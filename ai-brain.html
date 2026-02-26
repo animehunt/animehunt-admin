@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Brain – AnimeHunt CMS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{width:240px;background:#070b16;border-right:1px solid #1a2035;padding:16px 0}
+.brand{padding:0 20px 16px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{display:flex;gap:8px;padding:10px 20px;font-size:14px;color:#cfcfcf;text-decoration:none}
+.cms-menu a:hover,.cms-menu a.active{background:#0e1424;color:#ffcc00}
+
+/* MAIN */
+.cms-main{flex:1;display:flex;flex-direction:column}
+.cms-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035}
+.cms-header .title{font-size:18px;font-weight:600}
+.cms-content{padding:20px}
+
+/* BUTTON */
+.pause-btn{background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer}
+
+/* GRID */
+.ai-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(360px, 1fr));
+  gap:20px;
+}
+/* CARD */
+.ai-card{background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;padding:16px}
+.ai-card h3{font-size:15px;color:#ffcc00;margin-bottom:10px}
+
+/* ITEM */
+.ai-item{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:#ddd}
+.ai-item input{width:16px;height:16px;accent-color:#ffcc00}
+
+/* STATUS */
+.status{padding:4px 8px;border-radius:6px;font-size:11px}
+.ok{background:#123c1a;color:#4cff4c}
+.warn{background:#3c2d12;color:#ffcc00}
+.bad{background:#3c1212;color:#ff4c4c}
+
+/* CARD BUTTON */
+.card-btn{width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:#0e1424;color:#fff;cursor:pointer}
+.card-btn:hover{background:#141c33}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+   <a href="ai-brain.html" class="active">🧠 Ai Brain</a>
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<main class="cms-main">
+
+<header class="cms-header">
+  <div class="title">🧠 AI Brain Control Center</div>
+  <button class="pause-btn">⏸ Pause All AI</button>
+</header>
+
+<section class="cms-content">
+
+<div class="ai-grid">
+
+<!-- AUTO SERVER -->
+<div class="ai-card">
+<h3>🌐 Auto Server Engine</h3>
+<div class="ai-item">Health Check <input type="checkbox" checked></div>
+<div class="ai-item">Auto Failover <input type="checkbox" checked></div>
+<div class="ai-item">Auto Priority <input type="checkbox" checked></div>
+<div class="ai-item">Auto Fallback <input type="checkbox" checked></div>
+</div>
+
+<!-- AUTO PLAYER -->
+<div class="ai-card">
+<h3>🎞 Auto Player Engine</h3>
+<div class="ai-item">Server Switch <input type="checkbox" checked></div>
+<div class="ai-item">Stream Priority <input type="checkbox" checked></div>
+<div class="ai-item">Embed Rotation <input type="checkbox"></div>
+</div>
+
+<!-- AUTO ANALYTICS -->
+<div class="ai-card">
+<h3>📊 Auto Analytics Engine</h3>
+<div class="ai-item">Popular Detect <input type="checkbox" checked></div>
+<div class="ai-item">Trending Detect <input type="checkbox" checked></div>
+<div class="ai-item">Heatmap Logic <input type="checkbox"></div>
+<div class="ai-item">Homepage Optimize <input type="checkbox" checked></div>
+</div>
+
+<!-- AUTO BACKUP -->
+<div class="ai-card">
+<h3>💾 Auto Backup Engine</h3>
+<div class="ai-item">Backup Schedule <input type="checkbox" checked></div>
+<div class="ai-item">Auto Versioning <input type="checkbox"></div>
+<div class="ai-item">Auto Restore <input type="checkbox"></div>
+</div>
+
+<!-- AUTO DEPLOY -->
+<div class="ai-card">
+<h3>🚀 Auto Deploy Engine</h3>
+<div class="ai-item">Auto Publish <input type="checkbox"></div>
+<div class="ai-item">Auto Sync <input type="checkbox" checked></div>
+<div class="ai-item">Auto Update <input type="checkbox"></div>
+<div class="ai-item">Auto Rollback <input type="checkbox"></div>
+</div>
+
+<!-- AUTO CATEGORY -->
+<div class="ai-card">
+<h3>🗂 Auto Category Engine</h3>
+<div class="ai-item">Genre Detect <input type="checkbox" checked></div>
+<div class="ai-item">Category Assign <input type="checkbox" checked></div>
+<div class="ai-item">Auto Trending <input type="checkbox"></div>
+<div class="ai-item">Auto Latest <input type="checkbox" checked></div>
+</div>
+
+<!-- AUTO BANNER -->
+<div class="ai-card">
+<h3>🖼 Auto Banner Engine</h3>
+<div class="ai-item">Homepage Banners <input type="checkbox" checked></div>
+<div class="ai-item">Category Banners <input type="checkbox"></div>
+<div class="ai-item">Trending Banners <input type="checkbox"></div>
+<div class="ai-item">Hero Banners <input type="checkbox" checked></div>
+</div>
+
+<!-- AUTO HOMEPAGE -->
+<div class="ai-card">
+<h3>🏠 Auto Homepage Engine</h3>
+<div class="ai-item">Row Generate <input type="checkbox" checked></div>
+<div class="ai-item">Row Sorting <input type="checkbox" checked></div>
+<div class="ai-item">Priority System <input type="checkbox"></div>
+<div class="ai-item">Layout Logic <input type="checkbox"></div>
+</div>
+
+<!-- AUTO SEARCH -->
+<div class="ai-card">
+<h3>🔍 Auto Search Engine</h3>
+<div class="ai-item">Auto Indexing <input type="checkbox" checked></div>
+<div class="ai-item">Auto Suggestion <input type="checkbox" checked></div>
+<div class="ai-item">Auto Ranking <input type="checkbox"></div>
+<div class="ai-item">Popularity Boost <input type="checkbox"></div>
+</div>
+
+<!-- AUTO SEO -->
+<div class="ai-card">
+<h3>📈 Auto SEO Engine</h3>
+<div class="ai-item">Auto Title <input type="checkbox" checked></div>
+<div class="ai-item">Auto Description <input type="checkbox" checked></div>
+<div class="ai-item">OG Tags <input type="checkbox"></div>
+<div class="ai-item">Sitemap & Robots <input type="checkbox"></div>
+</div>
+
+<!-- AUTO DOWNLOAD -->
+<div class="ai-card">
+<h3>📥 Auto Download Engine</h3>
+<div class="ai-item">Quality Mapping <input type="checkbox" checked></div>
+<div class="ai-item">Server Mapping <input type="checkbox" checked></div>
+<div class="ai-item">Link Validation <input type="checkbox"></div>
+<div class="ai-item">Broken Remove <input type="checkbox"></div>
+</div>
+
+</div>
+</section>
+</main>
+</div>
+  <!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href = "login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const AI_API = "/api/admin/ai";
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url, options = {}){
+
+  const res = await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   ENGINE KEY FORMATTER
+   (convert title to safe key)
+================================ */
+function formatEngineKey(text){
+  return text
+    .replace(/[^\w\s]/g,"")
+    .replace(/\s+/g,"_")
+    .toLowerCase();
+}
+
+/* ===============================
+   LOAD AI STATE
+================================ */
+async function loadAI(){
+
+  try{
+
+    const data = await apiFetch(AI_API);
+
+    document.querySelectorAll(".ai-card").forEach(card => {
+
+      const engineTitle = card.querySelector("h3").innerText;
+      const engineKey = formatEngineKey(engineTitle);
+
+      const settings = data[engineKey] || {};
+
+      card.querySelectorAll("input[type='checkbox']").forEach(input => {
+
+        const label = input.closest(".ai-item").innerText.trim();
+        const settingKey = formatEngineKey(label);
+
+        input.checked = settings[settingKey] ?? input.checked;
+      });
+    });
+
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* ===============================
+   TOGGLE SINGLE AI SETTING
+================================ */
+document.querySelectorAll(".ai-item input").forEach(input => {
+
+  input.addEventListener("change", async ()=>{
+
+    try{
+
+      const card = input.closest(".ai-card");
+      const engineTitle = card.querySelector("h3").innerText;
+      const engineKey = formatEngineKey(engineTitle);
+
+      const label = input.closest(".ai-item").innerText.trim();
+      const settingKey = formatEngineKey(label);
+
+      await apiFetch(AI_API,{
+        method:"PATCH",
+        body:JSON.stringify({
+          engine: engineKey,
+          setting: settingKey,
+          value: input.checked
+        })
+      });
+
+    }catch(err){
+      console.error(err);
+    }
+  });
+
+});
+
+/* ===============================
+   PAUSE ALL AI
+================================ */
+document.querySelector(".pause-btn").addEventListener("click", async ()=>{
+
+  try{
+    await apiFetch(AI_API + "/pause",{
+      method:"PATCH"
+    });
+    alert("✅ AI State Updated");
+  }catch(err){
+    console.error(err);
+  }
+});
+
+/* INIT */
+loadAI();
+
+</script>
+</body>
+</html>
