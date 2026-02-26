@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Security – AnimeHunt CMS</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+
+body{background:#0b0f1a;color:#fff}
+
+.cms-app{display:flex;min-height:100vh}
+
+.cms-sidebar{
+width:260px;
+background:linear-gradient(180deg,#0b0f1a,#0e1424);
+border-right:1px solid #1a2035;
+padding:20px 14px;
+}
+
+.brand{font-size:20px;font-weight:700;margin-bottom:30px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:10px;color:#777;margin-top:4px}
+
+.cms-menu{display:flex;flex-direction:column;gap:6px}
+.cms-menu a{
+padding:10px 14px;
+border-radius:8px;
+font-size:13px;
+color:#ccc;
+text-decoration:none;
+}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(6px)}
+
+.cms-main{flex:1;background:#0e1424;display:flex;flex-direction:column}
+.cms-header{
+height:60px;background:#0b0f1a;
+display:flex;align-items:center;
+justify-content:space-between;
+padding:0 20px;border-bottom:1px solid #1a2035
+}
+
+.cms-content{padding:20px}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:14px;
+margin-bottom:20px;
+}
+
+.card{
+background:#0b0f1a;
+border:1px solid #1a2035;
+border-radius:12px;
+padding:14px;
+}
+
+.card h3{font-size:13px;color:#ffcc00;margin-bottom:10px}
+
+.toggle{
+display:flex;
+justify-content:space-between;
+margin:6px 0;
+font-size:12px;
+}
+
+.switch{
+position:relative;width:42px;height:22px;
+}
+.switch input{display:none}
+.slider{
+position:absolute;top:0;left:0;right:0;bottom:0;
+background:#333;border-radius:22px;
+}
+.slider:before{
+content:"";position:absolute;height:16px;width:16px;
+left:3px;top:3px;background:#fff;border-radius:50%;
+transition:.3s;
+}
+input:checked+.slider{background:#00ffb3}
+input:checked+.slider:before{transform:translateX(20px)}
+
+.big-red{
+background:#ff2d2d;
+padding:10px;
+border:none;
+border-radius:8px;
+color:#fff;
+width:100%;
+font-weight:700;
+margin-top:10px;
+cursor:pointer;
+}
+
+.yellow-btn{
+background:#ffcc00;
+padding:8px;
+border:none;
+border-radius:6px;
+width:100%;
+margin-top:10px;
+cursor:pointer;
+}
+
+.range{
+width:100%;
+margin-top:8px;
+}
+
+.list{
+margin-top:10px;
+font-size:12px;
+color:#ccc;
+}
+  .heatmap-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-top:10px;
+}
+
+.heat{
+  background:#11162a;
+  padding:10px;
+  border-radius:8px;
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  border:1px solid #1a2035;
+}
+  .activity-log li{
+  font-size:12px;
+  padding:6px 0;
+  border-bottom:1px solid #1a2035;
+}
+  .threat-bar{
+  width:100%;
+  height:12px;
+  background:#111;
+  border-radius:8px;
+  overflow:hidden;
+}
+
+.threat-fill{
+  height:100%;
+  width:30%;
+  background:#ffcc00;
+}
+  /* ===== MAIN CONTENT WIDTH FIX ===== */
+.cms-content{
+  max-width:1400px;
+  margin:auto;
+  width:100%;
+}
+
+/* ===== SECTION SPACING ===== */
+.security-section{
+  margin-bottom:18px;
+}
+
+/* ===== GRID FIX ===== */
+.security-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(220px, 1fr));
+  gap:16px;
+}
+
+/* ===== CARD LOOK IMPROVE ===== */
+.sec-card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:14px;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  min-height:60px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.02);
+}
+
+/* ===== BIG CONTROL PANELS ===== */
+.security-section{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:14px;
+  padding:18px;
+}
+
+/* ===== HEADER AREA WIDTH ===== */
+.cms-header{
+  max-width:1400px;
+  margin:auto;
+  width:100%;
+}
+
+/* ===== HEATMAP IMPROVE ===== */
+.heatmap-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:10px;
+}
+
+.heat{
+  background:#11162a;
+  padding:12px;
+  border-radius:8px;
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  border:1px solid #1a2035;
+}
+
+/* ===== 3 COLUMN BOTTOM AREA ===== */
+.security-bottom{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+/* ===== MOBILE FIX ===== */
+@media (max-width:1100px){
+  .security-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media (max-width:700px){
+  .security-grid{
+    grid-template-columns:1fr;
+  }
+
+  .security-bottom{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+   <a href="security.html" class="active">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+<div>🔐 Ultra Security Control Center</div>
+</header>
+
+<section class="cms-content">
+
+<!-- ULTRA MODE -->
+<div class="card">
+<h3>🚨 ULTRA SECURITY MODE</h3>
+<button class="big-red" onclick="alert('Ultra Mode Activated')">ACTIVATE FULL LOCKDOWN</button>
+<button class="yellow-btn">Emergency Traffic Block</button>
+</div>
+
+<!-- CORE -->
+<div class="grid">
+  
+  <div class="security-section">
+  <h2>🔥 Ultra Security Mode</h2>
+
+  <div class="sec-card">
+    <h3>Enable Ultra Protection</h3>
+    <label class="switch">
+      <input type="checkbox" id="ultraMode">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+  
+  <div class="security-section">
+  <h2>Threat Level</h2>
+
+  <div class="threat-bar">
+    <div class="threat-fill" id="threatFill"></div>
+  </div>
+</div>
+  
+  <div class="security-grid">
+
+  <div class="sec-card">
+    <h3>Blocked IPs</h3>
+    <span id="ipCount">0</span>
+  </div>
+
+  <div class="sec-card">
+    <h3>Firewall Level</h3>
+    <span id="fwLive">3</span>
+  </div>
+
+  <div class="sec-card">
+    <h3>Protection Status</h3>
+    <span id="protStatus">Active</span>
+  </div>
+
+  <div class="sec-card">
+    <h3>Threat Level</h3>
+    <span id="threat">Low</span>
+  </div>
+
+</div>
+
+<div class="card">
+<h3>Core Protection</h3>
+<div class="toggle">Bot Protection<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Scraper Shield<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Hotlink Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Embed Lock<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+</div>
+
+<div class="card">
+<h3>Admin Security</h3>
+<div class="toggle">2FA<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Session Timeout<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Device Lock<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Admin IP Only<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+</div>
+
+<div class="card">
+<h3>Firewall</h3>
+<div class="toggle">Proxy Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">VPN Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">TOR Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Country Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+</div>
+
+<div class="card">
+<h3>Anti-DDoS</h3>
+<label>Request Limit</label>
+<input type="range" class="range" min="10" max="500">
+<label>Burst Protection</label>
+<input type="range" class="range" min="10" max="300">
+</div>
+  
+  <div class="security-section">
+  <h2>Firewall Strength</h2>
+
+  <input type="range" id="firewallLevel" min="1" max="5" value="3">
+  <p id="fwLabel">Level 3 – Strong</p>
+</div>
+
+<div class="card">
+<h3>AI Protection</h3>
+<div class="toggle">Auto IP Ban<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Behavior Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">Brute Force Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+</div>
+
+<div class="card">
+<h3>Geo Lock</h3>
+<input placeholder="Block Country Code" style="width:100%;padding:6px;background:#11162a;border:1px solid #222;color:#fff">
+<div class="list">Blocked: CN, RU, IR</div>
+</div>
+
+<div class="card">
+<h3>Domain Control</h3>
+<input placeholder="Allowed Domain" style="width:100%;padding:6px;background:#11162a;border:1px solid #222;color:#fff">
+<div class="list">animehunt.in</div>
+</div>
+  
+  <div class="security-section">
+  <h2>Geo Protection</h2>
+
+  <label>
+    <input type="checkbox" id="indiaOnly"> India Only Access
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="blockForeign"> Block Foreign Traffic
+  </label>
+</div>
+
+<div class="card">
+<h3>Security Level</h3>
+<label>Low → Extreme</label>
+<input type="range" class="range" min="1" max="5">
+</div>
+  
+  <div class="security-section">
+  <h2>Admin Security</h2>
+
+  <label><input type="checkbox" id="loginLimit"> Limit Login Attempts</label><br>
+  <label><input type="checkbox" id="deviceLock"> Device Lock</label><br>
+  <label><input type="checkbox" id="sessionMonitor"> Session Monitor</label>
+</div>
+  
+  <div class="security-section">
+  <h2>Auto Defense Engine</h2>
+
+  <label><input type="checkbox" id="autoBan"> Auto IP Ban</label><br>
+  <label><input type="checkbox" id="autoLockDownloads"> Lock Downloads on Attack</label><br>
+  <label><input type="checkbox" id="autoProtectPlayer"> Protect Player</label>
+</div>
+  
+  <div class="security-section">
+  <h2>AI Protection</h2>
+
+  <label><input type="checkbox" id="aiDetect"> Auto Threat Detect</label><br>
+  <label><input type="checkbox" id="aiBlock"> Auto Block Attackers</label><br>
+  <label><input type="checkbox" id="aiLearn"> Learning Mode</label>
+</div>
+  
+  <div class="security-section">
+  <h2>🔥 Attack Heatmap</h2>
+
+  <div class="heatmap-grid">
+    <div class="heat">India <span>12</span></div>
+    <div class="heat">USA <span>5</span></div>
+    <div class="heat">China <span>21</span></div>
+    <div class="heat">Russia <span>9</span></div>
+    <div class="heat">Brazil <span>3</span></div>
+  </div>
+</div>
+  
+  <div class="security-section">
+  <h2>📡 Live Traffic Monitor</h2>
+
+  <div class="sec-card">
+    <h3>Live Users</h3>
+    <span id="liveUsers">128</span>
+  </div>
+
+  <div class="sec-card">
+    <h3>Requests / sec</h3>
+    <span id="reqPerSec">42</span>
+  </div>
+
+  <div class="sec-card">
+    <h3>Blocked Requests</h3>
+    <span id="blockedReq">9</span>
+  </div>
+</div>
+  
+  <div class="security-section">
+  <h2>⚠ Suspicious Activity</h2>
+
+  <ul class="activity-log" id="activityLog">
+    <li>IP 192.168.0.1 blocked</li>
+    <li>Too many requests detected</li>
+    <li>Bot attack prevented</li>
+  </ul>
+</div>
+  
+  <div class="security-section">
+  <h2>🔐 Admin Login Attempts</h2>
+
+  <ul id="loginAttempts">
+    <li>Admin login success – 10:21 PM</li>
+    <li>Failed login – Wrong password</li>
+  </ul>
+</div>
+  
+  <div class="security-section">
+  <h2>🤖 Auto Ban Engine</h2>
+
+  <label>
+    <input type="checkbox" id="banBrute">
+    Ban brute-force attackers
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="banBots">
+    Ban detected bots
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="banScrapers">
+    Ban scrapers
+  </label>
+</div>
+  
+  <div class="security-section">
+  <h2>👻 Stealth Mode</h2>
+
+  <label>
+    <input type="checkbox" id="hideServerInfo">
+    Hide Server Info
+  </label><br>
+
+  <label>
+    <input type="checkbox" id="hideTechStack">
+    Hide Tech Stack
+  </label>
+</div>
+
+</div>
+
+</section>
+</main>
+</div>
+  
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/security";
+let statsInterval=null;
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   LOAD SECURITY CONFIG
+================================ */
+async function loadSecurity(){
+
+  try{
+
+    const d=await apiFetch(API);
+    if(!d) return;
+
+    ultraMode.checked = !!d.ultra;
+    firewallLevel.value = clamp(d.firewallLevel,1,5);
+
+    indiaOnly.checked = !!d.geo?.indiaOnly;
+    blockForeign.checked = !!d.geo?.blockForeign;
+
+    loginLimit.checked = !!d.admin?.loginLimit;
+    deviceLock.checked = !!d.admin?.deviceLock;
+    sessionMonitor.checked = !!d.admin?.sessionMonitor;
+
+    autoBan.checked = !!d.ai?.autoBan;
+    banBrute.checked = !!d.ai?.brute;
+    banBots.checked = !!d.ai?.bot;
+    aiLearn.checked = !!d.ai?.learning;
+
+    hideServerInfo.checked = !!d.system?.hideServer;
+    hideTechStack.checked = !!d.system?.hideTech;
+
+    updateFirewallLabel();
+
+  }catch(err){
+    console.error("Load failed:",err);
+  }
+
+}
+
+/* ===============================
+   SAVE SECURITY CONFIG
+================================ */
+let saveTimeout=null;
+
+function queueSave(){
+  clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(saveSecurity,400);
+}
+
+async function saveSecurity(){
+
+  try{
+
+    const payload={
+      ultra: ultraMode.checked,
+      firewallLevel: clamp(+firewallLevel.value,1,5),
+      geo:{
+        indiaOnly:indiaOnly.checked,
+        blockForeign:blockForeign.checked,
+        blockedCountries:["CN","RU","IR"]
+      },
+      admin:{
+        loginLimit:loginLimit.checked,
+        deviceLock:deviceLock.checked,
+        sessionMonitor:sessionMonitor.checked
+      },
+      ai:{
+        autoBan:autoBan.checked,
+        brute:banBrute.checked,
+        bot:banBots.checked,
+        learning:aiLearn.checked
+      },
+      system:{
+        hideServer:hideServerInfo.checked,
+        hideTech:hideTechStack.checked
+      }
+    };
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+  }catch(err){
+    console.error("Save failed:",err);
+    loadSecurity(); // rollback
+  }
+
+}
+
+/* ===============================
+   ULTRA MODE
+================================ */
+ultraMode.addEventListener("change",async()=>{
+
+  try{
+    await apiFetch(API+"/ultra",{
+      method:"POST",
+      body:JSON.stringify({ enable:ultraMode.checked })
+    });
+  }catch(err){
+    ultraMode.checked=!ultraMode.checked; // rollback toggle
+  }
+
+});
+
+/* ===============================
+   LIVE STATS
+================================ */
+async function loadStats(){
+
+  try{
+
+    const d=await apiFetch("/api/security/stats");
+
+    ipCount.innerText=d.blockedIPs||0;
+    liveUsers.innerText=d.liveUsers||0;
+    reqPerSec.innerText=d.reqPerSec||0;
+    blockedReq.innerText=d.blockedReq||0;
+
+  }catch(err){
+    console.error("Stats error:",err);
+  }
+
+}
+
+function startStats(){
+  if(statsInterval) clearInterval(statsInterval);
+  statsInterval=setInterval(loadStats,4000);
+}
+
+/* ===============================
+   UTIL
+================================ */
+function clamp(v,min,max){
+  if(isNaN(v)) return min;
+  return Math.max(min,Math.min(max,v));
+}
+
+function updateFirewallLabel(){
+  const level=+firewallLevel.value;
+  const map={
+    1:"Level 1 – Basic",
+    2:"Level 2 – Moderate",
+    3:"Level 3 – Strong",
+    4:"Level 4 – Aggressive",
+    5:"Level 5 – Extreme"
+  };
+  fwLabel.innerText=map[level]||"Level 3 – Strong";
+}
+
+firewallLevel.addEventListener("input",()=>{
+  updateFirewallLabel();
+  queueSave();
+});
+
+/* ===============================
+   ATTACH CHANGE LISTENERS
+================================ */
+[
+  indiaOnly,
+  blockForeign,
+  loginLimit,
+  deviceLock,
+  sessionMonitor,
+  autoBan,
+  banBrute,
+  banBots,
+  aiLearn,
+  hideServerInfo,
+  hideTechStack
+].forEach(el=>{
+  el.addEventListener("change",queueSave);
+});
+
+/* ===============================
+   INIT
+================================ */
+loadSecurity();
+loadStats();
+startStats();
+
+</script>
+</body>
+</html>
