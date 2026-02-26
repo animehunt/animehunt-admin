@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AnimeHunt CMS – Ads Manager</title>
+
+<style>
+/* ===== RESET ===== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:system-ui, sans-serif;
+}
+body{
+  background:#0b0f1a;
+  color:#fff;
+}
+a{ text-decoration:none; color:inherit }
+
+/* ===== LAYOUT ===== */
+.cms-app{
+  display:flex;
+  min-height:100vh;
+  width:100%;
+}
+.cms-sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#0b0f1a,#0e1424);
+  border-right:1px solid #1a2035;
+  padding:20px 14px;
+}
+.cms-main{
+  flex:1;
+  background:#0e1424;
+  display:flex;
+  flex-direction:column;
+}
+.cms-header{
+  height:60px;
+  background:#0b0f1a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid #1a2035;
+}
+.cms-content{
+  flex:1;
+  padding:16px;
+  overflow:auto;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(360px,1fr));
+  gap:20px;
+}
+
+/* ===== SIDEBAR ===== */
+.brand{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:30px;
+}
+.brand b{ color:#ffcc00 }
+.brand small{
+  display:block;
+  font-size:10px;
+  color:#777;
+}
+.cms-menu{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.cms-menu a{
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:13px;
+  color:#ccc;
+  transition:.25s;
+}
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+  transform:translateX(6px);
+}
+
+/* ===== ADS GRID ===== */
+.ads-grid{ display:contents }
+
+/* ===== CARD ===== */
+.ads-card{
+  background:linear-gradient(180deg,#0b0f1a,#0d1324);
+  border:1px solid #1a2035;
+  padding:18px;
+  border-radius:16px;
+  box-shadow:0 8px 22px rgba(0,0,0,.45);
+}
+.ads-card h3{
+  font-size:14px;
+  margin-bottom:14px;
+  font-weight:600;
+  color:#ffcc00;
+}
+
+/* ===== FORM ===== */
+.ads-card input,
+.ads-card select,
+.ads-card textarea{
+  width:100%;
+  padding:11px 12px;
+  margin-bottom:12px;
+  background:#11162a;
+  border:1px solid #1f2742;
+  border-radius:10px;
+  color:#fff;
+  font-size:13px;
+}
+.ads-card textarea{
+  resize:vertical;
+  min-height:90px;
+}
+
+/* ===== TOGGLE ===== */
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  color:#ccc;
+  margin-bottom:8px;
+}
+.toggle input{
+  accent-color:#ffcc00;
+  transform:scale(1.05);
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary{
+  background:linear-gradient(135deg,#ffcc00,#f1b800);
+  color:#000;
+  border:none;
+  padding:11px 22px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-secondary{
+  background:#1a2035;
+  color:#fff;
+  border:1px solid #232c4a;
+  padding:11px 22px;
+  border-radius:12px;
+  cursor:pointer;
+}
+.ads-actions{
+  grid-column:1/-1;
+  display:flex;
+  gap:14px;
+  justify-content:flex-end;
+  margin:30px 0;
+}
+
+/* ===== TABLE ===== */
+.ads-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.ads-table th,
+.ads-table td{
+  padding:12px;
+  border-bottom:1px solid #1a2035;
+}
+.ads-table th{ color:#aaa }
+
+/* ===== STATUS ===== */
+.status.on{ color:#1abc9c; font-weight:700 }
+.status.off{ color:#e74c3c; font-weight:700 }
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html" class="active">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+<header class="cms-header">
+  <div>Ads Manager</div>
+  <div>Admin</div>
+</header>
+
+<section class="cms-content">
+
+<!-- BASIC -->
+<div class="ads-grid">
+  <div class="ads-card">
+    <h3>Basic Ad Info</h3>
+    <input placeholder="Ad Name">
+    <select>
+      <option>Banner</option>
+      <option>Video</option>
+      <option>Native</option>
+    </select>
+    <textarea placeholder="Ad Code"></textarea>
+  </div>
+
+  <div class="ads-card">
+    <h3>Bulk Import</h3>
+    <select id="bulkType">
+      <option>JSON</option>
+      <option>CSV</option>
+    </select>
+    <textarea id="bulkData" placeholder="Paste bulk ad data"></textarea>
+    <button class="btn-primary" onclick="bulkAddAds()">Add Ads</button>
+  </div>
+
+  <div class="ads-card">
+    <h3>Placement</h3>
+    <select><option>Home</option><option>Watch</option></select>
+    <select><option>Header</option><option>Player</option></select>
+    <input placeholder="Max Ads Per Page">
+  </div>
+
+  <div class="ads-card">
+    <h3>Schedule</h3>
+    <input type="datetime-local">
+    <input type="datetime-local">
+    <input placeholder="Priority (1 = high)">
+  </div>
+</div>
+
+<!-- TARGETING -->
+<div class="ads-grid">
+  <div class="ads-card">
+    <h3>Targeting</h3>
+    <input placeholder="Anime Slug">
+    <input placeholder="Episode (optional)">
+    <div class="toggle"><input type="checkbox"> Apply to all episodes</div>
+  </div>
+
+  <div class="ads-card">
+    <h3>User & Device</h3>
+    <div class="toggle"><input type="checkbox"> Mobile Only</div>
+    <div class="toggle"><input type="checkbox"> Desktop Only</div>
+    <div class="toggle"><input type="checkbox"> Premium Users Ad-Free</div>
+  </div>
+
+  <div class="ads-card">
+    <h3>Geo & Language</h3>
+    <input placeholder="Country (IN, US)">
+    <select>
+      <option>All Languages</option>
+      <option>Hindi</option>
+      <option>English</option>
+    </select>
+  </div>
+
+  <div class="ads-card">
+    <h3>Rotation & Frequency</h3>
+    <input placeholder="Max Views Per Ad">
+    <div class="toggle"><input type="checkbox"> Smart Rotation</div>
+    <div class="toggle"><input type="checkbox"> A/B Testing</div>
+  </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="ads-actions">
+  <button class="btn-primary">Save Ad</button>
+  <button class="btn-secondary">Preview</button>
+</div>
+
+<!-- EXISTING ADS -->
+<div class="ads-card" style="grid-column:1/-1">
+  <h3>Existing Ads</h3>
+  <table class="ads-table">
+    <tr>
+      <th>Name</th><th>Page</th><th>Position</th><th>Status</th><th>Action</th>
+    </tr>
+    <tr>
+      <td>Home Header</td>
+      <td>Home</td>
+      <td>Header</td>
+      <td class="status on">ON</td>
+      <td>Edit | Pause</td>
+    </tr>
+  </table>
+</div>
+
+</section>
+</main>
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href = "login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API_BASE = "/api/admin/ads";
+
+/* ===============================
+   ELEMENT REFERENCES
+================================ */
+const saveBtn = document.querySelector(".ads-actions .btn-primary");
+const bulkBtn = document.querySelector(".ads-card button");
+const bulkDataEl = document.getElementById("bulkData");
+const bulkTypeEl = document.getElementById("bulkType");
+const adsTable = document.querySelector(".ads-table");
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url, options = {}){
+  const res = await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   SAVE SINGLE AD
+================================ */
+saveBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    const adData = {
+      name: document.querySelector("input[placeholder='Ad Name']").value.trim(),
+      type: document.querySelector(".ads-card select").value,
+      adCode: document.querySelector("textarea[placeholder='Ad Code']").value.trim(),
+      page: document.querySelectorAll(".ads-card select")[1].value,
+      position: document.querySelectorAll(".ads-card select")[2].value,
+      maxPerPage: Number(document.querySelector("input[placeholder='Max Ads Per Page']").value) || 1,
+      startDate: document.querySelectorAll("input[type='datetime-local']")[0].value,
+      endDate: document.querySelectorAll("input[type='datetime-local']")[1].value,
+      priority: Number(document.querySelector("input[placeholder='Priority (1 = high)']").value) || 5,
+      animeSlug: document.querySelector("input[placeholder='Anime Slug']").value.trim(),
+      episode: document.querySelector("input[placeholder='Episode (optional)']").value || null,
+      country: document.querySelector("input[placeholder='Country (IN, US)']").value.trim(),
+      language: document.querySelectorAll(".ads-card select")[3].value,
+      maxViews: Number(document.querySelector("input[placeholder='Max Views Per Ad']").value) || null
+    };
+
+    if(!adData.name || !adData.adCode){
+      alert("Ad name and Ad code required");
+      return;
+    }
+
+    await apiFetch(API_BASE,{
+      method:"POST",
+      body:JSON.stringify(adData)
+    });
+
+    alert("✅ Ad Saved Successfully");
+    loadAds();
+
+  }catch(err){
+    console.error(err);
+    alert("Error saving ad");
+  }
+});
+
+/* ===============================
+   BULK ADD
+================================ */
+bulkBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    const raw = bulkDataEl.value.trim();
+
+    if(!raw){
+      alert("Paste bulk data first");
+      return;
+    }
+
+    let ads;
+
+    if(bulkTypeEl.value === "JSON"){
+      ads = JSON.parse(raw);
+    }else{
+      alert("CSV parsing not implemented yet");
+      return;
+    }
+
+    if(!Array.isArray(ads)){
+      alert("Invalid JSON format");
+      return;
+    }
+
+    if(ads.length > 1000){
+      alert("Max 1000 ads allowed");
+      return;
+    }
+
+    await apiFetch(API_BASE + "/bulk",{
+      method:"POST",
+      body:JSON.stringify(ads)
+    });
+
+    alert("✅ Bulk Ads Added");
+    bulkDataEl.value = "";
+    loadAds();
+
+  }catch(e){
+    console.error(e);
+    alert("Invalid JSON data");
+  }
+});
+
+/* ===============================
+   LOAD ADS
+================================ */
+async function loadAds(){
+
+  try{
+
+    const ads = await apiFetch(API_BASE);
+
+    adsTable.innerHTML = `
+      <tr>
+        <th>Name</th>
+        <th>Page</th>
+        <th>Position</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    `;
+
+    ads.forEach(ad=>{
+
+      adsTable.innerHTML += `
+        <tr>
+          <td>${ad.name}</td>
+          <td>${ad.page}</td>
+          <td>${ad.position}</td>
+          <td class="status ${ad.status === "ON" ? "on" : "off"}">
+            ${ad.status}
+          </td>
+          <td>
+            <button onclick="toggleAd('${ad._id}')">
+              ${ad.status === "ON" ? "Pause" : "Resume"}
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* ===============================
+   TOGGLE AD
+================================ */
+async function toggleAd(id){
+
+  try{
+    await apiFetch(API_BASE + "/" + id + "/toggle",{
+      method:"PATCH"
+    });
+    loadAds();
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* INIT */
+loadAds();
+
+</script>
+</body>
+      </html>
