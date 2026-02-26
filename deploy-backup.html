@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deploy & Backup – AnimeHunt CMS</title>
+
+<style>
+/* ===== BASE LAYOUT ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#070b17;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:13px;
+}
+.cms-app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.cms-sidebar{
+  width:240px;
+  background:#0b0f1a;
+  border-right:1px solid #1a2035;
+  padding:20px;
+}
+.brand{
+  font-size:18px;
+  margin-bottom:30px;
+}
+.brand b{color:#ffcc00}
+.brand small{
+  display:block;
+  font-size:11px;
+  color:#777;
+}
+
+.cms-menu a{
+  display:block;
+  padding:10px 12px;
+  margin-bottom:6px;
+  color:#ccc;
+  text-decoration:none;
+  border-radius:8px;
+  font-size:13px;
+}
+.cms-menu a.active,
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+}
+
+/* ===== MAIN ===== */
+.cms-main{
+  flex:1;
+  padding:12px 10px;
+}
+
+.cms-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+.cms-header .title{
+  font-size:18px;
+  font-weight:600;
+}
+
+.cms-content{
+  padding-bottom:30px;
+}
+
+/* ===== DEPLOY & BACKUP ===== */
+.deploy-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.deploy-card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:14px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.deploy-card h3{
+  font-size:13px;
+  color:#00ffd5;
+}
+
+.deploy-card button{
+  background:#1a2035;
+  border:none;
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.25s;
+  font-size:13px;
+}
+
+.deploy-card button:hover{
+  background:#00ffd5;
+  color:#000;
+}
+
+.deploy-card.full{
+  grid-column:1/4;
+}
+
+.list-item{
+  background:#11162a;
+  padding:8px 10px;
+  border-radius:6px;
+  font-size:12px;
+  border:1px solid #1a2035;
+}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html" class="active">🚀 Deploy-backup</a>
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+  <div class="title">🚀 Deployment & Backup</div>
+</header>
+
+<section class="cms-content">
+
+  <div class="deploy-grid">
+
+    <div class="deploy-card">
+      <h3>Deployment</h3>
+      <button id="deploySite">🚀 Deploy Website</button>
+      <button id="freezeSite">🧊 Freeze Site</button>
+      <button id="unfreezeSite">🔥 Unfreeze Site</button>
+    </div>
+
+    <div class="deploy-card">
+      <h3>Version Control</h3>
+      <div id="versionList"></div>
+      <button id="createVersion">➕ Create Version</button>
+    </div>
+
+    <div class="deploy-card">
+      <h3>Backup</h3>
+      <button id="createBackup">💾 Create Backup</button>
+      <div id="backupList"></div>
+    </div>
+
+    <div class="deploy-card">
+      <h3>Restore</h3>
+      <div id="restoreList"></div>
+    </div>
+
+    <div class="deploy-card full">
+      <h3>Emergency Control</h3>
+      <button id="emergencyShutdown">🚨 Emergency Shutdown</button>
+      <button id="emergencyRecover">🛟 Emergency Recover</button>
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/deploy";
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   LOAD DATA
+================================ */
+async function loadData(){
+
+  try{
+
+    const data=await apiFetch(API);
+
+    renderVersions(data.versions || []);
+    renderBackups(data.backups || []);
+
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   DEPLOY ACTIONS
+================================ */
+deploySite.onclick=async()=>{
+  await apiFetch(`${API}/deploy`,{method:"POST"});
+  alert("Deployment started");
+};
+
+freezeSite.onclick=async()=>{
+  await apiFetch(`${API}/freeze`,{method:"PATCH"});
+  alert("Site frozen (maintenance)");
+};
+
+unfreezeSite.onclick=async()=>{
+  await apiFetch(`${API}/unfreeze`,{method:"PATCH"});
+  alert("Site live again");
+};
+
+/* ===============================
+   VERSION CONTROL
+================================ */
+createVersion.onclick=async()=>{
+  const data=await apiFetch(`${API}/version`,{
+    method:"POST"
+  });
+  renderVersions(data.versions);
+};
+
+function renderVersions(versions){
+  versionList.innerHTML="";
+  versions.forEach(v=>{
+    const div=document.createElement("div");
+    div.className="list-item";
+    div.innerText=`Version ${v.name} – ${v.date}`;
+    versionList.appendChild(div);
+  });
+}
+
+/* ===============================
+   BACKUP
+================================ */
+createBackup.onclick=async()=>{
+  const data=await apiFetch(`${API}/backup`,{
+    method:"POST"
+  });
+  renderBackups(data.backups);
+};
+
+function renderBackups(backups){
+
+  backupList.innerHTML="";
+  restoreList.innerHTML="";
+
+  backups.forEach(b=>{
+
+    const item=document.createElement("div");
+    item.className="list-item";
+    item.innerText=`Backup ${b.name} – ${b.date}`;
+    backupList.appendChild(item);
+
+    const restore=document.createElement("div");
+    restore.className="list-item";
+    restore.innerText=`Restore ${b.name}`;
+    restore.onclick=()=>restoreBackup(b.id);
+    restoreList.appendChild(restore);
+
+  });
+
+}
+
+async function restoreBackup(id){
+
+  if(!confirm("Restore this backup?")) return;
+
+  await apiFetch(`${API}/restore/${id}`,{
+    method:"POST"
+  });
+
+  alert("Backup restored");
+}
+
+/* ===============================
+   EMERGENCY
+================================ */
+emergencyShutdown.onclick=async()=>{
+
+  if(!confirm("⚠ Emergency shutdown?")) return;
+
+  await apiFetch(`${API}/emergency/shutdown`,{
+    method:"POST"
+  });
+
+  alert("Emergency shutdown activated");
+};
+
+emergencyRecover.onclick=async()=>{
+
+  await apiFetch(`${API}/emergency/recover`,{
+    method:"POST"
+  });
+
+  alert("Recovery started");
+};
+
+/* INIT */
+loadData();
+
+</script>
+</body>
+</html>
