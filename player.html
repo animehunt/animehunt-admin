@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Player CMS – AnimeHunt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035
+}
+.brand{padding:16px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,.cms-menu a:hover{
+  background:#0e1424;color:#ffcc00
+}
+
+/* MAIN */
+.cms-main{flex:1}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:8px 16px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+.cms-content{padding:20px}
+
+/* GRID */
+.player-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:12px;
+  padding:16px;
+}
+.card h3{
+  font-size:14px;
+  margin-bottom:12px;
+  color:#ffcc00;
+}
+.form{
+  display:grid;
+  gap:10px;
+}
+.form label{
+  font-size:11px;
+  color:#aaa;
+}
+.form select{
+  background:#0e1424;
+  border:1px solid #1a2035;
+  color:#fff;
+  padding:8px 10px;
+  border-radius:6px;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html" class="active">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+  <div>🎞 Player Settings</div>
+  <button class="save-btn" id="savePlayer">💾 Save Player</button>
+</header>
+
+<section class="cms-content">
+
+<div class="player-grid">
+
+<!-- PLAYER CONFIG -->
+<div class="card">
+<h3>Player Configuration</h3>
+<div class="form">
+
+<label>Default Server</label>
+<select id="defaultServer">
+  <option>Server 1</option>
+  <option>Server 2</option>
+  <option>Server 3</option>
+</select>
+
+<label>Autoplay</label>
+<select id="autoplay">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
+
+<label>Resume Watching</label>
+<select id="resume">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
+
+<label>Server Auto Switch</label>
+<select id="autoswitch">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
+
+<label>Player Mode</label>
+<select id="mode">
+  <option value="responsive">Responsive</option>
+  <option value="fixed">Fixed</option>
+</select>
+
+</div>
+</div>
+
+<!-- UI CONTROLS -->
+<div class="card">
+<h3>UI Controls</h3>
+<div class="form">
+
+<label>Show Server Buttons</label>
+<select id="showServers">
+  <option value="true">Yes</option>
+  <option value="false">No</option>
+</select>
+
+<label>Show Download Button</label>
+<select id="showDownload">
+  <option value="true">Yes</option>
+  <option value="false">No</option>
+</select>
+
+<label>Show Subscribe Button</label>
+<select id="showSubscribe">
+  <option value="true">Yes</option>
+  <option value="false">No</option>
+</select>
+
+<label>Show Related Anime</label>
+<select id="showRelated">
+  <option value="true">Yes</option>
+  <option value="false">No</option>
+</select>
+
+</div>
+</div>
+
+<!-- SECURITY -->
+<div class="card">
+<h3>Security & Limits</h3>
+<div class="form">
+
+<label>External Embed Only</label>
+<select><option>Enabled</option></select>
+
+<label>Cloudflare Protection</label>
+<select><option>Enabled</option></select>
+
+<label>Iframe Sandbox</label>
+<select><option>Enabled</option></select>
+
+<label>Referrer Policy</label>
+<select><option>Strict</option></select>
+
+</div>
+</div>
+
+</div>
+
+</section>
+</main>
+</div>
+
+<!-- ============================= -->
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+/* ===============================
+   BASIC AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href = "login.html";
+}
+
+/* ===============================
+   ELEMENT REFERENCES
+================================ */
+const saveBtn = document.getElementById("savePlayer");
+
+const defaultServer = document.getElementById("defaultServer");
+const autoplay      = document.getElementById("autoplay");
+const resume        = document.getElementById("resume");
+const autoswitch    = document.getElementById("autoswitch");
+const mode          = document.getElementById("mode");
+
+const showServers   = document.getElementById("showServers");
+const showDownload  = document.getElementById("showDownload");
+const showSubscribe = document.getElementById("showSubscribe");
+const showRelated   = document.getElementById("showRelated");
+
+/* ===============================
+   LOAD PLAYER CONFIG
+================================ */
+async function loadPlayer(){
+
+  try{
+
+    const res = await fetch("/api/admin/player");
+
+    if(!res.ok){
+      throw new Error("Session expired");
+    }
+
+    const d = await res.json();
+
+    defaultServer.value = d.defaultServer || "Server 1";
+
+    autoplay.value   = String(d.autoplay ?? false);
+    resume.value     = String(d.resume ?? false);
+    autoswitch.value = String(d.autoswitch ?? false);
+    mode.value       = d.mode || "responsive";
+
+    showServers.value   = String(d.ui?.servers ?? false);
+    showDownload.value  = String(d.ui?.download ?? false);
+    showSubscribe.value = String(d.ui?.subscribe ?? false);
+    showRelated.value   = String(d.ui?.related ?? false);
+
+  }catch(err){
+
+    console.error("Player load error:", err);
+
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+}
+
+/* ===============================
+   SAVE PLAYER CONFIG
+================================ */
+saveBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    const payload = {
+      defaultServer: defaultServer.value,
+      autoplay: autoplay.value === "true",
+      resume: resume.value === "true",
+      autoswitch: autoswitch.value === "true",
+      mode: mode.value,
+      ui:{
+        servers: showServers.value === "true",
+        download: showDownload.value === "true",
+        subscribe: showSubscribe.value === "true",
+        related: showRelated.value === "true"
+      }
+    };
+
+    const res = await fetch("/api/admin/player",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      throw new Error("Save failed");
+    }
+
+    alert("✅ Player settings saved successfully");
+
+  }catch(err){
+
+    console.error("Player save error:", err);
+
+    alert("Session expired. Please login again.");
+
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+
+});
+
+/* ===============================
+   INIT
+================================ */
+loadPlayer();
+
+</script>
+
+</body>
+</html>
