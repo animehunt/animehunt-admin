@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Category CMS – AnimeHunt</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{
+  width:240px;background:#070b16;border-right:1px solid #1a2035
+}
+.brand{padding:16px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+
+.cms-menu a{
+  display:block;padding:10px 16px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,
+.cms-menu a:hover{background:#0e1424;color:#ffcc00}
+
+/* MAIN */
+.cms-main{flex:1;display:flex;flex-direction:column}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.add-btn{
+  background:#ffcc00;border:none;padding:8px 16px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+
+.cms-content{padding:20px}
+
+/* TABLE */
+.category-table{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:12px;overflow:hidden
+}
+.table-head,.row{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 90px 90px 70px 70px 220px;
+  align-items:center;padding:12px;font-size:12px
+}
+.table-head{background:#0e1424;color:#aaa}
+.row{border-top:1px solid #1a2035}
+
+.badge{
+  padding:3px 8px;border-radius:6px;font-size:10px;background:#1a2035
+}
+.active{color:#4cff4c}
+.inactive{color:#ff4c4c}
+
+.actions button{
+  background:none;border:none;color:#ffcc00;
+  cursor:pointer;margin-right:6px;font-size:14px
+}
+
+/* MODAL */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:none;align-items:center;justify-content:center
+}
+.modal-box{
+  width:760px;background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:14px;overflow:hidden
+}
+.modal-header{
+  display:flex;justify-content:space-between;
+  padding:14px;background:#0e1424
+}
+.modal-body{padding:16px}
+.modal-footer{
+  padding:14px;background:#0e1424;text-align:right
+}
+.modal-footer button{
+  background:#ffcc00;border:none;padding:8px 18px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+
+/* FORM */
+.form-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px
+}
+.form-grid input,.form-grid select{
+  background:#0e1424;border:1px solid #1a2035;
+  color:#fff;padding:8px;border-radius:6px;font-size:12px
+}
+.check{display:flex;align-items:center;gap:6px;font-size:12px}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html" class="active">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+  <div>🗂 Category Management</div>
+  <button class="add-btn" onclick="openModal()">➕ Add Category</button>
+</header>
+
+<section class="cms-content">
+
+<div class="category-table">
+  <div class="table-head">
+    <span>Name</span><span>Slug</span><span>Type</span>
+    <span>Status</span><span>Order</span><span>Priority</span><span>Actions</span>
+  </div>
+  <div id="list"></div>
+</div>
+
+</section>
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="modal-box">
+<div class="modal-header">
+  <b>Add / Edit Category</b>
+  <span onclick="closeModal()">✕</span>
+</div>
+
+<div class="modal-body">
+<div class="form-grid">
+  <input id="name" placeholder="Category Name">
+  <input id="slug" placeholder="Slug">
+  <select id="type">
+    <option value="row">Homepage Row</option>
+    <option value="page">Category Page</option>
+    <option value="both">Row + Page</option>
+  </select>
+
+  <input id="order" placeholder="Order">
+  <select id="priority">
+    <option>1</option><option>2</option><option>3</option>
+    <option>4</option><option>5</option>
+  </select>
+
+  <label class="check"><input type="checkbox" id="showHome"> Show on Home</label>
+  <label class="check"><input type="checkbox" id="isActive"> Active</label>
+  <label class="check"><input type="checkbox" id="isFeatured"> Featured ⭐</label>
+
+  <label class="check"><input type="checkbox" id="aiTrending"> AI Trending</label>
+  <label class="check"><input type="checkbox" id="aiPopular"> AI Popular</label>
+  <label class="check"><input type="checkbox" id="aiAssign"> AI Auto Assign</label>
+</div>
+</div>
+
+<div class="modal-footer">
+<button onclick="saveCategory()">💾 Save</button>
+</div>
+</div>
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/categories";
+let editId=null;
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   SLUG AUTO GENERATE
+================================ */
+name.addEventListener("input",()=>{
+  slug.value=name.value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g,"")
+    .replace(/\s+/g,"-");
+});
+
+/* ===============================
+   LOAD
+================================ */
+async function load(){
+  try{
+    const data=await apiFetch(API);
+    render(data);
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* ===============================
+   SAVE
+================================ */
+async function saveCategory(){
+
+  try{
+
+    if(!name.value.trim()){
+      alert("Category name required");
+      return;
+    }
+
+    const payload={
+      name:name.value.trim(),
+      slug:slug.value.trim(),
+      type:type.value,
+      order:Number(order.value||0),
+      priority:Number(priority.value),
+      showHome:showHome.checked,
+      active:isActive.checked,
+      featured:isFeatured.checked,
+      aiTrending:aiTrending.checked,
+      aiPopular:aiPopular.checked,
+      aiAssign:aiAssign.checked
+    };
+
+    if(editId){
+      await apiFetch(`${API}/${editId}`,{
+        method:"PATCH",
+        body:JSON.stringify(payload)
+      });
+    }else{
+      await apiFetch(API,{
+        method:"POST",
+        body:JSON.stringify(payload)
+      });
+    }
+
+    closeModal();
+    resetForm();
+    load();
+
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   SAFE RENDER (NO XSS)
+================================ */
+function render(data){
+
+  list.innerHTML="";
+
+  data.forEach(d=>{
+
+    const row=document.createElement("div");
+    row.className="row";
+
+    row.innerHTML=`
+      <span>${escapeHTML(d.name)}</span>
+      <span>${escapeHTML(d.slug)}</span>
+      <span class="badge">${escapeHTML(d.type)}</span>
+      <span class="${d.active?'active':'inactive'}">
+        ${d.active?'Active':'Inactive'}
+      </span>
+      <span>${d.order}</span>
+      <span>${d.priority}</span>
+      <span class="actions">
+        <button>✏️</button>
+        <button>🔄</button>
+        <button>🗑</button>
+      </span>
+    `;
+
+    const buttons=row.querySelectorAll("button");
+
+    buttons[0].addEventListener("click",()=>editCategory(d._id));
+    buttons[1].addEventListener("click",()=>toggle(d._id));
+    buttons[2].addEventListener("click",()=>del(d._id));
+
+    list.appendChild(row);
+
+  });
+}
+
+/* ===============================
+   EDIT (SINGLE FETCH)
+================================ */
+async function editCategory(id){
+
+  const d=await apiFetch(`${API}/${id}`);
+
+  editId=id;
+
+  name.value=d.name;
+  slug.value=d.slug;
+  type.value=d.type;
+  order.value=d.order;
+  priority.value=d.priority;
+  showHome.checked=d.showHome;
+  isActive.checked=d.active;
+  isFeatured.checked=d.featured;
+  aiTrending.checked=d.aiTrending;
+  aiPopular.checked=d.aiPopular;
+  aiAssign.checked=d.aiAssign;
+
+  openModal();
+}
+
+/* ===============================
+   TOGGLE
+================================ */
+async function toggle(id){
+  await apiFetch(`${API}/${id}/toggle`,{
+    method:"PATCH"
+  });
+  load();
+}
+
+/* ===============================
+   DELETE
+================================ */
+async function del(id){
+
+  if(!confirm("Delete category?")) return;
+
+  await apiFetch(`${API}/${id}`,{
+    method:"DELETE"
+  });
+
+  load();
+}
+
+/* ===============================
+   ESCAPE HTML
+================================ */
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* ===============================
+   MODAL CONTROL
+================================ */
+function openModal(){
+  editId=null;
+  modal.style.display="flex";
+}
+
+function closeModal(){
+  modal.style.display="none";
+}
+
+function resetForm(){
+  name.value="";
+  slug.value="";
+  order.value="";
+  priority.value="1";
+  showHome.checked=false;
+  isActive.checked=false;
+  isFeatured.checked=false;
+  aiTrending.checked=false;
+  aiPopular.checked=false;
+  aiAssign.checked=false;
+}
+
+/* INIT */
+load();
+
+</script>
+</body>
+</html>
