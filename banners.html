@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Banner CMS – AnimeHunt</title>
+
+
+  <style>
+  .cms-sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#0b0f1a,#0e1424);
+  border-right:1px solid #1a2035;
+  padding:20px 14px;
+}
+
+.brand{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:30px;
+}
+.brand b{ color:#ffcc00 }
+.brand small{
+  display:block;
+  font-size:10px;
+  color:#777;
+  margin-top:4px;
+}
+
+.cms-menu{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.cms-menu a{
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:13px;
+  color:#ccc;
+  transition:.25s;
+}
+
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+  transform:translateX(6px);
+}
+  .cms-app{
+  display:flex;
+  min-height:100vh;
+}
+
+.cms-main{
+  flex:1;
+  background:#0e1424;
+  display:flex;
+  flex-direction:column;
+}
+
+.cms-header{
+  height:60px;
+  background:#0b0f1a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid #1a2035;
+}
+
+.cms-content{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+  *{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body{
+  background:#0b0f1a;
+  color:#fff;
+}
+
+a{ text-decoration:none; color:inherit }
+  /* ===== EXISTING CSS (UNCHANGED) ===== */
+  .add-btn{
+    background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;
+    font-weight:600;cursor:pointer;
+  }
+
+  .banner-table{
+    background:#0b0f1a;border:1px solid #1a2035;
+    border-radius:12px;overflow:hidden;
+  }
+
+  .table-head{
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1.5fr 1fr 80px 80px 140px;
+    background:#0e1424;padding:12px;font-size:12px;color:#aaa;
+  }
+
+  .table-body .row{
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1.5fr 1fr 80px 80px 140px;
+    padding:12px;border-top:1px solid #1a2035;
+    align-items:center;font-size:12px;
+  }
+
+  .badge{
+    padding:3px 8px;border-radius:6px;font-size:10px;
+    background:#1a2035;
+  }
+
+  .actions button{
+    background:none;border:none;color:#ffcc00;
+    cursor:pointer;margin-right:6px;
+  }
+
+  /* ===== STATUS TOGGLE ===== */
+  .switch{
+    position:relative;width:34px;height:18px;
+    display:inline-block;
+  }
+  .switch input{display:none;}
+  .slider{
+    position:absolute;inset:0;background:#333;
+    border-radius:20px;cursor:pointer;
+  }
+  .slider:before{
+    content:"";position:absolute;width:14px;height:14px;
+    left:2px;top:2px;background:#fff;border-radius:50%;
+    transition:.2s;
+  }
+  input:checked + .slider{background:#4cff4c;}
+  input:checked + .slider:before{transform:translateX(16px);}
+
+  /* ===== MODAL ===== */
+  .modal{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    display:none;align-items:center;justify-content:center;z-index:9999;
+  }
+
+  .modal-box{
+    width:720px;background:#0b0f1a;
+    border:1px solid #1a2035;border-radius:14px;overflow:hidden;
+  }
+
+  .modal-header{
+    display:flex;justify-content:space-between;
+    padding:14px 16px;background:#0e1424;
+  }
+
+  .modal-body{padding:16px;}
+
+  .form-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+
+  .form-grid input,
+  .form-grid select{
+    background:#0e1424;border:1px solid #1a2035;
+    color:#fff;padding:8px 10px;border-radius:6px;font-size:12px;
+  }
+
+  .check{
+    display:flex;align-items:center;gap:6px;font-size:12px;
+  }
+
+  .modal-footer{
+    padding:14px 16px;background:#0e1424;text-align:right;
+  }
+
+  .modal-footer button{
+    background:#ffcc00;border:none;padding:8px 18px;
+    border-radius:8px;font-weight:600;cursor:pointer;
+  }
+
+  /* ===== NEW: PREVIEW ===== */
+  .preview-box{
+    grid-column:1/4;background:#000;height:120px;
+    border-radius:8px;display:flex;
+    align-items:center;justify-content:center;
+  }
+  .preview-box img{max-height:100%;display:none;}
+  .preview-error{color:#ff4c4c;font-size:12px;display:none;}
+  </style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+  <!-- SIDEBAR (UNCHANGED) -->
+  <aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+  <!-- MAIN -->
+  <main class="cms-main">
+
+    <header class="cms-header">
+      <div class="title">🖼 Banner Management</div>
+      <button class="add-btn" onclick="openModal()">➕ Add Banner</button>
+    </header>
+
+    <section class="cms-content">
+
+      <div class="banner-table">
+        <div class="table-head">
+          <span>Title</span><span>Type</span><span>Target</span>
+          <span>Position</span><span>Order</span>
+          <span>Status</span><span>Actions</span>
+        </div>
+
+        <div class="table-body" id="bannerList"></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="bannerModal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3>Add Banner</h3>
+      <span onclick="closeModal()">✕</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <input id="banTitle" placeholder="Banner Title">
+        <input id="banImage" placeholder="Image URL (optional)">
+<input type="file" id="banImageFile" accept="image/*">
+        <select id="banType">
+          <option>Hero</option><option>Slider</option>
+          <option>Category</option><option>Page</option>
+        </select>
+
+        <input id="banTarget" placeholder="Target">
+        <input id="banPosition" placeholder="Position">
+        <input id="banOrder" placeholder="Order">
+        
+        <select id="banDevice">
+          <option value="all">All Devices</option>
+          <option value="mobile">Mobile</option>
+          <option value="desktop">Desktop</option>
+        </select>
+
+        <label class="check"><input type="checkbox" id="banActive"> Active</label>
+        <label class="check"><input type="checkbox" id="banRotate"> Auto Rotate</label>
+
+        <!-- PREVIEW -->
+        <div class="preview-box">
+          <img id="previewImg">
+          <div class="preview-error" id="previewError">⚠ Image load failed</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button onclick="saveBanner()">💾 Save</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/banners";
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   LOAD BANNERS
+================================ */
+async function loadBanners(){
+
+  try{
+    const banners=await apiFetch(API);
+    render(banners);
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   SAFE RENDER
+================================ */
+function render(banners){
+
+  bannerList.innerHTML="";
+
+  banners.forEach(b=>{
+
+    const row=document.createElement("div");
+    row.className="row";
+
+    row.innerHTML=`
+      <span>${escapeHTML(b.title)}</span>
+      <span>${escapeHTML(b.type)}</span>
+      <span>${escapeHTML(b.target)}</span>
+      <span>${escapeHTML(b.position)}</span>
+      <span>${b.order}</span>
+
+      <span>
+        <label class="switch">
+          <input type="checkbox" ${b.active ? "checked":""}>
+          <span class="slider"></span>
+        </label>
+      </span>
+
+      <span class="actions">
+        <button>Delete</button>
+      </span>
+    `;
+
+    /* Toggle Handler */
+    row.querySelector("input").addEventListener("change",e=>{
+      toggleStatus(b._id,e.target.checked);
+    });
+
+    /* Delete Handler */
+    row.querySelector("button").addEventListener("click",()=>{
+      deleteBanner(b._id);
+    });
+
+    bannerList.appendChild(row);
+
+  });
+}
+
+/* ===============================
+   SAVE BANNER
+================================ */
+async function saveBanner(){
+
+  try{
+
+    if(!banImage.value.trim()){
+      alert("Image URL required");
+      return;
+    }
+
+    const payload={
+      title:banTitle.value.trim(),
+      image:banImage.value.trim(),
+      type:banType.value,
+      target:banTarget.value.trim(),
+      position:banPosition.value.trim(),
+      order:Number(banOrder.value||0),
+      device:banDevice.value,
+      active:banActive.checked,
+      autoRotate:banRotate.checked
+    };
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+    closeModal();
+    resetForm();
+    loadBanners();
+
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   TOGGLE STATUS
+================================ */
+async function toggleStatus(id,active){
+
+  try{
+    await apiFetch(`${API}/${id}/status`,{
+      method:"PUT",
+      body:JSON.stringify({active})
+    });
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   DELETE
+================================ */
+async function deleteBanner(id){
+
+  if(!confirm("Delete banner?")) return;
+
+  try{
+    await apiFetch(`${API}/${id}`,{
+      method:"DELETE"
+    });
+    loadBanners();
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   ESCAPE HTML (XSS SAFE)
+================================ */
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* ===============================
+   MODAL CONTROL
+================================ */
+function openModal(){
+  bannerModal.style.display="flex";
+}
+
+function closeModal(){
+  bannerModal.style.display="none";
+}
+
+function resetForm(){
+  banTitle.value="";
+  banImage.value="";
+  banType.value="Hero";
+  banTarget.value="";
+  banPosition.value="";
+  banOrder.value="";
+  banDevice.value="all";
+  banActive.checked=false;
+  banRotate.checked=false;
+}
+
+/* INIT */
+loadBanners();
+
+</script>
+</body>
+</html>
