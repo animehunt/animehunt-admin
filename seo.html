@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SEO CMS – AnimeHunt</title>
+  <meta charset="UTF-8">
+
+  <style>
+  /* ===== main.css ===== */
+  *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,sans-serif;
+  }
+  body{
+    background:#0b0f1a;
+    color:#fff;
+  }
+  a{ text-decoration:none; color:inherit }
+
+  /* ===== layout.css ===== */
+  .cms-app{
+    display:flex;
+    min-height:100vh;
+  }
+  .cms-main{
+    flex:1;
+    background:#0e1424;
+    display:flex;
+    flex-direction:column;
+  }
+  .cms-header{
+    height:60px;
+    background:#0b0f1a;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-bottom:1px solid #1a2035;
+  }
+  .cms-content{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+  }
+
+  /* ===== sidebar.css ===== */
+  .cms-sidebar{
+    width:260px;
+    background:linear-gradient(180deg,#0b0f1a,#0e1424);
+    border-right:1px solid #1a2035;
+    padding:20px 14px;
+  }
+  .brand{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:30px;
+  }
+  .brand b{ color:#ffcc00 }
+  .brand small{
+    display:block;
+    font-size:10px;
+    color:#777;
+    margin-top:4px;
+  }
+  .cms-menu{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .cms-menu a{
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:13px;
+    color:#ccc;
+    transition:.25s;
+  }
+  .cms-menu a:hover,
+  .cms-menu a.active{
+    background:#1a2035;
+    color:#ffcc00;
+    transform:translateX(6px);
+  }
+
+  /* ===== seo.css ===== */
+  .save-btn{
+    background:#ffcc00;
+    border:none;
+    padding:8px 16px;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+  }
+
+  .seo-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+  }
+
+  .card{
+    background:#0b0f1a;
+    border:1px solid #1a2035;
+    border-radius:12px;
+    padding:16px;
+  }
+
+  .card h3{
+    font-size:14px;
+    margin-bottom:12px;
+    color:#ffcc00;
+  }
+
+  .form{
+    display:grid;
+    gap:10px;
+  }
+
+  .form label{
+    font-size:11px;
+    color:#aaa;
+  }
+
+  .form input,
+  .form textarea,
+  .form select{
+    background:#0e1424;
+    border:1px solid #1a2035;
+    color:#fff;
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:12px;
+  }
+
+  .form textarea{
+    min-height:60px;
+    resize:vertical;
+  }
+  </style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+  <!-- SIDEBAR -->
+  <aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html" class="active">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+  <!-- MAIN -->
+  <main class="cms-main">
+
+    <header class="cms-header">
+      <div class="title">📈 SEO CMS</div>
+      <button class="save-btn" id="saveSEO">💾 Save SEO</button>
+    </header>
+
+    <section class="cms-content">
+
+      <div class="seo-grid">
+
+        <!-- GLOBAL SEO -->
+        <div class="card">
+          <h3>Global SEO</h3>
+          <div class="form">
+            <label>Site Title</label>
+            <input id="siteTitle" value="AnimeHunt – Hindi Dubbed Anime Streaming">
+
+            <label>Site Description</label>
+            <textarea id="siteDesc">Watch official Hindi dubbed anime movies and series on AnimeHunt.</textarea>
+
+            <label>Site Keywords</label>
+            <input id="siteKeywords" value="anime, hindi dubbed anime, animehunt, anime streaming">
+
+            <label>Canonical Domain</label>
+            <input id="canonical" value="https://animehunt.in">
+
+            <label>Indexing</label>
+            <select id="indexing">
+              <option value="index">Index</option>
+              <option value="noindex">No Index</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- HOMEPAGE SEO -->
+        <div class="card">
+          <h3>Homepage SEO</h3>
+          <div class="form">
+            <label>Homepage Title</label>
+            <input id="homeTitle" value="AnimeHunt – Watch Hindi Dubbed Anime Online">
+
+            <label>Homepage Description</label>
+            <textarea id="homeDesc">Stream and download Hindi dubbed anime movies and series.</textarea>
+
+            <label>Homepage Keywords</label>
+            <input id="homeKeywords" value="hindi anime, dubbed anime, animehunt">
+
+            <label>OG Image</label>
+            <input id="homeOG" placeholder="https://animehunt.in/og.jpg">
+          </div>
+        </div>
+
+        <!-- DYNAMIC SEO -->
+        <div class="card">
+          <h3>Dynamic SEO</h3>
+          <div class="form">
+            <label>Anime Page Template</label>
+            <input id="animeTemplate" value="{title} Hindi Dubbed Anime – Watch Online | AnimeHunt">
+
+            <label>Category Template</label>
+            <input id="categoryTemplate" value="{category} Anime – AnimeHunt">
+
+            <label>Episode Template</label>
+            <input id="episodeTemplate" value="{anime} Episode {ep} Hindi Dubbed – AnimeHunt">
+
+            <label>Search Page Template</label>
+            <input id="searchTemplate" value="Search results for {query} – AnimeHunt">
+          </div>
+        </div>
+
+        <!-- SOCIAL SEO -->
+        <div class="card">
+          <h3>Social SEO</h3>
+          <div class="form">
+            <label>OG Title</label>
+            <input id="ogTitle" value="AnimeHunt">
+
+            <label>OG Description</label>
+            <textarea id="ogDesc">Watch Hindi dubbed anime online</textarea>
+
+            <label>Twitter Title</label>
+            <input id="twTitle" value="AnimeHunt">
+
+            <label>Twitter Description</label>
+            <textarea id="twDesc">Hindi dubbed anime streaming platform</textarea>
+
+            <label>Twitter Card</label>
+            <select id="twCard">
+              <option value="summary_large_image">Large Image</option>
+              <option value="summary">Summary</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/seo";
+const saveBtn=document.getElementById("saveSEO");
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   LOAD SEO
+================================ */
+async function loadSEO(){
+
+  try{
+
+    const d=await apiFetch(API);
+
+    siteTitle.value    = d.global?.title || "";
+    siteDesc.value     = d.global?.desc || "";
+    siteKeywords.value = d.global?.keywords || "";
+    canonical.value    = d.global?.canonical || "";
+    indexing.value     = d.global?.indexing || "index";
+
+    homeTitle.value    = d.home?.title || "";
+    homeDesc.value     = d.home?.desc || "";
+    homeKeywords.value = d.home?.keywords || "";
+    homeOG.value       = d.home?.og || "";
+
+    animeTemplate.value    = d.templates?.anime || "";
+    categoryTemplate.value = d.templates?.category || "";
+    episodeTemplate.value  = d.templates?.episode || "";
+    searchTemplate.value   = d.templates?.search || "";
+
+    ogTitle.value = d.social?.ogTitle || "";
+    ogDesc.value  = d.social?.ogDesc || "";
+    twTitle.value = d.social?.twTitle || "";
+    twDesc.value  = d.social?.twDesc || "";
+    twCard.value  = d.social?.twCard || "summary_large_image";
+
+  }catch(err){
+    console.error("SEO load failed:",err);
+  }
+
+}
+
+/* ===============================
+   VALIDATION
+================================ */
+function sanitize(str,max=300){
+  if(!str) return "";
+  return str.trim().substring(0,max);
+}
+
+function isValidURL(url){
+  try{
+    new URL(url);
+    return true;
+  }catch{
+    return false;
+  }
+}
+
+/* ===============================
+   SAVE SEO
+================================ */
+saveBtn.addEventListener("click",async()=>{
+
+  try{
+
+    const canonicalURL=sanitize(canonical.value,200);
+
+    if(canonicalURL && !isValidURL(canonicalURL)){
+      showStatus("Invalid Canonical URL ❌",true);
+      return;
+    }
+
+    const payload={
+      global:{
+        title:sanitize(siteTitle.value,120),
+        desc:sanitize(siteDesc.value,300),
+        keywords:sanitize(siteKeywords.value,200),
+        canonical:canonicalURL,
+        indexing:indexing.value
+      },
+      home:{
+        title:sanitize(homeTitle.value,120),
+        desc:sanitize(homeDesc.value,300),
+        keywords:sanitize(homeKeywords.value,200),
+        og:sanitize(homeOG.value,200)
+      },
+      templates:{
+        anime:sanitize(animeTemplate.value,200),
+        category:sanitize(categoryTemplate.value,200),
+        episode:sanitize(episodeTemplate.value,200),
+        search:sanitize(searchTemplate.value,200)
+      },
+      social:{
+        ogTitle:sanitize(ogTitle.value,120),
+        ogDesc:sanitize(ogDesc.value,300),
+        twTitle:sanitize(twTitle.value,120),
+        twDesc:sanitize(twDesc.value,300),
+        twCard:twCard.value
+      }
+    };
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+    showStatus("SEO saved ✔");
+
+  }catch(err){
+    console.error("SEO save failed:",err);
+    showStatus("Save failed ❌",true);
+    loadSEO(); // rollback
+  }
+
+});
+
+/* ===============================
+   STATUS FEEDBACK
+================================ */
+function showStatus(msg,isError=false){
+
+  const original=saveBtn.innerText;
+
+  saveBtn.innerText=msg;
+  saveBtn.style.background=isError?"#ff4c4c":"#00ffd5";
+  saveBtn.style.color=isError?"#fff":"#000";
+
+  setTimeout(()=>{
+    saveBtn.innerText=original;
+    saveBtn.style.background="#ffcc00";
+    saveBtn.style.color="#000";
+  },1500);
+}
+
+/* INIT */
+loadSEO();
+
+</script>
+</body>
+</html>
