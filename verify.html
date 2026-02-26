@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Email Verification – AnimeHunt CMS</title>
+
+<style>
+body{
+  background:#070b17;
+  color:#fff;
+  font-family:Arial;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+.box{
+  width:360px;
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:14px;
+  padding:24px;
+}
+h2{text-align:center;margin-bottom:8px}
+p{font-size:13px;color:#aaa;text-align:center}
+input{
+  width:100%;
+  margin-top:14px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #1a2035;
+  background:#11162a;
+  color:#fff;
+  text-align:center;
+  letter-spacing:3px;
+}
+button{
+  width:100%;
+  margin-top:14px;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#ffcc00;
+  color:#000;
+  font-weight:600;
+  cursor:pointer;
+}
+.msg{
+  margin-top:12px;
+  font-size:12px;
+  text-align:center;
+  display:none;
+}
+.error{color:#ff4d4d}
+.success{color:#00ffd5}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Verify Login</h2>
+  <p>Check your email & enter digit token</p>
+
+  <input id="token" placeholder="Enter Token" maxlength="16">
+
+  <button id="verifyBtn">Verify</button>
+
+  <div class="msg error" id="err"></div>
+  <div class="msg success" id="ok"></div>
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTO REDIRECT IF LOGGED IN
+================================ */
+if(localStorage.getItem("AUTH_TOKEN")){
+  location.href="dashboard.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/auth/verify";
+const username=sessionStorage.getItem("LOGIN_USER");
+
+let attempts=0;
+const MAX_ATTEMPTS=5;
+let locked=false;
+
+/* ===============================
+   VALIDATION
+================================ */
+function isValidToken(t){
+  return /^[A-Za-z0-9]{16}$/.test(t);
+}
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(body){
+
+  const res=await fetch(API,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify(body)
+  });
+
+  if(!res.ok){
+    throw new Error("Invalid");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   VERIFY HANDLER
+================================ */
+verifyBtn.onclick=async()=>{
+
+  err.style.display=ok.style.display="none";
+
+  if(locked) return;
+
+  if(!username){
+    err.innerText="Session expired. Login again.";
+    err.style.display="block";
+    setTimeout(()=>location.href="login.html",1000);
+    return;
+  }
+
+  const tokenVal=token.value.trim();
+
+  if(!isValidToken(tokenVal)){
+    err.innerText="Invalid token format";
+    err.style.display="block";
+    return;
+  }
+
+  if(attempts>=MAX_ATTEMPTS){
+    locked=true;
+    err.innerText="Too many attempts. Try later.";
+    err.style.display="block";
+    setTimeout(()=>{
+      attempts=0;
+      locked=false;
+    },30000);
+    return;
+  }
+
+  attempts++;
+  verifyBtn.disabled=true;
+
+  try{
+
+    const data=await apiFetch({
+      username,
+      token:tokenVal
+    });
+
+    /* STORE TOKEN */
+    localStorage.setItem("AUTH_TOKEN",data.accessToken);
+
+    /* CLEAN TEMP SESSION */
+    sessionStorage.removeItem("LOGIN_USER");
+
+    ok.innerText="Verified ✔";
+    ok.style.display="block";
+
+    setTimeout(()=>{
+      location.href="dashboard.html";
+    },800);
+
+  }catch{
+
+    err.innerText="Token invalid or expired";
+    err.style.display="block";
+
+  }finally{
+    verifyBtn.disabled=false;
+  }
+
+};
+
+/* ===============================
+   INPUT HARDENING
+================================ */
+token.addEventListener("input",()=>{
+  token.value=token.value.replace(/[^A-Za-z0-9]/g,"").substring(0,16);
+});
+
+</script>
+</body>
+</html>
