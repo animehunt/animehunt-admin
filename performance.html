@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Performance CMS – AnimeHunt</title>
+
+  <style>
+  .perf-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+  }
+
+  .perf-card{
+    background:#0b0f1a;
+    border:1px solid #1a2035;
+    border-radius:12px;
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  .perf-card h3{
+    font-size:12px;
+    color:#fff;
+  }
+
+  /* Toggle Switch */
+  .switch{
+    position:relative;
+    display:inline-block;
+    width:42px;
+    height:22px;
+  }
+
+  .switch input{display:none;}
+
+  .slider{
+    position:absolute;
+    cursor:pointer;
+    top:0;left:0;right:0;bottom:0;
+    background:#333;
+    border-radius:22px;
+    transition:.3s;
+  }
+
+  .slider:before{
+    position:absolute;
+    content:"";
+    height:16px;width:16px;
+    left:3px;top:3px;
+    background:white;
+    border-radius:50%;
+    transition:.3s;
+  }
+
+  input:checked + .slider{
+    background:#00ffb3;
+  }
+
+  input:checked + .slider:before{
+    transform:translateX(20px);
+  }
+  
+
+/* ============================= */
+/* main.css */
+/* ============================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body{
+  background:#0b0f1a;
+  color:#fff;
+}
+
+a{ 
+  text-decoration:none; 
+  color:inherit 
+}
+
+/* ============================= */
+/* layout.css */
+/* ============================= */
+.cms-app{
+  display:flex;
+  min-height:100vh;
+}
+
+.cms-main{
+  flex:1;
+  background:#0e1424;
+  display:flex;
+  flex-direction:column;
+}
+
+.cms-header{
+  height:60px;
+  background:#0b0f1a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid #1a2035;
+}
+
+.cms-content{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+
+/* ============================= */
+/* sidebar.css */
+/* ============================= */
+.cms-sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#0b0f1a,#0e1424);
+  border-right:1px solid #1a2035;
+  padding:20px 14px;
+}
+
+.brand{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:30px;
+}
+
+.brand b{ 
+  color:#ffcc00 
+}
+
+.brand small{
+  display:block;
+  font-size:10px;
+  color:#777;
+  margin-top:4px;
+}
+
+.cms-menu{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.cms-menu a{
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:13px;
+  color:#ccc;
+  transition:.25s;
+}
+
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+  transform:translateX(6px);
+}
+  </style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+  <!-- SIDEBAR -->
+  <aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html" class="active">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+  <!-- MAIN -->
+  <main class="cms-main">
+
+    <header class="cms-header">
+      <div class="title">⚡ Performance Control Panel</div>
+    </header>
+
+    <section class="cms-content">
+
+      <div class="perf-grid">
+
+        <div class="perf-card">
+          <h3>Lazy Loading</h3>
+          <label class="switch">
+            <input type="checkbox" id="lazyLoad">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Smart Preload</h3>
+          <label class="switch">
+            <input type="checkbox" id="smartPreload">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Asset Minifier</h3>
+          <label class="switch">
+            <input type="checkbox" id="assetMinify">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Image Optimizer</h3>
+          <label class="switch">
+            <input type="checkbox" id="imgOptimize">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>JS Optimizer</h3>
+          <label class="switch">
+            <input type="checkbox" id="jsOptimize">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>CSS Optimizer</h3>
+          <label class="switch">
+            <input type="checkbox" id="cssOptimize">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Smart Cache</h3>
+          <label class="switch">
+            <input type="checkbox" id="smartCache">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Mobile Priority</h3>
+          <label class="switch">
+            <input type="checkbox" id="mobilePriority">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>CDN Mode</h3>
+          <label class="switch">
+            <input type="checkbox" id="cdnMode">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Adaptive Loading</h3>
+          <label class="switch">
+            <input type="checkbox" id="adaptiveLoad">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Preconnect Engine</h3>
+          <label class="switch">
+            <input type="checkbox" id="preconnect">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="perf-card">
+          <h3>Bandwidth Control</h3>
+          <label class="switch">
+            <input type="checkbox" id="bandwidth">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/performance";
+
+const toggles=[
+  "lazyLoad","smartPreload","assetMinify","imgOptimize",
+  "jsOptimize","cssOptimize","smartCache","mobilePriority",
+  "cdnMode","adaptiveLoad","preconnect","bandwidth"
+];
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   LOAD SETTINGS
+================================ */
+async function loadPerformance(){
+  try{
+
+    const data=await apiFetch(API);
+
+    toggles.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.checked=!!data[id];
+    });
+
+  }catch(err){
+    console.error("Load error:",err);
+  }
+}
+
+/* ===============================
+   SAVE SETTINGS (DEBOUNCED)
+================================ */
+let saveTimer=null;
+
+function scheduleSave(){
+
+  clearTimeout(saveTimer);
+
+  saveTimer=setTimeout(async()=>{
+
+    const payload={};
+
+    toggles.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+      payload[id]=el.checked;
+    });
+
+    try{
+      await apiFetch(API,{
+        method:"POST",
+        body:JSON.stringify(payload)
+      });
+    }catch(err){
+      console.error("Save failed:",err);
+      loadPerformance(); // rollback
+    }
+
+  },400); // debounce
+
+}
+
+/* ===============================
+   ATTACH LISTENERS
+================================ */
+toggles.forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+
+  el.addEventListener("change",scheduleSave);
+});
+
+/* INIT */
+loadPerformance();
+
+</script>
+</body>
+</html>
