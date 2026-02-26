@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AnimeHunt CMS – Dashboard</title>
+
+<style>
+/* ===== BASE LAYOUT ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#070b17;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:13px;
+}
+.cms-app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ===== SIDEBAR (UNCHANGED) ===== */
+.cms-sidebar{
+  width:240px;
+  background:#0b0f1a;
+  border-right:1px solid #1a2035;
+  padding:20px;
+}
+.brand{
+  font-size:18px;
+  margin-bottom:30px;
+}
+.brand b{color:#ffcc00}
+.brand small{
+  display:block;
+  font-size:11px;
+  color:#777;
+}
+
+.cms-menu a{
+  display:block;
+  padding:10px 12px;
+  margin-bottom:6px;
+  color:#ccc;
+  text-decoration:none;
+  border-radius:8px;
+  font-size:13px;
+}
+.cms-menu a.active,
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+}
+
+/* ===== MAIN CONTENT ===== */
+.cms-main{
+  flex:1;
+  padding:12px 10px;   /* wide feel */
+}
+
+.cms-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+.cms-header .title{
+  font-size:18px;
+  font-weight:600;
+}
+.cms-header .profile{
+  font-size:12px;
+  color:#ccc;
+}
+
+.cms-content{
+  padding-bottom:30px;
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap:20px;
+  padding-bottom:6px;
+}
+/* ===== STAT CARD ===== */
+.stat-card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.stat-card span{
+  font-size:14px;
+  color:#ffcc00;
+  font-weight:600;
+  letter-spacing:0.2px;
+}
+</style>
+</head>
+
+<body>
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+<header class="cms-header">
+  <div class="title">Dashboard</div>
+  <div class="profile">Admin</div>
+</header>
+
+<section class="cms-content">
+
+<!-- 🔥 ROW 1 – CORE STATS -->
+<div class="stats-grid">
+  <div class="stat-card">🎬 Anime <span id="animeCount">0</span></div>
+  <div class="stat-card">📺 Episodes <span id="episodeCount">0</span></div>
+  <div class="stat-card">🗂 Categories <span id="categoryCount">0</span></div>
+  <div class="stat-card">🖼 Banners <span id="bannerCount">0</span></div>
+  <div class="stat-card">📥 Downloads <span id="downloadCount">0</span></div>
+  <div class="stat-card">🌐 Servers <span id="serverCount">0</span></div>
+</div>
+
+<br>
+
+<!-- 🔥 ROW 2 – GROWTH & ADS -->
+<div class="stats-grid">
+  <div class="stat-card">📢 Active Ads <span id="activeAds">0</span></div>
+  <div class="stat-card">💰 Today Revenue <span id="todayRevenue">₹0</span></div>
+  <div class="stat-card">🖱 Ad Clicks <span id="adClicks">0</span></div>
+  <div class="stat-card">🔥 Trending Anime <span id="trendingAnime">0</span></div>
+  <div class="stat-card">🕒 Ongoing Anime <span id="ongoingAnime">0</span></div>
+  <div class="stat-card">⭐ Top Rated <span id="topRated">0</span></div>
+</div>
+
+<br>
+
+<!-- 🔥 ROW 3 – SYSTEM HEALTH -->
+<div class="stats-grid">
+  <div class="stat-card">⚙ CMS Status <span id="cmsStatus">OK</span></div>
+  <div class="stat-card">🚀 Server Load <span id="serverLoad">Low</span></div>
+  <div class="stat-card">📡 API Status <span id="apiStatus">Online</span></div>
+  <div class="stat-card">🧠 AI Engine <span id="aiStatus">Active</span></div>
+  <div class="stat-card">🔍 Search Index <span id="searchStatus">Ready</span></div>
+  <div class="stat-card">💾 Backup <span id="backupStatus">Synced</span></div>
+</div>
+
+<br>
+
+<!-- 🔥 ROW 4 – QUICK ACTIONS -->
+<div class="stats-grid">
+  <div class="stat-card">➕ Add Anime <span>+</span></div>
+  <div class="stat-card">📢 Manage Ads <span>→</span></div>
+  <div class="stat-card">🖼 Upload Banner <span>+</span></div>
+  <div class="stat-card">🔄 Sync Content <span>↻</span></div>
+  <div class="stat-card">🧠 AI Scan <span>Run</span></div>
+  <div class="stat-card">🚨 Emergency Stop <span>!</span></div>
+</div>
+
+</section>
+</main>
+
+</div>
+  <script src="auth.js"></script>
+
+<script>
+const DASH_API = "/api/admin/dashboard";
+
+async function loadDashboard(){
+  try{
+    const res = await fetch(DASH_API);
+
+    if(!res.ok){
+      throw new Error("Session expired");
+    }
+
+    const data = await res.json();
+
+    animeCount.textContent = data.core.animeCount;
+    episodeCount.textContent = data.core.episodeCount;
+    categoryCount.textContent = data.core.categoryCount;
+    bannerCount.textContent = data.core.bannerCount;
+    downloadCount.textContent = data.core.downloadCount;
+    serverCount.textContent = data.core.serverCount;
+
+    activeAds.textContent = data.growth.activeAds;
+    todayRevenue.textContent = "₹" + data.growth.todayRevenue;
+    adClicks.textContent = data.growth.adClicks;
+    trendingAnime.textContent = data.growth.trendingAnime;
+    ongoingAnime.textContent = data.growth.ongoingAnime;
+    topRated.textContent = data.growth.topRated;
+
+    cmsStatus.textContent = data.system.cmsStatus;
+    serverLoad.textContent = data.system.serverLoad;
+    apiStatus.textContent = data.system.apiStatus;
+    aiStatus.textContent = data.system.aiStatus;
+    searchStatus.textContent = data.system.searchStatus;
+    backupStatus.textContent = data.system.backupStatus;
+
+  }catch(err){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+}
+
+loadDashboard();
+</script>
+
+<script src="admin.js"></script>
