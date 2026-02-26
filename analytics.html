@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Analytics CMS – AnimeHunt</title>
+  <meta charset="UTF-8">
+
+  <style>
+  /* ===== GLOBAL ===== */
+  *{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,sans-serif;
+  }
+  body{
+    background:#0b0f1a;
+    color:#fff;
+  }
+  a{ text-decoration:none; color:inherit }
+
+  /* ===== LAYOUT ===== */
+  .cms-app{ display:flex; min-height:100vh; }
+
+  .cms-main{
+    flex:1;
+    background:#0e1424;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .cms-header{
+    height:60px;
+    background:#0b0f1a;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-bottom:1px solid #1a2035;
+  }
+
+  .cms-content{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .cms-sidebar{
+    width:260px;
+    background:linear-gradient(180deg,#0b0f1a,#0e1424);
+    border-right:1px solid #1a2035;
+    padding:20px 14px;
+  }
+
+  .brand{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:30px;
+  }
+  .brand b{ color:#ffcc00 }
+  .brand small{
+    display:block;
+    font-size:10px;
+    color:#777;
+    margin-top:4px;
+  }
+
+  .cms-menu{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .cms-menu a{
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:13px;
+    color:#ccc;
+    transition:.25s;
+  }
+
+  .cms-menu a:hover,
+  .cms-menu a.active{
+    background:#1a2035;
+    color:#ffcc00;
+    transform:translateX(6px);
+  }
+
+  /* ===== HEADER SELECT ===== */
+  select{
+    background:#0e1424;
+    border:1px solid #1a2035;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:6px;
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:12px;
+    margin-bottom:16px;
+  }
+
+  .stat-card{
+    background:#0b0f1a;
+    border:1px solid #1a2035;
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+  }
+
+  .stat-card h3{
+    font-size:11px;
+    color:#aaa;
+  }
+
+  .stat-card p{
+    font-size:22px;
+    color:#ffcc00;
+    font-weight:700;
+    margin-top:6px;
+  }
+
+  /* ===== ANALYTICS GRID ===== */
+  .analytics-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+
+  .card{
+    background:#0b0f1a;
+    border:1px solid #1a2035;
+    border-radius:12px;
+    padding:14px;
+  }
+
+  .card h3{
+    font-size:13px;
+    color:#ffcc00;
+    margin-bottom:10px;
+  }
+
+  .card ul{
+    list-style:none;
+  }
+
+  .card li{
+    font-size:12px;
+    padding:6px 0;
+    border-bottom:1px solid #1a2035;
+    color:#ccc;
+  }
+
+  .card li:last-child{
+    border-bottom:none;
+  }
+  </style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+  <!-- SIDEBAR -->
+  <aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html" class="active">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+  <!-- MAIN -->
+  <main class="cms-main">
+
+    <header class="cms-header">
+      <div class="title">📊 Analytics Dashboard</div>
+      <select id="range">
+        <option value="today">Today</option>
+        <option value="7">Last 7 Days</option>
+        <option value="30">Last 30 Days</option>
+        <option value="365">Year</option>
+      </select>
+    </header>
+
+    <section class="cms-content">
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card"><h3>Visitors</h3><p id="visitors">0</p></div>
+        <div class="stat-card"><h3>Page Views</h3><p id="views">0</p></div>
+        <div class="stat-card"><h3>Anime Views</h3><p id="animeViews">0</p></div>
+        <div class="stat-card"><h3>Episode Views</h3><p id="episodeViews">0</p></div>
+        <div class="stat-card"><h3>Downloads</h3><p id="downloads">0</p></div>
+        <div class="stat-card"><h3>Searches</h3><p id="searches">0</p></div>
+      </div>
+
+      <!-- LIST DATA -->
+      <div class="analytics-grid">
+
+        <div class="card">
+          <h3>🔥 Top Anime</h3>
+          <ul id="topAnime"></ul>
+        </div>
+
+        <div class="card">
+          <h3>📺 Top Episodes</h3>
+          <ul id="topEpisodes"></ul>
+        </div>
+
+        <div class="card">
+          <h3>🔍 Trending Searches</h3>
+          <ul id="topSearches"></ul>
+        </div>
+
+        <div class="card">
+          <h3>🗂 Popular Categories</h3>
+          <ul id="topCategories"></ul>
+        </div>
+
+        <div class="card">
+          <h3>🖼 Banner Performance</h3>
+          <ul id="topBanners"></ul>
+        </div>
+
+        <div class="card">
+          <h3>🎞 Player Servers</h3>
+          <ul id="topServers"></ul>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   BASIC AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href = "login.html";
+}
+
+/* ===============================
+   ELEMENT REFERENCES
+================================ */
+const rangeSelect = document.getElementById("range");
+
+const visitorsEl     = document.getElementById("visitors");
+const viewsEl        = document.getElementById("views");
+const animeViewsEl   = document.getElementById("animeViews");
+const episodeViewsEl = document.getElementById("episodeViews");
+const downloadsEl    = document.getElementById("downloads");
+const searchesEl     = document.getElementById("searches");
+
+const topAnimeEl      = document.getElementById("topAnime");
+const topEpisodesEl   = document.getElementById("topEpisodes");
+const topSearchesEl   = document.getElementById("topSearches");
+const topCategoriesEl = document.getElementById("topCategories");
+const topBannersEl    = document.getElementById("topBanners");
+const topServersEl    = document.getElementById("topServers");
+
+/* ===============================
+   LOAD ANALYTICS
+================================ */
+async function loadAnalytics(){
+
+  try{
+
+    const range = rangeSelect.value;
+
+    const res = await fetch(`/api/admin/analytics?range=${range}`);
+
+    if(!res.ok){
+      throw new Error("Session expired");
+    }
+
+    const data = await res.json();
+
+    // ===== TOP STATS =====
+    visitorsEl.textContent     = data.stats?.visitors ?? 0;
+    viewsEl.textContent        = data.stats?.pageViews ?? 0;
+    animeViewsEl.textContent   = data.stats?.animeViews ?? 0;
+    episodeViewsEl.textContent = data.stats?.episodeViews ?? 0;
+    downloadsEl.textContent    = data.stats?.downloads ?? 0;
+    searchesEl.textContent     = data.stats?.searches ?? 0;
+
+    // ===== LIST HELPER =====
+    function fill(el, arr, formatter){
+      el.innerHTML = "";
+      (arr || []).forEach(i=>{
+        const li = document.createElement("li");
+        li.textContent = formatter(i);
+        el.appendChild(li);
+      });
+    }
+
+    // ===== LIST DATA =====
+    fill(topAnimeEl, data.topAnime, a => `${a.animeSlug} (${a.views})`);
+    fill(topEpisodesEl, data.topEpisodes, e => `EP ${e.episodeId} (${e.views})`);
+    fill(topSearchesEl, data.topSearches, s => `${s.query} (${s.count})`);
+    fill(topCategoriesEl, data.topCategories, c => `${c.category} (${c.views})`);
+    fill(topBannersEl, data.topBanners, b => `${b.banner} (${b.clicks})`);
+    fill(topServersEl, data.topServers, s => `${s.server} (${s.views})`);
+
+  }catch(err){
+
+    console.error("Analytics error:", err);
+
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+}
+
+/* ===============================
+   RANGE CHANGE
+================================ */
+rangeSelect.addEventListener("change", loadAnalytics);
+
+/* ===============================
+   INIT
+================================ */
+loadAnalytics();
+
+</script>
+</body>
+</html>
