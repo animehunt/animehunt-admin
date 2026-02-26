@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Footer PRO – AnimeHunt CMS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
+}
+.brand{padding:0 18px 14px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,.cms-menu a:hover{
+  background:#0e1424;color:#ffcc00
+}
+
+/* MAIN */
+.cms-main{flex:1}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:8px 18px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+.cms-content{padding:20px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{
+  background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:12px;padding:14px;
+  display:flex;flex-direction:column;gap:10px
+}
+.card h3{font-size:14px;color:#ffcc00}
+
+/* FORM */
+label{font-size:12px;color:#aaa}
+input,select{
+  background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:7px 10px;border-radius:6px;font-size:12px
+}
+.check{display:flex;gap:8px;align-items:center;font-size:12px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{
+  background:#1a2035;border:none;color:#fff;
+  padding:7px 12px;border-radius:6px;cursor:pointer
+}
+.btns button:hover{background:#ffcc00;color:#000}
+.full{grid-column:1/4}
+.status{font-size:11px;color:#4cff4c}
+pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:auto}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html" class="active">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<main class="cms-main">
+
+<header class="cms-header">
+  <div>🦶 Footer PRO Control</div>
+  <button class="save-btn" onclick="save()">💾 Save Footer</button>
+</header>
+
+<section class="cms-content">
+<div class="grid">
+
+<!-- GLOBAL -->
+<div class="card">
+<h3>Global Footer</h3>
+<label class="check"><input type="checkbox" id="footerOn"> Enabled</label>
+<label class="check"><input type="checkbox" id="footerLazy"> Lazy Load</label>
+<label class="check"><input type="checkbox" id="footerBlur"> Blur Background</label>
+<label class="check"><input type="checkbox" id="footerLock"> Lock Footer</label>
+<select id="footerTheme">
+  <option>Dark</option><option>Light</option><option>Auto</option>
+</select>
+</div>
+
+<!-- LINKS -->
+<div class="card">
+<h3>Footer Links</h3>
+<label class="check"><input type="checkbox" id="about"> About</label>
+<label class="check"><input type="checkbox" id="privacy"> Privacy</label>
+<label class="check"><input type="checkbox" id="disclaimer"> Disclaimer</label>
+<label class="check"><input type="checkbox" id="dmca"> DMCA</label>
+<label class="check"><input type="checkbox" id="telegram"> Telegram</label>
+<label class="check"><input type="checkbox" id="linkBadges"> Show Badges</label>
+</div>
+
+<!-- A-Z -->
+<div class="card">
+<h3>A–Z Engine</h3>
+<label class="check"><input type="checkbox" id="azOn"> Enable</label>
+<label class="check"><input type="checkbox" id="azAuto"> Auto Generate</label>
+<label class="check"><input type="checkbox" id="azSticky"> Sticky</label>
+<label class="check"><input type="checkbox" id="azCompact"> Mobile Compact</label>
+<select id="azMode"><option>Scroll</option><option>Redirect</option></select>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="card">
+<h3>Mobile Bottom Nav</h3>
+<label class="check"><input type="checkbox" id="mobileNav"> Enable</label>
+<label class="check"><input type="checkbox" id="mobileFloat"> Floating</label>
+<label class="check"><input type="checkbox" id="mobileBlur"> Blur</label>
+<label class="check"><input type="checkbox" id="mobileHideScroll"> Hide on Scroll</label>
+</div>
+
+<!-- PROMO -->
+<div class="card">
+<h3>Footer Promo</h3>
+<label class="check"><input type="checkbox" id="promoOn"> Enable Promo</label>
+<input id="promoText" placeholder="Join our Telegram">
+<input id="promoLink" placeholder="https://t.me/...">
+<label class="check"><input type="checkbox" id="promoAutoHide"> Auto Hide</label>
+</div>
+
+<!-- SYSTEM -->
+<div class="card full">
+<h3>System</h3>
+<div class="btns">
+<button onclick="exportCfg()">Export</button>
+<button onclick="importCfg()">Import</button>
+<button onclick="resetCfg()">Reset</button>
+<button onclick="kill()">Kill Footer</button>
+<button onclick="debug()">Debug JSON</button>
+</div>
+<div class="status" id="status">Ready</div>
+<pre id="debugBox" style="display:none"></pre>
+</div>
+
+</div>
+</section>
+
+</main>
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/footer";
+const statusEl=document.getElementById("status");
+const debugBox=document.getElementById("debugBox");
+
+/* Only configurable fields */
+const configFields=[
+  "footerOn","footerLazy","footerBlur","footerLock","footerTheme",
+  "about","privacy","disclaimer","dmca","telegram","linkBadges",
+  "azOn","azAuto","azSticky","azCompact","azMode",
+  "mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
+  "promoOn","promoText","promoLink","promoAutoHide"
+];
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   LOAD
+================================ */
+async function loadFooter(){
+  try{
+
+    const data=await apiFetch(API);
+
+    configFields.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el || data[id]===undefined) return;
+
+      el.type==="checkbox"
+        ? el.checked=data[id]
+        : el.value=data[id];
+    });
+
+    statusEl.innerText="Loaded ✔";
+
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* ===============================
+   SAVE
+================================ */
+async function save(){
+
+  try{
+
+    const payload={};
+
+    configFields.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+
+      payload[id]=el.type==="checkbox"
+        ? el.checked
+        : el.value.trim();
+    });
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+    statusEl.innerText="Saved ✔";
+
+  }catch(err){
+    console.error(err);
+  }
+
+}
+
+/* ===============================
+   KILL FOOTER
+================================ */
+async function kill(){
+
+  if(!confirm("Disable footer globally?")) return;
+
+  await apiFetch(API+"/kill",{method:"POST"});
+
+  alert("Footer disabled globally");
+}
+
+/* ===============================
+   DEBUG JSON
+================================ */
+async function debug(){
+
+  const json=await apiFetch(API);
+
+  debugBox.style.display="block";
+  debugBox.textContent=JSON.stringify(json,null,2);
+}
+
+/* ===============================
+   EXPORT
+================================ */
+async function exportCfg(){
+
+  const json=await apiFetch(API);
+
+  await navigator.clipboard.writeText(
+    JSON.stringify(json,null,2)
+  );
+
+  alert("Copied ✔");
+}
+
+/* ===============================
+   IMPORT
+================================ */
+async function importCfg(){
+
+  const input=prompt("Paste Footer JSON");
+  if(!input) return;
+
+  try{
+    JSON.parse(input);
+  }catch{
+    alert("Invalid JSON");
+    return;
+  }
+
+  await apiFetch(API,{
+    method:"POST",
+    body:input
+  });
+
+  loadFooter();
+}
+
+/* INIT */
+loadFooter();
+
+</script>
+</body>
+</html>
