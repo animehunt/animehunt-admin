@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Search CMS – AnimeHunt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* ===== BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* ===== SIDEBAR ===== */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
+}
+.brand{padding:0 18px 14px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,.cms-menu a:hover{
+  background:#0e1424;color:#ffcc00
+}
+
+/* ===== MAIN ===== */
+.cms-main{flex:1}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:8px 16px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+.cms-content{padding:20px}
+
+/* ===== GRID ===== */
+.search-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px
+}
+.card{
+  background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:12px;padding:16px
+}
+.card h3{
+  font-size:14px;margin-bottom:12px;color:#ffcc00
+}
+.form{display:grid;gap:10px}
+.form label{font-size:11px;color:#aaa}
+.form select,.form input{
+  background:#0e1424;border:1px solid #1a2035;
+  color:#fff;padding:8px 10px;border-radius:6px;font-size:12px
+}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html" class="active">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+  <div class="title">🔍 Search CMS</div>
+  <button class="save-btn" onclick="saveSearch()">💾 Save Search Settings</button>
+</header>
+
+<section class="cms-content">
+
+<div class="search-grid">
+
+<!-- SEARCH ENGINE -->
+<div class="card">
+<h3>Search Engine</h3>
+<div class="form">
+<label>Enable Search</label>
+<select id="enableSearch"><option>true</option><option>false</option></select>
+
+<label>Live Dropdown</label>
+<select id="liveSearch"><option>true</option><option>false</option></select>
+
+<label>Search Mode</label>
+<select id="searchMode">
+<option>instant</option>
+<option>debounce</option>
+</select>
+
+<label>Debounce Delay (ms)</label>
+<input type="number" id="debounce" value="300">
+</div>
+</div>
+
+<!-- RANKING -->
+<div class="card">
+<h3>Ranking & Priority</h3>
+<div class="form">
+<label>Ranking Mode</label>
+<select id="ranking">
+<option>smart</option>
+<option>views</option>
+<option>latest</option>
+<option>alphabetical</option>
+</select>
+
+<label>Boost Featured</label>
+<select id="boost"><option>true</option><option>false</option></select>
+
+<label>Boost Weight (1–10)</label>
+<input type="number" id="boostWeight" value="5">
+</div>
+</div>
+
+<!-- SEARCH SOURCES -->
+<div class="card">
+<h3>Search Sources</h3>
+<div class="form">
+<label>Anime</label><select id="sAnime"><option>true</option><option>false</option></select>
+<label>Episodes</label><select id="sEpisode"><option>true</option><option>false</option></select>
+<label>Categories</label><select id="sCategory"><option>true</option><option>false</option></select>
+<label>Pages</label><select id="sPages"><option>true</option><option>false</option></select>
+</div>
+</div>
+
+<!-- SMART FEATURES -->
+<div class="card">
+<h3>Smart Features</h3>
+<div class="form">
+<label>Typo Correction</label>
+<select id="typo"><option>true</option><option>false</option></select>
+
+<label>Synonym / Alias</label>
+<select id="alias"><option>true</option><option>false</option></select>
+
+<label>Language Aware</label>
+<select id="language">
+<option>all</option>
+<option>hindi</option>
+<option>english</option>
+</select>
+</div>
+</div>
+
+<!-- UI CONTROL -->
+<div class="card">
+<h3>Result UI</h3>
+<div class="form">
+<label>Max Results</label>
+<input id="maxResults" type="number" value="8">
+
+<label>Show Thumbnails</label>
+<select id="thumb"><option>true</option><option>false</option></select>
+
+<label>Group Results</label>
+<select id="group"><option>true</option><option>false</option></select>
+
+<label>Highlight Match</label>
+<select id="highlight"><option>true</option><option>false</option></select>
+</div>
+</div>
+
+<!-- SAFETY & SEO -->
+<div class="card">
+<h3>Safety & SEO</h3>
+<div class="form">
+<label>Safe Search</label>
+<select id="safe">
+<option>strict</option>
+<option>medium</option>
+<option>off</option>
+</select>
+
+<label>Track Popular Searches</label>
+<select id="track"><option>true</option><option>false</option></select>
+
+<label>SEO Search URLs</label>
+<select id="seo"><option>true</option><option>false</option></select>
+
+<label>Search Cache (sec)</label>
+<input id="cache" type="number" value="60">
+</div>
+</div>
+
+</div>
+</section>
+</main>
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/search";
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   LOAD SETTINGS
+================================ */
+async function loadSearch(){
+
+  try{
+
+    const d=await apiFetch(API);
+    if(!d) return;
+
+    enableSearch.value = String(d.enableSearch);
+    liveSearch.value   = String(d.liveSearch);
+    searchMode.value   = d.mode || "instant";
+    debounce.value     = d.debounce || 300;
+
+    ranking.value      = d.ranking?.mode || "smart";
+    boost.value        = String(d.ranking?.boost);
+    boostWeight.value  = d.ranking?.weight || 5;
+
+    sAnime.value       = String(d.sources?.anime);
+    sEpisode.value     = String(d.sources?.episode);
+    sCategory.value    = String(d.sources?.category);
+    sPages.value       = String(d.sources?.pages);
+
+    typo.value         = String(d.smart?.typo);
+    alias.value        = String(d.smart?.alias);
+    language.value     = d.smart?.language || "all";
+
+    maxResults.value   = d.ui?.max || 8;
+    thumb.value        = String(d.ui?.thumb);
+    group.value        = String(d.ui?.group);
+    highlight.value    = String(d.ui?.highlight);
+
+    safe.value         = d.safety?.safe || "medium";
+    track.value        = String(d.safety?.track);
+    seo.value          = String(d.safety?.seo);
+    cache.value        = d.safety?.cache || 60;
+
+  }catch(err){
+    console.error("Load failed:",err);
+  }
+
+}
+
+/* ===============================
+   SAVE SETTINGS
+================================ */
+async function saveSearch(){
+
+  try{
+
+    const config={
+
+      enableSearch:enableSearch.value==="true",
+      liveSearch:liveSearch.value==="true",
+      mode:searchMode.value,
+      debounce: clamp(+debounce.value,0,2000),
+
+      ranking:{
+        mode:ranking.value,
+        boost:boost.value==="true",
+        weight: clamp(+boostWeight.value,1,10)
+      },
+
+      sources:{
+        anime:sAnime.value==="true",
+        episode:sEpisode.value==="true",
+        category:sCategory.value==="true",
+        pages:sPages.value==="true"
+      },
+
+      smart:{
+        typo:typo.value==="true",
+        alias:alias.value==="true",
+        language:language.value
+      },
+
+      ui:{
+        max: clamp(+maxResults.value,1,50),
+        thumb:thumb.value==="true",
+        group:group.value==="true",
+        highlight:highlight.value==="true"
+      },
+
+      safety:{
+        safe:safe.value,
+        track:track.value==="true",
+        seo:seo.value==="true",
+        cache: clamp(+cache.value,0,600)
+      }
+    };
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(config)
+    });
+
+    showStatus("Search settings saved ✔");
+
+  }catch(err){
+    console.error("Save failed:",err);
+    showStatus("Save failed ❌",true);
+    loadSearch(); // rollback
+  }
+
+}
+
+/* ===============================
+   UTIL
+================================ */
+function clamp(value,min,max){
+  if(isNaN(value)) return min;
+  return Math.max(min,Math.min(max,value));
+}
+
+function showStatus(msg,isError=false){
+  const btn=document.querySelector(".save-btn");
+  const original=btn.innerText;
+
+  btn.innerText=msg;
+  btn.style.background=isError?"#ff4c4c":"#00ffd5";
+  btn.style.color=isError?"#fff":"#000";
+
+  setTimeout(()=>{
+    btn.innerText=original;
+    btn.style.background="#ffcc00";
+    btn.style.color="#000";
+  },1500);
+}
+
+/* INIT */
+loadSearch();
+
+</script>
+</body>
+</html>
