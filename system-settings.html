@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Master OTT Control – AnimeHunt CMS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
+}
+.brand{padding:0 18px 14px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,.cms-menu a:hover{background:#0e1424;color:#ffcc00}
+
+/* MAIN */
+.cms-main{flex:1}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:8px 18px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+.cms-content{padding:20px}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px
+}
+.card{
+  background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px
+}
+.card h3{font-size:14px;color:#ffcc00}
+
+/* FORM */
+label{font-size:12px;color:#aaa}
+select,input{
+  background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:7px 10px;border-radius:6px;font-size:12px
+}
+.check{display:flex;gap:8px;align-items:center;font-size:12px}
+
+/* BUTTONS */
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{
+  background:#1a2035;border:none;color:#fff;
+  padding:7px 12px;border-radius:6px;cursor:pointer
+}
+.btns button:hover{background:#ffcc00;color:#000}
+
+.full{grid-column:1/4}
+.status{font-size:11px;color:#4cff4c}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html" class="active">⚙ System-settings</a>
+  </nav>
+</aside>
+
+<main class="cms-main">
+
+<header class="cms-header">
+  <div>🔥 MASTER OTT CONTROL PANEL</div>
+  <button class="save-btn" onclick="saveAll()">💾 Save All</button>
+</header>
+
+<section class="cms-content">
+<div class="grid">
+
+<!-- SYSTEM -->
+<div class="card">
+<h3>System Core</h3>
+<label class="check"><input type="checkbox" id="systemOn"> System ON</label>
+<label class="check"><input type="checkbox" id="maintenanceSoft"> Maintenance (Soft)</label>
+<label class="check"><input type="checkbox" id="maintenanceHard"> Maintenance (Hard)</label>
+<label class="check"><input type="checkbox" id="lockCMS"> Lock CMS</label>
+<label class="check"><input type="checkbox" id="readOnly"> Read Only</label>
+<select id="env">
+  <option>Production</option>
+  <option>Staging</option>
+  <option>Development</option>
+</select>
+</div>
+
+<!-- UI -->
+<div class="card">
+<h3>UI & Theme</h3>
+<select id="theme"><option>Dark</option><option>Light</option><option>Auto</option></select>
+<select id="animation"><option>None</option><option>Soft</option><option>Premium</option></select>
+<label class="check"><input type="checkbox" id="skeleton"> Skeleton Loader</label>
+<label class="check"><input type="checkbox" id="imgBlur"> Image Blur Load</label>
+<label class="check"><input type="checkbox" id="mobileUI"> Mobile Override</label>
+</div>
+
+<!-- HOMEPAGE -->
+<div class="card">
+<h3>Homepage Engine</h3>
+<label class="check"><input type="checkbox" id="autoHome"> Auto Homepage</label>
+<label class="check"><input type="checkbox" id="aiHome"> AI Reorder</label>
+<label class="check"><input type="checkbox" id="trendBoost"> Trending Boost</label>
+<label class="check"><input type="checkbox" id="manualPin"> Manual Pin Force</label>
+<select id="homeMode"><option>Static</option><option>Dynamic</option></select>
+</div>
+
+<!-- CONTENT -->
+<div class="card">
+<h3>Content Control</h3>
+<label class="check"><input type="checkbox" id="geoBlock"> Geo Block</label>
+<label class="check"><input type="checkbox" id="ageLock"> Age Restriction</label>
+<label class="check"><input type="checkbox" id="schedule"> Scheduled Publish</label>
+<label class="check"><input type="checkbox" id="shadow"> Shadow Publish</label>
+</div>
+
+<!-- PLAYER -->
+<div class="card">
+<h3>Player Engine</h3>
+<label class="check"><input type="checkbox" id="autoPlay"> Autoplay</label>
+<label class="check"><input type="checkbox" id="resume"> Resume Watch</label>
+<label class="check"><input type="checkbox" id="autoNext"> Auto Next</label>
+<label class="check"><input type="checkbox" id="skipIntro"> Skip Intro</label>
+<label class="check"><input type="checkbox" id="serverSwitch"> Auto Server Switch</label>
+</div>
+
+<!-- DOWNLOAD -->
+<div class="card">
+<h3>Download Engine</h3>
+<label class="check"><input type="checkbox" id="downloads"> Enable Downloads</label>
+<label class="check"><input type="checkbox" id="zip"> ZIP Packs</label>
+<label class="check"><input type="checkbox" id="scan"> Auto Scan Broken</label>
+<label class="check"><input type="checkbox" id="limit"> Daily Limit</label>
+</div>
+
+<!-- SEARCH -->
+<div class="card">
+<h3>Search Engine</h3>
+<label class="check"><input type="checkbox" id="liveSearch"> Live Search</label>
+<label class="check"><input type="checkbox" id="highlight"> Highlight Match</label>
+<label class="check"><input type="checkbox" id="fuzzy"> Fuzzy Search</label>
+<label class="check"><input type="checkbox" id="adult"> Adult Filter</label>
+<input id="maxResult" placeholder="Max Results">
+</div>
+
+<!-- SECURITY -->
+<div class="card">
+<h3>Security</h3>
+<label class="check"><input type="checkbox" id="antiInspect"> Anti Inspect</label>
+<label class="check"><input type="checkbox" id="iframe"> Iframe Protect</label>
+<label class="check"><input type="checkbox" id="rateLimit"> Rate Limit</label>
+<label class="check"><input type="checkbox" id="rightClick"> Disable Right Click</label>
+</div>
+
+<!-- ACTIONS -->
+<div class="card full">
+<h3>System Actions</h3>
+<div class="btns">
+<button onclick="clearCache()">Clear Cache</button>
+<button onclick="exportConfig()">Export</button>
+<button onclick="importConfig()">Import</button>
+<button onclick="resetAll()">Reset</button>
+<button onclick="kill()">Kill Switch</button>
+</div>
+<div class="status" id="statusText">Ready</div>
+</div>
+
+</div>
+</section>
+
+</main>
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+const API="/api/admin/system";
+const statusEl=document.getElementById("statusText");
+const ids=[...document.querySelectorAll("[id]")].map(e=>e.id);
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   UTIL
+================================ */
+function clamp(v,min,max){
+  v=Number(v);
+  if(isNaN(v)) return min;
+  return Math.max(min,Math.min(max,v));
+}
+
+function showStatus(msg,isError=false){
+
+  statusEl.innerText=msg;
+  statusEl.style.color=isError?"#ff4c4c":"#4cff4c";
+
+  setTimeout(()=>{
+    statusEl.innerText="Ready";
+    statusEl.style.color="#4cff4c";
+  },2000);
+}
+
+/* ===============================
+   LOAD SYSTEM
+================================ */
+async function loadSystem(){
+
+  try{
+
+    const data=await apiFetch(API);
+
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+
+      if(data[id]!==undefined){
+        el.type==="checkbox"
+          ? el.checked=data[id]
+          : el.value=data[id];
+      }
+    });
+
+  }catch(err){
+    console.error("Load failed:",err);
+  }
+
+}
+
+/* ===============================
+   SAVE SYSTEM
+================================ */
+async function saveAll(){
+
+  try{
+
+    const payload={};
+
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+
+      if(id==="maxResult"){
+        payload[id]=clamp(el.value,1,100);
+      }else{
+        payload[id]=el.type==="checkbox"
+          ? el.checked
+          : el.value;
+      }
+    });
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+    showStatus("Saved ✔");
+
+  }catch(err){
+    console.error("Save failed:",err);
+    showStatus("Save failed ❌",true);
+    loadSystem(); // rollback
+  }
+
+}
+
+/* ===============================
+   CRITICAL ACTIONS
+================================ */
+async function kill(){
+
+  const confirmKill=confirm("⚠ This will stop the entire platform. Continue?");
+  if(!confirmKill) return;
+
+  try{
+    await apiFetch(API+"/kill",{ method:"POST" });
+    showStatus("System halted ⚠",true);
+  }catch(err){
+    showStatus("Kill failed ❌",true);
+  }
+
+}
+
+async function clearCache(){
+  showStatus("Cache cleared ✔");
+}
+
+async function exportConfig(){
+
+  try{
+    const data=await apiFetch(API);
+    navigator.clipboard.writeText(JSON.stringify(data,null,2));
+    showStatus("Copied ✔");
+  }catch(err){
+    showStatus("Export failed ❌",true);
+  }
+
+}
+
+async function importConfig(){
+
+  const input=prompt("Paste JSON config");
+  if(!input) return;
+
+  try{
+
+    const parsed=JSON.parse(input);
+
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(parsed)
+    });
+
+    loadSystem();
+    showStatus("Imported ✔");
+
+  }catch(err){
+    showStatus("Invalid JSON ❌",true);
+  }
+
+}
+
+async function resetAll(){
+
+  const confirmReset=confirm("Reset all settings?");
+  if(!confirmReset) return;
+
+  try{
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify({})
+    });
+    loadSystem();
+    showStatus("Reset ✔");
+  }catch(err){
+    showStatus("Reset failed ❌",true);
+  }
+
+}
+
+/* ===============================
+   INIT
+================================ */
+loadSystem();
+
+</script>
+</body>
+</html>
