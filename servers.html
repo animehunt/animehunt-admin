@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Server CMS – AnimeHunt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035
+}
+.brand{padding:16px;font-size:20px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:11px;color:#888}
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+}
+.cms-menu a.active,.cms-menu a:hover{
+  background:#0e1424;color:#ffcc00
+}
+
+/* MAIN */
+.cms-main{flex:1}
+.cms-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+}
+.add-btn{
+  background:#ffcc00;border:none;padding:8px 16px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+.cms-content{padding:20px}
+
+/* TABLE */
+.servers-table{
+  background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:12px;overflow:hidden
+}
+.servers-head,.row{
+  display:grid;
+  grid-template-columns:120px 1fr 80px 80px 1.8fr 80px 80px 140px;
+  padding:12px;align-items:center;font-size:12px
+}
+.servers-head{background:#0e1424;color:#aaa}
+.row{border-top:1px solid #1a2035;font-size:11px}
+
+.status.active{color:#4cff4c}
+.status.inactive{color:#ff4c4c}
+
+.actions button{
+  background:none;border:none;color:#ffcc00;
+  cursor:pointer;margin-right:6px
+}
+
+/* MODAL */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:none;align-items:center;justify-content:center;z-index:9999
+}
+.modal-box{
+  width:720px;background:#0b0f1a;
+  border:1px solid #1a2035;border-radius:14px
+}
+.modal-header{
+  display:flex;justify-content:space-between;
+  padding:14px 16px;background:#0e1424
+}
+.modal-body{padding:16px}
+.modal-footer{
+  padding:14px 16px;background:#0e1424;text-align:right
+}
+.modal-footer button{
+  background:#ffcc00;border:none;padding:8px 18px;
+  border-radius:8px;font-weight:600;cursor:pointer
+}
+
+/* FORM */
+.form-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px
+}
+.form-grid input{
+  background:#0e1424;border:1px solid #1a2035;
+  color:#fff;padding:8px 10px;border-radius:6px;font-size:12px
+}
+.check{display:flex;align-items:center;gap:6px;font-size:12px}
+</style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html" class="active">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+
+<header class="cms-header">
+  <div>🌐 Streaming Servers</div>
+  <button class="add-btn" id="addServerBtn">➕ Add Server</button>
+</header>
+
+<section class="cms-content">
+
+<div class="servers-table">
+  <div class="servers-head">
+    <span>Server</span>
+    <span>Anime</span>
+    <span>Season</span>
+    <span>Episode</span>
+    <span>Embed URL</span>
+    <span>Priority</span>
+    <span>Status</span>
+    <span>Actions</span>
+  </div>
+  <div id="serverList"></div>
+</div>
+
+</section>
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="serverModal">
+<div class="modal-box">
+
+<div class="modal-header">
+  <h3 id="modalTitle">Add Server</h3>
+  <span id="closeModal">✕</span>
+</div>
+
+<div class="modal-body">
+<div class="form-grid">
+  <input id="serverName" placeholder="Server Name (Server 1)">
+  <input id="animeName" placeholder="Anime Name">
+  <input id="seasonNo" placeholder="Season No">
+
+  <input id="episodeNo" placeholder="Episode No">
+  <input id="embedUrl" placeholder="Embed URL">
+  <input id="priority" placeholder="Priority (1 = Highest)">
+
+  <label class="check">
+    <input type="checkbox" id="active"> Active
+  </label>
+</div>
+</div>
+
+<div class="modal-footer">
+  <button id="saveServer">💾 Save</button>
+</div>
+
+</div>
+</div>
+
+<!-- ============================= -->
+<!-- AUTH FIRST -->
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   BASIC AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href = "login.html";
+}
+
+/* ===============================
+   GLOBAL STATE
+================================ */
+let servers = [];
+let editId = null;
+
+/* ===============================
+   ELEMENT REFERENCES
+================================ */
+const modal = document.getElementById("serverModal");
+const list = document.getElementById("serverList");
+const addServerBtn = document.getElementById("addServerBtn");
+const closeModalBtn = document.getElementById("closeModal");
+const saveServerBtn = document.getElementById("saveServer");
+
+const serverName = document.getElementById("serverName");
+const animeName  = document.getElementById("animeName");
+const seasonNo   = document.getElementById("seasonNo");
+const episodeNo  = document.getElementById("episodeNo");
+const embedUrl   = document.getElementById("embedUrl");
+const priority   = document.getElementById("priority");
+const active     = document.getElementById("active");
+const modalTitle = document.getElementById("modalTitle");
+
+/* ===============================
+   OPEN MODAL
+================================ */
+addServerBtn.addEventListener("click", () => {
+
+  editId = null;
+  modalTitle.innerText = "Add Server";
+
+  serverName.value = "";
+  animeName.value  = "";
+  seasonNo.value   = "";
+  episodeNo.value  = "";
+  embedUrl.value   = "";
+  priority.value   = "";
+  active.checked   = true;
+
+  modal.style.display = "flex";
+});
+
+/* ===============================
+   CLOSE MODAL
+================================ */
+closeModalBtn.addEventListener("click", ()=>{
+  modal.style.display = "none";
+});
+
+/* ===============================
+   LOAD SERVERS
+================================ */
+async function loadServers(){
+
+  try{
+
+    const res = await fetch("/api/admin/servers");
+
+    if(!res.ok){
+      throw new Error("Session expired");
+    }
+
+    servers = await res.json();
+    render();
+
+  }catch(err){
+
+    console.error("Load servers error:", err);
+
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+}
+
+/* ===============================
+   SAVE SERVER (ADD / UPDATE)
+================================ */
+saveServerBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    if(!serverName.value || !animeName.value){
+      alert("Server name and Anime name required");
+      return;
+    }
+
+    const payload = {
+      _id: editId,
+      name: serverName.value.trim(),
+      anime: animeName.value.trim(),
+      season: seasonNo.value.trim(),
+      episode: episodeNo.value.trim(),
+      embed: embedUrl.value.trim(),
+      priority: Number(priority.value || 99),
+      active: active.checked
+    };
+
+    const res = await fetch("/api/admin/servers",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      throw new Error("Save failed");
+    }
+
+    modal.style.display = "none";
+    loadServers();
+
+  }catch(err){
+
+    console.error("Save server error:", err);
+
+    alert("Session expired");
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+
+});
+
+/* ===============================
+   DELETE SERVER
+================================ */
+async function deleteServer(id){
+
+  if(!confirm("Delete this server?")) return;
+
+  try{
+
+    const res = await fetch("/api/admin/servers",{
+      method:"DELETE",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({ id })
+    });
+
+    if(!res.ok){
+      throw new Error("Delete failed");
+    }
+
+    loadServers();
+
+  }catch(err){
+
+    console.error("Delete error:", err);
+
+    alert("Session expired");
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+  }
+}
+
+/* ===============================
+   EDIT SERVER
+================================ */
+function editServer(id){
+
+  const s = servers.find(x => x._id === id);
+  if(!s) return;
+
+  editId = s._id;
+  modalTitle.innerText = "Edit Server";
+
+  serverName.value = s.name;
+  animeName.value  = s.anime;
+  seasonNo.value   = s.season;
+  episodeNo.value  = s.episode;
+  embedUrl.value   = s.embed;
+  priority.value   = s.priority;
+  active.checked   = s.active;
+
+  modal.style.display = "flex";
+}
+
+/* ===============================
+   RENDER TABLE
+================================ */
+function render(){
+
+  list.innerHTML = "";
+
+  servers
+    .sort((a,b)=> (a.priority ?? 99) - (b.priority ?? 99))
+    .forEach(s => {
+
+      list.innerHTML += `
+        <div class="row">
+          <span>${s.name}</span>
+          <span>${s.anime}</span>
+          <span>S${s.season}</span>
+          <span>E${s.episode}</span>
+          <span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis">
+            ${s.embed}
+          </span>
+          <span>#${s.priority}</span>
+          <span class="status ${s.active ? "active" : "inactive"}">
+            ${s.active ? "Active" : "Inactive"}
+          </span>
+          <span class="actions">
+            <button onclick="editServer('${s._id}')">✏️</button>
+            <button onclick="deleteServer('${s._id}')">🗑</button>
+          </span>
+        </div>
+      `;
+    });
+}
+
+/* ===============================
+   INIT
+================================ */
+loadServers();
+
+</script>
+</body>
+</html>
