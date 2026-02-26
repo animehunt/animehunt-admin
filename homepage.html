@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Homepage CMS – AnimeHunt</title>
+
+  <style>
+  body{background:#060a14;color:#fff;font-family:system-ui}
+  .cms-app{display:flex;min-height:100vh}
+  .cms-sidebar{width:240px;background:#070b16;border-right:1px solid #1a2035}
+  .brand{padding:16px;font-size:20px}
+  .brand b{color:#ffcc00}
+  .cms-menu a{display:block;padding:10px 20px;color:#ccc;text-decoration:none}
+  .cms-menu a.active,.cms-menu a:hover{background:#0e1424;color:#ffcc00}
+
+  .cms-main{flex:1}
+  .cms-header{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #1a2035}
+  .add-btn{background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer}
+
+  .cms-content{padding:20px}
+
+  .rows-table{background:#0b0f1a;border:1px solid #1a2035;border-radius:12px;overflow:hidden}
+  .rows-head,.row{
+    display:grid;
+    grid-template-columns:1.5fr 1fr 1.2fr 1fr 80px 80px 140px;
+    padding:12px;
+    font-size:12px;
+    align-items:center;
+  }
+  .rows-head{background:#0e1424;color:#aaa}
+  .row{border-top:1px solid #1a2035}
+
+  .badge{background:#1a2035;padding:3px 8px;border-radius:6px;font-size:10px}
+  .status.active{color:#4cff4c}
+  .status.inactive{color:#ff4c4c}
+  .actions button{background:none;border:none;color:#ffcc00;cursor:pointer;margin-right:6px}
+
+  /* MODAL */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
+  .modal-box{width:720px;background:#0b0f1a;border:1px solid #1a2035;border-radius:14px}
+  .modal-header,.modal-footer{padding:14px 16px;background:#0e1424}
+  .modal-header{display:flex;justify-content:space-between}
+  .modal-body{padding:16px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .form-grid input,.form-grid select{background:#0e1424;border:1px solid #1a2035;color:#fff;padding:8px;border-radius:6px}
+  .check{display:flex;gap:6px;font-size:12px}
+  </style>
+</head>
+
+<body>
+
+<div class="cms-app">
+
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
+
+  <nav class="cms-menu">
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html" class="active">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+  <main class="cms-main">
+
+    <header class="cms-header">
+      <div class="title">🏠 Homepage Builder</div>
+      <button class="add-btn" id="addRowBtn">➕ Add Row</button>
+    </header>
+
+    <section class="cms-content">
+      <div class="rows-table">
+        <div class="rows-head">
+          <span>Title</span><span>Type</span><span>Source</span>
+          <span>Layout</span><span>Order</span><span>Status</span><span>Actions</span>
+        </div>
+        <div id="rowList"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="rowModal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3>Create Homepage Row</h3>
+      <span id="closeModal">✕</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <input id="rowTitle" placeholder="Row Title">
+        <select id="rowType">
+          <option value="auto">Auto</option>
+          <option value="manual">Manual</option>
+          <option value="category">Category</option>
+        </select>
+        <input id="rowSource" placeholder="Source">
+        <select id="rowLayout">
+          <option value="scroll">Scroll</option>
+          <option value="grid">Grid</option>
+          <option value="slider">Slider</option>
+        </select>
+        <input id="rowLimit" placeholder="Limit">
+        <input id="rowOrder" placeholder="Order">
+        <label class="check"><input type="checkbox" id="rowActive"> Active</label>
+        <label class="check"><input type="checkbox" id="rowAuto"> Auto Update</label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="add-btn" id="saveRow">💾 Save Row</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="auth.js"></script>
+
+<script>
+
+/* ===============================
+   AUTH GUARD
+================================ */
+if(!localStorage.getItem("AUTH_TOKEN")){
+  location.href="login.html";
+}
+
+/* ===============================
+   CONFIG
+================================ */
+const API="/api/admin/homepage";
+let editId=null;
+
+/* ===============================
+   SAFE FETCH
+================================ */
+async function apiFetch(url,options={}){
+
+  const res=await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
+   MODAL CONTROL
+================================ */
+addRowBtn.onclick=()=>{
+  clearForm();
+  editId=null;
+  rowModal.style.display="flex";
+};
+
+closeModal.onclick=()=>{
+  rowModal.style.display="none";
+};
+
+/* ===============================
+   LOAD ROWS
+================================ */
+async function loadRows(){
+  try{
+    const rows=await apiFetch(API);
+    renderRows(rows);
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* ===============================
+   SAVE ROW
+================================ */
+saveRow.onclick=async()=>{
+
+  if(!rowTitle.value.trim()){
+    alert("Title required");
+    return;
+  }
+
+  const payload={
+    title:rowTitle.value.trim(),
+    type:rowType.value,
+    source:rowSource.value.trim(),
+    layout:rowLayout.value,
+    limit:Number(rowLimit.value||10),
+    order:Number(rowOrder.value||0),
+    active:rowActive.checked,
+    autoUpdate:rowAuto.checked
+  };
+
+  if(editId){
+    await apiFetch(`${API}/${editId}`,{
+      method:"PATCH",
+      body:JSON.stringify(payload)
+    });
+  }else{
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+  }
+
+  rowModal.style.display="none";
+  clearForm();
+  loadRows();
+};
+
+/* ===============================
+   DELETE ROW
+================================ */
+window.deleteRow=async(id)=>{
+
+  if(!confirm("Delete this row?")) return;
+
+  await apiFetch(`${API}/${id}`,{
+    method:"DELETE"
+  });
+
+  loadRows();
+};
+
+/* ===============================
+   EDIT ROW
+================================ */
+window.editRow=async(id)=>{
+
+  const row=await apiFetch(`${API}/${id}`);
+  editId=id;
+
+  rowTitle.value=row.title;
+  rowType.value=row.type;
+  rowSource.value=row.source||"";
+  rowLayout.value=row.layout;
+  rowLimit.value=row.limit;
+  rowOrder.value=row.order;
+  rowActive.checked=row.active;
+  rowAuto.checked=row.autoUpdate;
+
+  rowModal.style.display="flex";
+};
+
+/* ===============================
+   SAFE RENDER
+================================ */
+function renderRows(rows){
+
+  rowList.innerHTML="";
+
+  rows.forEach(r=>{
+
+    const row=document.createElement("div");
+    row.className="row";
+
+    row.innerHTML=`
+      <span>${escapeHTML(r.title)}</span>
+      <span>${escapeHTML(r.type)}</span>
+      <span>${escapeHTML(r.source||"-")}</span>
+      <span>${escapeHTML(r.layout)}</span>
+      <span class="badge">${r.order}</span>
+      <span class="status ${r.active?'active':'inactive'}">
+        ${r.active?'Active':'Off'}
+      </span>
+      <span class="actions">
+        <button>✏️</button>
+        <button>🗑</button>
+      </span>
+    `;
+
+    const buttons=row.querySelectorAll("button");
+
+    buttons[0].addEventListener("click",()=>editRow(r._id));
+    buttons[1].addEventListener("click",()=>deleteRow(r._id));
+
+    rowList.appendChild(row);
+
+  });
+}
+
+/* ===============================
+   ESCAPE HTML
+================================ */
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* ===============================
+   CLEAR FORM
+================================ */
+function clearForm(){
+  rowTitle.value="";
+  rowType.value="auto";
+  rowSource.value="";
+  rowLayout.value="scroll";
+  rowLimit.value="";
+  rowOrder.value="";
+  rowActive.checked=false;
+  rowAuto.checked=false;
+}
+
+/* INIT */
+loadRows();
+
+</script>
+</body>
+</html>
