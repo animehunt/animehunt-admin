@@ -294,168 +294,183 @@
 </div>
 <script>
 
-/* ===============================
+/* ==========================================
    CONFIG
-================================ */
-const API="/api/admin/seo";
-const saveBtn=document.getElementById("saveSEO");
+========================================== */
+const API = "/api/admin/seo";
+const saveBtn = document.getElementById("saveSEO");
 
-/* ===============================
+/* ==========================================
    SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url,options={}){
+========================================== */
+async function apiFetch(url, options = {}) {
 
-  const res=await fetch(url,{
+  const res = await fetch(url, {
     ...options,
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + (localStorage.getItem("AUTH_TOKEN") || ""),
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if (!res.ok) {
     localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
+    location.href = "login.html";
     throw new Error("Session expired");
   }
 
-  return res.json().catch(()=>({}));
+  return res.json().catch(() => ({}));
 }
 
-/* ===============================
-   LOAD SEO
-================================ */
-async function loadSEO(){
+/* ==========================================
+   LOAD SEO CONFIG
+========================================== */
+async function loadSEO() {
 
-  try{
+  try {
 
-    const d=await apiFetch(API);
+    const d = await apiFetch(API);
+    if (!d) return;
 
+    /* Global */
     siteTitle.value    = d.global?.title || "";
     siteDesc.value     = d.global?.desc || "";
     siteKeywords.value = d.global?.keywords || "";
     canonical.value    = d.global?.canonical || "";
     indexing.value     = d.global?.indexing || "index";
 
+    /* Homepage */
     homeTitle.value    = d.home?.title || "";
     homeDesc.value     = d.home?.desc || "";
     homeKeywords.value = d.home?.keywords || "";
     homeOG.value       = d.home?.og || "";
 
+    /* Templates */
     animeTemplate.value    = d.templates?.anime || "";
     categoryTemplate.value = d.templates?.category || "";
     episodeTemplate.value  = d.templates?.episode || "";
     searchTemplate.value   = d.templates?.search || "";
 
+    /* Social */
     ogTitle.value = d.social?.ogTitle || "";
     ogDesc.value  = d.social?.ogDesc || "";
     twTitle.value = d.social?.twTitle || "";
     twDesc.value  = d.social?.twDesc || "";
     twCard.value  = d.social?.twCard || "summary_large_image";
 
-  }catch(err){
-    console.error("SEO load failed:",err);
+  } catch (err) {
+    console.error("SEO load failed:", err);
   }
-
 }
 
-/* ===============================
-   VALIDATION
-================================ */
-function sanitize(str,max=300){
-  if(!str) return "";
-  return str.trim().substring(0,max);
+/* ==========================================
+   VALIDATION HELPERS
+========================================== */
+function sanitize(str, max = 300) {
+  if (!str) return "";
+  return String(str).trim().substring(0, max);
 }
 
-function isValidURL(url){
-  try{
+function isValidURL(url) {
+  try {
     new URL(url);
     return true;
-  }catch{
+  } catch {
     return false;
   }
 }
 
-/* ===============================
-   SAVE SEO
-================================ */
-saveBtn.addEventListener("click",async()=>{
+/* ==========================================
+   SAVE SEO CONFIG
+========================================== */
+saveBtn.addEventListener("click", async () => {
 
-  try{
+  try {
 
-    const canonicalURL=sanitize(canonical.value,200);
+    const canonicalURL = sanitize(canonical.value, 200);
 
-    if(canonicalURL && !isValidURL(canonicalURL)){
-      showStatus("Invalid Canonical URL ❌",true);
+    if (canonicalURL && !isValidURL(canonicalURL)) {
+      showStatus("Invalid Canonical URL ❌", true);
       return;
     }
 
-    const payload={
-      global:{
-        title:sanitize(siteTitle.value,120),
-        desc:sanitize(siteDesc.value,300),
-        keywords:sanitize(siteKeywords.value,200),
-        canonical:canonicalURL,
-        indexing:indexing.value
+    const payload = {
+
+      global: {
+        title: sanitize(siteTitle.value, 120),
+        desc: sanitize(siteDesc.value, 300),
+        keywords: sanitize(siteKeywords.value, 200),
+        canonical: canonicalURL,
+        indexing: indexing.value
       },
-      home:{
-        title:sanitize(homeTitle.value,120),
-        desc:sanitize(homeDesc.value,300),
-        keywords:sanitize(homeKeywords.value,200),
-        og:sanitize(homeOG.value,200)
+
+      home: {
+        title: sanitize(homeTitle.value, 120),
+        desc: sanitize(homeDesc.value, 300),
+        keywords: sanitize(homeKeywords.value, 200),
+        og: sanitize(homeOG.value, 200)
       },
-      templates:{
-        anime:sanitize(animeTemplate.value,200),
-        category:sanitize(categoryTemplate.value,200),
-        episode:sanitize(episodeTemplate.value,200),
-        search:sanitize(searchTemplate.value,200)
+
+      templates: {
+        anime: sanitize(animeTemplate.value, 200),
+        category: sanitize(categoryTemplate.value, 200),
+        episode: sanitize(episodeTemplate.value, 200),
+        search: sanitize(searchTemplate.value, 200)
       },
-      social:{
-        ogTitle:sanitize(ogTitle.value,120),
-        ogDesc:sanitize(ogDesc.value,300),
-        twTitle:sanitize(twTitle.value,120),
-        twDesc:sanitize(twDesc.value,300),
-        twCard:twCard.value
+
+      social: {
+        ogTitle: sanitize(ogTitle.value, 120),
+        ogDesc: sanitize(ogDesc.value, 300),
+        twTitle: sanitize(twTitle.value, 120),
+        twDesc: sanitize(twDesc.value, 300),
+        twCard: twCard.value
       }
+
     };
 
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(payload)
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify(payload)
     });
 
-    showStatus("SEO saved ✔");
+    showStatus("SEO Saved ✔");
 
-  }catch(err){
-    console.error("SEO save failed:",err);
-    showStatus("Save failed ❌",true);
+  } catch (err) {
+
+    console.error("SEO save failed:", err);
+    showStatus("Save Failed ❌", true);
     loadSEO(); // rollback
+
   }
 
 });
 
-/* ===============================
-   STATUS FEEDBACK
-================================ */
-function showStatus(msg,isError=false){
+/* ==========================================
+   STATUS UI
+========================================== */
+function showStatus(msg, isError = false) {
 
-  const original=saveBtn.innerText;
+  const original = "💾 Save SEO";
 
-  saveBtn.innerText=msg;
-  saveBtn.style.background=isError?"#ff4c4c":"#00ffd5";
-  saveBtn.style.color=isError?"#fff":"#000";
+  saveBtn.innerText = msg;
+  saveBtn.style.background = isError ? "#ff4c4c" : "#00ffd5";
+  saveBtn.style.color = isError ? "#fff" : "#000";
 
-  setTimeout(()=>{
-    saveBtn.innerText=original;
-    saveBtn.style.background="#ffcc00";
-    saveBtn.style.color="#000";
-  },1500);
+  setTimeout(() => {
+    saveBtn.innerText = original;
+    saveBtn.style.background = "#ffcc00";
+    saveBtn.style.color = "#000";
+  }, 1500);
 }
 
-/* INIT */
+/* ==========================================
+   INIT
+========================================== */
 loadSEO();
 
 </script>
+
+
 </body>
 </html>
