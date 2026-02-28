@@ -540,19 +540,28 @@ color:#ccc;
 </div>
 
 <script>
-
 /* ===============================
    CONFIG
 ================================ */
-const API="/api/admin/security";
-let statsInterval=null;
+const API = "/api/admin/security";
+const STATS_API = "/api/security/stats";
+
+let statsInterval = null;
+let saveTimeout = null;
+
+/* ===============================
+   SAFE ELEMENT GETTER
+================================ */
+function el(id){
+  return document.getElementById(id);
+}
 
 /* ===============================
    SAFE FETCH
 ================================ */
-async function apiFetch(url,options={}){
+async function apiFetch(url, options = {}){
 
-  const res=await fetch(url,{
+  const res = await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
@@ -577,43 +586,40 @@ async function loadSecurity(){
 
   try{
 
-    const d=await apiFetch(API);
+    const d = await apiFetch(API);
     if(!d) return;
 
-    ultraMode.checked = !!d.ultra;
-    firewallLevel.value = clamp(d.firewallLevel,1,5);
+    el("ultraMode").checked = !!d.ultra;
+    el("firewallLevel").value = clamp(d.firewallLevel,1,5);
 
-    indiaOnly.checked = !!d.geo?.indiaOnly;
-    blockForeign.checked = !!d.geo?.blockForeign;
+    el("indiaOnly").checked = !!d.geo?.indiaOnly;
+    el("blockForeign").checked = !!d.geo?.blockForeign;
 
-    loginLimit.checked = !!d.admin?.loginLimit;
-    deviceLock.checked = !!d.admin?.deviceLock;
-    sessionMonitor.checked = !!d.admin?.sessionMonitor;
+    el("loginLimit").checked = !!d.admin?.loginLimit;
+    el("deviceLock").checked = !!d.admin?.deviceLock;
+    el("sessionMonitor").checked = !!d.admin?.sessionMonitor;
 
-    autoBan.checked = !!d.ai?.autoBan;
-    banBrute.checked = !!d.ai?.brute;
-    banBots.checked = !!d.ai?.bot;
-    aiLearn.checked = !!d.ai?.learning;
+    el("autoBan").checked = !!d.ai?.autoBan;
+    el("banBrute").checked = !!d.ai?.brute;
+    el("banBots").checked = !!d.ai?.bot;
+    el("aiLearn").checked = !!d.ai?.learning;
 
-    hideServerInfo.checked = !!d.system?.hideServer;
-    hideTechStack.checked = !!d.system?.hideTech;
+    el("hideServerInfo").checked = !!d.system?.hideServer;
+    el("hideTechStack").checked = !!d.system?.hideTech;
 
     updateFirewallLabel();
 
   }catch(err){
     console.error("Load failed:",err);
   }
-
 }
 
 /* ===============================
    SAVE SECURITY CONFIG
 ================================ */
-let saveTimeout=null;
-
 function queueSave(){
   clearTimeout(saveTimeout);
-  saveTimeout=setTimeout(saveSecurity,400);
+  saveTimeout = setTimeout(saveSecurity,400);
 }
 
 async function saveSecurity(){
@@ -621,27 +627,27 @@ async function saveSecurity(){
   try{
 
     const payload={
-      ultra: ultraMode.checked,
-      firewallLevel: clamp(+firewallLevel.value,1,5),
+      ultra: el("ultraMode").checked,
+      firewallLevel: clamp(+el("firewallLevel").value,1,5),
       geo:{
-        indiaOnly:indiaOnly.checked,
-        blockForeign:blockForeign.checked,
+        indiaOnly: el("indiaOnly").checked,
+        blockForeign: el("blockForeign").checked,
         blockedCountries:["CN","RU","IR"]
       },
       admin:{
-        loginLimit:loginLimit.checked,
-        deviceLock:deviceLock.checked,
-        sessionMonitor:sessionMonitor.checked
+        loginLimit: el("loginLimit").checked,
+        deviceLock: el("deviceLock").checked,
+        sessionMonitor: el("sessionMonitor").checked
       },
       ai:{
-        autoBan:autoBan.checked,
-        brute:banBrute.checked,
-        bot:banBots.checked,
-        learning:aiLearn.checked
+        autoBan: el("autoBan").checked,
+        brute: el("banBrute").checked,
+        bot: el("banBots").checked,
+        learning: el("aiLearn").checked
       },
       system:{
-        hideServer:hideServerInfo.checked,
-        hideTech:hideTechStack.checked
+        hideServer: el("hideServerInfo").checked,
+        hideTech: el("hideTechStack").checked
       }
     };
 
@@ -654,49 +660,92 @@ async function saveSecurity(){
     console.error("Save failed:",err);
     loadSecurity(); // rollback
   }
-
 }
 
 /* ===============================
    ULTRA MODE
 ================================ */
-ultraMode.addEventListener("change",async()=>{
+el("ultraMode").addEventListener("change", async ()=>{
 
   try{
     await apiFetch(API+"/ultra",{
       method:"POST",
-      body:JSON.stringify({ enable:ultraMode.checked })
+      body:JSON.stringify({ enable: el("ultraMode").checked })
     });
-  }catch(err){
-    ultraMode.checked=!ultraMode.checked; // rollback toggle
+  }catch{
+    el("ultraMode").checked = !el("ultraMode").checked;
   }
 
 });
 
 /* ===============================
-   LIVE STATS
+   FIREWALL LEVEL
+================================ */
+function updateFirewallLabel(){
+
+  const level = +el("firewallLevel").value;
+
+  const map={
+    1:"Level 1 – Basic",
+    2:"Level 2 – Moderate",
+    3:"Level 3 – Strong",
+    4:"Level 4 – Aggressive",
+    5:"Level 5 – Extreme"
+  };
+
+  el("fwLabel").innerText = map[level] || "Level 3 – Strong";
+}
+
+el("firewallLevel").addEventListener("input",()=>{
+  updateFirewallLabel();
+  queueSave();
+});
+
+/* ===============================
+   LIVE SECURITY STATS
 ================================ */
 async function loadStats(){
 
   try{
 
-    const d=await apiFetch("/api/security/stats");
+    const d = await apiFetch(STATS_API);
 
-    ipCount.innerText=d.blockedIPs||0;
-    liveUsers.innerText=d.liveUsers||0;
-    reqPerSec.innerText=d.reqPerSec||0;
-    blockedReq.innerText=d.blockedReq||0;
+    el("ipCount").innerText = d.blockedIPs || 0;
+    el("liveUsers").innerText = d.liveUsers || 0;
+    el("reqPerSec").innerText = d.reqPerSec || 0;
+    el("blockedReq").innerText = d.blockedReq || 0;
 
   }catch(err){
     console.error("Stats error:",err);
   }
-
 }
 
 function startStats(){
   if(statsInterval) clearInterval(statsInterval);
-  statsInterval=setInterval(loadStats,4000);
+  statsInterval = setInterval(loadStats,4000);
 }
+
+/* ===============================
+   ATTACH CHANGE LISTENERS
+================================ */
+[
+  "indiaOnly",
+  "blockForeign",
+  "loginLimit",
+  "deviceLock",
+  "sessionMonitor",
+  "autoBan",
+  "banBrute",
+  "banBots",
+  "aiLearn",
+  "hideServerInfo",
+  "hideTechStack"
+].forEach(id=>{
+  const element = el(id);
+  if(element){
+    element.addEventListener("change",queueSave);
+  }
+});
 
 /* ===============================
    UTIL
@@ -706,49 +755,14 @@ function clamp(v,min,max){
   return Math.max(min,Math.min(max,v));
 }
 
-function updateFirewallLabel(){
-  const level=+firewallLevel.value;
-  const map={
-    1:"Level 1 – Basic",
-    2:"Level 2 – Moderate",
-    3:"Level 3 – Strong",
-    4:"Level 4 – Aggressive",
-    5:"Level 5 – Extreme"
-  };
-  fwLabel.innerText=map[level]||"Level 3 – Strong";
-}
-
-firewallLevel.addEventListener("input",()=>{
-  updateFirewallLabel();
-  queueSave();
-});
-
-/* ===============================
-   ATTACH CHANGE LISTENERS
-================================ */
-[
-  indiaOnly,
-  blockForeign,
-  loginLimit,
-  deviceLock,
-  sessionMonitor,
-  autoBan,
-  banBrute,
-  banBots,
-  aiLearn,
-  hideServerInfo,
-  hideTechStack
-].forEach(el=>{
-  el.addEventListener("change",queueSave);
-});
-
 /* ===============================
    INIT
 ================================ */
-loadSecurity();
-loadStats();
-startStats();
-
+document.addEventListener("DOMContentLoaded",()=>{
+  loadSecurity();
+  loadStats();
+  startStats();
+});
 </script>
 </body>
 </html>
