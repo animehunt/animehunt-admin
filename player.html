@@ -230,8 +230,12 @@ body{background:#060a14;color:#fff}
 </section>
 </main>
 </div>
-
 <script>
+
+/* ===============================
+   CONFIG
+================================ */
+const API = "/api/admin/player";
 
 /* ===============================
    ELEMENT REFERENCES
@@ -250,19 +254,38 @@ const showSubscribe = document.getElementById("showSubscribe");
 const showRelated   = document.getElementById("showRelated");
 
 /* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url, options = {}){
+
+  const token = localStorage.getItem("AUTH_TOKEN");
+
+  const res = await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization": "Bearer " + token,
+      ...options.headers
+    }
+  });
+
+  if(!res.ok){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href="login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(()=>({}));
+}
+
+/* ===============================
    LOAD PLAYER CONFIG
 ================================ */
 async function loadPlayer(){
 
   try{
 
-    const res = await fetch("/api/admin/player");
-
-    if(!res.ok){
-      throw new Error("Session expired");
-    }
-
-    const d = await res.json();
+    const d = await apiFetch(API);
 
     defaultServer.value = d.defaultServer || "Server 1";
 
@@ -277,11 +300,7 @@ async function loadPlayer(){
     showRelated.value   = String(d.ui?.related ?? false);
 
   }catch(err){
-
     console.error("Player load error:", err);
-
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
   }
 }
 
@@ -306,28 +325,15 @@ saveBtn.addEventListener("click", async ()=>{
       }
     };
 
-    const res = await fetch("/api/admin/player",{
+    await apiFetch(API,{
       method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
       body: JSON.stringify(payload)
     });
-
-    if(!res.ok){
-      throw new Error("Save failed");
-    }
 
     alert("✅ Player settings saved successfully");
 
   }catch(err){
-
     console.error("Player save error:", err);
-
-    alert("Session expired. Please login again.");
-
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
   }
 
 });
