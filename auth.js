@@ -1,15 +1,15 @@
 /* =========================================
-   AnimeHunt Admin Simple Auth Handler
+   SIMPLE LOGIN AUTH (NO JWT)
 ========================================= */
 
 const API_BASE = "https://animehunt-backend-rhg6.onrender.com";
 
-// ===============================
-// LOGIN FUNCTION
-// ===============================
+/* ===============================
+   LOGIN FUNCTION
+================================ */
 async function loginAdmin(username, password) {
   try {
-    const response = await fetch(`${API_BASE}/auth/login`, {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -19,16 +19,15 @@ async function loginAdmin(username, password) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      alert(data.message || "Login failed");
+    if (!response.ok || !data.success) {
+      alert("Invalid credentials");
       return;
     }
 
-    // Save JWT
-    localStorage.setItem("AUTH_TOKEN", data.accessToken);
+    // SIMPLE LOGIN FLAG
+    localStorage.setItem("LOGGED_IN", "true");
 
-    // Redirect to dashboard
-    window.location.href = "index.html";
+    window.location.href = "dashboard.html";
 
   } catch (error) {
     console.error("Login Error:", error);
@@ -36,44 +35,11 @@ async function loginAdmin(username, password) {
   }
 }
 
-// ===============================
-// AUTO AUTH CHECK
-// ===============================
-const storedToken = localStorage.getItem("AUTH_TOKEN");
-
-if (storedToken) {
-  window.__AUTH_TOKEN__ = storedToken;
-} else {
-  if (!location.pathname.includes("login")) {
+/* ===============================
+   PAGE PROTECTION
+================================ */
+if (!location.pathname.includes("login")) {
+  if (localStorage.getItem("LOGGED_IN") !== "true") {
     location.href = "login.html";
   }
 }
-
-// ===============================
-// AUTO FETCH WRAPPER
-// ===============================
-const originalFetch = window.fetch;
-
-window.fetch = async (url, options = {}) => {
-
-  if (url.startsWith("/api")) {
-    url = API_BASE + url;
-  }
-
-  options.headers = options.headers || {};
-
-  const token = localStorage.getItem("AUTH_TOKEN");
-
-  if (token) {
-    options.headers["Authorization"] = "Bearer " + token;
-  }
-
-  const response = await originalFetch(url, options);
-
-  if (response.status === 401) {
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-  }
-
-  return response;
-};
