@@ -1,45 +1,75 @@
 /* =========================================
-   AnimeHunt Admin Auth Handler
+   AnimeHunt Admin Simple Auth Handler
 ========================================= */
 
-const API_BASE = "https://animehunt-backend.onrender.com"; 
-// ⚠️ Apna real backend URL daalo
+const API_BASE = "https://animehunt-backend-rhg6.onrender.com";
 
-// Load token
+// ===============================
+// LOGIN FUNCTION
+// ===============================
+async function loginAdmin(username, password) {
+  try {
+    const response = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    // Save JWT
+    localStorage.setItem("AUTH_TOKEN", data.accessToken);
+
+    // Redirect to dashboard
+    window.location.href = "index.html";
+
+  } catch (error) {
+    console.error("Login Error:", error);
+    alert("Server error");
+  }
+}
+
+// ===============================
+// AUTO AUTH CHECK
+// ===============================
 const storedToken = localStorage.getItem("AUTH_TOKEN");
 
 if (storedToken) {
   window.__AUTH_TOKEN__ = storedToken;
 } else {
-  // Agar login page nahi hai to redirect karo
-  if (!location.pathname.includes("login") &&
-      !location.pathname.includes("verification")) {
+  if (!location.pathname.includes("login")) {
     location.href = "login.html";
   }
 }
 
-/* ===============================
-   AUTO FETCH WRAPPER
-================================ */
+// ===============================
+// AUTO FETCH WRAPPER
+// ===============================
 const originalFetch = window.fetch;
 
 window.fetch = async (url, options = {}) => {
 
-  // Agar relative API call hai to base add karo
   if (url.startsWith("/api")) {
     url = API_BASE + url;
   }
 
   options.headers = options.headers || {};
 
-  if (window.__AUTH_TOKEN__) {
-    options.headers["Authorization"] =
-      "Bearer " + window.__AUTH_TOKEN__;
+  const token = localStorage.getItem("AUTH_TOKEN");
+
+  if (token) {
+    options.headers["Authorization"] = "Bearer " + token;
   }
 
   const response = await originalFetch(url, options);
 
-  // Agar unauthorized ho jaye to logout
   if (response.status === 401) {
     localStorage.removeItem("AUTH_TOKEN");
     location.href = "login.html";
