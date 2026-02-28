@@ -458,6 +458,168 @@ bulkBtn.addEventListener("click", async ()=>{
       method:"POST",
       body:JSON.stringify(ads)
     });
+<script>
+
+/* ===============================
+   CONFIG
+================================ */
+const API_BASE = "/api/admin/ads";
+
+/* ===============================
+   ELEMENT REFERENCES (SAFE)
+================================ */
+const saveBtn = document.querySelector(".ads-actions .btn-primary");
+const bulkBtn = document.querySelector(".ads-card button");
+const bulkDataEl = document.getElementById("bulkData");
+const bulkTypeEl = document.getElementById("bulkType");
+const adsTable = document.querySelector(".ads-table");
+
+/* FORM FIELDS */
+const nameEl = document.querySelector("input[placeholder='Ad Name']");
+const typeEl = document.querySelector(".ads-card select");
+const adCodeEl = document.querySelector("textarea[placeholder='Ad Code']");
+
+const pageEl = document.querySelectorAll(".ads-card select")[1];
+const positionEl = document.querySelectorAll(".ads-card select")[2];
+const maxPerPageEl = document.querySelector("input[placeholder='Max Ads Per Page']");
+
+const startDateEl = document.querySelectorAll("input[type='datetime-local']")[0];
+const endDateEl = document.querySelectorAll("input[type='datetime-local']")[1];
+const priorityEl = document.querySelector("input[placeholder='Priority (1 = high)']");
+
+const animeSlugEl = document.querySelector("input[placeholder='Anime Slug']");
+const episodeEl = document.querySelector("input[placeholder='Episode (optional)']");
+
+const countryEl = document.querySelector("input[placeholder='Country (IN, US)']");
+const languageEl = document.querySelectorAll(".ads-card select")[3];
+
+const maxViewsEl = document.querySelector("input[placeholder='Max Views Per Ad']");
+
+/* ===============================
+   AUTH SAFE FETCH
+================================ */
+async function apiFetch(url, options = {}) {
+
+  const token = localStorage.getItem("AUTH_TOKEN");
+
+  const res = await fetch(url,{
+    ...options,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization": token ? "Bearer " + token : "",
+      ...options.headers
+    }
+  });
+
+  if(res.status === 401){
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    throw new Error("Unauthorized");
+  }
+
+  if(!res.ok){
+    const errorText = await res.text();
+    throw new Error(errorText || "API Error");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   VALIDATION
+================================ */
+function validateAd(data){
+  if(!data.name) return "Ad name required";
+  if(!data.adCode) return "Ad code required";
+  if(!data.page) return "Page required";
+  if(!data.position) return "Position required";
+  return null;
+}
+
+/* ===============================
+   SAVE SINGLE AD
+================================ */
+saveBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    const adData = {
+      name: nameEl.value.trim(),
+      type: typeEl.value,
+      adCode: adCodeEl.value.trim(),
+      page: pageEl.value,
+      position: positionEl.value,
+      maxPerPage: Number(maxPerPageEl.value) || 1,
+      startDate: startDateEl.value || null,
+      endDate: endDateEl.value || null,
+      priority: Number(priorityEl.value) || 5,
+      animeSlug: animeSlugEl.value.trim() || null,
+      episode: episodeEl.value.trim() || null,
+      country: countryEl.value.trim() || null,
+      language: languageEl.value,
+      maxViews: Number(maxViewsEl.value) || null
+    };
+
+    const error = validateAd(adData);
+    if(error){
+      alert(error);
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
+    await apiFetch(API_BASE,{
+      method:"POST",
+      body:JSON.stringify(adData)
+    });
+
+    alert("✅ Ad Saved Successfully");
+    resetForm();
+    loadAds();
+
+  }catch(err){
+    console.error(err);
+    alert("❌ Error saving ad");
+  }finally{
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Ad";
+  }
+});
+
+/* ===============================
+   BULK ADD
+================================ */
+bulkBtn.addEventListener("click", async ()=>{
+
+  try{
+
+    const raw = bulkDataEl.value.trim();
+    if(!raw) return alert("Paste bulk data first");
+
+    let ads;
+
+    if(bulkTypeEl.value === "JSON"){
+      ads = JSON.parse(raw);
+    }else{
+      return alert("CSV not supported yet");
+    }
+
+    if(!Array.isArray(ads)){
+      return alert("Invalid JSON format");
+    }
+
+    if(ads.length > 1000){
+      return alert("Max 1000 ads allowed");
+    }
+
+    bulkBtn.disabled = true;
+    bulkBtn.textContent = "Uploading...";
+
+    await apiFetch(API_BASE + "/bulk",{
+      method:"POST",
+      body:JSON.stringify(ads)
+    });
 
     alert("✅ Bulk Ads Added");
     bulkDataEl.value = "";
@@ -465,7 +627,10 @@ bulkBtn.addEventListener("click", async ()=>{
 
   }catch(e){
     console.error(e);
-    alert("Invalid JSON data");
+    alert("❌ Invalid JSON data");
+  }finally{
+    bulkBtn.disabled = false;
+    bulkBtn.textContent = "Add Ads";
   }
 });
 
@@ -490,21 +655,23 @@ async function loadAds(){
 
     ads.forEach(ad=>{
 
-      adsTable.innerHTML += `
-        <tr>
-          <td>${ad.name}</td>
-          <td>${ad.page}</td>
-          <td>${ad.position}</td>
-          <td class="status ${ad.status === "ON" ? "on" : "off"}">
-            ${ad.status}
-          </td>
-          <td>
-            <button onclick="toggleAd('${ad._id}')">
-              ${ad.status === "ON" ? "Pause" : "Resume"}
-            </button>
-          </td>
-        </tr>
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${escapeHtml(ad.name)}</td>
+        <td>${escapeHtml(ad.page)}</td>
+        <td>${escapeHtml(ad.position)}</td>
+        <td class="status ${ad.status === "ON" ? "on" : "off"}">
+          ${ad.status}
+        </td>
+        <td>
+          <button onclick="toggleAd('${ad._id}')">
+            ${ad.status === "ON" ? "Pause" : "Resume"}
+          </button>
+        </td>
       `;
+
+      adsTable.appendChild(row);
     });
 
   }catch(err){
@@ -516,7 +683,6 @@ async function loadAds(){
    TOGGLE AD
 ================================ */
 async function toggleAd(id){
-
   try{
     await apiFetch(API_BASE + "/" + id + "/toggle",{
       method:"PATCH"
@@ -524,7 +690,27 @@ async function toggleAd(id){
     loadAds();
   }catch(err){
     console.error(err);
+    alert("Toggle failed");
   }
+}
+
+/* ===============================
+   RESET FORM
+================================ */
+function resetForm(){
+  document.querySelectorAll(".ads-card input, .ads-card textarea").forEach(el=>{
+    if(el.type === "checkbox") el.checked = false;
+    else el.value = "";
+  });
+}
+
+/* ===============================
+   ESCAPE HTML (XSS SAFE)
+================================ */
+function escapeHtml(text){
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /* INIT */
