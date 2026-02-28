@@ -226,155 +226,206 @@ body{
 /* ===============================
    CONFIG
 ================================ */
-const API="/api/admin/deploy";
+const API = "/api/admin/deploy";
 
 /* ===============================
-   SAFE FETCH WRAPPER
+   SAFE FETCH WRAPPER (WITH AUTH)
 ================================ */
-async function apiFetch(url,options={}){
+async function apiFetch(url, options = {}) {
 
-  const res=await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      ...options.headers
+  try {
+
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
+        ...options.headers
+      }
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem("AUTH_TOKEN");
+      location.href = "login.html";
+      return;
     }
-  });
 
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
-    throw new Error("Session expired");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || "Request failed");
+    }
+
+    return res.json();
+
+  } catch (err) {
+    console.error("API ERROR:", err.message);
+    alert("Server error. Check console.");
+    throw err;
   }
-
-  return res.json();
 }
 
 /* ===============================
    LOAD DATA
 ================================ */
-async function loadData(){
+async function loadData() {
 
-  try{
-
-    const data=await apiFetch(API);
+  try {
+    const data = await apiFetch(API);
 
     renderVersions(data.versions || []);
     renderBackups(data.backups || []);
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
   }
 
 }
 
 /* ===============================
+   BUTTON SAFE HANDLER
+================================ */
+function safeAction(button, callback) {
+
+  button.disabled = true;
+
+  callback()
+    .catch(console.error)
+    .finally(() => {
+      setTimeout(() => button.disabled = false, 800);
+    });
+
+}
+
+/* ===============================
    DEPLOY ACTIONS
 ================================ */
-deploySite.onclick=async()=>{
-  await apiFetch(`${API}/deploy`,{method:"POST"});
-  alert("Deployment started");
-};
+deploySite.onclick = () => safeAction(deploySite, async () => {
 
-freezeSite.onclick=async()=>{
-  await apiFetch(`${API}/freeze`,{method:"PATCH"});
-  alert("Site frozen (maintenance)");
-};
+  await apiFetch(`${API}/deploy`, { method: "POST" });
+  alert("🚀 Deployment logged");
+  loadData();
 
-unfreezeSite.onclick=async()=>{
-  await apiFetch(`${API}/unfreeze`,{method:"PATCH"});
-  alert("Site live again");
-};
+});
+
+freezeSite.onclick = () => safeAction(freezeSite, async () => {
+
+  await apiFetch(`${API}/freeze`, { method: "PATCH" });
+  alert("🧊 Site frozen (maintenance mode)");
+  loadData();
+
+});
+
+unfreezeSite.onclick = () => safeAction(unfreezeSite, async () => {
+
+  await apiFetch(`${API}/unfreeze`, { method: "PATCH" });
+  alert("🔥 Site live again");
+  loadData();
+
+});
 
 /* ===============================
    VERSION CONTROL
 ================================ */
-createVersion.onclick=async()=>{
-  const data=await apiFetch(`${API}/version`,{
-    method:"POST"
-  });
-  renderVersions(data.versions);
-};
+createVersion.onclick = () => safeAction(createVersion, async () => {
 
-function renderVersions(versions){
-  versionList.innerHTML="";
-  versions.forEach(v=>{
-    const div=document.createElement("div");
-    div.className="list-item";
-    div.innerText=`Version ${v.name} – ${v.date}`;
+  const data = await apiFetch(`${API}/version`, {
+    method: "POST"
+  });
+
+  renderVersions(data.versions || []);
+});
+
+function renderVersions(versions) {
+
+  versionList.innerHTML = "";
+
+  versions.forEach(v => {
+    const div = document.createElement("div");
+    div.className = "list-item";
+    div.innerText = `Version ${v.name} – ${v.date}`;
     versionList.appendChild(div);
   });
+
 }
 
 /* ===============================
    BACKUP
 ================================ */
-createBackup.onclick=async()=>{
-  const data=await apiFetch(`${API}/backup`,{
-    method:"POST"
+createBackup.onclick = () => safeAction(createBackup, async () => {
+
+  const data = await apiFetch(`${API}/backup`, {
+    method: "POST"
   });
-  renderBackups(data.backups);
-};
 
-function renderBackups(backups){
+  renderBackups(data.backups || []);
 
-  backupList.innerHTML="";
-  restoreList.innerHTML="";
+});
 
-  backups.forEach(b=>{
+function renderBackups(backups) {
 
-    const item=document.createElement("div");
-    item.className="list-item";
-    item.innerText=`Backup ${b.name} – ${b.date}`;
+  backupList.innerHTML = "";
+  restoreList.innerHTML = "";
+
+  backups.forEach(b => {
+
+    const item = document.createElement("div");
+    item.className = "list-item";
+    item.innerText = `Backup ${b.name} – ${b.date}`;
     backupList.appendChild(item);
 
-    const restore=document.createElement("div");
-    restore.className="list-item";
-    restore.innerText=`Restore ${b.name}`;
-    restore.onclick=()=>restoreBackup(b.id);
+    const restore = document.createElement("div");
+    restore.className = "list-item";
+    restore.innerText = `Restore ${b.name}`;
+    restore.onclick = () => restoreBackup(b.id);
     restoreList.appendChild(restore);
 
   });
 
 }
 
-async function restoreBackup(id){
+async function restoreBackup(id) {
 
-  if(!confirm("Restore this backup?")) return;
+  if (!confirm("Restore this backup?")) return;
 
-  await apiFetch(`${API}/restore/${id}`,{
-    method:"POST"
+  await apiFetch(`${API}/restore/${id}`, {
+    method: "POST"
   });
 
-  alert("Backup restored");
+  alert("🛟 Backup restored (simulated)");
+  loadData();
+
 }
 
 /* ===============================
    EMERGENCY
 ================================ */
-emergencyShutdown.onclick=async()=>{
+emergencyShutdown.onclick = () => safeAction(emergencyShutdown, async () => {
 
-  if(!confirm("⚠ Emergency shutdown?")) return;
+  if (!confirm("⚠ Emergency shutdown?")) return;
 
-  await apiFetch(`${API}/emergency/shutdown`,{
-    method:"POST"
+  await apiFetch(`${API}/emergency/shutdown`, {
+    method: "POST"
   });
 
-  alert("Emergency shutdown activated");
-};
+  alert("🚨 Emergency shutdown activated");
+});
 
-emergencyRecover.onclick=async()=>{
+emergencyRecover.onclick = () => safeAction(emergencyRecover, async () => {
 
-  await apiFetch(`${API}/emergency/recover`,{
-    method:"POST"
+  await apiFetch(`${API}/emergency/recover`, {
+    method: "POST"
   });
 
-  alert("Recovery started");
-};
+  alert("🛟 Recovery completed");
+});
 
-/* INIT */
-loadData();
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", loadData);
 
 </script>
+
+
 </body>
 </html>
