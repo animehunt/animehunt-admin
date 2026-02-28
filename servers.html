@@ -205,10 +205,38 @@ body{background:#060a14;color:#fff}
 <script>
 
 /* ===============================
+   CONFIG
+================================ */
+const API = "/api/admin/servers";
+
+/* ===============================
    GLOBAL STATE
 ================================ */
 let servers = [];
 let editId = null;
+
+/* ===============================
+   SAFE FETCH WRAPPER
+================================ */
+async function apiFetch(url, options = {}) {
+
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + localStorage.getItem("AUTH_TOKEN"),
+      ...options.headers
+    }
+  });
+
+  if (!res.ok) {
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    throw new Error("Session expired");
+  }
+
+  return res.json().catch(() => ({}));
+}
 
 /* ===============================
    ELEMENT REFERENCES
@@ -250,45 +278,41 @@ addServerBtn.addEventListener("click", () => {
 /* ===============================
    CLOSE MODAL
 ================================ */
-closeModalBtn.addEventListener("click", ()=>{
+closeModalBtn.addEventListener("click", () => {
   modal.style.display = "none";
 });
 
 /* ===============================
    LOAD SERVERS
 ================================ */
-async function loadServers(){
-
-  try{
-
-    const res = await fetch("/api/admin/servers");
-
-    if(!res.ok){
-      throw new Error("Session expired");
-    }
-
-    servers = await res.json();
+async function loadServers() {
+  try {
+    servers = await apiFetch(API);
     render();
-
-  }catch(err){
-
-    console.error("Load servers error:", err);
-
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
+  } catch (err) {
+    console.error("Load error:", err);
   }
 }
 
 /* ===============================
    SAVE SERVER (ADD / UPDATE)
 ================================ */
-saveServerBtn.addEventListener("click", async ()=>{
+saveServerBtn.addEventListener("click", async () => {
 
-  try{
+  try {
 
-    if(!serverName.value || !animeName.value){
+    if (!serverName.value.trim() || !animeName.value.trim()) {
       alert("Server name and Anime name required");
       return;
+    }
+
+    if (embedUrl.value.trim()) {
+      try {
+        new URL(embedUrl.value.trim());
+      } catch {
+        alert("Invalid Embed URL");
+        return;
+      }
     }
 
     const payload = {
@@ -298,76 +322,50 @@ saveServerBtn.addEventListener("click", async ()=>{
       season: seasonNo.value.trim(),
       episode: episodeNo.value.trim(),
       embed: embedUrl.value.trim(),
-      priority: Number(priority.value || 99),
+      priority: Math.max(1, Number(priority.value || 99)),
       active: active.checked
     };
 
-    const res = await fetch("/api/admin/servers",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
+    await apiFetch(API, {
+      method: "POST",
       body: JSON.stringify(payload)
     });
-
-    if(!res.ok){
-      throw new Error("Save failed");
-    }
 
     modal.style.display = "none";
     loadServers();
 
-  }catch(err){
-
-    console.error("Save server error:", err);
-
-    alert("Session expired");
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
+  } catch (err) {
+    console.error("Save error:", err);
   }
-
 });
 
 /* ===============================
    DELETE SERVER
 ================================ */
-async function deleteServer(id){
+async function deleteServer(id) {
 
-  if(!confirm("Delete this server?")) return;
+  if (!confirm("Delete this server?")) return;
 
-  try{
-
-    const res = await fetch("/api/admin/servers",{
-      method:"DELETE",
-      headers:{
-        "Content-Type":"application/json"
-      },
+  try {
+    await apiFetch(API, {
+      method: "DELETE",
       body: JSON.stringify({ id })
     });
 
-    if(!res.ok){
-      throw new Error("Delete failed");
-    }
-
     loadServers();
 
-  }catch(err){
-
+  } catch (err) {
     console.error("Delete error:", err);
-
-    alert("Session expired");
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
   }
 }
 
 /* ===============================
    EDIT SERVER
 ================================ */
-function editServer(id){
+function editServer(id) {
 
   const s = servers.find(x => x._id === id);
-  if(!s) return;
+  if (!s) return;
 
   editId = s._id;
   modalTitle.innerText = "Edit Server";
@@ -384,9 +382,9 @@ function editServer(id){
 }
 
 /* ===============================
-   RENDER TABLE
+   SAFE RENDER (XSS SAFE)
 ================================ */
-function render(){
+function render() {
 
   list.innerHTML = "";
 
@@ -394,26 +392,45 @@ function render(){
     .sort((a,b)=> (a.priority ?? 99) - (b.priority ?? 99))
     .forEach(s => {
 
-      list.innerHTML += `
-        <div class="row">
-          <span>${s.name}</span>
-          <span>${s.anime}</span>
-          <span>S${s.season}</span>
-          <span>E${s.episode}</span>
-          <span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis">
-            ${s.embed}
-          </span>
-          <span>#${s.priority}</span>
-          <span class="status ${s.active ? "active" : "inactive"}">
-            ${s.active ? "Active" : "Inactive"}
-          </span>
-          <span class="actions">
-            <button onclick="editServer('${s._id}')">✏️</button>
-            <button onclick="deleteServer('${s._id}')">🗑</button>
-          </span>
-        </div>
+      const row = document.createElement("div");
+      row.className = "row";
+
+      row.innerHTML = `
+        <span>${escapeHTML(s.name)}</span>
+        <span>${escapeHTML(s.anime)}</span>
+        <span>S${escapeHTML(s.season)}</span>
+        <span>E${escapeHTML(s.episode)}</span>
+        <span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis">
+          ${escapeHTML(s.embed)}
+        </span>
+        <span>#${escapeHTML(String(s.priority))}</span>
+        <span class="status ${s.active ? "active" : "inactive"}">
+          ${s.active ? "Active" : "Inactive"}
+        </span>
+        <span class="actions">
+          <button>✏️</button>
+          <button>🗑</button>
+        </span>
       `;
+
+      const buttons = row.querySelectorAll("button");
+
+      buttons[0].addEventListener("click", () => editServer(s._id));
+      buttons[1].addEventListener("click", () => deleteServer(s._id));
+
+      list.appendChild(row);
     });
+}
+
+/* ===============================
+   ESCAPE HTML
+================================ */
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
 
 /* ===============================
