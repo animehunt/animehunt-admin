@@ -275,18 +275,8 @@
 
 </div>
 
-<!-- ============================= -->
-<!-- AUTH FIRST -->
-<script src="auth.js"></script>
 
-<script>
-
-/* ===============================
-   BASIC AUTH GUARD
-================================ */
-if(!localStorage.getItem("AUTH_TOKEN")){
-  location.href = "login.html";
-}
+    <script>
 
 /* ===============================
    ELEMENT REFERENCES
@@ -308,18 +298,24 @@ const topBannersEl    = document.getElementById("topBanners");
 const topServersEl    = document.getElementById("topServers");
 
 /* ===============================
-   LOAD ANALYTICS
+   CONFIG
+================================ */
+const ANALYTICS_API =
+  "https://animehunt-backend-rhg6.onrender.com/api/admin/analytics";
+
+/* ===============================
+   LOAD ANALYTICS (NO AUTH LOGIC)
 ================================ */
 async function loadAnalytics(){
-
   try{
 
-    const range = rangeSelect.value;
+    const range = rangeSelect?.value || "7d";
 
-    const res = await fetch(`/api/admin/analytics?range=${range}`);
+    const res = await fetch(`${ANALYTICS_API}?range=${range}`);
 
     if(!res.ok){
-      throw new Error("Session expired");
+      console.warn("Analytics API failed:", res.status);
+      return; // ❌ no redirect
     }
 
     const data = await res.json();
@@ -332,7 +328,6 @@ async function loadAnalytics(){
     downloadsEl.textContent    = data.stats?.downloads ?? 0;
     searchesEl.textContent     = data.stats?.searches ?? 0;
 
-    // ===== LIST HELPER =====
     function fill(el, arr, formatter){
       el.innerHTML = "";
       (arr || []).forEach(i=>{
@@ -342,7 +337,6 @@ async function loadAnalytics(){
       });
     }
 
-    // ===== LIST DATA =====
     fill(topAnimeEl, data.topAnime, a => `${a.animeSlug} (${a.views})`);
     fill(topEpisodesEl, data.topEpisodes, e => `EP ${e.episodeId} (${e.views})`);
     fill(topSearchesEl, data.topSearches, s => `${s.query} (${s.count})`);
@@ -351,24 +345,20 @@ async function loadAnalytics(){
     fill(topServersEl, data.topServers, s => `${s.server} (${s.views})`);
 
   }catch(err){
-
     console.error("Analytics error:", err);
-
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
+    // ❌ no redirect anymore
   }
 }
 
 /* ===============================
-   RANGE CHANGE
-================================ */
-rangeSelect.addEventListener("change", loadAnalytics);
-
-/* ===============================
    INIT
 ================================ */
+if(rangeSelect){
+  rangeSelect.addEventListener("change", loadAnalytics);
+}
+
 loadAnalytics();
 
-</script>
+    </script>
 </body>
 </html>
