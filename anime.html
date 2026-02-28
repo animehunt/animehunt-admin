@@ -426,13 +426,14 @@ a{ text-decoration:none; color:inherit }
     <script>
 
 /* ===============================
-   CONFIG
+   CONFIG (IMPORTANT)
 ================================ */
-const API = "/api/admin/anime";
+const BASE = "https://animehunt-backend-rhg6.onrender.com";
+const API = BASE + "/api/admin/anime";
 let editId = null;
 
 /* ===============================
-   SAFE FETCH WRAPPER (JWT READY)
+   SAFE FETCH WRAPPER
 ================================ */
 async function apiFetch(url, options = {}) {
 
@@ -445,10 +446,11 @@ async function apiFetch(url, options = {}) {
     }
   });
 
+  // Unauthorized
   if (res.status === 401) {
     localStorage.removeItem("AUTH_TOKEN");
     location.href = "login.html";
-    throw new Error("Unauthorized");
+    throw new Error("Session Expired");
   }
 
   const data = await res.json().catch(() => ({}));
@@ -461,7 +463,7 @@ async function apiFetch(url, options = {}) {
 }
 
 /* ===============================
-   SLUG AUTO GENERATOR
+   AUTO SLUG
 ================================ */
 title.addEventListener("input", () => {
   slug.value = title.value
@@ -471,17 +473,17 @@ title.addEventListener("input", () => {
 });
 
 /* ===============================
-   LOAD ANIME LIST
+   LOAD ANIME
 ================================ */
 async function loadAnime() {
 
   try {
 
     const query = new URLSearchParams({
-      type: typeFilter.value,
-      status: statusFilter.value,
-      home: homeFilter.value,
-      search: searchAnime.value
+      type: typeFilter.value || "",
+      status: statusFilter.value || "",
+      home: homeFilter.value || "",
+      search: searchAnime.value || ""
     }).toString();
 
     const data = await apiFetch(`${API}?${query}`);
@@ -519,7 +521,7 @@ async function loadAnime() {
     });
 
   } catch (err) {
-    console.error(err);
+    alert(err.message);
   }
 }
 
@@ -597,7 +599,7 @@ window.deleteAnime = async (id) => {
     loadAnime();
 
   } catch (err) {
-    alert("Delete failed");
+    alert(err.message);
   }
 };
 
@@ -611,7 +613,6 @@ window.editAnime = async (id) => {
     const a = await apiFetch(`${API}/${id}`);
 
     editId = id;
-
     modalTitle.innerText = "Edit Anime";
 
     title.value = a.title;
@@ -652,7 +653,7 @@ function escapeHTML(str) {
 }
 
 /* ===============================
-   MODAL CONTROLS
+   MODAL RESET
 ================================ */
 function closeModalAndReset() {
 
@@ -675,16 +676,13 @@ openAddAnime.onclick = () => {
 closeModal.onclick = closeModalAndReset;
 
 /* ===============================
-   FILTER LISTENERS
+   FILTERS
 ================================ */
 [typeFilter, statusFilter, homeFilter]
   .forEach(el => el.addEventListener("change", loadAnime));
 
 searchAnime.addEventListener("input", debounce(loadAnime, 400));
 
-/* ===============================
-   DEBOUNCE
-================================ */
 function debounce(func, delay) {
   let timer;
   return (...args) => {
@@ -697,5 +695,7 @@ function debounce(func, delay) {
 loadAnime();
 
     </script>
+
+
 </body>
 </html>
