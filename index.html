@@ -212,13 +212,7 @@ body{
 </main>
 
 </div>
-  <script>
-/* ===============================
-   SIMPLE LOGIN CHECK
-================================ */
-if (localStorage.getItem("LOGGED_IN") !== "true") {
-  location.href = "login.html";
-}
+<script>
 
 /* ===============================
    CONFIG
@@ -226,14 +220,15 @@ if (localStorage.getItem("LOGGED_IN") !== "true") {
 const DASH_API = "https://animehunt-backend-rhg6.onrender.com/api/admin/dashboard";
 
 /* ===============================
-   LOAD DASHBOARD
+   LOAD DASHBOARD (NO LOGIN LOGIC)
 ================================ */
 async function loadDashboard(){
   try{
     const res = await fetch(DASH_API);
 
     if(!res.ok){
-      throw new Error("Failed");
+      console.warn("Dashboard API failed:", res.status);
+      return;   // ❌ NO redirect
     }
 
     const data = await res.json();
@@ -260,12 +255,13 @@ async function loadDashboard(){
     backupStatus.textContent = data.system?.backupStatus ?? "Synced";
 
   }catch(err){
-    console.error(err);
-    location.href = "login.html";
+    console.error("Dashboard Error:", err);
+    // ❌ No redirect anymore
   }
 }
 
 loadDashboard();
+
 </script>
 
 <script src="admin.js"></script>
