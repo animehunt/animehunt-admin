@@ -228,193 +228,228 @@ select,input{
 
 <script>
 
-const API="/api/admin/system";
-const statusEl=document.getElementById("statusText");
-const ids=[...document.querySelectorAll("[id]")].map(e=>e.id);
+/* =====================================
+   CONFIG
+===================================== */
+const API = "/api/admin/system";
+const statusEl = document.getElementById("statusText");
 
-/* ===============================
+/* All controllable form IDs only */
+const FIELD_IDS = [
+  "systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
+  "theme","animation","skeleton","imgBlur","mobileUI",
+  "autoHome","aiHome","trendBoost","manualPin","homeMode",
+  "geoBlock","ageLock","schedule","shadow",
+  "autoPlay","resume","autoNext","skipIntro","serverSwitch",
+  "downloads","zip","scan","limit",
+  "liveSearch","highlight","fuzzy","adult","maxResult",
+  "antiInspect","iframe","rateLimit","rightClick"
+];
+
+/* =====================================
    SAFE FETCH
-================================ */
-async function apiFetch(url,options={}){
+===================================== */
+async function apiFetch(url, options = {}) {
 
-  const res=await fetch(url,{
+  const res = await fetch(url, {
     ...options,
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if (!res.ok) {
     localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
+    location.href = "login.html";
     throw new Error("Session expired");
   }
 
-  return res.json().catch(()=>({}));
+  return res.json().catch(() => ({}));
 }
 
-/* ===============================
+/* =====================================
    UTIL
-================================ */
-function clamp(v,min,max){
-  v=Number(v);
-  if(isNaN(v)) return min;
-  return Math.max(min,Math.min(max,v));
+===================================== */
+function clamp(value, min, max) {
+  value = Number(value);
+  if (isNaN(value)) return min;
+  return Math.max(min, Math.min(max, value));
 }
 
-function showStatus(msg,isError=false){
+function showStatus(msg, isError = false) {
+  statusEl.innerText = msg;
+  statusEl.style.color = isError ? "#ff4c4c" : "#4cff4c";
 
-  statusEl.innerText=msg;
-  statusEl.style.color=isError?"#ff4c4c":"#4cff4c";
-
-  setTimeout(()=>{
-    statusEl.innerText="Ready";
-    statusEl.style.color="#4cff4c";
-  },2000);
+  setTimeout(() => {
+    statusEl.innerText = "Ready";
+    statusEl.style.color = "#4cff4c";
+  }, 2000);
 }
 
-/* ===============================
-   LOAD SYSTEM
-================================ */
-async function loadSystem(){
+/* =====================================
+   LOAD SYSTEM CONFIG
+===================================== */
+async function loadSystem() {
 
-  try{
+  try {
 
-    const data=await apiFetch(API);
+    const data = await apiFetch(API);
 
-    ids.forEach(id=>{
-      const el=document.getElementById(id);
-      if(!el) return;
+    FIELD_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-      if(data[id]!==undefined){
-        el.type==="checkbox"
-          ? el.checked=data[id]
-          : el.value=data[id];
+      if (data[id] !== undefined) {
+        if (el.type === "checkbox") {
+          el.checked = !!data[id];
+        } else {
+          el.value = data[id];
+        }
       }
     });
 
-  }catch(err){
-    console.error("Load failed:",err);
+  } catch (err) {
+    console.error("Load failed:", err);
   }
-
 }
 
-/* ===============================
-   SAVE SYSTEM
-================================ */
-async function saveAll(){
+/* =====================================
+   SAVE ALL SETTINGS
+===================================== */
+async function saveAll() {
 
-  try{
+  try {
 
-    const payload={};
+    const payload = {};
 
-    ids.forEach(id=>{
-      const el=document.getElementById(id);
-      if(!el) return;
+    FIELD_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-      if(id==="maxResult"){
-        payload[id]=clamp(el.value,1,100);
-      }else{
-        payload[id]=el.type==="checkbox"
+      if (id === "maxResult") {
+        payload[id] = clamp(el.value, 1, 100);
+      } else {
+        payload[id] = el.type === "checkbox"
           ? el.checked
           : el.value;
       }
     });
 
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(payload)
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify(payload)
     });
 
     showStatus("Saved ✔");
 
-  }catch(err){
-    console.error("Save failed:",err);
-    showStatus("Save failed ❌",true);
+  } catch (err) {
+    console.error("Save failed:", err);
+    showStatus("Save failed ❌", true);
     loadSystem(); // rollback
   }
-
 }
 
-/* ===============================
-   CRITICAL ACTIONS
-================================ */
-async function kill(){
+/* =====================================
+   KILL SWITCH
+===================================== */
+async function kill() {
 
-  const confirmKill=confirm("⚠ This will stop the entire platform. Continue?");
-  if(!confirmKill) return;
+  const confirmKill = confirm("⚠ This will stop the entire platform. Continue?");
+  if (!confirmKill) return;
 
-  try{
-    await apiFetch(API+"/kill",{ method:"POST" });
-    showStatus("System halted ⚠",true);
-  }catch(err){
-    showStatus("Kill failed ❌",true);
+  try {
+
+    await apiFetch(API + "/kill", {
+      method: "POST"
+    });
+
+    showStatus("System halted ⚠", true);
+
+  } catch {
+    showStatus("Kill failed ❌", true);
   }
-
 }
 
-async function clearCache(){
+/* =====================================
+   CLEAR CACHE (UI ONLY)
+===================================== */
+function clearCache() {
   showStatus("Cache cleared ✔");
 }
 
-async function exportConfig(){
+/* =====================================
+   EXPORT CONFIG
+===================================== */
+async function exportConfig() {
 
-  try{
-    const data=await apiFetch(API);
-    navigator.clipboard.writeText(JSON.stringify(data,null,2));
+  try {
+
+    const data = await apiFetch(API);
+
+    await navigator.clipboard.writeText(
+      JSON.stringify(data, null, 2)
+    );
+
     showStatus("Copied ✔");
-  }catch(err){
-    showStatus("Export failed ❌",true);
-  }
 
+  } catch {
+    showStatus("Export failed ❌", true);
+  }
 }
 
-async function importConfig(){
+/* =====================================
+   IMPORT CONFIG
+===================================== */
+async function importConfig() {
 
-  const input=prompt("Paste JSON config");
-  if(!input) return;
+  const input = prompt("Paste JSON config");
+  if (!input) return;
 
-  try{
+  try {
 
-    const parsed=JSON.parse(input);
+    const parsed = JSON.parse(input);
 
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(parsed)
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify(parsed)
     });
 
     loadSystem();
     showStatus("Imported ✔");
 
-  }catch(err){
-    showStatus("Invalid JSON ❌",true);
+  } catch {
+    showStatus("Invalid JSON ❌", true);
   }
-
 }
 
-async function resetAll(){
+/* =====================================
+   RESET ALL SETTINGS
+===================================== */
+async function resetAll() {
 
-  const confirmReset=confirm("Reset all settings?");
-  if(!confirmReset) return;
+  const confirmReset = confirm("Reset all settings?");
+  if (!confirmReset) return;
 
-  try{
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify({})
+  try {
+
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify({})
     });
+
     loadSystem();
     showStatus("Reset ✔");
-  }catch(err){
-    showStatus("Reset failed ❌",true);
-  }
 
+  } catch {
+    showStatus("Reset failed ❌", true);
+  }
 }
 
-/* ===============================
+/* =====================================
    INIT
-================================ */
+===================================== */
 loadSystem();
 
 </script>
