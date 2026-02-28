@@ -237,29 +237,37 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-
 /* ===============================
    CONFIG
 ================================ */
 const API="/api/admin/search";
+const TOKEN_KEY="AUTH_TOKEN";
 
 /* ===============================
-   SAFE FETCH
+   SAFE FETCH (SECURE)
 ================================ */
 async function apiFetch(url,options={}){
+
+  const token=localStorage.getItem(TOKEN_KEY);
 
   const res=await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization":"Bearer "+token,
       ...options.headers
     }
   });
 
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
+  if(res.status===401){
+    localStorage.removeItem(TOKEN_KEY);
+    alert("Session expired. Please login again.");
     location.href="login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if(!res.ok){
+    throw new Error("Request failed");
   }
 
   return res.json().catch(()=>({}));
@@ -275,33 +283,33 @@ async function loadSearch(){
     const d=await apiFetch(API);
     if(!d) return;
 
-    enableSearch.value = String(d.enableSearch);
-    liveSearch.value   = String(d.liveSearch);
+    enableSearch.value = String(d.enableSearch ?? true);
+    liveSearch.value   = String(d.liveSearch ?? true);
     searchMode.value   = d.mode || "instant";
-    debounce.value     = d.debounce || 300;
+    debounce.value     = d.debounce ?? 300;
 
     ranking.value      = d.ranking?.mode || "smart";
-    boost.value        = String(d.ranking?.boost);
-    boostWeight.value  = d.ranking?.weight || 5;
+    boost.value        = String(d.ranking?.boost ?? true);
+    boostWeight.value  = d.ranking?.weight ?? 5;
 
-    sAnime.value       = String(d.sources?.anime);
-    sEpisode.value     = String(d.sources?.episode);
-    sCategory.value    = String(d.sources?.category);
-    sPages.value       = String(d.sources?.pages);
+    sAnime.value       = String(d.sources?.anime ?? true);
+    sEpisode.value     = String(d.sources?.episode ?? true);
+    sCategory.value    = String(d.sources?.category ?? false);
+    sPages.value       = String(d.sources?.pages ?? false);
 
-    typo.value         = String(d.smart?.typo);
-    alias.value        = String(d.smart?.alias);
+    typo.value         = String(d.smart?.typo ?? true);
+    alias.value        = String(d.smart?.alias ?? true);
     language.value     = d.smart?.language || "all";
 
-    maxResults.value   = d.ui?.max || 8;
-    thumb.value        = String(d.ui?.thumb);
-    group.value        = String(d.ui?.group);
-    highlight.value    = String(d.ui?.highlight);
+    maxResults.value   = d.ui?.max ?? 8;
+    thumb.value        = String(d.ui?.thumb ?? true);
+    group.value        = String(d.ui?.group ?? false);
+    highlight.value    = String(d.ui?.highlight ?? true);
 
     safe.value         = d.safety?.safe || "medium";
-    track.value        = String(d.safety?.track);
-    seo.value          = String(d.safety?.seo);
-    cache.value        = d.safety?.cache || 60;
+    track.value        = String(d.safety?.track ?? true);
+    seo.value          = String(d.safety?.seo ?? true);
+    cache.value        = d.safety?.cache ?? 60;
 
   }catch(err){
     console.error("Load failed:",err);
@@ -362,7 +370,7 @@ async function saveSearch(){
       body:JSON.stringify(config)
     });
 
-    showStatus("Search settings saved ✔");
+    showStatus("Saved ✔");
 
   }catch(err){
     console.error("Save failed:",err);
@@ -396,8 +404,9 @@ function showStatus(msg,isError=false){
 }
 
 /* INIT */
-loadSearch();
-
+document.addEventListener("DOMContentLoaded",loadSearch);
 </script>
+
+        
 </body>
 </html>
