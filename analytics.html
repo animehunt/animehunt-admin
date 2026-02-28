@@ -275,8 +275,15 @@
 
 </div>
 
+<script>
 
-    <script>
+/* ===============================
+   CONFIG
+================================ */
+const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000/api/admin/analytics"
+    : "/api/admin/analytics";
 
 /* ===============================
    ELEMENT REFERENCES
@@ -298,67 +305,110 @@ const topBannersEl    = document.getElementById("topBanners");
 const topServersEl    = document.getElementById("topServers");
 
 /* ===============================
-   CONFIG
+   SAFE FETCH (WITH AUTH)
 ================================ */
-const ANALYTICS_API =
-  "https://animehunt-backend-rhg6.onrender.com/api/admin/analytics";
+async function apiFetch(url){
 
-/* ===============================
-   LOAD ANALYTICS (NO AUTH LOGIC)
-================================ */
-async function loadAnalytics(){
   try{
 
-    const range = rangeSelect?.value || "7d";
-
-    const res = await fetch(`${ANALYTICS_API}?range=${range}`);
+    const res = await fetch(url,{
+      headers:{
+        "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN")
+      }
+    });
 
     if(!res.ok){
       console.warn("Analytics API failed:", res.status);
-      return; // ❌ no redirect
+      return null; // ❌ no redirect
     }
 
-    const data = await res.json();
-
-    // ===== TOP STATS =====
-    visitorsEl.textContent     = data.stats?.visitors ?? 0;
-    viewsEl.textContent        = data.stats?.pageViews ?? 0;
-    animeViewsEl.textContent   = data.stats?.animeViews ?? 0;
-    episodeViewsEl.textContent = data.stats?.episodeViews ?? 0;
-    downloadsEl.textContent    = data.stats?.downloads ?? 0;
-    searchesEl.textContent     = data.stats?.searches ?? 0;
-
-    function fill(el, arr, formatter){
-      el.innerHTML = "";
-      (arr || []).forEach(i=>{
-        const li = document.createElement("li");
-        li.textContent = formatter(i);
-        el.appendChild(li);
-      });
-    }
-
-    fill(topAnimeEl, data.topAnime, a => `${a.animeSlug} (${a.views})`);
-    fill(topEpisodesEl, data.topEpisodes, e => `EP ${e.episodeId} (${e.views})`);
-    fill(topSearchesEl, data.topSearches, s => `${s.query} (${s.count})`);
-    fill(topCategoriesEl, data.topCategories, c => `${c.category} (${c.views})`);
-    fill(topBannersEl, data.topBanners, b => `${b.banner} (${b.clicks})`);
-    fill(topServersEl, data.topServers, s => `${s.server} (${s.views})`);
+    return await res.json();
 
   }catch(err){
-    console.error("Analytics error:", err);
-    // ❌ no redirect anymore
+    console.error("Network error:", err);
+    return null;
   }
 }
 
 /* ===============================
-   INIT
+   FILL LIST HELPER
+================================ */
+function fillList(element, arr, formatter){
+  element.innerHTML = "";
+
+  if(!arr || arr.length === 0){
+    element.innerHTML = "<li>No data</li>";
+    return;
+  }
+
+  arr.forEach(item=>{
+    const li = document.createElement("li");
+    li.textContent = formatter(item);
+    element.appendChild(li);
+  });
+}
+
+/* ===============================
+   LOAD ANALYTICS
+================================ */
+async function loadAnalytics(){
+
+  const range = rangeSelect?.value || "7";
+
+  const data = await apiFetch(`${API_BASE}?range=${range}`);
+
+  if(!data) return;
+
+  /* ===== TOP STATS ===== */
+  visitorsEl.textContent     = data.stats?.visitors ?? 0;
+  viewsEl.textContent        = data.stats?.pageViews ?? 0;
+  animeViewsEl.textContent   = data.stats?.animeViews ?? 0;
+  episodeViewsEl.textContent = data.stats?.episodeViews ?? 0;
+  downloadsEl.textContent    = data.stats?.downloads ?? 0;
+  searchesEl.textContent     = data.stats?.searches ?? 0;
+
+  /* ===== LIST DATA ===== */
+  fillList(topAnimeEl, data.topAnime,
+    a => `${a.animeSlug} (${a.views})`
+  );
+
+  fillList(topEpisodesEl, data.topEpisodes,
+    e => `EP ${e.episodeId} (${e.views})`
+  );
+
+  fillList(topSearchesEl, data.topSearches,
+    s => `${s.query} (${s.count})`
+  );
+
+  fillList(topCategoriesEl, data.topCategories,
+    c => `${c.category} (${c.views})`
+  );
+
+  fillList(topBannersEl, data.topBanners,
+    b => `${b.banner} (${b.clicks})`
+  );
+
+  fillList(topServersEl, data.topServers,
+    s => `${s.server} (${s.views})`
+  );
+}
+
+/* ===============================
+   RANGE CHANGE
 ================================ */
 if(rangeSelect){
   rangeSelect.addEventListener("change", loadAnalytics);
 }
 
+/* ===============================
+   AUTO REFRESH (OPTIONAL)
+================================ */
+setInterval(loadAnalytics, 60000); // refresh every 60s
+
+/* INIT */
 loadAnalytics();
 
-    </script>
+</script>
+
 </body>
 </html>
