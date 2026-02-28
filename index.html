@@ -213,55 +213,76 @@ body{
 
 </div>
 <script>
-
 /* ===============================
    CONFIG
 ================================ */
-const DASH_API = "https://animehunt-backend-rhg6.onrender.com/api/admin/dashboard";
+const DASH_API = "/api/admin/dashboard";
 
 /* ===============================
-   LOAD DASHBOARD (NO LOGIN LOGIC)
+   SAFE FETCH WRAPPER
 ================================ */
-async function loadDashboard(){
-  try{
-    const res = await fetch(DASH_API);
+async function apiFetch(url, options = {}) {
 
-    if(!res.ok){
-      console.warn("Dashboard API failed:", res.status);
-      return;   // ❌ NO redirect
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
+      ...options.headers
     }
+  });
 
-    const data = await res.json();
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    throw new Error("Session expired");
+  }
 
-    animeCount.textContent = data.core?.animeCount ?? 0;
-    episodeCount.textContent = data.core?.episodeCount ?? 0;
-    categoryCount.textContent = data.core?.categoryCount ?? 0;
-    bannerCount.textContent = data.core?.bannerCount ?? 0;
-    downloadCount.textContent = data.core?.downloadCount ?? 0;
-    serverCount.textContent = data.core?.serverCount ?? 0;
+  return res.json();
+}
 
-    activeAds.textContent = data.growth?.activeAds ?? 0;
-    todayRevenue.textContent = "₹" + (data.growth?.todayRevenue ?? 0);
-    adClicks.textContent = data.growth?.adClicks ?? 0;
-    trendingAnime.textContent = data.growth?.trendingAnime ?? 0;
-    ongoingAnime.textContent = data.growth?.ongoingAnime ?? 0;
-    topRated.textContent = data.growth?.topRated ?? 0;
+/* ===============================
+   LOAD DASHBOARD
+================================ */
+async function loadDashboard() {
 
-    cmsStatus.textContent = data.system?.cmsStatus ?? "OK";
-    serverLoad.textContent = data.system?.serverLoad ?? "Low";
-    apiStatus.textContent = data.system?.apiStatus ?? "Online";
-    aiStatus.textContent = data.system?.aiStatus ?? "Active";
-    searchStatus.textContent = data.system?.searchStatus ?? "Ready";
-    backupStatus.textContent = data.system?.backupStatus ?? "Synced";
+  try {
 
-  }catch(err){
+    const data = await apiFetch(DASH_API);
+
+    /* ===== CORE ===== */
+    animeCount.textContent     = data.core?.animeCount ?? 0;
+    episodeCount.textContent   = data.core?.episodeCount ?? 0;
+    categoryCount.textContent  = data.core?.categoryCount ?? 0;
+    bannerCount.textContent    = data.core?.bannerCount ?? 0;
+    downloadCount.textContent  = data.core?.downloadCount ?? 0;
+    serverCount.textContent    = data.core?.serverCount ?? 0;
+
+    /* ===== GROWTH ===== */
+    activeAds.textContent      = data.growth?.activeAds ?? 0;
+    todayRevenue.textContent   = "₹" + (data.growth?.todayRevenue ?? 0);
+    adClicks.textContent       = data.growth?.adClicks ?? 0;
+    trendingAnime.textContent  = data.growth?.trendingAnime ?? 0;
+    ongoingAnime.textContent   = data.growth?.ongoingAnime ?? 0;
+    topRated.textContent       = data.growth?.topRated ?? 0;
+
+    /* ===== SYSTEM ===== */
+    cmsStatus.textContent      = data.system?.cmsStatus ?? "OK";
+    serverLoad.textContent     = data.system?.serverLoad ?? "Low";
+    apiStatus.textContent      = data.system?.apiStatus ?? "Online";
+    aiStatus.textContent       = data.system?.aiStatus ?? "Active";
+    searchStatus.textContent   = data.system?.searchStatus ?? "Ready";
+    backupStatus.textContent   = data.system?.backupStatus ?? "Synced";
+
+  } catch (err) {
     console.error("Dashboard Error:", err);
-    // ❌ No redirect anymore
   }
 }
 
-loadDashboard();
-
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 
 <script src="admin.js"></script>
