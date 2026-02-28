@@ -439,73 +439,259 @@ async function saveBanner(){
   }
 
 }
+<script>
+
+/* ===============================
+   CONFIG
+================================ */
+const API = "/api/admin/banners";
+let editingId = null;
+
+/* ===============================
+   SAFE FETCH WRAPPER (WITH AUTH)
+================================ */
+async function apiFetch(url, options = {}) {
+
+  const token = localStorage.getItem("AUTH_TOKEN");
+
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token ? "Bearer " + token : "",
+      ...options.headers
+    }
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("AUTH_TOKEN");
+    location.href = "login.html";
+    return;
+  }
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => null);
+    throw new Error(error?.message || "Request failed");
+  }
+
+  return res.json();
+}
+
+/* ===============================
+   IMAGE PREVIEW
+================================ */
+const previewImg = document.getElementById("previewImg");
+const previewError = document.getElementById("previewError");
+
+banImage.addEventListener("input", () => {
+  showPreview(banImage.value.trim());
+});
+
+banImageFile.addEventListener("change", () => {
+  const file = banImageFile.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    showPreview(e.target.result);
+  };
+  reader.readAsDataURL(file);
+});
+
+function showPreview(src) {
+  previewError.style.display = "none";
+  previewImg.style.display = "none";
+
+  if (!src) return;
+
+  previewImg.src = src;
+  previewImg.onload = () => {
+    previewImg.style.display = "block";
+  };
+  previewImg.onerror = () => {
+    previewError.style.display = "block";
+  };
+}
+
+/* ===============================
+   LOAD BANNERS
+================================ */
+async function loadBanners() {
+  try {
+    const banners = await apiFetch(API);
+    render(banners);
+  } catch (err) {
+    console.error(err.message);
+  }
+}
+
+/* ===============================
+   RENDER TABLE
+================================ */
+function render(banners) {
+
+  bannerList.innerHTML = "";
+
+  banners.forEach(b => {
+
+    const row = document.createElement("div");
+    row.className = "row";
+
+    row.innerHTML = `
+      <span>${escapeHTML(b.title)}</span>
+      <span>${escapeHTML(b.type)}</span>
+      <span>${escapeHTML(b.target || "-")}</span>
+      <span>${escapeHTML(b.position || "-")}</span>
+      <span>${b.order}</span>
+
+      <span>
+        <label class="switch">
+          <input type="checkbox" ${b.active ? "checked" : ""}>
+          <span class="slider"></span>
+        </label>
+      </span>
+
+      <span class="actions">
+        <button data-id="${b._id}" class="delete-btn">Delete</button>
+      </span>
+    `;
+
+    /* Toggle */
+    row.querySelector("input").addEventListener("change", e => {
+      toggleStatus(b._id, e.target.checked);
+    });
+
+    /* Delete */
+    row.querySelector(".delete-btn").addEventListener("click", () => {
+      deleteBanner(b._id);
+    });
+
+    bannerList.appendChild(row);
+  });
+}
+
+/* ===============================
+   SAVE BANNER
+================================ */
+async function saveBanner() {
+
+  try {
+
+    let imageValue = banImage.value.trim();
+
+    /* If file selected, convert to base64 (temporary support) */
+    if (banImageFile.files.length > 0) {
+      const file = banImageFile.files[0];
+      imageValue = await toBase64(file);
+    }
+
+    if (!imageValue) {
+      alert("Image required");
+      return;
+    }
+
+    const payload = {
+      title: banTitle.value.trim(),
+      image: imageValue,
+      type: banType.value,
+      target: banTarget.value.trim(),
+      position: banPosition.value.trim(),
+      order: Number(banOrder.value || 0),
+      device: banDevice.value,
+      active: banActive.checked,
+      autoRotate: banRotate.checked
+    };
+
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    closeModal();
+    resetForm();
+    loadBanners();
+
+  } catch (err) {
+    alert(err.message);
+  }
+}
 
 /* ===============================
    TOGGLE STATUS
 ================================ */
-async function toggleStatus(id,active){
-
-  try{
-    await apiFetch(`${API}/${id}/status`,{
-      method:"PUT",
-      body:JSON.stringify({active})
+async function toggleStatus(id, active) {
+  try {
+    await apiFetch(`${API}/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ active })
     });
-  }catch(err){
-    console.error(err);
+  } catch (err) {
+    alert(err.message);
+    loadBanners();
   }
-
 }
 
 /* ===============================
    DELETE
 ================================ */
-async function deleteBanner(id){
+async function deleteBanner(id) {
 
-  if(!confirm("Delete banner?")) return;
+  if (!confirm("Delete banner?")) return;
 
-  try{
-    await apiFetch(`${API}/${id}`,{
-      method:"DELETE"
+  try {
+    await apiFetch(`${API}/${id}`, {
+      method: "DELETE"
     });
     loadBanners();
-  }catch(err){
-    console.error(err);
+  } catch (err) {
+    alert(err.message);
   }
-
 }
 
 /* ===============================
-   ESCAPE HTML (XSS SAFE)
+   UTILS
 ================================ */
-function escapeHTML(str){
+function escapeHTML(str) {
   return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 /* ===============================
    MODAL CONTROL
 ================================ */
-function openModal(){
-  bannerModal.style.display="flex";
+function openModal() {
+  bannerModal.style.display = "flex";
 }
 
-function closeModal(){
-  bannerModal.style.display="none";
+function closeModal() {
+  bannerModal.style.display = "none";
 }
 
-function resetForm(){
-  banTitle.value="";
-  banImage.value="";
-  banType.value="Hero";
-  banTarget.value="";
-  banPosition.value="";
-  banOrder.value="";
-  banDevice.value="all";
-  banActive.checked=false;
-  banRotate.checked=false;
+function resetForm() {
+  banTitle.value = "";
+  banImage.value = "";
+  banImageFile.value = "";
+  banType.value = "Hero";
+  banTarget.value = "";
+  banPosition.value = "";
+  banOrder.value = "";
+  banDevice.value = "all";
+  banActive.checked = false;
+  banRotate.checked = false;
+  previewImg.style.display = "none";
+  previewError.style.display = "none";
 }
 
 /* INIT */
