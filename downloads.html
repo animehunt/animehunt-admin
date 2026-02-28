@@ -169,7 +169,8 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 </div>
 
 
-<script>
+
+  <script>
 
 /* ===============================
    CONFIG
@@ -186,56 +187,84 @@ async function apiFetch(url,options={}){
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization":"Bearer "+localStorage.getItem("AUTH_TOKEN"),
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if(res.status===401){
     localStorage.removeItem("AUTH_TOKEN");
     location.href="login.html";
-    throw new Error("Session expired");
+    return;
+  }
+
+  if(!res.ok){
+    throw new Error("Request failed");
   }
 
   return res.json();
 }
 
 /* ===============================
-   MODAL CONTROL
+   ELEMENT REFERENCES
 ================================ */
-openModal.onclick=()=>downloadModal.style.display="flex";
-closeModal.onclick=()=>downloadModal.style.display="none";
+const modal=document.getElementById("downloadModal");
+const openBtn=document.getElementById("openModal");
+const closeBtn=document.getElementById("closeModal");
+const saveBtn=document.getElementById("saveDownload");
+const listEl=document.getElementById("downloadList");
 
 /* ===============================
-   ADD QUALITY ROW
+   MODAL CONTROL
+================================ */
+openBtn.onclick=()=>modal.style.display="flex";
+closeBtn.onclick=()=>modal.style.display="none";
+
+/* ===============================
+   ADD QUALITY ROW (SAFE CLONE)
 ================================ */
 document.addEventListener("click",e=>{
+
   if(e.target.classList.contains("add-quality")){
-    const row=e.target.parentElement.cloneNode(true);
-    row.querySelector(".quality-link").value="";
-    e.target.closest(".download-host").appendChild(row);
+
+    const hostBox=e.target.closest(".download-host");
+    const firstRow=hostBox.querySelector(".quality-row");
+    const newRow=firstRow.cloneNode(true);
+
+    newRow.querySelector(".quality-link").value="";
+    newRow.querySelector("select").selectedIndex=0;
+
+    hostBox.appendChild(newRow);
   }
+
 });
 
 /* ===============================
    LOAD DOWNLOADS
 ================================ */
 async function loadDownloads(){
+
   try{
     downloads=await apiFetch(API);
     render();
   }catch(err){
     console.error(err);
   }
+
 }
 
 /* ===============================
    SAVE (BATCH MODE)
 ================================ */
-saveDownload.onclick=async()=>{
+saveBtn.onclick=async()=>{
 
   try{
 
-    if(!anime.value.trim()){
+    const anime=document.getElementById("anime").value.trim();
+    const season=document.getElementById("season").value.trim();
+    const episode=document.getElementById("episode").value.trim();
+
+    if(!anime){
       alert("Anime name required");
       return;
     }
@@ -251,12 +280,13 @@ saveDownload.onclick=async()=>{
 
         const quality=row.querySelector("select").value;
         const link=row.querySelector(".quality-link").value.trim();
+
         if(!link) return;
 
         payload.push({
-          anime:anime.value.trim(),
-          season:season.value.trim(),
-          episode:episode.value.trim(),
+          anime,
+          season,
+          episode,
           host,
           quality,
           link
@@ -277,11 +307,12 @@ saveDownload.onclick=async()=>{
     });
 
     resetForm();
-    downloadModal.style.display="none";
+    modal.style.display="none";
     loadDownloads();
 
   }catch(err){
     console.error(err);
+    alert("Save failed");
   }
 
 };
@@ -289,23 +320,27 @@ saveDownload.onclick=async()=>{
 /* ===============================
    DELETE
 ================================ */
-window.removeDownload=async(id)=>{
+async function removeDownload(id){
 
   if(!confirm("Delete download?")) return;
 
-  await apiFetch(`${API}/${id}`,{
-    method:"DELETE"
-  });
+  try{
+    await apiFetch(`${API}/${id}`,{
+      method:"DELETE"
+    });
+    loadDownloads();
+  }catch(err){
+    console.error(err);
+  }
 
-  loadDownloads();
-};
+}
 
 /* ===============================
    SAFE RENDER
 ================================ */
 function render(){
 
-  downloadList.innerHTML="";
+  listEl.innerHTML="";
 
   downloads.forEach(d=>{
 
@@ -319,24 +354,26 @@ function render(){
       <span>${escapeHTML(d.host)}</span>
       <span class="badge">${escapeHTML(d.quality)}</span>
       <span>
-        <a href="${escapeHTML(d.link)}" target="_blank">Open</a>
+        <a href="${escapeHTML(d.link)}" target="_blank" rel="noopener">
+          Open
+        </a>
       </span>
       <span class="actions">
-        <button>🗑</button>
+        <button data-id="${d._id}">🗑</button>
       </span>
     `;
 
     row.querySelector("button")
        .addEventListener("click",()=>removeDownload(d._id));
 
-    downloadList.appendChild(row);
+    listEl.appendChild(row);
 
   });
 
 }
 
 /* ===============================
-   ESCAPE HTML
+   ESCAPE HTML (XSS SAFE)
 ================================ */
 function escapeHTML(str){
   return String(str)
@@ -351,17 +388,25 @@ function escapeHTML(str){
 ================================ */
 function resetForm(){
 
-  anime.value="";
-  season.value="";
-  episode.value="";
+  document.getElementById("anime").value="";
+  document.getElementById("season").value="";
+  document.getElementById("episode").value="";
 
   document.querySelectorAll(".download-host").forEach((box,i)=>{
+
     if(i>0) box.remove();
+
     box.querySelector(".host-name").value="";
+
     box.querySelectorAll(".quality-row").forEach((row,j)=>{
+
       if(j>0) row.remove();
+
       row.querySelector(".quality-link").value="";
+      row.querySelector("select").selectedIndex=0;
+
     });
+
   });
 
 }
@@ -369,6 +414,6 @@ function resetForm(){
 /* INIT */
 loadDownloads();
 
-</script>
+  </script>
 </body>
 </html>
