@@ -114,89 +114,42 @@ button:disabled{
 
 <script>
 
-/* ===============================
-   HTTPS CHECK
-================================ */
 if(location.protocol !== "https:" && location.hostname !== "localhost"){
   document.body.innerHTML = "Secure connection required.";
 }
 
-/* ===============================
-   AUTO REDIRECT IF ALREADY LOGGED
-================================ */
-if(localStorage.getItem("AUTH_TOKEN")){
-  location.href="dashboard.html";
-}
+const loginBtn = document.getElementById("loginBtn");
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const errorMsg = document.getElementById("errorMsg");
 
-/* ===============================
-   CONFIG
-================================ */
-const MAX_ATTEMPTS = 5;
-const LOCK_TIME = 30000;
-const ATTEMPT_KEY = "LOGIN_ATTEMPTS";
-
-let attempts = Number(localStorage.getItem(ATTEMPT_KEY) || 0);
-let locked = false;
-
-/* ===============================
-   SAFE FETCH WITH TIMEOUT
-================================ */
-async function safeFetch(url, options = {}, timeout = 8000){
-
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try{
-    const res = await fetch(url,{
-      ...options,
-      signal: controller.signal
-    });
-
-    clearTimeout(id);
-    return res;
-  }catch(err){
-    clearTimeout(id);
-    throw err;
-  }
-}
-
-/* ===============================
-   LOGIN HANDLER
-================================ */
 loginBtn.onclick = async () => {
-
-  if (locked) return;
 
   const user = username.value.trim();
   const pass = password.value;
 
-  errorMsg.style.display = successMsg.style.display = "none";
+  errorMsg.style.display = "none";
 
   if (!user || !pass) {
     showError("Missing credentials");
     return;
   }
 
-  if (attempts >= MAX_ATTEMPTS) {
-    lockUser();
-    return;
-  }
-
-  attempts++;
-  localStorage.setItem(ATTEMPT_KEY, attempts);
-
   loginBtn.disabled = true;
 
   try {
 
-    const res = await safeFetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: user,
-        password: pass
-      })
-    });
+    const res = await fetch(
+      "https://animehunt-backend-rhg6.onrender.com/api/auth/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: user,
+          password: pass
+        })
+      }
+    );
 
     if (!res.ok) {
       throw new Error("Invalid");
@@ -204,22 +157,15 @@ loginBtn.onclick = async () => {
 
     const data = await res.json();
 
-    if(!data || !data.tempSession){
-      throw new Error("Malformed response");
+    if (!data.success) {
+      throw new Error("Invalid");
     }
 
-    // Store temporary session only
-    sessionStorage.setItem("TEMP_SESSION", data.tempSession);
-    sessionStorage.setItem("LOGIN_USER", user);
+    // Login success
+    localStorage.setItem("LOGGED_IN", "true");
+    localStorage.setItem("ADMIN_USER", user);
 
-    localStorage.removeItem(ATTEMPT_KEY);
-
-    successMsg.innerText = "Verification required";
-    successMsg.style.display = "block";
-
-    setTimeout(()=>{
-      location.href="verify.html";
-    },800);
+    location.href = "dashboard.html";
 
   } catch (err) {
     showError("Invalid credentials");
@@ -228,29 +174,9 @@ loginBtn.onclick = async () => {
   }
 };
 
-/* ===============================
-   LOCK SYSTEM
-================================ */
-function lockUser(){
-  locked = true;
-
-  showError("Too many attempts. Try again later.");
-
-  setTimeout(()=>{
-    locked = false;
-    attempts = 0;
-    localStorage.removeItem(ATTEMPT_KEY);
-  }, LOCK_TIME);
-}
-
-/* ===============================
-   ERROR DISPLAY
-================================ */
 function showError(msg){
   errorMsg.innerText = msg;
   errorMsg.style.display = "block";
 }
 
 </script>
-</body>
-</html>
