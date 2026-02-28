@@ -217,18 +217,25 @@ const configFields=[
 ================================ */
 async function apiFetch(url,options={}){
 
+  const token=localStorage.getItem("AUTH_TOKEN");
+
   const res=await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization": token ? "Bearer "+token : "",
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if(res.status===401){
     localStorage.removeItem("AUTH_TOKEN");
     location.href="login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if(!res.ok){
+    throw new Error("Request failed: "+res.status);
   }
 
   return res.json().catch(()=>({}));
@@ -240,21 +247,26 @@ async function apiFetch(url,options={}){
 async function loadFooter(){
   try{
 
+    statusEl.innerText="Loading...";
+
     const data=await apiFetch(API);
 
     configFields.forEach(id=>{
       const el=document.getElementById(id);
-      if(!el || data[id]===undefined) return;
+      if(!el) return;
 
-      el.type==="checkbox"
-        ? el.checked=data[id]
-        : el.value=data[id];
+      if(data[id]!==undefined){
+        el.type==="checkbox"
+          ? el.checked=data[id]
+          : el.value=data[id];
+      }
     });
 
     statusEl.innerText="Loaded ✔";
 
   }catch(err){
     console.error(err);
+    statusEl.innerText="Load failed ❌";
   }
 }
 
@@ -264,6 +276,8 @@ async function loadFooter(){
 async function save(){
 
   try{
+
+    statusEl.innerText="Saving...";
 
     const payload={};
 
@@ -285,6 +299,7 @@ async function save(){
 
   }catch(err){
     console.error(err);
+    statusEl.innerText="Save failed ❌";
   }
 
 }
@@ -296,9 +311,13 @@ async function kill(){
 
   if(!confirm("Disable footer globally?")) return;
 
-  await apiFetch(API+"/kill",{method:"POST"});
-
-  alert("Footer disabled globally");
+  try{
+    await apiFetch(API+"/kill",{method:"POST"});
+    statusEl.innerText="Footer Disabled ❌";
+    loadFooter();
+  }catch(err){
+    console.error(err);
+  }
 }
 
 /* ===============================
@@ -306,10 +325,17 @@ async function kill(){
 ================================ */
 async function debug(){
 
-  const json=await apiFetch(API);
+  try{
 
-  debugBox.style.display="block";
-  debugBox.textContent=JSON.stringify(json,null,2);
+    const json=await apiFetch(API);
+
+    debugBox.style.display="block";
+    debugBox.textContent=JSON.stringify(json,null,2);
+
+  }catch(err){
+    console.error(err);
+  }
+
 }
 
 /* ===============================
@@ -317,13 +343,20 @@ async function debug(){
 ================================ */
 async function exportCfg(){
 
-  const json=await apiFetch(API);
+  try{
 
-  await navigator.clipboard.writeText(
-    JSON.stringify(json,null,2)
-  );
+    const json=await apiFetch(API);
 
-  alert("Copied ✔");
+    await navigator.clipboard.writeText(
+      JSON.stringify(json,null,2)
+    );
+
+    alert("Copied ✔");
+
+  }catch(err){
+    console.error(err);
+  }
+
 }
 
 /* ===============================
@@ -334,19 +367,29 @@ async function importCfg(){
   const input=prompt("Paste Footer JSON");
   if(!input) return;
 
+  let parsed;
+
   try{
-    JSON.parse(input);
+    parsed=JSON.parse(input);
   }catch{
-    alert("Invalid JSON");
+    alert("Invalid JSON ❌");
     return;
   }
 
-  await apiFetch(API,{
-    method:"POST",
-    body:input
-  });
+  try{
 
-  loadFooter();
+    await apiFetch(API,{
+      method:"POST",
+      body:JSON.stringify(parsed)
+    });
+
+    statusEl.innerText="Imported ✔";
+    loadFooter();
+
+  }catch(err){
+    console.error(err);
+  }
+
 }
 
 /* INIT */
