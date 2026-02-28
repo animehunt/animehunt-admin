@@ -210,229 +210,74 @@ body{background:#060a14;color:#fff}
 
 <script>
 
-/* ===============================
-   CONFIG
-================================ */
-const API="/api/admin/categories";
-let editId=null;
+/* =====================================
+   GLOBAL ADMIN CONFIG
+===================================== */
+const AUTH_TOKEN_KEY = "AUTH_TOKEN";
 
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url,options={}){
+/* =====================================
+   SECURE FETCH WRAPPER
+===================================== */
+async function apiFetch(url, options = {}) {
 
-  const res=await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      ...options.headers
+  try {
+
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? "Bearer " + token : "",
+        ...options.headers
+      }
+    });
+
+    // Unauthorized
+    if (res.status === 401 || res.status === 403) {
+      handleLogout();
+      throw new Error("Unauthorized");
     }
-  });
 
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
-    throw new Error("Session expired");
-  }
+    // Other server error
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Server error");
+    }
 
-  return res.json();
-}
+    return await res.json();
 
-/* ===============================
-   SLUG AUTO GENERATE
-================================ */
-name.addEventListener("input",()=>{
-  slug.value=name.value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g,"")
-    .replace(/\s+/g,"-");
-});
-
-/* ===============================
-   LOAD
-================================ */
-async function load(){
-  try{
-    const data=await apiFetch(API);
-    render(data);
-  }catch(err){
-    console.error(err);
+  } catch (error) {
+    console.error("API Error:", error);
+    showError("Network or server error occurred.");
+    throw error;
   }
 }
 
-/* ===============================
-   SAVE
-================================ */
-async function saveCategory(){
+/* =====================================
+   LOGOUT HANDLER
+===================================== */
+function handleLogout(){
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  window.location.href = "login.html";
+}
 
-  try{
+/* =====================================
+   GLOBAL ERROR POPUP
+===================================== */
+function showError(message){
+  alert(message);
+}
 
-    if(!name.value.trim()){
-      alert("Category name required");
-      return;
-    }
-
-    const payload={
-      name:name.value.trim(),
-      slug:slug.value.trim(),
-      type:type.value,
-      order:Number(order.value||0),
-      priority:Number(priority.value),
-      showHome:showHome.checked,
-      active:isActive.checked,
-      featured:isFeatured.checked,
-      aiTrending:aiTrending.checked,
-      aiPopular:aiPopular.checked,
-      aiAssign:aiAssign.checked
-    };
-
-    if(editId){
-      await apiFetch(`${API}/${editId}`,{
-        method:"PATCH",
-        body:JSON.stringify(payload)
-      });
-    }else{
-      await apiFetch(API,{
-        method:"POST",
-        body:JSON.stringify(payload)
-      });
-    }
-
-    closeModal();
-    resetForm();
-    load();
-
-  }catch(err){
-    console.error(err);
+/* =====================================
+   CHECK AUTH ON PAGE LOAD
+===================================== */
+(function checkAuth(){
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(!token){
+    window.location.href = "login.html";
   }
-
-}
-
-/* ===============================
-   SAFE RENDER (NO XSS)
-================================ */
-function render(data){
-
-  list.innerHTML="";
-
-  data.forEach(d=>{
-
-    const row=document.createElement("div");
-    row.className="row";
-
-    row.innerHTML=`
-      <span>${escapeHTML(d.name)}</span>
-      <span>${escapeHTML(d.slug)}</span>
-      <span class="badge">${escapeHTML(d.type)}</span>
-      <span class="${d.active?'active':'inactive'}">
-        ${d.active?'Active':'Inactive'}
-      </span>
-      <span>${d.order}</span>
-      <span>${d.priority}</span>
-      <span class="actions">
-        <button>✏️</button>
-        <button>🔄</button>
-        <button>🗑</button>
-      </span>
-    `;
-
-    const buttons=row.querySelectorAll("button");
-
-    buttons[0].addEventListener("click",()=>editCategory(d._id));
-    buttons[1].addEventListener("click",()=>toggle(d._id));
-    buttons[2].addEventListener("click",()=>del(d._id));
-
-    list.appendChild(row);
-
-  });
-}
-
-/* ===============================
-   EDIT (SINGLE FETCH)
-================================ */
-async function editCategory(id){
-
-  const d=await apiFetch(`${API}/${id}`);
-
-  editId=id;
-
-  name.value=d.name;
-  slug.value=d.slug;
-  type.value=d.type;
-  order.value=d.order;
-  priority.value=d.priority;
-  showHome.checked=d.showHome;
-  isActive.checked=d.active;
-  isFeatured.checked=d.featured;
-  aiTrending.checked=d.aiTrending;
-  aiPopular.checked=d.aiPopular;
-  aiAssign.checked=d.aiAssign;
-
-  openModal();
-}
-
-/* ===============================
-   TOGGLE
-================================ */
-async function toggle(id){
-  await apiFetch(`${API}/${id}/toggle`,{
-    method:"PATCH"
-  });
-  load();
-}
-
-/* ===============================
-   DELETE
-================================ */
-async function del(id){
-
-  if(!confirm("Delete category?")) return;
-
-  await apiFetch(`${API}/${id}`,{
-    method:"DELETE"
-  });
-
-  load();
-}
-
-/* ===============================
-   ESCAPE HTML
-================================ */
-function escapeHTML(str){
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
-
-/* ===============================
-   MODAL CONTROL
-================================ */
-function openModal(){
-  editId=null;
-  modal.style.display="flex";
-}
-
-function closeModal(){
-  modal.style.display="none";
-}
-
-function resetForm(){
-  name.value="";
-  slug.value="";
-  order.value="";
-  priority.value="1";
-  showHome.checked=false;
-  isActive.checked=false;
-  isFeatured.checked=false;
-  aiTrending.checked=false;
-  aiPopular.checked=false;
-  aiAssign.checked=false;
-}
-
-/* INIT */
-load();
+})();
 
 </script>
 </body>
