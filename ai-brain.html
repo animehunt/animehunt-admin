@@ -215,9 +215,8 @@ body{background:#060a14;color:#fff}
 </div>
   <!-- ============================= -->
 
+
 <script>
-
-
 
 /* ===============================
    CONFIG
@@ -225,30 +224,36 @@ body{background:#060a14;color:#fff}
 const AI_API = "/api/admin/ai";
 
 /* ===============================
-   SAFE FETCH WRAPPER
+   SAFE FETCH WRAPPER (JWT READY)
 ================================ */
 async function apiFetch(url, options = {}){
+
+  const token = localStorage.getItem("AUTH_TOKEN");
 
   const res = await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization": token ? "Bearer " + token : "",
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if(res.status === 401){
     localStorage.removeItem("AUTH_TOKEN");
     location.href = "login.html";
-    throw new Error("Session expired");
+    return;
+  }
+
+  if(!res.ok){
+    throw new Error("Request failed");
   }
 
   return res.json();
 }
 
 /* ===============================
-   ENGINE KEY FORMATTER
-   (convert title to safe key)
+   FORMAT KEY (Safe Object Keys)
 ================================ */
 function formatEngineKey(text){
   return text
@@ -266,6 +271,8 @@ async function loadAI(){
 
     const data = await apiFetch(AI_API);
 
+    const pausedState = data.paused ?? false;
+
     document.querySelectorAll(".ai-card").forEach(card => {
 
       const engineTitle = card.querySelector("h3").innerText;
@@ -279,16 +286,21 @@ async function loadAI(){
         const settingKey = formatEngineKey(label);
 
         input.checked = settings[settingKey] ?? input.checked;
+
+        // Disable if globally paused
+        input.disabled = pausedState;
       });
     });
 
+    updatePauseButton(pausedState);
+
   }catch(err){
-    console.error(err);
+    console.error("Load AI failed:", err);
   }
 }
 
 /* ===============================
-   TOGGLE SINGLE AI SETTING
+   UPDATE SINGLE SETTING
 ================================ */
 document.querySelectorAll(".ai-item input").forEach(input => {
 
@@ -313,26 +325,51 @@ document.querySelectorAll(".ai-item input").forEach(input => {
       });
 
     }catch(err){
-      console.error(err);
+      console.error("Update failed:", err);
+      alert("Update failed");
     }
+
   });
 
 });
 
 /* ===============================
-   PAUSE ALL AI
+   PAUSE / RESUME ALL AI
 ================================ */
-document.querySelector(".pause-btn").addEventListener("click", async ()=>{
+const pauseBtn = document.querySelector(".pause-btn");
+
+pauseBtn.addEventListener("click", async ()=>{
 
   try{
-    await apiFetch(AI_API + "/pause",{
+
+    const res = await apiFetch(AI_API + "/pause",{
       method:"PATCH"
     });
+
     alert("✅ AI State Updated");
+    loadAI();
+
   }catch(err){
-    console.error(err);
+    console.error("Pause failed:", err);
+    alert("Pause failed");
   }
+
 });
+
+/* ===============================
+   UPDATE BUTTON UI
+================================ */
+function updatePauseButton(paused){
+
+  if(paused){
+    pauseBtn.innerText = "▶ Resume All AI";
+    pauseBtn.style.background = "#1abc9c";
+  }else{
+    pauseBtn.innerText = "⏸ Pause All AI";
+    pauseBtn.style.background = "#ffcc00";
+  }
+
+}
 
 /* INIT */
 loadAI();
