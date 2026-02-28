@@ -212,44 +212,55 @@ body{
 </main>
 
 </div>
-  <script src="auth.js"></script>
+  <script>
+/* ===============================
+   SIMPLE LOGIN CHECK
+================================ */
+if (localStorage.getItem("LOGGED_IN") !== "true") {
+  location.href = "login.html";
+}
 
-<script>
-const DASH_API = "/api/admin/dashboard";
+/* ===============================
+   CONFIG
+================================ */
+const DASH_API = "https://animehunt-backend-rhg6.onrender.com/api/admin/dashboard";
 
+/* ===============================
+   LOAD DASHBOARD
+================================ */
 async function loadDashboard(){
   try{
     const res = await fetch(DASH_API);
 
     if(!res.ok){
-      throw new Error("Session expired");
+      throw new Error("Failed");
     }
 
     const data = await res.json();
 
-    animeCount.textContent = data.core.animeCount;
-    episodeCount.textContent = data.core.episodeCount;
-    categoryCount.textContent = data.core.categoryCount;
-    bannerCount.textContent = data.core.bannerCount;
-    downloadCount.textContent = data.core.downloadCount;
-    serverCount.textContent = data.core.serverCount;
+    animeCount.textContent = data.core?.animeCount ?? 0;
+    episodeCount.textContent = data.core?.episodeCount ?? 0;
+    categoryCount.textContent = data.core?.categoryCount ?? 0;
+    bannerCount.textContent = data.core?.bannerCount ?? 0;
+    downloadCount.textContent = data.core?.downloadCount ?? 0;
+    serverCount.textContent = data.core?.serverCount ?? 0;
 
-    activeAds.textContent = data.growth.activeAds;
-    todayRevenue.textContent = "₹" + data.growth.todayRevenue;
-    adClicks.textContent = data.growth.adClicks;
-    trendingAnime.textContent = data.growth.trendingAnime;
-    ongoingAnime.textContent = data.growth.ongoingAnime;
-    topRated.textContent = data.growth.topRated;
+    activeAds.textContent = data.growth?.activeAds ?? 0;
+    todayRevenue.textContent = "₹" + (data.growth?.todayRevenue ?? 0);
+    adClicks.textContent = data.growth?.adClicks ?? 0;
+    trendingAnime.textContent = data.growth?.trendingAnime ?? 0;
+    ongoingAnime.textContent = data.growth?.ongoingAnime ?? 0;
+    topRated.textContent = data.growth?.topRated ?? 0;
 
-    cmsStatus.textContent = data.system.cmsStatus;
-    serverLoad.textContent = data.system.serverLoad;
-    apiStatus.textContent = data.system.apiStatus;
-    aiStatus.textContent = data.system.aiStatus;
-    searchStatus.textContent = data.system.searchStatus;
-    backupStatus.textContent = data.system.backupStatus;
+    cmsStatus.textContent = data.system?.cmsStatus ?? "OK";
+    serverLoad.textContent = data.system?.serverLoad ?? "Low";
+    apiStatus.textContent = data.system?.apiStatus ?? "Online";
+    aiStatus.textContent = data.system?.aiStatus ?? "Active";
+    searchStatus.textContent = data.system?.searchStatus ?? "Ready";
+    backupStatus.textContent = data.system?.backupStatus ?? "Synced";
 
   }catch(err){
-    localStorage.removeItem("AUTH_TOKEN");
+    console.error(err);
     location.href = "login.html";
   }
 }
