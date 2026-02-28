@@ -221,7 +221,10 @@ body{background:#060a14;color:#fff;}
 </div>
 
 
-<script>
+
+
+    <script>
+
 /* ===============================
    CONFIG
 ================================ */
@@ -237,6 +240,7 @@ async function apiFetch(url,options={}){
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization":"Bearer "+localStorage.getItem("AUTH_TOKEN"),
       ...options.headers
     }
   });
@@ -255,6 +259,7 @@ async function apiFetch(url,options={}){
 ================================ */
 openAddEpisode.onclick=()=>{
   editId=null;
+  resetForm();
   episodeModal.style.display="flex";
 };
 
@@ -313,10 +318,14 @@ saveEpisode.onclick=async()=>{
       h.querySelectorAll(".quality-row").forEach(r=>{
         const quality=r.querySelector("select").value;
         const url=r.querySelector(".quality-link").value.trim();
-        if(url) links.push({quality,url});
+        if(url){
+          links.push({quality,url});
+        }
       });
 
-      if(links.length) downloads.push({host,links});
+      if(links.length){
+        downloads.push({host,links});
+      }
     });
 
     const payload={
@@ -350,7 +359,6 @@ saveEpisode.onclick=async()=>{
   }catch(err){
     console.error(err);
   }
-
 };
 
 /* ===============================
@@ -372,23 +380,76 @@ window.removeEpisode=async(id)=>{
 ================================ */
 window.editEpisode=async(id)=>{
 
-  const e=await apiFetch(`${API}/${id}`);
-  editId=id;
+  try{
 
-  animeName.value=e.anime;
-  seasonNo.value=e.season;
-  episodeNo.value=e.episode;
-  episodeTitle.value=e.title;
-  description.value=e.description || "";
+    const e=await apiFetch(`${API}/${id}`);
+    editId=id;
 
-  server1.value=e.servers?.[0]||"";
-  server2.value=e.servers?.[1]||"";
-  server3.value=e.servers?.[2]||"";
+    resetForm();
 
-  isOngoing.checked=e.ongoing;
-  isFeatured.checked=e.featured;
+    animeName.value=e.anime;
+    seasonNo.value=e.season;
+    episodeNo.value=e.episode;
+    episodeTitle.value=e.title;
+    description.value=e.description || "";
 
-  episodeModal.style.display="flex";
+    server1.value=e.servers?.[0]||"";
+    server2.value=e.servers?.[1]||"";
+    server3.value=e.servers?.[2]||"";
+
+    isOngoing.checked=e.ongoing;
+    isFeatured.checked=e.featured;
+
+    /* LOAD DOWNLOADS */
+    if(e.downloads?.length){
+
+      const container=document.querySelector(".download-section");
+      container.innerHTML="";
+
+      e.downloads.forEach(hostObj=>{
+
+        const hostDiv=document.createElement("div");
+        hostDiv.className="download-host";
+
+        hostDiv.innerHTML=`
+          <input class="host-name" placeholder="Host Name">
+        `;
+
+        hostDiv.querySelector(".host-name").value=hostObj.host;
+
+        hostObj.links.forEach(linkObj=>{
+
+          const row=document.createElement("div");
+          row.className="quality-row";
+
+          row.innerHTML=`
+            <select>
+              <option ${linkObj.quality==="480p"?"selected":""}>480p</option>
+              <option ${linkObj.quality==="720p"?"selected":""}>720p</option>
+              <option ${linkObj.quality==="1080p"?"selected":""}>1080p</option>
+              <option ${linkObj.quality==="4K"?"selected":""}>4K</option>
+              <option ${linkObj.quality==="ZIP"?"selected":""}>ZIP</option>
+            </select>
+            <input class="quality-link" placeholder="Download Link">
+            <button type="button" class="add-quality">＋</button>
+          `;
+
+          row.querySelector(".quality-link").value=linkObj.url;
+          hostDiv.appendChild(row);
+
+        });
+
+        container.appendChild(hostDiv);
+
+      });
+
+    }
+
+    episodeModal.style.display="flex";
+
+  }catch(err){
+    console.error(err);
+  }
 };
 
 /* ===============================
@@ -403,13 +464,15 @@ function render(list){
     const row=document.createElement("div");
     row.className="row";
 
+    const totalDownloads=e.downloads?.reduce((t,h)=>t+h.links.length,0)||0;
+
     row.innerHTML=`
       <span>${escapeHTML(e.anime)}</span>
       <span class="badge">S${escapeHTML(e.season)}</span>
       <span class="badge">E${escapeHTML(e.episode)}</span>
       <span>${escapeHTML(e.title)}</span>
       <span>${e.servers?.length||0}</span>
-      <span>${e.downloads?.reduce((t,h)=>t+h.links.length,0)||0}</span>
+      <span>${totalDownloads}</span>
       <span class="actions">
         <button>✏️</button>
         <button>🗑</button>
@@ -454,20 +517,29 @@ function resetForm(){
   isOngoing.checked=false;
   isFeatured.checked=false;
 
-  document.querySelectorAll(".download-host").forEach((box,i)=>{
-    if(i>0) box.remove();
-    box.querySelector(".host-name").value="";
-    box.querySelectorAll(".quality-row").forEach((row,j)=>{
-      if(j>0) row.remove();
-      row.querySelector(".quality-link").value="";
-    });
-  });
+  const container=document.querySelector(".download-section");
 
+  container.innerHTML=`
+    <div class="download-host">
+      <input class="host-name" placeholder="Host Name (Upload4ever)">
+      <div class="quality-row">
+        <select>
+          <option>480p</option>
+          <option>720p</option>
+          <option>1080p</option>
+          <option>4K</option>
+          <option>ZIP</option>
+        </select>
+        <input class="quality-link" placeholder="Download Link">
+        <button type="button" class="add-quality">＋</button>
+      </div>
+    </div>
+  `;
 }
 
 /* INIT */
 loadEpisodes();
 
-</script>
+    </script>
 </body>
 </html>
