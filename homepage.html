@@ -161,7 +161,7 @@ const API="/api/admin/homepage";
 let editId=null;
 
 /* ===============================
-   SAFE FETCH
+   SAFE FETCH (JWT + Error Safe)
 ================================ */
 async function apiFetch(url,options={}){
 
@@ -169,18 +169,42 @@ async function apiFetch(url,options={}){
     ...options,
     headers:{
       "Content-Type":"application/json",
+      "Authorization":"Bearer "+localStorage.getItem("AUTH_TOKEN"),
       ...options.headers
     }
   });
 
-  if(!res.ok){
+  if(res.status===401){
     localStorage.removeItem("AUTH_TOKEN");
     location.href="login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if(!res.ok){
+    const text=await res.text();
+    throw new Error(text||"Request failed");
   }
 
   return res.json().catch(()=>({}));
 }
+
+/* ===============================
+   ELEMENTS
+================================ */
+const rowModal=document.getElementById("rowModal");
+const addRowBtn=document.getElementById("addRowBtn");
+const closeModal=document.getElementById("closeModal");
+const saveRow=document.getElementById("saveRow");
+const rowList=document.getElementById("rowList");
+
+const rowTitle=document.getElementById("rowTitle");
+const rowType=document.getElementById("rowType");
+const rowSource=document.getElementById("rowSource");
+const rowLayout=document.getElementById("rowLayout");
+const rowLimit=document.getElementById("rowLimit");
+const rowOrder=document.getElementById("rowOrder");
+const rowActive=document.getElementById("rowActive");
+const rowAuto=document.getElementById("rowAuto");
 
 /* ===============================
    MODAL CONTROL
@@ -201,7 +225,7 @@ closeModal.onclick=()=>{
 async function loadRows(){
   try{
     const rows=await apiFetch(API);
-    renderRows(rows);
+    renderRows(rows||[]);
   }catch(err){
     console.error(err);
   }
@@ -212,37 +236,45 @@ async function loadRows(){
 ================================ */
 saveRow.onclick=async()=>{
 
-  if(!rowTitle.value.trim()){
-    alert("Title required");
-    return;
+  try{
+
+    if(!rowTitle.value.trim()){
+      alert("Title required");
+      return;
+    }
+
+    const payload={
+      title:rowTitle.value.trim(),
+      type:rowType.value,
+      source:rowSource.value.trim(),
+      layout:rowLayout.value,
+      limit:Number(rowLimit.value||10),
+      order:Number(rowOrder.value||0),
+      active:rowActive.checked,
+      autoUpdate:rowAuto.checked
+    };
+
+    if(editId){
+      await apiFetch(`${API}/${editId}`,{
+        method:"PATCH",
+        body:JSON.stringify(payload)
+      });
+    }else{
+      await apiFetch(API,{
+        method:"POST",
+        body:JSON.stringify(payload)
+      });
+    }
+
+    rowModal.style.display="none";
+    clearForm();
+    loadRows();
+
+  }catch(err){
+    console.error(err);
+    alert("Save failed");
   }
 
-  const payload={
-    title:rowTitle.value.trim(),
-    type:rowType.value,
-    source:rowSource.value.trim(),
-    layout:rowLayout.value,
-    limit:Number(rowLimit.value||10),
-    order:Number(rowOrder.value||0),
-    active:rowActive.checked,
-    autoUpdate:rowAuto.checked
-  };
-
-  if(editId){
-    await apiFetch(`${API}/${editId}`,{
-      method:"PATCH",
-      body:JSON.stringify(payload)
-    });
-  }else{
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(payload)
-    });
-  }
-
-  rowModal.style.display="none";
-  clearForm();
-  loadRows();
 };
 
 /* ===============================
@@ -250,13 +282,20 @@ saveRow.onclick=async()=>{
 ================================ */
 window.deleteRow=async(id)=>{
 
-  if(!confirm("Delete this row?")) return;
+  try{
 
-  await apiFetch(`${API}/${id}`,{
-    method:"DELETE"
-  });
+    if(!confirm("Delete this row?")) return;
 
-  loadRows();
+    await apiFetch(`${API}/${id}`,{
+      method:"DELETE"
+    });
+
+    loadRows();
+
+  }catch(err){
+    console.error(err);
+  }
+
 };
 
 /* ===============================
@@ -264,19 +303,26 @@ window.deleteRow=async(id)=>{
 ================================ */
 window.editRow=async(id)=>{
 
-  const row=await apiFetch(`${API}/${id}`);
-  editId=id;
+  try{
 
-  rowTitle.value=row.title;
-  rowType.value=row.type;
-  rowSource.value=row.source||"";
-  rowLayout.value=row.layout;
-  rowLimit.value=row.limit;
-  rowOrder.value=row.order;
-  rowActive.checked=row.active;
-  rowAuto.checked=row.autoUpdate;
+    const row=await apiFetch(`${API}/${id}`);
+    editId=id;
 
-  rowModal.style.display="flex";
+    rowTitle.value=row.title||"";
+    rowType.value=row.type||"auto";
+    rowSource.value=row.source||"";
+    rowLayout.value=row.layout||"scroll";
+    rowLimit.value=row.limit||10;
+    rowOrder.value=row.order||0;
+    rowActive.checked=!!row.active;
+    rowAuto.checked=!!row.autoUpdate;
+
+    rowModal.style.display="flex";
+
+  }catch(err){
+    console.error(err);
+  }
+
 };
 
 /* ===============================
@@ -301,26 +347,22 @@ function renderRows(rows){
         ${r.active?'Active':'Off'}
       </span>
       <span class="actions">
-        <button>✏️</button>
-        <button>🗑</button>
+        <button onclick="editRow('${r._id}')">✏️</button>
+        <button onclick="deleteRow('${r._id}')">🗑</button>
       </span>
     `;
-
-    const buttons=row.querySelectorAll("button");
-
-    buttons[0].addEventListener("click",()=>editRow(r._id));
-    buttons[1].addEventListener("click",()=>deleteRow(r._id));
 
     rowList.appendChild(row);
 
   });
+
 }
 
 /* ===============================
-   ESCAPE HTML
+   ESCAPE HTML (XSS SAFE)
 ================================ */
 function escapeHTML(str){
-  return String(str)
+  return String(str||"")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
@@ -345,5 +387,6 @@ function clearForm(){
 loadRows();
 
 </script>
+
 </body>
 </html>
