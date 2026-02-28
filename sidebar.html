@@ -218,7 +218,6 @@ body{background:#060a14;color:#fff}
 
 <script>
 
-
 const API="/api/admin/sidebar";
 
 let items=[];
@@ -262,7 +261,7 @@ function clamp(v,min,max){
 
 function isValidURL(u){
   if(!u) return false;
-  if(u.startsWith("/")) return true; // internal allowed
+  if(u.startsWith("/")) return true;
   try{
     new URL(u);
     return true;
@@ -271,23 +270,8 @@ function isValidURL(u){
   }
 }
 
-function showStatus(msg,isError=false){
-  const btn=document.querySelector(".add-btn");
-  const original=btn.innerText;
-
-  btn.innerText=msg;
-  btn.style.background=isError?"#ff4c4c":"#00ffd5";
-  btn.style.color=isError?"#fff":"#000";
-
-  setTimeout(()=>{
-    btn.innerText=original;
-    btn.style.background="#ffcc00";
-    btn.style.color="#000";
-  },1500);
-}
-
 /* ===============================
-   MODAL
+   MODAL CONTROL
 ================================ */
 function openModal(){
   document.getElementById("modal").style.display="flex";
@@ -335,12 +319,12 @@ async function saveItem(){
     const cleanURL=sanitize(url.value,200);
 
     if(!sanitize(title.value)){
-      showStatus("Title required ❌",true);
+      alert("Title required");
       return;
     }
 
     if(!isValidURL(cleanURL)){
-      showStatus("Invalid URL ❌",true);
+      alert("Invalid URL");
       return;
     }
 
@@ -365,12 +349,10 @@ async function saveItem(){
 
     closeModal();
     loadItems();
-    showStatus("Saved ✔");
 
   }catch(err){
     console.error("Save failed:",err);
-    showStatus("Save failed ❌",true);
-    loadItems(); // rollback
+    alert("Save failed");
   }
 
 }
@@ -393,6 +375,7 @@ async function delItem(id){
 
   }catch(err){
     console.error("Delete failed:",err);
+    alert("Delete failed");
   }
 
 }
@@ -422,7 +405,7 @@ function editItem(id){
 }
 
 /* ===============================
-   RENDER
+   SAFE RENDER (NO XSS)
 ================================ */
 function render(){
 
@@ -433,30 +416,54 @@ function render(){
     .sort((a,b)=>a.priority-b.priority)
     .forEach((i,idx)=>{
 
-      list.innerHTML+=`
-        <div class="row">
-          <span>${idx+1}</span>
+      const row=document.createElement("div");
+      row.className="row";
 
-          <span>
-            ${i.icon||""} ${i.title}
-            ${i.highlight!=="None"
-              ? `<span class="badge">${i.highlight}</span>`
-              : ""}
-          </span>
+      const index=document.createElement("span");
+      index.textContent=idx+1;
 
-          <span>${i.url}</span>
-          <span>${i.device}</span>
+      const titleSpan=document.createElement("span");
+      titleSpan.textContent=`${i.icon||""} ${i.title}`;
 
-          <span class="badge">
-            ${i.active?"ON":"OFF"}
-          </span>
+      if(i.highlight && i.highlight!=="None"){
+        const badge=document.createElement("span");
+        badge.className="badge";
+        badge.textContent=i.highlight;
+        titleSpan.appendChild(badge);
+      }
 
-          <span class="actions">
-            <button onclick="editItem('${i._id}')">✏️</button>
-            <button onclick="delItem('${i._id}')">🗑</button>
-          </span>
-        </div>
-      `;
+      const urlSpan=document.createElement("span");
+      urlSpan.textContent=i.url;
+
+      const deviceSpan=document.createElement("span");
+      deviceSpan.textContent=i.device;
+
+      const status=document.createElement("span");
+      status.className="badge";
+      status.textContent=i.active?"ON":"OFF";
+
+      const actions=document.createElement("span");
+      actions.className="actions";
+
+      const editBtn=document.createElement("button");
+      editBtn.textContent="✏️";
+      editBtn.onclick=()=>editItem(i._id);
+
+      const delBtn=document.createElement("button");
+      delBtn.textContent="🗑";
+      delBtn.onclick=()=>delItem(i._id);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      row.appendChild(index);
+      row.appendChild(titleSpan);
+      row.appendChild(urlSpan);
+      row.appendChild(deviceSpan);
+      row.appendChild(status);
+      row.appendChild(actions);
+
+      list.appendChild(row);
     });
 
 }
