@@ -225,16 +225,15 @@ select,input{
 
 </main>
 </div>
-
 <script>
 
 /* =====================================
    CONFIG
 ===================================== */
-const API = "/api/admin/system";
-const statusEl = document.getElementById("statusText");
+const API = "/api/admin/system"
+const statusEl = document.getElementById("statusText")
 
-/* All controllable form IDs only */
+/* All valid fields */
 const FIELD_IDS = [
   "systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
   "theme","animation","skeleton","imgBlur","mobileUI",
@@ -244,110 +243,121 @@ const FIELD_IDS = [
   "downloads","zip","scan","limit",
   "liveSearch","highlight","fuzzy","adult","maxResult",
   "antiInspect","iframe","rateLimit","rightClick"
-];
+]
 
 /* =====================================
-   SAFE FETCH
+   SAFE FETCH (NO CRASH VERSION)
 ===================================== */
 async function apiFetch(url, options = {}) {
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
-      ...options.headers
+  try {
+
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem("AUTH_TOKEN") || ""),
+        ...options.headers
+      }
+    })
+
+    if (res.status === 401) {
+      localStorage.removeItem("AUTH_TOKEN")
+      location.href = "login.html"
+      throw new Error("Unauthorized")
     }
-  });
 
-  if (!res.ok) {
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Session expired");
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(text || "Request failed")
+    }
+
+    return res.json().catch(() => ({}))
+
+  } catch (err) {
+    console.error("API Error:", err)
+    throw err
   }
-
-  return res.json().catch(() => ({}));
 }
 
 /* =====================================
    UTIL
 ===================================== */
-function clamp(value, min, max) {
-  value = Number(value);
-  if (isNaN(value)) return min;
-  return Math.max(min, Math.min(max, value));
+function clamp(v, min, max) {
+  v = Number(v)
+  if (isNaN(v)) return min
+  return Math.max(min, Math.min(max, v))
 }
 
 function showStatus(msg, isError = false) {
-  statusEl.innerText = msg;
-  statusEl.style.color = isError ? "#ff4c4c" : "#4cff4c";
+  statusEl.innerText = msg
+  statusEl.style.color = isError ? "#ff4c4c" : "#4cff4c"
 
   setTimeout(() => {
-    statusEl.innerText = "Ready";
-    statusEl.style.color = "#4cff4c";
-  }, 2000);
+    statusEl.innerText = "Ready"
+    statusEl.style.color = "#4cff4c"
+  }, 2000)
 }
 
 /* =====================================
-   LOAD SYSTEM CONFIG
+   LOAD CONFIG
 ===================================== */
 async function loadSystem() {
 
   try {
 
-    const data = await apiFetch(API);
+    const data = await apiFetch(API)
 
     FIELD_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
+      const el = document.getElementById(id)
+      if (!el) return
 
       if (data[id] !== undefined) {
         if (el.type === "checkbox") {
-          el.checked = !!data[id];
+          el.checked = !!data[id]
         } else {
-          el.value = data[id];
+          el.value = data[id]
         }
       }
-    });
+    })
 
   } catch (err) {
-    console.error("Load failed:", err);
+    showStatus("Load failed ❌", true)
   }
 }
 
 /* =====================================
-   SAVE ALL SETTINGS
+   SAVE ALL
 ===================================== */
 async function saveAll() {
 
   try {
 
-    const payload = {};
+    const payload = {}
 
     FIELD_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
+      const el = document.getElementById(id)
+      if (!el) return
 
       if (id === "maxResult") {
-        payload[id] = clamp(el.value, 1, 100);
+        payload[id] = clamp(el.value, 1, 100)
       } else {
         payload[id] = el.type === "checkbox"
           ? el.checked
-          : el.value;
+          : el.value
       }
-    });
+    })
 
     await apiFetch(API, {
       method: "POST",
       body: JSON.stringify(payload)
-    });
+    })
 
-    showStatus("Saved ✔");
+    showStatus("Saved ✔")
 
   } catch (err) {
-    console.error("Save failed:", err);
-    showStatus("Save failed ❌", true);
-    loadSystem(); // rollback
+    showStatus("Save failed ❌", true)
+    loadSystem()
   }
 }
 
@@ -356,19 +366,19 @@ async function saveAll() {
 ===================================== */
 async function kill() {
 
-  const confirmKill = confirm("⚠ This will stop the entire platform. Continue?");
-  if (!confirmKill) return;
+  if (!confirm("⚠ This will stop the entire platform. Continue?"))
+    return
 
   try {
 
     await apiFetch(API + "/kill", {
       method: "POST"
-    });
+    })
 
-    showStatus("System halted ⚠", true);
+    showStatus("System halted ⚠", true)
 
   } catch {
-    showStatus("Kill failed ❌", true);
+    showStatus("Kill failed ❌", true)
   }
 }
 
@@ -376,7 +386,7 @@ async function kill() {
    CLEAR CACHE (UI ONLY)
 ===================================== */
 function clearCache() {
-  showStatus("Cache cleared ✔");
+  showStatus("Cache cleared ✔")
 }
 
 /* =====================================
@@ -386,16 +396,16 @@ async function exportConfig() {
 
   try {
 
-    const data = await apiFetch(API);
+    const data = await apiFetch(API)
 
     await navigator.clipboard.writeText(
       JSON.stringify(data, null, 2)
-    );
+    )
 
-    showStatus("Copied ✔");
+    showStatus("Copied ✔")
 
   } catch {
-    showStatus("Export failed ❌", true);
+    showStatus("Export failed ❌", true)
   }
 }
 
@@ -404,54 +414,54 @@ async function exportConfig() {
 ===================================== */
 async function importConfig() {
 
-  const input = prompt("Paste JSON config");
-  if (!input) return;
+  const input = prompt("Paste JSON config")
+  if (!input) return
 
   try {
 
-    const parsed = JSON.parse(input);
+    const parsed = JSON.parse(input)
 
     await apiFetch(API, {
       method: "POST",
       body: JSON.stringify(parsed)
-    });
+    })
 
-    loadSystem();
-    showStatus("Imported ✔");
+    loadSystem()
+    showStatus("Imported ✔")
 
   } catch {
-    showStatus("Invalid JSON ❌", true);
+    showStatus("Invalid JSON ❌", true)
   }
 }
 
 /* =====================================
-   RESET ALL SETTINGS
+   RESET SETTINGS
 ===================================== */
 async function resetAll() {
 
-  const confirmReset = confirm("Reset all settings?");
-  if (!confirmReset) return;
+  if (!confirm("Reset all settings?")) return
 
   try {
 
     await apiFetch(API, {
       method: "POST",
       body: JSON.stringify({})
-    });
+    })
 
-    loadSystem();
-    showStatus("Reset ✔");
+    loadSystem()
+    showStatus("Reset ✔")
 
   } catch {
-    showStatus("Reset failed ❌", true);
+    showStatus("Reset failed ❌", true)
   }
 }
 
 /* =====================================
-   INIT
+   AUTO INIT
 ===================================== */
-loadSystem();
+document.addEventListener("DOMContentLoaded", loadSystem)
 
 </script>
+
 </body>
 </html>
