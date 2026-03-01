@@ -211,74 +211,244 @@ body{background:#060a14;color:#fff}
 <script>
 
 /* =====================================
-   GLOBAL ADMIN CONFIG
+   CONFIG
 ===================================== */
-const AUTH_TOKEN_KEY = "AUTH_TOKEN";
+const AUTH_TOKEN_KEY = "AUTH_TOKEN"
+const API = "/api/admin/categories"
+let editingId = null
 
 /* =====================================
-   SECURE FETCH WRAPPER
+   AUTH CHECK
+===================================== */
+(function checkAuth(){
+  const token = localStorage.getItem(AUTH_TOKEN_KEY)
+  if(!token){
+    window.location.href = "login.html"
+  }
+})()
+
+/* =====================================
+   SAFE FETCH
 ===================================== */
 async function apiFetch(url, options = {}) {
 
-  try {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY)
 
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token ? "Bearer " + token : "",
+      ...options.headers
+    }
+  })
 
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": token ? "Bearer " + token : "",
-        ...options.headers
-      }
-    });
+  if(res.status === 401 || res.status === 403){
+    localStorage.removeItem(AUTH_TOKEN_KEY)
+    window.location.href = "login.html"
+    throw new Error("Unauthorized")
+  }
 
-    // Unauthorized
-    if (res.status === 401 || res.status === 403) {
-      handleLogout();
-      throw new Error("Unauthorized");
+  if(!res.ok){
+    const text = await res.text()
+    throw new Error(text || "Server Error")
+  }
+
+  return await res.json()
+}
+
+/* =====================================
+   AUTO SLUG
+===================================== */
+name.addEventListener("input", () => {
+  slug.value = name.value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g,"")
+    .replace(/\s+/g,"-")
+})
+
+/* =====================================
+   LOAD CATEGORIES
+===================================== */
+async function loadCategories(){
+
+  try{
+
+    const data = await apiFetch(API)
+
+    list.innerHTML = ""
+
+    if(!data.length){
+      list.innerHTML = "<div style='padding:20px;color:#888'>No Categories Found</div>"
+      return
     }
 
-    // Other server error
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || "Server error");
-    }
+    data.forEach(cat => {
 
-    return await res.json();
+      const row = document.createElement("div")
+      row.className = "row"
 
-  } catch (error) {
-    console.error("API Error:", error);
-    showError("Network or server error occurred.");
-    throw error;
+      row.innerHTML = `
+        <span>${escapeHTML(cat.name)}</span>
+        <span>${escapeHTML(cat.slug)}</span>
+        <span class="badge">${cat.type}</span>
+        <span class="${cat.active ? 'active':'inactive'}">
+          ${cat.active ? 'Active':'Inactive'}
+        </span>
+        <span>${cat.category_order}</span>
+        <span>${cat.priority}</span>
+        <span class="actions">
+          <button onclick="editCategory('${cat.id}')">✏️</button>
+          <button onclick="deleteCategory('${cat.id}')">🗑</button>
+        </span>
+      `
+
+      list.appendChild(row)
+    })
+
+  }catch(err){
+    alert(err.message)
   }
 }
 
 /* =====================================
-   LOGOUT HANDLER
+   SAVE CATEGORY
 ===================================== */
-function handleLogout(){
-  localStorage.removeItem(AUTH_TOKEN_KEY);
-  window.location.href = "login.html";
-}
+async function saveCategory(){
 
-/* =====================================
-   GLOBAL ERROR POPUP
-===================================== */
-function showError(message){
-  alert(message);
-}
+  try{
 
-/* =====================================
-   CHECK AUTH ON PAGE LOAD
-===================================== */
-(function checkAuth(){
-  const token = localStorage.getItem(AUTH_TOKEN_KEY);
-  if(!token){
-    window.location.href = "login.html";
+    const payload = {
+      name: name.value.trim(),
+      slug: slug.value.trim(),
+      type: type.value,
+      order: Number(order.value || 0),
+      priority: Number(priority.value || 1),
+      showHome: showHome.checked,
+      isActive: isActive.checked,
+      isFeatured: isFeatured.checked,
+      aiTrending: aiTrending.checked,
+      aiPopular: aiPopular.checked,
+      aiAssign: aiAssign.checked
+    }
+
+    if(!payload.name || !payload.slug){
+      alert("Name & slug required")
+      return
+    }
+
+    if(editingId){
+      await apiFetch(API + "/" + editingId, {
+        method:"PUT",
+        body:JSON.stringify(payload)
+      })
+    }else{
+      await apiFetch(API, {
+        method:"POST",
+        body:JSON.stringify(payload)
+      })
+    }
+
+    closeModal()
+    resetForm()
+    loadCategories()
+
+  }catch(err){
+    alert(err.message)
   }
-})();
+}
+
+/* =====================================
+   EDIT CATEGORY
+===================================== */
+window.editCategory = async (id)=>{
+
+  try{
+
+    const data = await apiFetch(API)
+    const cat = data.find(c => c.id === id)
+
+    if(!cat) return
+
+    editingId = id
+
+    name.value = cat.name
+    slug.value = cat.slug
+    type.value = cat.type
+    order.value = cat.category_order
+    priority.value = cat.priority
+
+    showHome.checked = !!cat.showHome
+    isActive.checked = !!cat.active
+    isFeatured.checked = !!cat.featured
+    aiTrending.checked = !!cat.aiTrending
+    aiPopular.checked = !!cat.aiPopular
+    aiAssign.checked = !!cat.aiAssign
+
+    modal.style.display = "flex"
+
+  }catch(err){
+    alert("Failed to load category")
+  }
+}
+
+/* =====================================
+   DELETE CATEGORY
+===================================== */
+window.deleteCategory = async (id)=>{
+
+  if(!confirm("Delete this category?")) return
+
+  try{
+    await apiFetch(API + "/" + id, {
+      method:"DELETE"
+    })
+
+    loadCategories()
+
+  }catch(err){
+    alert(err.message)
+  }
+}
+
+/* =====================================
+   MODAL CONTROL
+===================================== */
+function openModal(){
+  editingId = null
+  modal.style.display = "flex"
+}
+
+function closeModal(){
+  modal.style.display = "none"
+}
+
+/* =====================================
+   RESET FORM
+===================================== */
+function resetForm(){
+  editingId = null
+  document.querySelectorAll(".form-grid input").forEach(el=>{
+    if(el.type === "checkbox") el.checked = false
+    else el.value = ""
+  })
+}
+
+/* =====================================
+   ESCAPE HTML
+===================================== */
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+}
+
+/* INIT */
+loadCategories()
 
 </script>
+
+
 </body>
 </html>
