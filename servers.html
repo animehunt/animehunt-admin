@@ -200,46 +200,52 @@ body{background:#060a14;color:#fff}
 
 </div>
 </div>
-
-
 <script>
-
 /* ===============================
    CONFIG
 ================================ */
 const API = "/api/admin/servers";
+const TOKEN_KEY = "AUTH_TOKEN";
 
 /* ===============================
-   GLOBAL STATE
+   STATE
 ================================ */
 let servers = [];
 let editId = null;
+let isSaving = false;
 
 /* ===============================
-   SAFE FETCH WRAPPER
+   SAFE FETCH
 ================================ */
 async function apiFetch(url, options = {}) {
+
+  const token = localStorage.getItem(TOKEN_KEY);
 
   const res = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + localStorage.getItem("AUTH_TOKEN"),
+      "Authorization": token ? "Bearer " + token : "",
       ...options.headers
     }
   });
 
-  if (!res.ok) {
-    localStorage.removeItem("AUTH_TOKEN");
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem(TOKEN_KEY);
     location.href = "login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Request failed");
   }
 
   return res.json().catch(() => ({}));
 }
 
 /* ===============================
-   ELEMENT REFERENCES
+   ELEMENTS
 ================================ */
 const modal = document.getElementById("serverModal");
 const list = document.getElementById("serverList");
@@ -257,47 +263,57 @@ const active     = document.getElementById("active");
 const modalTitle = document.getElementById("modalTitle");
 
 /* ===============================
-   OPEN MODAL
+   MODAL CONTROL
 ================================ */
+function openModal(title="Add Server"){
+  modalTitle.innerText = title;
+  modal.style.display = "flex";
+}
+
+function closeModal(){
+  modal.style.display = "none";
+}
+
 addServerBtn.addEventListener("click", () => {
-
   editId = null;
-  modalTitle.innerText = "Add Server";
+  clearForm();
+  active.checked = true;
+  openModal("Add Server");
+});
 
+closeModalBtn.addEventListener("click", closeModal);
+
+/* ===============================
+   CLEAR FORM
+================================ */
+function clearForm(){
   serverName.value = "";
   animeName.value  = "";
   seasonNo.value   = "";
   episodeNo.value  = "";
   embedUrl.value   = "";
   priority.value   = "";
-  active.checked   = true;
-
-  modal.style.display = "flex";
-});
-
-/* ===============================
-   CLOSE MODAL
-================================ */
-closeModalBtn.addEventListener("click", () => {
-  modal.style.display = "none";
-});
+  active.checked   = false;
+}
 
 /* ===============================
    LOAD SERVERS
 ================================ */
-async function loadServers() {
-  try {
+async function loadServers(){
+  try{
     servers = await apiFetch(API);
     render();
-  } catch (err) {
+  }catch(err){
     console.error("Load error:", err);
   }
 }
 
 /* ===============================
-   SAVE SERVER (ADD / UPDATE)
+   SAVE SERVER
 ================================ */
 saveServerBtn.addEventListener("click", async () => {
+
+  if (isSaving) return;
 
   try {
 
@@ -307,13 +323,12 @@ saveServerBtn.addEventListener("click", async () => {
     }
 
     if (embedUrl.value.trim()) {
-      try {
-        new URL(embedUrl.value.trim());
-      } catch {
-        alert("Invalid Embed URL");
-        return;
-      }
+      try { new URL(embedUrl.value.trim()); }
+      catch { alert("Invalid Embed URL"); return; }
     }
+
+    isSaving = true;
+    saveServerBtn.innerText = "Saving...";
 
     const payload = {
       _id: editId,
@@ -331,44 +346,50 @@ saveServerBtn.addEventListener("click", async () => {
       body: JSON.stringify(payload)
     });
 
-    modal.style.display = "none";
+    closeModal();
+    clearForm();
     loadServers();
 
   } catch (err) {
     console.error("Save error:", err);
+    alert("Save failed");
+  } finally {
+    isSaving = false;
+    saveServerBtn.innerText = "💾 Save";
   }
+
 });
 
 /* ===============================
    DELETE SERVER
 ================================ */
-async function deleteServer(id) {
+async function deleteServer(id){
 
   if (!confirm("Delete this server?")) return;
 
-  try {
-    await apiFetch(API, {
-      method: "DELETE",
-      body: JSON.stringify({ id })
+  try{
+
+    await apiFetch(API,{
+      method:"DELETE",
+      body:JSON.stringify({ id })
     });
 
     loadServers();
 
-  } catch (err) {
-    console.error("Delete error:", err);
+  }catch(err){
+    console.error("Delete error:",err);
   }
 }
 
 /* ===============================
    EDIT SERVER
 ================================ */
-function editServer(id) {
+function editServer(id){
 
   const s = servers.find(x => x._id === id);
   if (!s) return;
 
   editId = s._id;
-  modalTitle.innerText = "Edit Server";
 
   serverName.value = s.name;
   animeName.value  = s.anime;
@@ -378,13 +399,13 @@ function editServer(id) {
   priority.value   = s.priority;
   active.checked   = s.active;
 
-  modal.style.display = "flex";
+  openModal("Edit Server");
 }
 
 /* ===============================
-   SAFE RENDER (XSS SAFE)
+   RENDER
 ================================ */
-function render() {
+function render(){
 
   list.innerHTML = "";
 
@@ -408,25 +429,25 @@ function render() {
           ${s.active ? "Active" : "Inactive"}
         </span>
         <span class="actions">
-          <button>✏️</button>
-          <button>🗑</button>
+          <button class="editBtn">✏️</button>
+          <button class="delBtn">🗑</button>
         </span>
       `;
 
-      const buttons = row.querySelectorAll("button");
+      const [editBtn, delBtn] = row.querySelectorAll("button");
 
-      buttons[0].addEventListener("click", () => editServer(s._id));
-      buttons[1].addEventListener("click", () => deleteServer(s._id));
+      editBtn.addEventListener("click", ()=>editServer(s._id));
+      delBtn.addEventListener("click", ()=>deleteServer(s._id));
 
       list.appendChild(row);
     });
 }
 
 /* ===============================
-   ESCAPE HTML
+   XSS SAFE ESCAPE
 ================================ */
-function escapeHTML(str) {
-  return String(str)
+function escapeHTML(str){
+  return String(str || "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
@@ -436,8 +457,8 @@ function escapeHTML(str) {
 /* ===============================
    INIT
 ================================ */
-loadServers();
-
+document.addEventListener("DOMContentLoaded", loadServers);
 </script>
+        
 </body>
 </html>
