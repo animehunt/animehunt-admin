@@ -342,7 +342,6 @@ a{ text-decoration:none; color:inherit }
 
 <script>
 
-
 /* ===============================
    CONFIG
 ================================ */
@@ -352,131 +351,11 @@ const API_BASE = "/api/admin/ads";
    ELEMENT REFERENCES
 ================================ */
 const saveBtn = document.querySelector(".ads-actions .btn-primary");
-const bulkBtn = document.querySelector(".ads-card button");
-const bulkDataEl = document.getElementById("bulkData");
-const bulkTypeEl = document.getElementById("bulkType");
+const bulkBtn = document.querySelector("#bulkData").parentElement.querySelector("button");
 const adsTable = document.querySelector(".ads-table");
 
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url, options = {}){
-  const res = await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      ...options.headers
-    }
-  });
-
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Session expired");
-  }
-
-  return res.json();
-}
-
-/* ===============================
-   SAVE SINGLE AD
-================================ */
-saveBtn.addEventListener("click", async ()=>{
-
-  try{
-
-    const adData = {
-      name: document.querySelector("input[placeholder='Ad Name']").value.trim(),
-      type: document.querySelector(".ads-card select").value,
-      adCode: document.querySelector("textarea[placeholder='Ad Code']").value.trim(),
-      page: document.querySelectorAll(".ads-card select")[1].value,
-      position: document.querySelectorAll(".ads-card select")[2].value,
-      maxPerPage: Number(document.querySelector("input[placeholder='Max Ads Per Page']").value) || 1,
-      startDate: document.querySelectorAll("input[type='datetime-local']")[0].value,
-      endDate: document.querySelectorAll("input[type='datetime-local']")[1].value,
-      priority: Number(document.querySelector("input[placeholder='Priority (1 = high)']").value) || 5,
-      animeSlug: document.querySelector("input[placeholder='Anime Slug']").value.trim(),
-      episode: document.querySelector("input[placeholder='Episode (optional)']").value || null,
-      country: document.querySelector("input[placeholder='Country (IN, US)']").value.trim(),
-      language: document.querySelectorAll(".ads-card select")[3].value,
-      maxViews: Number(document.querySelector("input[placeholder='Max Views Per Ad']").value) || null
-    };
-
-    if(!adData.name || !adData.adCode){
-      alert("Ad name and Ad code required");
-      return;
-    }
-
-    await apiFetch(API_BASE,{
-      method:"POST",
-      body:JSON.stringify(adData)
-    });
-
-    alert("✅ Ad Saved Successfully");
-    loadAds();
-
-  }catch(err){
-    console.error(err);
-    alert("Error saving ad");
-  }
-});
-
-/* ===============================
-   BULK ADD
-================================ */
-bulkBtn.addEventListener("click", async ()=>{
-
-  try{
-
-    const raw = bulkDataEl.value.trim();
-
-    if(!raw){
-      alert("Paste bulk data first");
-      return;
-    }
-
-    let ads;
-
-    if(bulkTypeEl.value === "JSON"){
-      ads = JSON.parse(raw);
-    }else{
-      alert("CSV parsing not implemented yet");
-      return;
-    }
-
-    if(!Array.isArray(ads)){
-      alert("Invalid JSON format");
-      return;
-    }
-
-    if(ads.length > 1000){
-      alert("Max 1000 ads allowed");
-      return;
-    }
-
-    await apiFetch(API_BASE + "/bulk",{
-      method:"POST",
-      body:JSON.stringify(ads)
-    });
-<script>
-
-/* ===============================
-   CONFIG
-================================ */
-const API_BASE = "/api/admin/ads";
-
-/* ===============================
-   ELEMENT REFERENCES (SAFE)
-================================ */
-const saveBtn = document.querySelector(".ads-actions .btn-primary");
-const bulkBtn = document.querySelector(".ads-card button");
-const bulkDataEl = document.getElementById("bulkData");
-const bulkTypeEl = document.getElementById("bulkType");
-const adsTable = document.querySelector(".ads-table");
-
-/* FORM FIELDS */
 const nameEl = document.querySelector("input[placeholder='Ad Name']");
-const typeEl = document.querySelector(".ads-card select");
+const typeEl = document.querySelectorAll(".ads-card select")[0];
 const adCodeEl = document.querySelector("textarea[placeholder='Ad Code']");
 
 const pageEl = document.querySelectorAll(".ads-card select")[1];
@@ -489,37 +368,29 @@ const priorityEl = document.querySelector("input[placeholder='Priority (1 = high
 
 const animeSlugEl = document.querySelector("input[placeholder='Anime Slug']");
 const episodeEl = document.querySelector("input[placeholder='Episode (optional)']");
-
 const countryEl = document.querySelector("input[placeholder='Country (IN, US)']");
 const languageEl = document.querySelectorAll(".ads-card select")[3];
-
 const maxViewsEl = document.querySelector("input[placeholder='Max Views Per Ad']");
 
+const bulkDataEl = document.getElementById("bulkData");
+const bulkTypeEl = document.getElementById("bulkType");
+
 /* ===============================
-   AUTH SAFE FETCH
+   SAFE FETCH
 ================================ */
 async function apiFetch(url, options = {}) {
 
-  const token = localStorage.getItem("AUTH_TOKEN");
-
-  const res = await fetch(url,{
+  const res = await fetch(url, {
     ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": token ? "Bearer " + token : "",
+    headers: {
+      "Content-Type": "application/json",
       ...options.headers
     }
   });
 
-  if(res.status === 401){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
-
-  if(!res.ok){
-    const errorText = await res.text();
-    throw new Error(errorText || "API Error");
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(txt || "API Error");
   }
 
   return res.json();
@@ -528,20 +399,20 @@ async function apiFetch(url, options = {}) {
 /* ===============================
    VALIDATION
 ================================ */
-function validateAd(data){
-  if(!data.name) return "Ad name required";
-  if(!data.adCode) return "Ad code required";
-  if(!data.page) return "Page required";
-  if(!data.position) return "Position required";
+function validateAd(data) {
+  if (!data.name) return "Ad name required";
+  if (!data.adCode) return "Ad code required";
+  if (!data.page) return "Page required";
+  if (!data.position) return "Position required";
   return null;
 }
 
 /* ===============================
    SAVE SINGLE AD
 ================================ */
-saveBtn.addEventListener("click", async ()=>{
+saveBtn.addEventListener("click", async () => {
 
-  try{
+  try {
 
     const adData = {
       name: nameEl.value.trim(),
@@ -561,27 +432,24 @@ saveBtn.addEventListener("click", async ()=>{
     };
 
     const error = validateAd(adData);
-    if(error){
-      alert(error);
-      return;
-    }
+    if (error) return alert(error);
 
     saveBtn.disabled = true;
     saveBtn.textContent = "Saving...";
 
-    await apiFetch(API_BASE,{
-      method:"POST",
-      body:JSON.stringify(adData)
+    await apiFetch(API_BASE, {
+      method: "POST",
+      body: JSON.stringify(adData)
     });
 
-    alert("✅ Ad Saved Successfully");
+    alert("✅ Ad Saved");
     resetForm();
     loadAds();
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    alert("❌ Error saving ad");
-  }finally{
+    alert("❌ Failed to save ad");
+  } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = "Save Ad";
   }
@@ -590,56 +458,42 @@ saveBtn.addEventListener("click", async ()=>{
 /* ===============================
    BULK ADD
 ================================ */
-bulkBtn.addEventListener("click", async ()=>{
+bulkBtn.addEventListener("click", async () => {
 
-  try{
+  try {
 
     const raw = bulkDataEl.value.trim();
-    if(!raw) return alert("Paste bulk data first");
+    if (!raw) return alert("Paste bulk data");
 
-    let ads;
+    if (bulkTypeEl.value !== "JSON")
+      return alert("Only JSON supported");
 
-    if(bulkTypeEl.value === "JSON"){
-      ads = JSON.parse(raw);
-    }else{
-      return alert("CSV not supported yet");
-    }
+    const ads = JSON.parse(raw);
 
-    if(!Array.isArray(ads)){
+    if (!Array.isArray(ads))
       return alert("Invalid JSON format");
-    }
 
-    if(ads.length > 1000){
-      return alert("Max 1000 ads allowed");
-    }
-
-    bulkBtn.disabled = true;
-    bulkBtn.textContent = "Uploading...";
-
-    await apiFetch(API_BASE + "/bulk",{
-      method:"POST",
-      body:JSON.stringify(ads)
+    await apiFetch(API_BASE + "/bulk", {
+      method: "POST",
+      body: JSON.stringify(ads)
     });
 
-    alert("✅ Bulk Ads Added");
+    alert("✅ Bulk ads added");
     bulkDataEl.value = "";
     loadAds();
 
-  }catch(e){
-    console.error(e);
-    alert("❌ Invalid JSON data");
-  }finally{
-    bulkBtn.disabled = false;
-    bulkBtn.textContent = "Add Ads";
+  } catch (err) {
+    console.error(err);
+    alert("❌ Invalid JSON");
   }
 });
 
 /* ===============================
    LOAD ADS
 ================================ */
-async function loadAds(){
+async function loadAds() {
 
-  try{
+  try {
 
     const ads = await apiFetch(API_BASE);
 
@@ -653,7 +507,7 @@ async function loadAds(){
       </tr>
     `;
 
-    ads.forEach(ad=>{
+    ads.forEach(ad => {
 
       const row = document.createElement("tr");
 
@@ -665,7 +519,7 @@ async function loadAds(){
           ${ad.status}
         </td>
         <td>
-          <button onclick="toggleAd('${ad._id}')">
+          <button onclick="toggleAd('${ad.id}')">
             ${ad.status === "ON" ? "Pause" : "Resume"}
           </button>
         </td>
@@ -674,22 +528,22 @@ async function loadAds(){
       adsTable.appendChild(row);
     });
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
   }
 }
 
 /* ===============================
-   TOGGLE AD
+   TOGGLE
 ================================ */
-async function toggleAd(id){
-  try{
-    await apiFetch(API_BASE + "/" + id + "/toggle",{
-      method:"PATCH"
+async function toggleAd(id) {
+
+  try {
+    await apiFetch(API_BASE + "/" + id + "/toggle", {
+      method: "PATCH"
     });
     loadAds();
-  }catch(err){
-    console.error(err);
+  } catch (err) {
     alert("Toggle failed");
   }
 }
@@ -697,17 +551,15 @@ async function toggleAd(id){
 /* ===============================
    RESET FORM
 ================================ */
-function resetForm(){
-  document.querySelectorAll(".ads-card input, .ads-card textarea").forEach(el=>{
-    if(el.type === "checkbox") el.checked = false;
-    else el.value = "";
-  });
+function resetForm() {
+  document.querySelectorAll(".ads-card input, .ads-card textarea")
+    .forEach(el => el.value = "");
 }
 
 /* ===============================
-   ESCAPE HTML (XSS SAFE)
+   ESCAPE HTML
 ================================ */
-function escapeHtml(text){
+function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
@@ -717,5 +569,9 @@ function escapeHtml(text){
 loadAds();
 
 </script>
+
+
+
+
 </body>
       </html>
