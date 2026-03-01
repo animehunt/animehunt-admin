@@ -234,85 +234,97 @@ body{background:#060a14;color:#fff}
 </section>
 </main>
 </div>
-
-
 <script>
+
 /* ===============================
    CONFIG
 ================================ */
-const API="/api/admin/search";
-const TOKEN_KEY="AUTH_TOKEN";
+const API = "/api/admin/search"
+const TOKEN_KEY = "AUTH_TOKEN"
 
 /* ===============================
-   SAFE FETCH (SECURE)
+   SAFE FETCH
 ================================ */
-async function apiFetch(url,options={}){
+async function apiFetch(url, options = {}) {
 
-  const token=localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY)
 
-  const res=await fetch(url,{
+  const res = await fetch(url, {
     ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+token,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token ? "Bearer " + token : "",
       ...options.headers
     }
-  });
+  })
 
-  if(res.status===401){
-    localStorage.removeItem(TOKEN_KEY);
-    alert("Session expired. Please login again.");
-    location.href="login.html";
-    throw new Error("Unauthorized");
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem(TOKEN_KEY)
+    alert("Session expired. Please login again.")
+    location.href = "login.html"
+    throw new Error("Unauthorized")
   }
 
-  if(!res.ok){
-    throw new Error("Request failed");
+  if (!res.ok) {
+    throw new Error("Request failed: " + res.status)
   }
 
-  return res.json().catch(()=>({}));
+  return res.json().catch(() => ({}))
+}
+
+/* ===============================
+   SAFE VALUE HELPERS
+================================ */
+function bool(val, def = false) {
+  if (val === undefined || val === null) return def
+  return !!val
+}
+
+function clamp(value, min, max) {
+  if (isNaN(value)) return min
+  return Math.max(min, Math.min(max, value))
 }
 
 /* ===============================
    LOAD SETTINGS
 ================================ */
-async function loadSearch(){
+async function loadSearch() {
 
-  try{
+  try {
 
-    const d=await apiFetch(API);
-    if(!d) return;
+    const d = await apiFetch(API)
+    if (!d) return
 
-    enableSearch.value = String(d.enableSearch ?? true);
-    liveSearch.value   = String(d.liveSearch ?? true);
-    searchMode.value   = d.mode || "instant";
-    debounce.value     = d.debounce ?? 300;
+    enableSearch.value = String(bool(d.enableSearch, true))
+    liveSearch.value   = String(bool(d.liveSearch, true))
+    searchMode.value   = d.mode || "instant"
+    debounce.value     = d.debounce ?? 300
 
-    ranking.value      = d.ranking?.mode || "smart";
-    boost.value        = String(d.ranking?.boost ?? true);
-    boostWeight.value  = d.ranking?.weight ?? 5;
+    ranking.value      = d.ranking?.mode || "smart"
+    boost.value        = String(bool(d.ranking?.boost, true))
+    boostWeight.value  = d.ranking?.weight ?? 5
 
-    sAnime.value       = String(d.sources?.anime ?? true);
-    sEpisode.value     = String(d.sources?.episode ?? true);
-    sCategory.value    = String(d.sources?.category ?? false);
-    sPages.value       = String(d.sources?.pages ?? false);
+    sAnime.value       = String(bool(d.sources?.anime, true))
+    sEpisode.value     = String(bool(d.sources?.episode, true))
+    sCategory.value    = String(bool(d.sources?.category, false))
+    sPages.value       = String(bool(d.sources?.pages, false))
 
-    typo.value         = String(d.smart?.typo ?? true);
-    alias.value        = String(d.smart?.alias ?? true);
-    language.value     = d.smart?.language || "all";
+    typo.value         = String(bool(d.smart?.typo, true))
+    alias.value        = String(bool(d.smart?.alias, true))
+    language.value     = d.smart?.language || "all"
 
-    maxResults.value   = d.ui?.max ?? 8;
-    thumb.value        = String(d.ui?.thumb ?? true);
-    group.value        = String(d.ui?.group ?? false);
-    highlight.value    = String(d.ui?.highlight ?? true);
+    maxResults.value   = d.ui?.max ?? 8
+    thumb.value        = String(bool(d.ui?.thumb, true))
+    group.value        = String(bool(d.ui?.group, false))
+    highlight.value    = String(bool(d.ui?.highlight, true))
 
-    safe.value         = d.safety?.safe || "medium";
-    track.value        = String(d.safety?.track ?? true);
-    seo.value          = String(d.safety?.seo ?? true);
-    cache.value        = d.safety?.cache ?? 60;
+    safe.value         = d.safety?.safe || "medium"
+    track.value        = String(bool(d.safety?.track, true))
+    seo.value          = String(bool(d.safety?.seo, true))
+    cache.value        = d.safety?.cache ?? 60
 
-  }catch(err){
-    console.error("Load failed:",err);
+  } catch (err) {
+    console.error("Load error:", err)
   }
 
 }
@@ -320,91 +332,92 @@ async function loadSearch(){
 /* ===============================
    SAVE SETTINGS
 ================================ */
-async function saveSearch(){
+async function saveSearch() {
 
-  try{
+  try {
 
-    const config={
+    const config = {
 
-      enableSearch:enableSearch.value==="true",
-      liveSearch:liveSearch.value==="true",
-      mode:searchMode.value,
-      debounce: clamp(+debounce.value,0,2000),
+      enableSearch: enableSearch.value === "true",
+      liveSearch: liveSearch.value === "true",
+      mode: searchMode.value,
+      debounce: clamp(+debounce.value, 0, 2000),
 
-      ranking:{
-        mode:ranking.value,
-        boost:boost.value==="true",
-        weight: clamp(+boostWeight.value,1,10)
+      ranking: {
+        mode: ranking.value,
+        boost: boost.value === "true",
+        weight: clamp(+boostWeight.value, 1, 10)
       },
 
-      sources:{
-        anime:sAnime.value==="true",
-        episode:sEpisode.value==="true",
-        category:sCategory.value==="true",
-        pages:sPages.value==="true"
+      sources: {
+        anime: sAnime.value === "true",
+        episode: sEpisode.value === "true",
+        category: sCategory.value === "true",
+        pages: sPages.value === "true"
       },
 
-      smart:{
-        typo:typo.value==="true",
-        alias:alias.value==="true",
-        language:language.value
+      smart: {
+        typo: typo.value === "true",
+        alias: alias.value === "true",
+        language: language.value
       },
 
-      ui:{
-        max: clamp(+maxResults.value,1,50),
-        thumb:thumb.value==="true",
-        group:group.value==="true",
-        highlight:highlight.value==="true"
+      ui: {
+        max: clamp(+maxResults.value, 1, 50),
+        thumb: thumb.value === "true",
+        group: group.value === "true",
+        highlight: highlight.value === "true"
       },
 
-      safety:{
-        safe:safe.value,
-        track:track.value==="true",
-        seo:seo.value==="true",
-        cache: clamp(+cache.value,0,600)
+      safety: {
+        safe: safe.value,
+        track: track.value === "true",
+        seo: seo.value === "true",
+        cache: clamp(+cache.value, 0, 600)
       }
-    };
+    }
 
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(config)
-    });
+    await apiFetch(API, {
+      method: "POST",
+      body: JSON.stringify(config)
+    })
 
-    showStatus("Saved ✔");
+    showStatus("Saved ✔")
 
-  }catch(err){
-    console.error("Save failed:",err);
-    showStatus("Save failed ❌",true);
-    loadSearch(); // rollback
+  } catch (err) {
+
+    console.error("Save error:", err)
+    showStatus("Save Failed ❌", true)
+
+    // rollback
+    await loadSearch()
   }
-
 }
 
 /* ===============================
-   UTIL
+   STATUS UI
 ================================ */
-function clamp(value,min,max){
-  if(isNaN(value)) return min;
-  return Math.max(min,Math.min(max,value));
+function showStatus(msg, isError = false) {
+
+  const btn = document.querySelector(".save-btn")
+  const original = btn.innerText
+
+  btn.innerText = msg
+  btn.style.background = isError ? "#ff4c4c" : "#00ffd5"
+  btn.style.color = isError ? "#fff" : "#000"
+
+  setTimeout(() => {
+    btn.innerText = original
+    btn.style.background = "#ffcc00"
+    btn.style.color = "#000"
+  }, 1500)
 }
 
-function showStatus(msg,isError=false){
-  const btn=document.querySelector(".save-btn");
-  const original=btn.innerText;
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", loadSearch)
 
-  btn.innerText=msg;
-  btn.style.background=isError?"#ff4c4c":"#00ffd5";
-  btn.style.color=isError?"#fff":"#000";
-
-  setTimeout(()=>{
-    btn.innerText=original;
-    btn.style.background="#ffcc00";
-    btn.style.color="#000";
-  },1500);
-}
-
-/* INIT */
-document.addEventListener("DOMContentLoaded",loadSearch);
 </script>
 
         
