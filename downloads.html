@@ -172,116 +172,123 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 
   <script>
 
-/* ===============================
+/* ======================================
    CONFIG
-================================ */
-const API="/api/admin/download";
-let downloads=[];
+====================================== */
+const API = "/api/admin/download"
+const TOKEN_KEY = "AUTH_TOKEN"
 
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url,options={}){
+/* ======================================
+   SAFE FETCH
+====================================== */
+async function apiFetch(url, options = {}) {
 
-  const res=await fetch(url,{
+  const token = localStorage.getItem(TOKEN_KEY)
+
+  const res = await fetch(url, {
     ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token ? "Bearer " + token : "",
       ...options.headers
     }
-  });
+  })
 
-  if(res.status===401){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
-    return;
+  if (res.status === 401) {
+    localStorage.removeItem(TOKEN_KEY)
+    location.href = "login.html"
+    return
   }
 
-  if(!res.ok){
-    throw new Error("Request failed");
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || "Request failed")
   }
 
-  return res.json();
+  return res.json()
 }
 
-/* ===============================
-   ELEMENT REFERENCES
-================================ */
-const modal=document.getElementById("downloadModal");
-const openBtn=document.getElementById("openModal");
-const closeBtn=document.getElementById("closeModal");
-const saveBtn=document.getElementById("saveDownload");
-const listEl=document.getElementById("downloadList");
+/* ======================================
+   ELEMENTS
+====================================== */
+const modal = document.getElementById("downloadModal")
+const openBtn = document.getElementById("openModal")
+const closeBtn = document.getElementById("closeModal")
+const saveBtn = document.getElementById("saveDownload")
+const listEl = document.getElementById("downloadList")
 
-/* ===============================
+/* ======================================
    MODAL CONTROL
-================================ */
-openBtn.onclick=()=>modal.style.display="flex";
-closeBtn.onclick=()=>modal.style.display="none";
+====================================== */
+openBtn.onclick = () => modal.style.display = "flex"
+closeBtn.onclick = () => closeModal()
 
-/* ===============================
-   ADD QUALITY ROW (SAFE CLONE)
-================================ */
-document.addEventListener("click",e=>{
-
-  if(e.target.classList.contains("add-quality")){
-
-    const hostBox=e.target.closest(".download-host");
-    const firstRow=hostBox.querySelector(".quality-row");
-    const newRow=firstRow.cloneNode(true);
-
-    newRow.querySelector(".quality-link").value="";
-    newRow.querySelector("select").selectedIndex=0;
-
-    hostBox.appendChild(newRow);
-  }
-
-});
-
-/* ===============================
-   LOAD DOWNLOADS
-================================ */
-async function loadDownloads(){
-
-  try{
-    downloads=await apiFetch(API);
-    render();
-  }catch(err){
-    console.error(err);
-  }
-
+function closeModal(){
+  modal.style.display = "none"
+  resetForm()
 }
 
-/* ===============================
-   SAVE (BATCH MODE)
-================================ */
-saveBtn.onclick=async()=>{
+/* ======================================
+   ADD QUALITY ROW (SAFE)
+====================================== */
+document.addEventListener("click", e => {
 
-  try{
+  if (!e.target.classList.contains("add-quality")) return
 
-    const anime=document.getElementById("anime").value.trim();
-    const season=document.getElementById("season").value.trim();
-    const episode=document.getElementById("episode").value.trim();
+  const hostBox = e.target.closest(".download-host")
+  const template = hostBox.querySelector(".quality-row")
+  const clone = template.cloneNode(true)
 
-    if(!anime){
-      alert("Anime name required");
-      return;
+  clone.querySelector(".quality-link").value = ""
+  clone.querySelector("select").selectedIndex = 0
+
+  hostBox.appendChild(clone)
+})
+
+/* ======================================
+   LOAD DOWNLOADS
+====================================== */
+let downloads = []
+
+async function loadDownloads() {
+
+  try {
+    downloads = await apiFetch(API)
+    render()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/* ======================================
+   SAVE BULK
+====================================== */
+saveBtn.onclick = async () => {
+
+  try {
+
+    const anime = document.getElementById("anime").value.trim()
+    const season = document.getElementById("season").value.trim()
+    const episode = document.getElementById("episode").value.trim()
+
+    if (!anime) {
+      alert("Anime name required")
+      return
     }
 
-    const payload=[];
+    const payload = []
 
-    document.querySelectorAll(".download-host").forEach(hostBox=>{
+    document.querySelectorAll(".download-host").forEach(hostBox => {
 
-      const host=hostBox.querySelector(".host-name").value.trim();
-      if(!host) return;
+      const host = hostBox.querySelector(".host-name").value.trim()
+      if (!host) return
 
-      hostBox.querySelectorAll(".quality-row").forEach(row=>{
+      hostBox.querySelectorAll(".quality-row").forEach(row => {
 
-        const quality=row.querySelector("select").value;
-        const link=row.querySelector(".quality-link").value.trim();
+        const quality = row.querySelector("select").value
+        const link = row.querySelector(".quality-link").value.trim()
 
-        if(!link) return;
+        if (!link) return
 
         payload.push({
           anime,
@@ -290,67 +297,71 @@ saveBtn.onclick=async()=>{
           host,
           quality,
           link
-        });
+        })
+      })
+    })
 
-      });
-
-    });
-
-    if(!payload.length){
-      alert("No valid download links found");
-      return;
+    if (!payload.length) {
+      alert("No valid download links found")
+      return
     }
 
-    await apiFetch(`${API}/bulk`,{
-      method:"POST",
-      body:JSON.stringify(payload)
-    });
+    saveBtn.disabled = true
+    saveBtn.textContent = "Saving..."
 
-    resetForm();
-    modal.style.display="none";
-    loadDownloads();
+    await apiFetch(`${API}/bulk`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
 
-  }catch(err){
-    console.error(err);
-    alert("Save failed");
+    closeModal()
+    loadDownloads()
+
+  } catch (err) {
+    alert("Save failed")
+  } finally {
+    saveBtn.disabled = false
+    saveBtn.textContent = "💾 Save"
   }
-
-};
-
-/* ===============================
-   DELETE
-================================ */
-async function removeDownload(id){
-
-  if(!confirm("Delete download?")) return;
-
-  try{
-    await apiFetch(`${API}/${id}`,{
-      method:"DELETE"
-    });
-    loadDownloads();
-  }catch(err){
-    console.error(err);
-  }
-
 }
 
-/* ===============================
-   SAFE RENDER
-================================ */
-function render(){
+/* ======================================
+   DELETE
+====================================== */
+async function removeDownload(id) {
 
-  listEl.innerHTML="";
+  if (!confirm("Delete download?")) return
 
-  downloads.forEach(d=>{
+  try {
+    await apiFetch(`${API}/${id}`, { method: "DELETE" })
+    loadDownloads()
+  } catch (err) {
+    alert("Delete failed")
+  }
+}
 
-    const row=document.createElement("div");
-    row.className="row";
+/* ======================================
+   RENDER SAFE
+====================================== */
+function render() {
 
-    row.innerHTML=`
+  listEl.innerHTML = ""
+
+  if (!downloads.length) {
+    listEl.innerHTML =
+      "<div style='padding:20px;color:#888'>No downloads found</div>"
+    return
+  }
+
+  downloads.forEach(d => {
+
+    const row = document.createElement("div")
+    row.className = "row"
+
+    row.innerHTML = `
       <span>${escapeHTML(d.anime)}</span>
-      <span class="badge">S${escapeHTML(d.season)}</span>
-      <span class="badge">E${escapeHTML(d.episode)}</span>
+      <span class="badge">S${escapeHTML(d.season || "-")}</span>
+      <span class="badge">E${escapeHTML(d.episode || "-")}</span>
       <span>${escapeHTML(d.host)}</span>
       <span class="badge">${escapeHTML(d.quality)}</span>
       <span>
@@ -359,61 +370,60 @@ function render(){
         </a>
       </span>
       <span class="actions">
-        <button data-id="${d._id}">🗑</button>
+        <button data-id="${d.id}">🗑</button>
       </span>
-    `;
+    `
 
     row.querySelector("button")
-       .addEventListener("click",()=>removeDownload(d._id));
+       .addEventListener("click", () => removeDownload(d.id))
 
-    listEl.appendChild(row);
-
-  });
-
+    listEl.appendChild(row)
+  })
 }
 
-/* ===============================
-   ESCAPE HTML (XSS SAFE)
-================================ */
-function escapeHTML(str){
+/* ======================================
+   ESCAPE HTML
+====================================== */
+function escapeHTML(str) {
   return String(str)
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
+    .replace(/"/g,"&quot;")
 }
 
-/* ===============================
+/* ======================================
    RESET FORM
-================================ */
-function resetForm(){
+====================================== */
+function resetForm() {
 
-  document.getElementById("anime").value="";
-  document.getElementById("season").value="";
-  document.getElementById("episode").value="";
+  document.getElementById("anime").value = ""
+  document.getElementById("season").value = ""
+  document.getElementById("episode").value = ""
 
-  document.querySelectorAll(".download-host").forEach((box,i)=>{
+  const hosts = document.querySelectorAll(".download-host")
 
-    if(i>0) box.remove();
+  hosts.forEach((box, i) => {
 
-    box.querySelector(".host-name").value="";
+    if (i > 0) box.remove()
 
-    box.querySelectorAll(".quality-row").forEach((row,j)=>{
+    box.querySelector(".host-name").value = ""
 
-      if(j>0) row.remove();
+    const rows = box.querySelectorAll(".quality-row")
 
-      row.querySelector(".quality-link").value="";
-      row.querySelector("select").selectedIndex=0;
-
-    });
-
-  });
-
+    rows.forEach((row, j) => {
+      if (j > 0) row.remove()
+      row.querySelector(".quality-link").value = ""
+      row.querySelector("select").selectedIndex = 0
+    })
+  })
 }
 
 /* INIT */
-loadDownloads();
+loadDownloads()
 
   </script>
+
+    
 </body>
 </html>
