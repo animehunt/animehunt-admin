@@ -217,260 +217,283 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
+/* =====================================
+   CONFIG
+===================================== */
+const API = "/api/admin/sidebar"
+const TOKEN_KEY = "AUTH_TOKEN"
 
-const API="/api/admin/sidebar";
+let items = []
+let editId = null
 
-let items=[];
-let editId=null;
+/* =====================================
+   SAFE ELEMENT HELPER
+===================================== */
+function el(id){
+  return document.getElementById(id)
+}
 
-/* ===============================
-   SAFE FETCH
-================================ */
-async function apiFetch(url,options={}){
+/* =====================================
+   SAFE FETCH (JWT + Auto Redirect)
+===================================== */
+async function apiFetch(url, options = {}){
 
-  const res=await fetch(url,{
+  const token = localStorage.getItem(TOKEN_KEY)
+
+  const res = await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
-      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+      "Authorization":"Bearer " + token,
       ...options.headers
     }
-  });
+  })
 
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
-    throw new Error("Session expired");
+  if(res.status === 401 || res.status === 403){
+    localStorage.removeItem(TOKEN_KEY)
+    location.href = "login.html"
+    throw new Error("Unauthorized")
   }
 
-  return res.json().catch(()=>({}));
+  if(!res.ok){
+    throw new Error("Request failed")
+  }
+
+  return res.json().catch(()=>[])
 }
 
-/* ===============================
+/* =====================================
    UTIL
-================================ */
-function sanitize(str,max=150){
-  return (str||"").trim().substring(0,max);
+===================================== */
+function sanitize(str, max = 150){
+  return (str || "").trim().substring(0, max)
 }
 
-function clamp(v,min,max){
-  v=Number(v);
-  if(isNaN(v)) return min;
-  return Math.max(min,Math.min(max,v));
+function clamp(v, min, max){
+  v = Number(v)
+  if(isNaN(v)) return min
+  return Math.max(min, Math.min(max, v))
 }
 
 function isValidURL(u){
-  if(!u) return false;
-  if(u.startsWith("/")) return true;
+  if(!u) return false
+  if(u.startsWith("/")) return true
   try{
-    new URL(u);
-    return true;
+    new URL(u)
+    return true
   }catch{
-    return false;
+    return false
   }
 }
 
-/* ===============================
+/* =====================================
    MODAL CONTROL
-================================ */
+===================================== */
 function openModal(){
-  document.getElementById("modal").style.display="flex";
+  el("modal").style.display = "flex"
 }
 
 function closeModal(){
 
-  document.getElementById("modal").style.display="none";
+  el("modal").style.display = "none"
 
-  title.value="";
-  icon.value="";
-  url.value="";
-  device.value="All";
-  visibility.value="All";
-  highlight.value="None";
-  badgeText.value="";
-  priority.value="";
-  active.checked=true;
-  newTab.checked=false;
+  el("title").value = ""
+  el("icon").value = ""
+  el("url").value = ""
+  el("device").value = "All"
+  el("visibility").value = "All"
+  el("highlight").value = "None"
+  el("badgeText").value = ""
+  el("priority").value = ""
+  el("active").checked = true
+  el("newTab").checked = false
 
-  editId=null;
+  editId = null
 }
 
-/* ===============================
+/* =====================================
    LOAD ITEMS
-================================ */
+===================================== */
 async function loadItems(){
 
   try{
-    items=await apiFetch(API);
-    render();
+    items = await apiFetch(API)
+    if(!Array.isArray(items)) items = []
+    render()
   }catch(err){
-    console.error("Load failed:",err);
+    console.error("Load failed:", err)
   }
 
 }
 
-/* ===============================
+/* =====================================
    SAVE ITEM
-================================ */
+===================================== */
 async function saveItem(){
 
   try{
 
-    const cleanURL=sanitize(url.value,200);
+    const cleanTitle = sanitize(el("title").value,120)
+    const cleanURL   = sanitize(el("url").value,200)
 
-    if(!sanitize(title.value)){
-      alert("Title required");
-      return;
+    if(!cleanTitle){
+      alert("Title required")
+      return
     }
 
     if(!isValidURL(cleanURL)){
-      alert("Invalid URL");
-      return;
+      alert("Invalid URL")
+      return
     }
 
-    const payload={
-      _id:editId,
-      title:sanitize(title.value,120),
-      icon:sanitize(icon.value,20),
-      url:cleanURL,
-      device:device.value,
-      visibility:visibility.value,
-      highlight:highlight.value,
-      badge:sanitize(badgeText.value,30),
-      priority:clamp(priority.value,1,99),
-      active:active.checked,
-      newTab:newTab.checked
-    };
+    const payload = {
+      _id: editId,
+      title: cleanTitle,
+      icon: sanitize(el("icon").value,20),
+      url: cleanURL,
+      device: el("device").value,
+      visibility: el("visibility").value,
+      highlight: el("highlight").value,
+      badge: sanitize(el("badgeText").value,30),
+      priority: clamp(el("priority").value,1,99),
+      active: el("active").checked,
+      newTab: el("newTab").checked
+    }
 
     await apiFetch(API,{
       method:"POST",
-      body:JSON.stringify(payload)
-    });
+      body: JSON.stringify(payload)
+    })
 
-    closeModal();
-    loadItems();
+    closeModal()
+    loadItems()
 
   }catch(err){
-    console.error("Save failed:",err);
-    alert("Save failed");
+    console.error("Save failed:", err)
+    alert("Save failed")
   }
 
 }
 
-/* ===============================
+/* =====================================
    DELETE ITEM
-================================ */
+===================================== */
 async function delItem(id){
 
-  if(!confirm("Delete this sidebar item?")) return;
+  if(!confirm("Delete this sidebar item?")) return
 
   try{
 
     await apiFetch(API,{
       method:"DELETE",
-      body:JSON.stringify({ id })
-    });
+      body: JSON.stringify({ id })
+    })
 
-    loadItems();
+    loadItems()
 
   }catch(err){
-    console.error("Delete failed:",err);
-    alert("Delete failed");
+    console.error("Delete failed:", err)
+    alert("Delete failed")
   }
 
 }
 
-/* ===============================
-   EDIT
-================================ */
+/* =====================================
+   EDIT ITEM
+===================================== */
 function editItem(id){
 
-  const i=items.find(x=>x._id===id);
-  if(!i) return;
+  const i = items.find(x => x._id === id)
+  if(!i) return
 
-  editId=id;
+  editId = id
 
-  title.value=i.title||"";
-  icon.value=i.icon||"";
-  url.value=i.url||"";
-  device.value=i.device||"All";
-  visibility.value=i.visibility||"All";
-  highlight.value=i.highlight||"None";
-  badgeText.value=i.badge||"";
-  priority.value=i.priority||99;
-  active.checked=!!i.active;
-  newTab.checked=!!i.newTab;
+  el("title").value      = i.title || ""
+  el("icon").value       = i.icon || ""
+  el("url").value        = i.url || ""
+  el("device").value     = i.device || "All"
+  el("visibility").value = i.visibility || "All"
+  el("highlight").value  = i.highlight || "None"
+  el("badgeText").value  = i.badge || ""
+  el("priority").value   = i.priority || 99
+  el("active").checked   = !!i.active
+  el("newTab").checked   = !!i.newTab
 
-  openModal();
+  openModal()
 }
 
-/* ===============================
-   SAFE RENDER (NO XSS)
-================================ */
+/* =====================================
+   SAFE RENDER (XSS SAFE)
+===================================== */
 function render(){
 
-  const list=document.getElementById("list");
-  list.innerHTML="";
+  const list = el("list")
+  list.innerHTML = ""
 
   items
-    .sort((a,b)=>a.priority-b.priority)
-    .forEach((i,idx)=>{
+    .sort((a,b)=> (a.priority ?? 99) - (b.priority ?? 99))
+    .forEach((i, idx)=>{
 
-      const row=document.createElement("div");
-      row.className="row";
+      const row = document.createElement("div")
+      row.className = "row"
 
-      const index=document.createElement("span");
-      index.textContent=idx+1;
+      const index = document.createElement("span")
+      index.textContent = idx + 1
 
-      const titleSpan=document.createElement("span");
-      titleSpan.textContent=`${i.icon||""} ${i.title}`;
+      const titleSpan = document.createElement("span")
+      titleSpan.textContent = `${i.icon || ""} ${i.title}`
 
-      if(i.highlight && i.highlight!=="None"){
-        const badge=document.createElement("span");
-        badge.className="badge";
-        badge.textContent=i.highlight;
-        titleSpan.appendChild(badge);
+      if(i.highlight && i.highlight !== "None"){
+        const badge = document.createElement("span")
+        badge.className = "badge"
+        badge.textContent = i.highlight
+        badge.style.marginLeft = "6px"
+        titleSpan.appendChild(badge)
       }
 
-      const urlSpan=document.createElement("span");
-      urlSpan.textContent=i.url;
+      const urlSpan = document.createElement("span")
+      urlSpan.textContent = i.url
 
-      const deviceSpan=document.createElement("span");
-      deviceSpan.textContent=i.device;
+      const deviceSpan = document.createElement("span")
+      deviceSpan.textContent = i.device
 
-      const status=document.createElement("span");
-      status.className="badge";
-      status.textContent=i.active?"ON":"OFF";
+      const status = document.createElement("span")
+      status.className = "badge"
+      status.textContent = i.active ? "ON" : "OFF"
 
-      const actions=document.createElement("span");
-      actions.className="actions";
+      const actions = document.createElement("span")
+      actions.className = "actions"
 
-      const editBtn=document.createElement("button");
-      editBtn.textContent="✏️";
-      editBtn.onclick=()=>editItem(i._id);
+      const editBtn = document.createElement("button")
+      editBtn.textContent = "✏️"
+      editBtn.onclick = () => editItem(i._id)
 
-      const delBtn=document.createElement("button");
-      delBtn.textContent="🗑";
-      delBtn.onclick=()=>delItem(i._id);
+      const delBtn = document.createElement("button")
+      delBtn.textContent = "🗑"
+      delBtn.onclick = () => delItem(i._id)
 
-      actions.appendChild(editBtn);
-      actions.appendChild(delBtn);
+      actions.appendChild(editBtn)
+      actions.appendChild(delBtn)
 
-      row.appendChild(index);
-      row.appendChild(titleSpan);
-      row.appendChild(urlSpan);
-      row.appendChild(deviceSpan);
-      row.appendChild(status);
-      row.appendChild(actions);
+      row.appendChild(index)
+      row.appendChild(titleSpan)
+      row.appendChild(urlSpan)
+      row.appendChild(deviceSpan)
+      row.appendChild(status)
+      row.appendChild(actions)
 
-      list.appendChild(row);
-    });
+      list.appendChild(row)
+    })
 
 }
 
-/* INIT */
-loadItems();
+/* =====================================
+   INIT
+===================================== */
+document.addEventListener("DOMContentLoaded", loadItems)
 
 </script>
+    
+  
 </body>
 </html>
