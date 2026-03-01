@@ -274,19 +274,15 @@
   </main>
 
 </div>
-
 <script>
 
 /* ===============================
-   CONFIG
+   CONFIG (CLOUDFLARE SAFE)
 ================================ */
-const API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5000/api/admin/analytics"
-    : "/api/admin/analytics";
+const API_BASE = "/api/admin/analytics";
 
 /* ===============================
-   ELEMENT REFERENCES
+   ELEMENTS
 ================================ */
 const rangeSelect = document.getElementById("range");
 
@@ -305,21 +301,20 @@ const topBannersEl    = document.getElementById("topBanners");
 const topServersEl    = document.getElementById("topServers");
 
 /* ===============================
-   SAFE FETCH (WITH AUTH)
+   SAFE FETCH
 ================================ */
 async function apiFetch(url){
 
   try{
-
     const res = await fetch(url,{
       headers:{
-        "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN")
+        "Authorization": "Bearer " + (localStorage.getItem("AUTH_TOKEN") || "")
       }
     });
 
     if(!res.ok){
       console.warn("Analytics API failed:", res.status);
-      return null; // ❌ no redirect
+      return null;
     }
 
     return await res.json();
@@ -331,9 +326,20 @@ async function apiFetch(url){
 }
 
 /* ===============================
-   FILL LIST HELPER
+   SAFE TEXT SETTER
+================================ */
+function setText(el, value){
+  if(!el) return;
+  el.textContent = value ?? 0;
+}
+
+/* ===============================
+   SAFE LIST RENDER
 ================================ */
 function fillList(element, arr, formatter){
+
+  if(!element) return;
+
   element.innerHTML = "";
 
   if(!arr || arr.length === 0){
@@ -357,17 +363,20 @@ async function loadAnalytics(){
 
   const data = await apiFetch(`${API_BASE}?range=${range}`);
 
-  if(!data) return;
+  if(!data){
+    console.warn("No analytics data received");
+    return;
+  }
 
-  /* ===== TOP STATS ===== */
-  visitorsEl.textContent     = data.stats?.visitors ?? 0;
-  viewsEl.textContent        = data.stats?.pageViews ?? 0;
-  animeViewsEl.textContent   = data.stats?.animeViews ?? 0;
-  episodeViewsEl.textContent = data.stats?.episodeViews ?? 0;
-  downloadsEl.textContent    = data.stats?.downloads ?? 0;
-  searchesEl.textContent     = data.stats?.searches ?? 0;
+  /* ===== STATS ===== */
+  setText(visitorsEl,     data.stats?.visitors);
+  setText(viewsEl,        data.stats?.pageViews);
+  setText(animeViewsEl,   data.stats?.animeViews);
+  setText(episodeViewsEl, data.stats?.episodeViews);
+  setText(downloadsEl,    data.stats?.downloads);
+  setText(searchesEl,     data.stats?.searches);
 
-  /* ===== LIST DATA ===== */
+  /* ===== LISTS ===== */
   fillList(topAnimeEl, data.topAnime,
     a => `${a.animeSlug} (${a.views})`
   );
@@ -401,14 +410,17 @@ if(rangeSelect){
 }
 
 /* ===============================
-   AUTO REFRESH (OPTIONAL)
+   AUTO REFRESH
 ================================ */
-setInterval(loadAnalytics, 60000); // refresh every 60s
+let refreshInterval = setInterval(loadAnalytics, 60000);
 
-/* INIT */
-loadAnalytics();
+/* ===============================
+   INIT
+================================ */
+document.addEventListener("DOMContentLoaded", loadAnalytics);
 
 </script>
+
 
 </body>
 </html>
