@@ -426,31 +426,32 @@ a{ text-decoration:none; color:inherit }
     <script>
 
 /* ===============================
-   CONFIG (IMPORTANT)
+   CONFIG
 ================================ */
-const BASE = "https://animehunt-backend-rhg6.onrender.com";
-const API = BASE + "/api/admin/anime";
+const API = "/api/admin/anime";
 let editId = null;
 
 /* ===============================
-   SAFE FETCH WRAPPER
+   SAFE FETCH
 ================================ */
 async function apiFetch(url, options = {}) {
+
+  const token = localStorage.getItem("AUTH_TOKEN");
 
   const res = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
+      ...(token && { "Authorization": "Bearer " + token }),
       ...options.headers
     }
   });
 
-  // Unauthorized
   if (res.status === 401) {
+    alert("Session expired");
     localStorage.removeItem("AUTH_TOKEN");
     location.href = "login.html";
-    throw new Error("Session Expired");
+    throw new Error("Unauthorized");
   }
 
   const data = await res.json().catch(() => ({}));
@@ -463,13 +464,48 @@ async function apiFetch(url, options = {}) {
 }
 
 /* ===============================
+   ELEMENT REFERENCES
+================================ */
+const animeList = document.getElementById("animeList");
+const titleEl = document.getElementById("title");
+const slugEl = document.getElementById("slug");
+const typeEl = document.getElementById("type");
+const statusEl = document.getElementById("status");
+const posterEl = document.getElementById("poster");
+const bannerEl = document.getElementById("banner");
+const yearEl = document.getElementById("year");
+const ratingEl = document.getElementById("rating");
+const languageEl = document.getElementById("language");
+const durationEl = document.getElementById("duration");
+const categoriesEl = document.getElementById("categories");
+const tagsEl = document.getElementById("tags");
+const descriptionEl = document.getElementById("description");
+
+const isHomeEl = document.getElementById("isHome");
+const isTrendingEl = document.getElementById("isTrending");
+const isMostViewedEl = document.getElementById("isMostViewed");
+const isBannerEl = document.getElementById("isBanner");
+
+const typeFilter = document.getElementById("typeFilter");
+const statusFilter = document.getElementById("statusFilter");
+const homeFilter = document.getElementById("homeFilter");
+const searchAnime = document.getElementById("searchAnime");
+
+const animeModal = document.getElementById("animeModal");
+const modalTitle = document.getElementById("modalTitle");
+const openAddAnime = document.getElementById("openAddAnime");
+const closeModal = document.getElementById("closeModal");
+const saveAnime = document.getElementById("saveAnime");
+
+/* ===============================
    AUTO SLUG
 ================================ */
-title.addEventListener("input", () => {
-  slug.value = title.value
+titleEl.addEventListener("input", () => {
+  slugEl.value = titleEl.value
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+    .replace(/\s+/g, "-")
+    .trim();
 });
 
 /* ===============================
@@ -480,10 +516,10 @@ async function loadAnime() {
   try {
 
     const query = new URLSearchParams({
-      type: typeFilter.value || "",
-      status: statusFilter.value || "",
-      home: homeFilter.value || "",
-      search: searchAnime.value || ""
+      type: typeFilter.value,
+      status: statusFilter.value,
+      home: homeFilter.value,
+      search: searchAnime.value
     }).toString();
 
     const data = await apiFetch(`${API}?${query}`);
@@ -491,7 +527,8 @@ async function loadAnime() {
     animeList.innerHTML = "";
 
     if (!data.length) {
-      animeList.innerHTML = "<div style='padding:20px;color:#888'>No Anime Found</div>";
+      animeList.innerHTML =
+        "<div style='padding:20px;color:#888'>No Anime Found</div>";
       return;
     }
 
@@ -512,8 +549,8 @@ async function loadAnime() {
         <span>${a.isHome ? "Yes" : "No"}</span>
         <span>${a.isTrending ? "Yes" : "No"}</span>
         <span class="actions">
-          <button onclick="editAnime('${a._id}')">✏️</button>
-          <button onclick="deleteAnime('${a._id}')">🗑</button>
+          <button onclick="editAnime('${a.id}')">✏️</button>
+          <button onclick="deleteAnime('${a.id}')">🗑</button>
         </span>
       `;
 
@@ -526,30 +563,30 @@ async function loadAnime() {
 }
 
 /* ===============================
-   SAVE (CREATE / UPDATE)
+   SAVE
 ================================ */
 saveAnime.onclick = async () => {
 
   try {
 
     const payload = {
-      title: title.value.trim(),
-      slug: slug.value.trim(),
-      type: type.value,
-      status: status.value,
-      poster: poster.value.trim(),
-      banner: banner.value.trim(),
-      year: year.value,
-      rating: rating.value,
-      language: language.value,
-      duration: duration.value,
-      categories: categories.value,
-      tags: tags.value,
-      description: description.value,
-      isHome: isHome.checked,
-      isTrending: isTrending.checked,
-      isMostViewed: isMostViewed.checked,
-      isBanner: isBanner.checked
+      title: titleEl.value.trim(),
+      slug: slugEl.value.trim(),
+      type: typeEl.value,
+      status: statusEl.value,
+      poster: posterEl.value.trim(),
+      banner: bannerEl.value.trim(),
+      year: yearEl.value,
+      rating: ratingEl.value,
+      language: languageEl.value,
+      duration: durationEl.value,
+      categories: categoriesEl.value,
+      tags: tagsEl.value,
+      description: descriptionEl.value,
+      isHome: isHomeEl.checked,
+      isTrending: isTrendingEl.checked,
+      isMostViewed: isMostViewedEl.checked,
+      isBanner: isBannerEl.checked
     };
 
     if (!payload.title) {
@@ -564,7 +601,7 @@ saveAnime.onclick = async () => {
         body: JSON.stringify(payload)
       });
 
-      alert("Anime Updated Successfully");
+      alert("Anime Updated");
 
     } else {
 
@@ -573,7 +610,7 @@ saveAnime.onclick = async () => {
         body: JSON.stringify(payload)
       });
 
-      alert("Anime Created Successfully");
+      alert("Anime Created");
     }
 
     closeModalAndReset();
@@ -592,12 +629,8 @@ window.deleteAnime = async (id) => {
   if (!confirm("Delete this anime?")) return;
 
   try {
-    await apiFetch(`${API}/${id}`, {
-      method: "DELETE"
-    });
-
+    await apiFetch(`${API}/${id}`, { method: "DELETE" });
     loadAnime();
-
   } catch (err) {
     alert(err.message);
   }
@@ -615,28 +648,28 @@ window.editAnime = async (id) => {
     editId = id;
     modalTitle.innerText = "Edit Anime";
 
-    title.value = a.title;
-    slug.value = a.slug;
-    type.value = a.type;
-    status.value = a.status;
-    poster.value = a.poster || "";
-    banner.value = a.banner || "";
-    year.value = a.year || "";
-    rating.value = a.rating || "";
-    language.value = a.language || "";
-    duration.value = a.duration || "";
-    categories.value = a.categories || "";
-    tags.value = a.tags || "";
-    description.value = a.description || "";
+    titleEl.value = a.title;
+    slugEl.value = a.slug;
+    typeEl.value = a.type;
+    statusEl.value = a.status;
+    posterEl.value = a.poster || "";
+    bannerEl.value = a.banner || "";
+    yearEl.value = a.year || "";
+    ratingEl.value = a.rating || "";
+    languageEl.value = a.language || "";
+    durationEl.value = a.duration || "";
+    categoriesEl.value = a.categories || "";
+    tagsEl.value = a.tags || "";
+    descriptionEl.value = a.description || "";
 
-    isHome.checked = a.isHome;
-    isTrending.checked = a.isTrending;
-    isMostViewed.checked = a.isMostViewed;
-    isBanner.checked = a.isBanner;
+    isHomeEl.checked = !!a.isHome;
+    isTrendingEl.checked = !!a.isTrending;
+    isMostViewedEl.checked = !!a.isMostViewed;
+    isBannerEl.checked = !!a.isBanner;
 
     animeModal.style.display = "flex";
 
-  } catch (err) {
+  } catch {
     alert("Failed to load anime");
   }
 };
@@ -662,10 +695,10 @@ function closeModalAndReset() {
   modalTitle.innerText = "Add Anime";
 
   document.querySelectorAll(".form-grid input, .form-grid textarea")
-    .forEach(el => el.value = "");
-
-  document.querySelectorAll(".form-grid input[type='checkbox']")
-    .forEach(el => el.checked = false);
+    .forEach(el => {
+      if (el.type === "checkbox") el.checked = false;
+      else el.value = "";
+    });
 }
 
 openAddAnime.onclick = () => {
@@ -695,6 +728,10 @@ function debounce(func, delay) {
 loadAnime();
 
     </script>
+
+
+    
+    
 
 
 </body>
