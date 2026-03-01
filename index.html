@@ -217,71 +217,123 @@ body{
    CONFIG
 ================================ */
 const DASH_API = "/api/admin/dashboard";
+const TOKEN_KEY = "AUTH_TOKEN";
+
+/* ===============================
+   ELEMENT GETTER (SAFE)
+================================ */
+function el(id){
+  return document.getElementById(id);
+}
+
+/* ===============================
+   AUTH CHECK
+================================ */
+function checkAuth(){
+  const token = localStorage.getItem(TOKEN_KEY);
+  if(!token){
+    location.href = "login.html";
+    return false;
+  }
+  return true;
+}
 
 /* ===============================
    SAFE FETCH WRAPPER
 ================================ */
-async function apiFetch(url, options = {}) {
+async function apiFetch(url){
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN"),
-      ...options.headers
+  try{
+
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    const res = await fetch(url,{
+      headers:{
+        "Authorization":"Bearer " + token
+      }
+    });
+
+    if(res.status === 401 || res.status === 403){
+      localStorage.removeItem(TOKEN_KEY);
+      location.href = "login.html";
+      return null;
     }
-  });
 
-  if (res.status === 401 || res.status === 403) {
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Session expired");
+    if(!res.ok){
+      console.warn("Dashboard API error:", res.status);
+      return null;
+    }
+
+    return await res.json();
+
+  }catch(err){
+    console.error("Network error:", err);
+    return null;
   }
+}
 
-  return res.json();
+/* ===============================
+   SET VALUE SAFE
+================================ */
+function setText(id,value){
+  const element = el(id);
+  if(element){
+    element.textContent = value;
+  }
 }
 
 /* ===============================
    LOAD DASHBOARD
 ================================ */
-async function loadDashboard() {
+async function loadDashboard(){
 
-  try {
+  if(!checkAuth()) return;
+
+  try{
 
     const data = await apiFetch(DASH_API);
 
+    if(!data){
+      console.warn("No dashboard data received");
+      return;
+    }
+
     /* ===== CORE ===== */
-    animeCount.textContent     = data.core?.animeCount ?? 0;
-    episodeCount.textContent   = data.core?.episodeCount ?? 0;
-    categoryCount.textContent  = data.core?.categoryCount ?? 0;
-    bannerCount.textContent    = data.core?.bannerCount ?? 0;
-    downloadCount.textContent  = data.core?.downloadCount ?? 0;
-    serverCount.textContent    = data.core?.serverCount ?? 0;
+    setText("animeCount",     data.core?.animeCount ?? 0);
+    setText("episodeCount",   data.core?.episodeCount ?? 0);
+    setText("categoryCount",  data.core?.categoryCount ?? 0);
+    setText("bannerCount",    data.core?.bannerCount ?? 0);
+    setText("downloadCount",  data.core?.downloadCount ?? 0);
+    setText("serverCount",    data.core?.serverCount ?? 0);
 
     /* ===== GROWTH ===== */
-    activeAds.textContent      = data.growth?.activeAds ?? 0;
-    todayRevenue.textContent   = "₹" + (data.growth?.todayRevenue ?? 0);
-    adClicks.textContent       = data.growth?.adClicks ?? 0;
-    trendingAnime.textContent  = data.growth?.trendingAnime ?? 0;
-    ongoingAnime.textContent   = data.growth?.ongoingAnime ?? 0;
-    topRated.textContent       = data.growth?.topRated ?? 0;
+    setText("activeAds",      data.growth?.activeAds ?? 0);
+    setText("todayRevenue",   "₹" + (data.growth?.todayRevenue ?? 0));
+    setText("adClicks",       data.growth?.adClicks ?? 0);
+    setText("trendingAnime",  data.growth?.trendingAnime ?? 0);
+    setText("ongoingAnime",   data.growth?.ongoingAnime ?? 0);
+    setText("topRated",       data.growth?.topRated ?? 0);
 
     /* ===== SYSTEM ===== */
-    cmsStatus.textContent      = data.system?.cmsStatus ?? "OK";
-    serverLoad.textContent     = data.system?.serverLoad ?? "Low";
-    apiStatus.textContent      = data.system?.apiStatus ?? "Online";
-    aiStatus.textContent       = data.system?.aiStatus ?? "Active";
-    searchStatus.textContent   = data.system?.searchStatus ?? "Ready";
-    backupStatus.textContent   = data.system?.backupStatus ?? "Synced";
+    setText("cmsStatus",      data.system?.cmsStatus ?? "OK");
+    setText("serverLoad",     data.system?.serverLoad ?? "Low");
+    setText("apiStatus",      data.system?.apiStatus ?? "Online");
+    setText("aiStatus",       data.system?.aiStatus ?? "Active");
+    setText("searchStatus",   data.system?.searchStatus ?? "Ready");
+    setText("backupStatus",   data.system?.backupStatus ?? "Synced");
 
-  } catch (err) {
-    console.error("Dashboard Error:", err);
+  }catch(err){
+    console.error("Dashboard load error:", err);
   }
+
 }
 
 /* ===============================
-   INIT
+   AUTO REFRESH (Optional)
 ================================ */
+setInterval(loadDashboard, 60000); // refresh every 60 sec
+
+/* INIT */
 document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 
