@@ -292,32 +292,40 @@
   </main>
 
 </div>
-<script>
 
+<script>
 /* ==========================================
    CONFIG
 ========================================== */
 const API = "/api/admin/seo";
+const TOKEN_KEY = "AUTH_TOKEN";
 const saveBtn = document.getElementById("saveSEO");
 
 /* ==========================================
-   SAFE FETCH WRAPPER
+   SAFE FETCH
 ========================================== */
 async function apiFetch(url, options = {}) {
+
+  const token = localStorage.getItem(TOKEN_KEY);
 
   const res = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + (localStorage.getItem("AUTH_TOKEN") || ""),
+      "Authorization": "Bearer " + (token || ""),
       ...options.headers
     }
   });
 
-  if (!res.ok) {
-    localStorage.removeItem("AUTH_TOKEN");
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem(TOKEN_KEY);
+    alert("Session expired. Please login again.");
     location.href = "login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if (!res.ok) {
+    throw new Error("Request failed");
   }
 
   return res.json().catch(() => ({}));
@@ -365,14 +373,14 @@ async function loadSEO() {
 }
 
 /* ==========================================
-   VALIDATION HELPERS
+   HELPERS
 ========================================== */
 function sanitize(str, max = 300) {
-  if (!str) return "";
-  return String(str).trim().substring(0, max);
+  return String(str || "").trim().substring(0, max);
 }
 
 function isValidURL(url) {
+  if (!url) return true;
   try {
     new URL(url);
     return true;
@@ -381,16 +389,22 @@ function isValidURL(url) {
   }
 }
 
+function clampTextLength(input, max) {
+  if (input.value.length > max) {
+    input.value = input.value.substring(0, max);
+  }
+}
+
 /* ==========================================
-   SAVE SEO CONFIG
+   SAVE SEO
 ========================================== */
-saveBtn.addEventListener("click", async () => {
+async function saveSEO() {
 
   try {
 
     const canonicalURL = sanitize(canonical.value, 200);
 
-    if (canonicalURL && !isValidURL(canonicalURL)) {
+    if (!isValidURL(canonicalURL)) {
       showStatus("Invalid Canonical URL ❌", true);
       return;
     }
@@ -426,7 +440,6 @@ saveBtn.addEventListener("click", async () => {
         twDesc: sanitize(twDesc.value, 300),
         twCard: twCard.value
       }
-
     };
 
     await apiFetch(API, {
@@ -440,14 +453,13 @@ saveBtn.addEventListener("click", async () => {
 
     console.error("SEO save failed:", err);
     showStatus("Save Failed ❌", true);
-    loadSEO(); // rollback
+    loadSEO(); // rollback UI
 
   }
-
-});
+}
 
 /* ==========================================
-   STATUS UI
+   STATUS BUTTON UI
 ========================================== */
 function showStatus(msg, isError = false) {
 
@@ -465,12 +477,30 @@ function showStatus(msg, isError = false) {
 }
 
 /* ==========================================
+   AUTO LIMITERS (LIVE TRIM)
+========================================== */
+[
+  siteTitle, homeTitle, ogTitle, twTitle
+].forEach(el => {
+  el.addEventListener("input", () => clampTextLength(el, 120));
+});
+
+[
+  siteDesc, homeDesc, ogDesc, twDesc
+].forEach(el => {
+  el.addEventListener("input", () => clampTextLength(el, 300));
+});
+
+/* ==========================================
    INIT
 ========================================== */
-loadSEO();
+document.addEventListener("DOMContentLoaded", () => {
 
+  saveBtn.addEventListener("click", saveSEO);
+  loadSEO();
+
+});
 </script>
-
 
 </body>
 </html>
