@@ -317,138 +317,11 @@ a{ text-decoration:none; color:inherit }
 /* ===============================
    CONFIG
 ================================ */
-const API="/api/admin/banners";
-
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url,options={}){
-
-  const res=await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      ...options.headers
-    }
-  });
-
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href="login.html";
-    throw new Error("Session expired");
-  }
-
-  return res.json();
-}
-
-/* ===============================
-   LOAD BANNERS
-================================ */
-async function loadBanners(){
-
-  try{
-    const banners=await apiFetch(API);
-    render(banners);
-  }catch(err){
-    console.error(err);
-  }
-
-}
-
-/* ===============================
-   SAFE RENDER
-================================ */
-function render(banners){
-
-  bannerList.innerHTML="";
-
-  banners.forEach(b=>{
-
-    const row=document.createElement("div");
-    row.className="row";
-
-    row.innerHTML=`
-      <span>${escapeHTML(b.title)}</span>
-      <span>${escapeHTML(b.type)}</span>
-      <span>${escapeHTML(b.target)}</span>
-      <span>${escapeHTML(b.position)}</span>
-      <span>${b.order}</span>
-
-      <span>
-        <label class="switch">
-          <input type="checkbox" ${b.active ? "checked":""}>
-          <span class="slider"></span>
-        </label>
-      </span>
-
-      <span class="actions">
-        <button>Delete</button>
-      </span>
-    `;
-
-    /* Toggle Handler */
-    row.querySelector("input").addEventListener("change",e=>{
-      toggleStatus(b._id,e.target.checked);
-    });
-
-    /* Delete Handler */
-    row.querySelector("button").addEventListener("click",()=>{
-      deleteBanner(b._id);
-    });
-
-    bannerList.appendChild(row);
-
-  });
-}
-
-/* ===============================
-   SAVE BANNER
-================================ */
-async function saveBanner(){
-
-  try{
-
-    if(!banImage.value.trim()){
-      alert("Image URL required");
-      return;
-    }
-
-    const payload={
-      title:banTitle.value.trim(),
-      image:banImage.value.trim(),
-      type:banType.value,
-      target:banTarget.value.trim(),
-      position:banPosition.value.trim(),
-      order:Number(banOrder.value||0),
-      device:banDevice.value,
-      active:banActive.checked,
-      autoRotate:banRotate.checked
-    };
-
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(payload)
-    });
-
-    closeModal();
-    resetForm();
-    loadBanners();
-
-  }catch(err){
-    console.error(err);
-  }
-
-}
-<script>
-
-/* ===============================
-   CONFIG
-================================ */
 const API = "/api/admin/banners";
 let editingId = null;
 
 /* ===============================
-   SAFE FETCH WRAPPER (WITH AUTH)
+   SAFE FETCH WRAPPER (JWT READY)
 ================================ */
 async function apiFetch(url, options = {}) {
 
@@ -457,7 +330,6 @@ async function apiFetch(url, options = {}) {
   const res = await fetch(url, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
       "Authorization": token ? "Bearer " + token : "",
       ...options.headers
     }
@@ -466,12 +338,12 @@ async function apiFetch(url, options = {}) {
   if (res.status === 401) {
     localStorage.removeItem("AUTH_TOKEN");
     location.href = "login.html";
-    return;
+    throw new Error("Unauthorized");
   }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => null);
-    throw new Error(error?.message || "Request failed");
+    const error = await res.text();
+    throw new Error(error || "Request failed");
   }
 
   return res.json();
@@ -483,45 +355,39 @@ async function apiFetch(url, options = {}) {
 const previewImg = document.getElementById("previewImg");
 const previewError = document.getElementById("previewError");
 
-banImage.addEventListener("input", () => {
-  showPreview(banImage.value.trim());
-});
-
 banImageFile.addEventListener("change", () => {
+
   const file = banImageFile.files[0];
   if (!file) return;
 
   const reader = new FileReader();
+
   reader.onload = e => {
-    showPreview(e.target.result);
-  };
-  reader.readAsDataURL(file);
-});
-
-function showPreview(src) {
-  previewError.style.display = "none";
-  previewImg.style.display = "none";
-
-  if (!src) return;
-
-  previewImg.src = src;
-  previewImg.onload = () => {
+    previewImg.src = e.target.result;
     previewImg.style.display = "block";
+    previewError.style.display = "none";
   };
-  previewImg.onerror = () => {
+
+  reader.onerror = () => {
+    previewImg.style.display = "none";
     previewError.style.display = "block";
   };
-}
+
+  reader.readAsDataURL(file);
+});
 
 /* ===============================
    LOAD BANNERS
 ================================ */
 async function loadBanners() {
+
   try {
+
     const banners = await apiFetch(API);
     render(banners);
+
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
   }
 }
 
@@ -531,6 +397,12 @@ async function loadBanners() {
 function render(banners) {
 
   bannerList.innerHTML = "";
+
+  if (!banners.length) {
+    bannerList.innerHTML =
+      "<div style='padding:20px;color:#888'>No banners found</div>";
+    return;
+  }
 
   banners.forEach(b => {
 
@@ -542,7 +414,7 @@ function render(banners) {
       <span>${escapeHTML(b.type)}</span>
       <span>${escapeHTML(b.target || "-")}</span>
       <span>${escapeHTML(b.position || "-")}</span>
-      <span>${b.order}</span>
+      <span>${b.banner_order ?? 0}</span>
 
       <span>
         <label class="switch">
@@ -552,18 +424,18 @@ function render(banners) {
       </span>
 
       <span class="actions">
-        <button data-id="${b._id}" class="delete-btn">Delete</button>
+        <button data-id="${b.id}" class="delete-btn">Delete</button>
       </span>
     `;
 
-    /* Toggle */
+    /* Toggle Status */
     row.querySelector("input").addEventListener("change", e => {
-      toggleStatus(b._id, e.target.checked);
+      toggleStatus(b.id, e.target.checked);
     });
 
     /* Delete */
     row.querySelector(".delete-btn").addEventListener("click", () => {
-      deleteBanner(b._id);
+      deleteBanner(b.id);
     });
 
     bannerList.appendChild(row);
@@ -571,40 +443,37 @@ function render(banners) {
 }
 
 /* ===============================
-   SAVE BANNER
+   SAVE BANNER (R2 UPLOAD)
 ================================ */
 async function saveBanner() {
 
   try {
 
-    let imageValue = banImage.value.trim();
+    const form = new FormData();
 
-    /* If file selected, convert to base64 (temporary support) */
-    if (banImageFile.files.length > 0) {
-      const file = banImageFile.files[0];
-      imageValue = await toBase64(file);
-    }
+    form.append("title", banTitle.value.trim());
+    form.append("type", banType.value);
+    form.append("target", banTarget.value.trim());
+    form.append("position", banPosition.value.trim());
+    form.append("order", banOrder.value || 0);
+    form.append("device", banDevice.value);
 
-    if (!imageValue) {
-      alert("Image required");
+    if (banActive.checked) form.append("active", "1");
+    if (banRotate.checked) form.append("autoRotate", "1");
+
+    if (!banImageFile.files.length) {
+      alert("Image file required");
       return;
     }
 
-    const payload = {
-      title: banTitle.value.trim(),
-      image: imageValue,
-      type: banType.value,
-      target: banTarget.value.trim(),
-      position: banPosition.value.trim(),
-      order: Number(banOrder.value || 0),
-      device: banDevice.value,
-      active: banActive.checked,
-      autoRotate: banRotate.checked
-    };
+    form.append("image", banImageFile.files[0]);
 
-    await apiFetch(API, {
+    await fetch(API, {
       method: "POST",
-      body: JSON.stringify(payload)
+      headers: {
+        "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN")
+      },
+      body: form
     });
 
     closeModal();
@@ -620,13 +489,17 @@ async function saveBanner() {
    TOGGLE STATUS
 ================================ */
 async function toggleStatus(id, active) {
+
   try {
+
     await apiFetch(`${API}/${id}/status`, {
       method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ active })
     });
+
   } catch (err) {
-    alert(err.message);
+    alert("Update failed");
     loadBanners();
   }
 }
@@ -639,17 +512,20 @@ async function deleteBanner(id) {
   if (!confirm("Delete banner?")) return;
 
   try {
+
     await apiFetch(`${API}/${id}`, {
       method: "DELETE"
     });
+
     loadBanners();
+
   } catch (err) {
-    alert(err.message);
+    alert("Delete failed");
   }
 }
 
 /* ===============================
-   UTILS
+   UTILITIES
 ================================ */
 function escapeHTML(str) {
   return String(str)
@@ -659,18 +535,6 @@ function escapeHTML(str) {
     .replace(/"/g, "&quot;");
 }
 
-function toBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-/* ===============================
-   MODAL CONTROL
-================================ */
 function openModal() {
   bannerModal.style.display = "flex";
 }
@@ -681,7 +545,6 @@ function closeModal() {
 
 function resetForm() {
   banTitle.value = "";
-  banImage.value = "";
   banImageFile.value = "";
   banType.value = "Hero";
   banTarget.value = "";
@@ -698,5 +561,8 @@ function resetForm() {
 loadBanners();
 
 </script>
+
+
+
 </body>
 </html>
