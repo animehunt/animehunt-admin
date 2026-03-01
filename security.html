@@ -538,49 +538,58 @@ color:#ccc;
 </section>
 </main>
 </div>
-
 <script>
 /* ===============================
    CONFIG
 ================================ */
 const API = "/api/admin/security";
 const STATS_API = "/api/security/stats";
+const TOKEN_KEY = "AUTH_TOKEN";
 
-let statsInterval = null;
-let saveTimeout = null;
+let saveTimer = null;
+let statsTimer = null;
 
 /* ===============================
-   SAFE ELEMENT GETTER
+   HELPER
 ================================ */
-function el(id){
-  return document.getElementById(id);
+function el(id){ return document.getElementById(id); }
+
+function clamp(v,min,max){
+  if(isNaN(v)) return min;
+  return Math.max(min,Math.min(max,v));
 }
 
 /* ===============================
    SAFE FETCH
 ================================ */
-async function apiFetch(url, options = {}){
+async function apiFetch(url,options={}){
+
+  const token = localStorage.getItem(TOKEN_KEY);
 
   const res = await fetch(url,{
     ...options,
     headers:{
       "Content-Type":"application/json",
-      Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN"),
+      "Authorization": token ? "Bearer "+token : "",
       ...options.headers
     }
   });
 
-  if(!res.ok){
-    localStorage.removeItem("AUTH_TOKEN");
+  if(res.status===401){
+    localStorage.removeItem(TOKEN_KEY);
     location.href="login.html";
-    throw new Error("Session expired");
+    throw new Error("Unauthorized");
+  }
+
+  if(!res.ok){
+    throw new Error("Request failed");
   }
 
   return res.json().catch(()=>({}));
 }
 
 /* ===============================
-   LOAD SECURITY CONFIG
+   LOAD CONFIG
 ================================ */
 async function loadSecurity(){
 
@@ -610,41 +619,45 @@ async function loadSecurity(){
     updateFirewallLabel();
 
   }catch(err){
-    console.error("Load failed:",err);
+    console.error("Load error:",err);
   }
+
 }
 
 /* ===============================
-   SAVE SECURITY CONFIG
+   SAVE (DEBOUNCED)
 ================================ */
-function queueSave(){
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(saveSecurity,400);
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveSecurity,400);
 }
 
 async function saveSecurity(){
 
   try{
 
-    const payload={
+    const payload = {
       ultra: el("ultraMode").checked,
       firewallLevel: clamp(+el("firewallLevel").value,1,5),
+
       geo:{
         indiaOnly: el("indiaOnly").checked,
-        blockForeign: el("blockForeign").checked,
-        blockedCountries:["CN","RU","IR"]
+        blockForeign: el("blockForeign").checked
       },
+
       admin:{
         loginLimit: el("loginLimit").checked,
         deviceLock: el("deviceLock").checked,
         sessionMonitor: el("sessionMonitor").checked
       },
+
       ai:{
         autoBan: el("autoBan").checked,
         brute: el("banBrute").checked,
         bot: el("banBots").checked,
         learning: el("aiLearn").checked
       },
+
       system:{
         hideServer: el("hideServerInfo").checked,
         hideTech: el("hideTechStack").checked
@@ -657,21 +670,24 @@ async function saveSecurity(){
     });
 
   }catch(err){
-    console.error("Save failed:",err);
-    loadSecurity(); // rollback
+    console.error("Save error:",err);
+    loadSecurity(); // rollback UI
   }
+
 }
 
 /* ===============================
-   ULTRA MODE
+   ULTRA MODE TOGGLE (INSTANT)
 ================================ */
 el("ultraMode").addEventListener("change", async ()=>{
 
   try{
+
     await apiFetch(API+"/ultra",{
       method:"POST",
       body:JSON.stringify({ enable: el("ultraMode").checked })
     });
+
   }catch{
     el("ultraMode").checked = !el("ultraMode").checked;
   }
@@ -679,13 +695,13 @@ el("ultraMode").addEventListener("change", async ()=>{
 });
 
 /* ===============================
-   FIREWALL LEVEL
+   FIREWALL LABEL
 ================================ */
 function updateFirewallLabel(){
 
   const level = +el("firewallLevel").value;
 
-  const map={
+  const map = {
     1:"Level 1 – Basic",
     2:"Level 2 – Moderate",
     3:"Level 3 – Strong",
@@ -698,35 +714,11 @@ function updateFirewallLabel(){
 
 el("firewallLevel").addEventListener("input",()=>{
   updateFirewallLabel();
-  queueSave();
+  scheduleSave();
 });
 
 /* ===============================
-   LIVE SECURITY STATS
-================================ */
-async function loadStats(){
-
-  try{
-
-    const d = await apiFetch(STATS_API);
-
-    el("ipCount").innerText = d.blockedIPs || 0;
-    el("liveUsers").innerText = d.liveUsers || 0;
-    el("reqPerSec").innerText = d.reqPerSec || 0;
-    el("blockedReq").innerText = d.blockedReq || 0;
-
-  }catch(err){
-    console.error("Stats error:",err);
-  }
-}
-
-function startStats(){
-  if(statsInterval) clearInterval(statsInterval);
-  statsInterval = setInterval(loadStats,4000);
-}
-
-/* ===============================
-   ATTACH CHANGE LISTENERS
+   ATTACH LISTENERS
 ================================ */
 [
   "indiaOnly",
@@ -743,16 +735,33 @@ function startStats(){
 ].forEach(id=>{
   const element = el(id);
   if(element){
-    element.addEventListener("change",queueSave);
+    element.addEventListener("change",scheduleSave);
   }
 });
 
 /* ===============================
-   UTIL
+   LIVE STATS
 ================================ */
-function clamp(v,min,max){
-  if(isNaN(v)) return min;
-  return Math.max(min,Math.min(max,v));
+async function loadStats(){
+
+  try{
+
+    const d = await apiFetch(STATS_API);
+
+    el("ipCount").innerText = d.blockedIPs ?? 0;
+    el("liveUsers").innerText = d.liveUsers ?? 0;
+    el("reqPerSec").innerText = d.reqPerSec ?? 0;
+    el("blockedReq").innerText = d.blockedReq ?? 0;
+
+  }catch(err){
+    console.error("Stats error:",err);
+  }
+
+}
+
+function startStats(){
+  if(statsTimer) clearInterval(statsTimer);
+  statsTimer = setInterval(loadStats,5000);
 }
 
 /* ===============================
@@ -764,5 +773,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   startStats();
 });
 </script>
+
 </body>
 </html>
