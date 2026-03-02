@@ -217,15 +217,9 @@ body{
 /* ===============================
    CONFIG
 ================================ */
-const DASH_API = "/api/admin/dashboard";
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev";
+const DASH_API = API_BASE + "/api/admin/dashboard";
 const TOKEN_KEY = "AUTH_TOKEN";
-
-/* ===============================
-   ELEMENT GETTER (SAFE)
-================================ */
-function el(id){
-  return document.getElementById(id);
-}
 
 /* ===============================
    AUTH CHECK
@@ -233,7 +227,7 @@ function el(id){
 function checkAuth(){
   const token = localStorage.getItem(TOKEN_KEY);
   if(!token){
-    location.href = "login.html";
+    window.location.href = "login.html";
     return false;
   }
   return true;
@@ -254,14 +248,14 @@ async function apiFetch(url){
       }
     });
 
-    if(res.status === 401 || res.status === 403){
+    if(res.status === 401){
       localStorage.removeItem(TOKEN_KEY);
-      location.href = "login.html";
+      window.location.href = "login.html";
       return null;
     }
 
     if(!res.ok){
-      console.warn("Dashboard API error:", res.status);
+      console.warn("API Error:", res.status);
       return null;
     }
 
@@ -274,65 +268,58 @@ async function apiFetch(url){
 }
 
 /* ===============================
-   SET VALUE SAFE
+   SAFE TEXT SETTER
 ================================ */
 function setText(id,value){
-  const element = el(id);
-  if(element){
-    element.textContent = value;
+  const el = document.getElementById(id);
+  if(el){
+    el.textContent = value;
   }
 }
 
 /* ===============================
-   LOAD DASHBOARD
+   LOAD DASHBOARD DATA
 ================================ */
 async function loadDashboard(){
 
   if(!checkAuth()) return;
 
-  try{
+  const data = await apiFetch(DASH_API);
 
-    const data = await apiFetch(DASH_API);
-
-    if(!data){
-      console.warn("No dashboard data received");
-      return;
-    }
-
-    /* ===== CORE ===== */
-    setText("animeCount",     data.core?.animeCount ?? 0);
-    setText("episodeCount",   data.core?.episodeCount ?? 0);
-    setText("categoryCount",  data.core?.categoryCount ?? 0);
-    setText("bannerCount",    data.core?.bannerCount ?? 0);
-    setText("downloadCount",  data.core?.downloadCount ?? 0);
-    setText("serverCount",    data.core?.serverCount ?? 0);
-
-    /* ===== GROWTH ===== */
-    setText("activeAds",      data.growth?.activeAds ?? 0);
-    setText("todayRevenue",   "₹" + (data.growth?.todayRevenue ?? 0));
-    setText("adClicks",       data.growth?.adClicks ?? 0);
-    setText("trendingAnime",  data.growth?.trendingAnime ?? 0);
-    setText("ongoingAnime",   data.growth?.ongoingAnime ?? 0);
-    setText("topRated",       data.growth?.topRated ?? 0);
-
-    /* ===== SYSTEM ===== */
-    setText("cmsStatus",      data.system?.cmsStatus ?? "OK");
-    setText("serverLoad",     data.system?.serverLoad ?? "Low");
-    setText("apiStatus",      data.system?.apiStatus ?? "Online");
-    setText("aiStatus",       data.system?.aiStatus ?? "Active");
-    setText("searchStatus",   data.system?.searchStatus ?? "Ready");
-    setText("backupStatus",   data.system?.backupStatus ?? "Synced");
-
-  }catch(err){
-    console.error("Dashboard load error:", err);
+  if(!data){
+    console.warn("No dashboard data");
+    return;
   }
 
+  /* ===== CORE ===== */
+  setText("animeCount",     data.core?.animeCount ?? 0);
+  setText("episodeCount",   data.core?.episodeCount ?? 0);
+  setText("categoryCount",  data.core?.categoryCount ?? 0);
+  setText("bannerCount",    data.core?.bannerCount ?? 0);
+  setText("downloadCount",  data.core?.downloadCount ?? 0);
+  setText("serverCount",    data.core?.serverCount ?? 0);
+
+  /* ===== GROWTH ===== */
+  setText("activeAds",      data.growth?.activeAds ?? 0);
+  setText("todayRevenue",   "₹" + (data.growth?.todayRevenue ?? 0));
+  setText("adClicks",       data.growth?.adClicks ?? 0);
+  setText("trendingAnime",  data.growth?.trendingAnime ?? 0);
+  setText("ongoingAnime",   data.growth?.ongoingAnime ?? 0);
+  setText("topRated",       data.growth?.topRated ?? 0);
+
+  /* ===== SYSTEM ===== */
+  setText("cmsStatus",      data.system?.cmsStatus ?? "OK");
+  setText("serverLoad",     data.system?.serverLoad ?? "Low");
+  setText("apiStatus",      data.system?.apiStatus ?? "Online");
+  setText("aiStatus",       data.system?.aiStatus ?? "Active");
+  setText("searchStatus",   data.system?.searchStatus ?? "Ready");
+  setText("backupStatus",   data.system?.backupStatus ?? "Synced");
 }
 
 /* ===============================
-   AUTO REFRESH (Optional)
+   AUTO REFRESH
 ================================ */
-setInterval(loadDashboard, 60000); // refresh every 60 sec
+setInterval(loadDashboard, 60000);
 
 /* INIT */
 document.addEventListener("DOMContentLoaded", loadDashboard);
