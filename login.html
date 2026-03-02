@@ -49,15 +49,15 @@ button{
 <script>
 async function login(){
 
-  const username=document.getElementById('username').value.trim()
-  const password=document.getElementById('password').value.trim()
+  const username = document.getElementById('username').value.trim()
+  const password = document.getElementById('password').value.trim()
 
-  const res=await fetch(
+  const res = await fetch(
     "https://animehunt-backend.animehunt715.workers.dev/api/admin/login",
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      credentials:"include",
+      credentials:'include',
       body:JSON.stringify({username,password})
     }
   )
