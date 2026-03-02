@@ -47,6 +47,8 @@ button{
 <button onclick="login()">Login</button>
 </div>
 <script>
+const TOKEN_KEY = "AUTH_TOKEN"
+
 async function login(){
 
   const username = document.getElementById('username').value.trim()
@@ -57,7 +59,6 @@ async function login(){
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      credentials:'include',
       body:JSON.stringify({username,password})
     }
   )
@@ -66,6 +67,10 @@ async function login(){
     alert("Invalid credentials")
     return
   }
+
+  const data = await res.json()
+
+  localStorage.setItem(TOKEN_KEY, data.token)
 
   location.href="index.html"
 }
