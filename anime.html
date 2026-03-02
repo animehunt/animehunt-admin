@@ -422,13 +422,14 @@ a{ text-decoration:none; color:inherit }
   </div>
 </div>
 
-
-    <script>
+<script>
 
 /* ===============================
-   CONFIG
+   CONFIG (ABSOLUTE BACKEND URL)
 ================================ */
-const API = "/api/admin/anime";
+const BASE_URL = "https://animehunt-backend.animehunt715.workers.dev";
+const API = BASE_URL + "/api/admin/anime";
+
 let editId = null;
 
 /* ===============================
@@ -464,51 +465,6 @@ async function apiFetch(url, options = {}) {
 }
 
 /* ===============================
-   ELEMENT REFERENCES
-================================ */
-const animeList = document.getElementById("animeList");
-const titleEl = document.getElementById("title");
-const slugEl = document.getElementById("slug");
-const typeEl = document.getElementById("type");
-const statusEl = document.getElementById("status");
-const posterEl = document.getElementById("poster");
-const bannerEl = document.getElementById("banner");
-const yearEl = document.getElementById("year");
-const ratingEl = document.getElementById("rating");
-const languageEl = document.getElementById("language");
-const durationEl = document.getElementById("duration");
-const categoriesEl = document.getElementById("categories");
-const tagsEl = document.getElementById("tags");
-const descriptionEl = document.getElementById("description");
-
-const isHomeEl = document.getElementById("isHome");
-const isTrendingEl = document.getElementById("isTrending");
-const isMostViewedEl = document.getElementById("isMostViewed");
-const isBannerEl = document.getElementById("isBanner");
-
-const typeFilter = document.getElementById("typeFilter");
-const statusFilter = document.getElementById("statusFilter");
-const homeFilter = document.getElementById("homeFilter");
-const searchAnime = document.getElementById("searchAnime");
-
-const animeModal = document.getElementById("animeModal");
-const modalTitle = document.getElementById("modalTitle");
-const openAddAnime = document.getElementById("openAddAnime");
-const closeModal = document.getElementById("closeModal");
-const saveAnime = document.getElementById("saveAnime");
-
-/* ===============================
-   AUTO SLUG
-================================ */
-titleEl.addEventListener("input", () => {
-  slugEl.value = titleEl.value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .trim();
-});
-
-/* ===============================
    LOAD ANIME
 ================================ */
 async function loadAnime() {
@@ -516,14 +472,15 @@ async function loadAnime() {
   try {
 
     const query = new URLSearchParams({
-      type: typeFilter.value,
-      status: statusFilter.value,
-      home: homeFilter.value,
-      search: searchAnime.value
+      type: document.getElementById("typeFilter").value,
+      status: document.getElementById("statusFilter").value,
+      home: document.getElementById("homeFilter").value,
+      search: document.getElementById("searchAnime").value
     }).toString();
 
     const data = await apiFetch(`${API}?${query}`);
 
+    const animeList = document.getElementById("animeList");
     animeList.innerHTML = "";
 
     if (!data.length) {
@@ -543,8 +500,8 @@ async function loadAnime() {
                onerror="this.src='https://via.placeholder.com/40x60'">
         </span>
         <span>${escapeHTML(a.title)}</span>
-        <span class="badge">${a.type}</span>
-        <span class="badge">${a.status}</span>
+        <span class="badge">${a.type || '-'}</span>
+        <span class="badge">${a.status || '-'}</span>
         <span>${escapeHTML(a.categories || "-")}</span>
         <span>${a.isHome ? "Yes" : "No"}</span>
         <span>${a.isTrending ? "Yes" : "No"}</span>
@@ -563,30 +520,30 @@ async function loadAnime() {
 }
 
 /* ===============================
-   SAVE
+   SAVE ANIME
 ================================ */
-saveAnime.onclick = async () => {
+document.getElementById("saveAnime").onclick = async () => {
 
   try {
 
     const payload = {
-      title: titleEl.value.trim(),
-      slug: slugEl.value.trim(),
-      type: typeEl.value,
-      status: statusEl.value,
-      poster: posterEl.value.trim(),
-      banner: bannerEl.value.trim(),
-      year: yearEl.value,
-      rating: ratingEl.value,
-      language: languageEl.value,
-      duration: durationEl.value,
-      categories: categoriesEl.value,
-      tags: tagsEl.value,
-      description: descriptionEl.value,
-      isHome: isHomeEl.checked,
-      isTrending: isTrendingEl.checked,
-      isMostViewed: isMostViewedEl.checked,
-      isBanner: isBannerEl.checked
+      title: document.getElementById("title").value.trim(),
+      slug: document.getElementById("slug").value.trim(),
+      type: document.getElementById("type").value,
+      status: document.getElementById("status").value,
+      poster: document.getElementById("poster").value.trim(),
+      banner: document.getElementById("banner").value.trim(),
+      year: document.getElementById("year").value,
+      rating: document.getElementById("rating").value,
+      language: document.getElementById("language").value,
+      duration: document.getElementById("duration").value,
+      categories: document.getElementById("categories").value,
+      tags: document.getElementById("tags").value,
+      description: document.getElementById("description").value,
+      isHome: document.getElementById("isHome").checked,
+      isTrending: document.getElementById("isTrending").checked,
+      isMostViewed: document.getElementById("isMostViewed").checked,
+      isBanner: document.getElementById("isBanner").checked
     };
 
     if (!payload.title) {
@@ -613,7 +570,7 @@ saveAnime.onclick = async () => {
       alert("Anime Created");
     }
 
-    closeModalAndReset();
+    closeModal();
     loadAnime();
 
   } catch (err) {
@@ -646,33 +603,47 @@ window.editAnime = async (id) => {
     const a = await apiFetch(`${API}/${id}`);
 
     editId = id;
-    modalTitle.innerText = "Edit Anime";
 
-    titleEl.value = a.title;
-    slugEl.value = a.slug;
-    typeEl.value = a.type;
-    statusEl.value = a.status;
-    posterEl.value = a.poster || "";
-    bannerEl.value = a.banner || "";
-    yearEl.value = a.year || "";
-    ratingEl.value = a.rating || "";
-    languageEl.value = a.language || "";
-    durationEl.value = a.duration || "";
-    categoriesEl.value = a.categories || "";
-    tagsEl.value = a.tags || "";
-    descriptionEl.value = a.description || "";
+    document.getElementById("title").value = a.title;
+    document.getElementById("slug").value = a.slug;
+    document.getElementById("type").value = a.type;
+    document.getElementById("status").value = a.status;
+    document.getElementById("poster").value = a.poster || "";
+    document.getElementById("banner").value = a.banner || "";
+    document.getElementById("year").value = a.year || "";
+    document.getElementById("rating").value = a.rating || "";
+    document.getElementById("language").value = a.language || "";
+    document.getElementById("duration").value = a.duration || "";
+    document.getElementById("categories").value = a.categories || "";
+    document.getElementById("tags").value = a.tags || "";
+    document.getElementById("description").value = a.description || "";
 
-    isHomeEl.checked = !!a.isHome;
-    isTrendingEl.checked = !!a.isTrending;
-    isMostViewedEl.checked = !!a.isMostViewed;
-    isBannerEl.checked = !!a.isBanner;
+    document.getElementById("isHome").checked = !!a.isHome;
+    document.getElementById("isTrending").checked = !!a.isTrending;
+    document.getElementById("isMostViewed").checked = !!a.isMostViewed;
+    document.getElementById("isBanner").checked = !!a.isBanner;
 
-    animeModal.style.display = "flex";
+    document.getElementById("animeModal").style.display = "flex";
 
   } catch {
     alert("Failed to load anime");
   }
 };
+
+/* ===============================
+   CLOSE MODAL
+================================ */
+function closeModal() {
+  document.getElementById("animeModal").style.display = "none";
+  editId = null;
+}
+
+document.getElementById("openAddAnime").onclick = () => {
+  closeModal();
+  document.getElementById("animeModal").style.display = "flex";
+};
+
+document.getElementById("closeModal").onclick = closeModal;
 
 /* ===============================
    ESCAPE HTML
@@ -685,53 +656,10 @@ function escapeHTML(str) {
     .replace(/"/g, "&quot;");
 }
 
-/* ===============================
-   MODAL RESET
-================================ */
-function closeModalAndReset() {
-
-  animeModal.style.display = "none";
-  editId = null;
-  modalTitle.innerText = "Add Anime";
-
-  document.querySelectorAll(".form-grid input, .form-grid textarea")
-    .forEach(el => {
-      if (el.type === "checkbox") el.checked = false;
-      else el.value = "";
-    });
-}
-
-openAddAnime.onclick = () => {
-  closeModalAndReset();
-  animeModal.style.display = "flex";
-};
-
-closeModal.onclick = closeModalAndReset;
-
-/* ===============================
-   FILTERS
-================================ */
-[typeFilter, statusFilter, homeFilter]
-  .forEach(el => el.addEventListener("change", loadAnime));
-
-searchAnime.addEventListener("input", debounce(loadAnime, 400));
-
-function debounce(func, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
 /* INIT */
 loadAnime();
 
-    </script>
-
-
-    
-    
+</script>
 
 
 </body>
