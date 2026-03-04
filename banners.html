@@ -313,253 +313,263 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 <script>
+const API="/api/admin/banners"
 
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/banners";
-let editingId = null;
+let editingId=null
 
-/* ===============================
-   SAFE FETCH WRAPPER (JWT READY)
-================================ */
-async function apiFetch(url, options = {}) {
+const bannerList=document.getElementById("bannerList")
 
-  const token = localStorage.getItem("AUTH_TOKEN");
+const banTitle=document.getElementById("banTitle")
+const banImageFile=document.getElementById("banImageFile")
+const banType=document.getElementById("banType")
+const banTarget=document.getElementById("banTarget")
+const banPosition=document.getElementById("banPosition")
+const banOrder=document.getElementById("banOrder")
+const banDevice=document.getElementById("banDevice")
+const banActive=document.getElementById("banActive")
+const banRotate=document.getElementById("banRotate")
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  });
+const previewImg=document.getElementById("previewImg")
+const previewError=document.getElementById("previewError")
 
-  if (res.status === 401) {
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
+async function apiFetch(url,options={}){
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(error || "Request failed");
-  }
+const token=localStorage.getItem("AUTH_TOKEN")
 
-  return res.json();
+const res=await fetch(url,{
+...options,
+headers:{
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+throw new Error("Unauthorized")
 }
 
-/* ===============================
-   IMAGE PREVIEW
-================================ */
-const previewImg = document.getElementById("previewImg");
-const previewError = document.getElementById("previewError");
-
-banImageFile.addEventListener("change", () => {
-
-  const file = banImageFile.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = e => {
-    previewImg.src = e.target.result;
-    previewImg.style.display = "block";
-    previewError.style.display = "none";
-  };
-
-  reader.onerror = () => {
-    previewImg.style.display = "none";
-    previewError.style.display = "block";
-  };
-
-  reader.readAsDataURL(file);
-});
-
-/* ===============================
-   LOAD BANNERS
-================================ */
-async function loadBanners() {
-
-  try {
-
-    const banners = await apiFetch(API);
-    render(banners);
-
-  } catch (err) {
-    console.error(err);
-  }
+if(!res.ok){
+throw new Error(await res.text())
 }
 
-/* ===============================
-   RENDER TABLE
-================================ */
-function render(banners) {
+return res.json()
 
-  bannerList.innerHTML = "";
-
-  if (!banners.length) {
-    bannerList.innerHTML =
-      "<div style='padding:20px;color:#888'>No banners found</div>";
-    return;
-  }
-
-  banners.forEach(b => {
-
-    const row = document.createElement("div");
-    row.className = "row";
-
-    row.innerHTML = `
-      <span>${escapeHTML(b.title)}</span>
-      <span>${escapeHTML(b.type)}</span>
-      <span>${escapeHTML(b.target || "-")}</span>
-      <span>${escapeHTML(b.position || "-")}</span>
-      <span>${b.banner_order ?? 0}</span>
-
-      <span>
-        <label class="switch">
-          <input type="checkbox" ${b.active ? "checked" : ""}>
-          <span class="slider"></span>
-        </label>
-      </span>
-
-      <span class="actions">
-        <button data-id="${b.id}" class="delete-btn">Delete</button>
-      </span>
-    `;
-
-    /* Toggle Status */
-    row.querySelector("input").addEventListener("change", e => {
-      toggleStatus(b.id, e.target.checked);
-    });
-
-    /* Delete */
-    row.querySelector(".delete-btn").addEventListener("click", () => {
-      deleteBanner(b.id);
-    });
-
-    bannerList.appendChild(row);
-  });
 }
 
-/* ===============================
-   SAVE BANNER (R2 UPLOAD)
-================================ */
-async function saveBanner() {
+banImageFile.addEventListener("change",()=>{
 
-  try {
+const file=banImageFile.files[0]
 
-    const form = new FormData();
+if(!file)return
 
-    form.append("title", banTitle.value.trim());
-    form.append("type", banType.value);
-    form.append("target", banTarget.value.trim());
-    form.append("position", banPosition.value.trim());
-    form.append("order", banOrder.value || 0);
-    form.append("device", banDevice.value);
+const reader=new FileReader()
 
-    if (banActive.checked) form.append("active", "1");
-    if (banRotate.checked) form.append("autoRotate", "1");
-
-    if (!banImageFile.files.length) {
-      alert("Image file required");
-      return;
-    }
-
-    form.append("image", banImageFile.files[0]);
-
-    await fetch(API, {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + localStorage.getItem("AUTH_TOKEN")
-      },
-      body: form
-    });
-
-    closeModal();
-    resetForm();
-    loadBanners();
-
-  } catch (err) {
-    alert(err.message);
-  }
+reader.onload=e=>{
+previewImg.src=e.target.result
+previewImg.style.display="block"
+previewError.style.display="none"
 }
 
-/* ===============================
-   TOGGLE STATUS
-================================ */
-async function toggleStatus(id, active) {
-
-  try {
-
-    await apiFetch(`${API}/${id}/status`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active })
-    });
-
-  } catch (err) {
-    alert("Update failed");
-    loadBanners();
-  }
+reader.onerror=()=>{
+previewImg.style.display="none"
+previewError.style.display="block"
 }
 
-/* ===============================
-   DELETE
-================================ */
-async function deleteBanner(id) {
+reader.readAsDataURL(file)
 
-  if (!confirm("Delete banner?")) return;
+})
 
-  try {
+async function loadBanners(){
 
-    await apiFetch(`${API}/${id}`, {
-      method: "DELETE"
-    });
+try{
 
-    loadBanners();
+const banners=await apiFetch(API)
 
-  } catch (err) {
-    alert("Delete failed");
-  }
+render(banners)
+
+}catch(err){
+
+console.error(err)
+
 }
 
-/* ===============================
-   UTILITIES
-================================ */
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
-function openModal() {
-  bannerModal.style.display = "flex";
+function render(banners){
+
+bannerList.innerHTML=""
+
+if(!banners||!banners.length){
+
+bannerList.innerHTML="<div style='padding:20px;color:#888'>No banners</div>"
+return
+
 }
 
-function closeModal() {
-  bannerModal.style.display = "none";
+banners.forEach(b=>{
+
+const row=document.createElement("div")
+
+row.className="row"
+
+row.innerHTML=`
+<span>${escapeHTML(b.title)}</span>
+<span>${escapeHTML(b.type)}</span>
+<span>${escapeHTML(b.target||"-")}</span>
+<span>${escapeHTML(b.position||"-")}</span>
+<span>${b.banner_order||0}</span>
+
+<span>
+<label class="switch">
+<input type="checkbox" ${b.active?"checked":""}>
+<span class="slider"></span>
+</label>
+</span>
+
+<span class="actions">
+<button data-id="${b.id}" class="delete-btn">Delete</button>
+</span>
+`
+
+row.querySelector("input")
+.addEventListener("change",e=>{
+toggleStatus(b.id,e.target.checked)
+})
+
+row.querySelector(".delete-btn")
+.addEventListener("click",()=>{
+deleteBanner(b.id)
+})
+
+bannerList.appendChild(row)
+
+})
+
 }
 
-function resetForm() {
-  banTitle.value = "";
-  banImageFile.value = "";
-  banType.value = "Hero";
-  banTarget.value = "";
-  banPosition.value = "";
-  banOrder.value = "";
-  banDevice.value = "all";
-  banActive.checked = false;
-  banRotate.checked = false;
-  previewImg.style.display = "none";
-  previewError.style.display = "none";
+async function saveBanner(){
+
+try{
+
+if(!banTitle.value.trim()){
+alert("Title required")
+return
 }
 
-/* INIT */
-loadBanners();
+if(!banImageFile.files.length){
+alert("Image required")
+return
+}
 
+const form=new FormData()
+
+form.append("title",banTitle.value.trim())
+form.append("type",banType.value)
+form.append("target",banTarget.value)
+form.append("position",banPosition.value)
+form.append("order",banOrder.value||0)
+form.append("device",banDevice.value)
+
+if(banActive.checked)form.append("active","1")
+if(banRotate.checked)form.append("autoRotate","1")
+
+form.append("image",banImageFile.files[0])
+
+await fetch(API,{
+method:"POST",
+headers:{
+Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN")
+},
+body:form
+})
+
+closeModal()
+resetForm()
+loadBanners()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
+async function toggleStatus(id,active){
+
+try{
+
+await apiFetch(`${API}/${id}/status`,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({active})
+})
+
+}catch(err){
+
+alert("Update failed")
+loadBanners()
+
+}
+
+}
+
+async function deleteBanner(id){
+
+if(!confirm("Delete banner?"))return
+
+try{
+
+await apiFetch(`${API}/${id}`,{method:"DELETE"})
+
+loadBanners()
+
+}catch(err){
+
+alert("Delete failed")
+
+}
+
+}
+
+function escapeHTML(str){
+
+return String(str)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+
+}
+
+function openModal(){
+document.getElementById("bannerModal").style.display="flex"
+}
+
+function closeModal(){
+document.getElementById("bannerModal").style.display="none"
+}
+
+function resetForm(){
+
+banTitle.value=""
+banImageFile.value=""
+banType.value="Hero"
+banTarget.value=""
+banPosition.value=""
+banOrder.value=""
+banDevice.value="all"
+banActive.checked=false
+banRotate.checked=false
+
+previewImg.style.display="none"
+previewError.style.display="none"
+
+}
+
+loadBanners()
 </script>
 
 
