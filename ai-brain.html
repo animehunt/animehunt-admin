@@ -217,173 +217,164 @@ body{background:#060a14;color:#fff}
 
 
 <script>
+  const AI_API = "/api/admin/ai"
 
-/* ===============================
-   CONFIG
-================================ */
-const AI_API = "/api/admin/ai";
-
-/* ===============================
-   SAFE FETCH (JWT READY)
-================================ */
 async function apiFetch(url, options = {}) {
 
-  const token = localStorage.getItem("AUTH_TOKEN");
+const token = localStorage.getItem("AUTH_TOKEN")
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  });
+const res = await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization": token ? "Bearer "+token : ""
+}
+})
 
-  if (res.status === 401) {
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "API Error");
-  }
-
-  return res.json();
+if(res.status===401){
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+throw new Error("Unauthorized")
 }
 
-/* ===============================
-   FORMAT SAFE KEY
-================================ */
-function formatKey(text) {
-  return text
-    .replace(/[^\w\s]/g, "")
-    .replace(/\s+/g, "_")
-    .toLowerCase();
+if(!res.ok){
+const txt = await res.text()
+throw new Error(txt || "API Error")
 }
 
-/* ===============================
-   LOAD AI STATE
-================================ */
-async function loadAI() {
-
-  try {
-
-    const data = await apiFetch(AI_API);
-
-    const paused = data.paused ?? false;
-
-    document.querySelectorAll(".ai-card").forEach(card => {
-
-      const engineTitle = card.querySelector("h3").innerText;
-      const engineKey = formatKey(engineTitle);
-
-      const engineSettings = data[engineKey] || {};
-
-      card.querySelectorAll("input[type='checkbox']").forEach(input => {
-
-        const labelText = input.closest(".ai-item").innerText.trim();
-        const settingKey = formatKey(labelText);
-
-        input.checked = engineSettings[settingKey] ?? input.checked;
-        input.disabled = paused;
-
-      });
-
-    });
-
-    updatePauseButton(paused);
-
-  } catch (err) {
-    console.error("Load AI failed:", err);
-  }
-}
-
-/* ===============================
-   UPDATE SETTING
-================================ */
-function initListeners() {
-
-  document.querySelectorAll(".ai-item input").forEach(input => {
-
-    input.addEventListener("change", async () => {
-
-      try {
-
-        const card = input.closest(".ai-card");
-        const engineTitle = card.querySelector("h3").innerText;
-        const engineKey = formatKey(engineTitle);
-
-        const labelText = input.closest(".ai-item").innerText.trim();
-        const settingKey = formatKey(labelText);
-
-        await apiFetch(AI_API, {
-          method: "PATCH",
-          body: JSON.stringify({
-            engine: engineKey,
-            setting: settingKey,
-            value: input.checked
-          })
-        });
-
-      } catch (err) {
-        console.error("Update failed:", err);
-        alert("Update failed");
-        loadAI();
-      }
-
-    });
-
-  });
+return res.json()
 
 }
 
-/* ===============================
-   PAUSE / RESUME ALL
-================================ */
-const pauseBtn = document.querySelector(".pause-btn");
+function key(text){
 
-pauseBtn.addEventListener("click", async () => {
-
-  try {
-
-    await apiFetch(AI_API + "/pause", {
-      method: "PATCH"
-    });
-
-    await loadAI();
-
-  } catch (err) {
-    console.error("Pause failed:", err);
-    alert("Pause failed");
-  }
-
-});
-
-/* ===============================
-   UPDATE BUTTON UI
-================================ */
-function updatePauseButton(paused) {
-
-  if (paused) {
-    pauseBtn.innerText = "▶ Resume All AI";
-    pauseBtn.style.background = "#1abc9c";
-  } else {
-    pauseBtn.innerText = "⏸ Pause All AI";
-    pauseBtn.style.background = "#ffcc00";
-  }
+return text
+.toLowerCase()
+.replace(/[^\w\s]/g,"")
+.replace(/\s+/g,"_")
 
 }
 
-/* ===============================
-   INIT
-================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  initListeners();
-  loadAI();
-});
+async function loadAI(){
 
+try{
+
+const data = await apiFetch(AI_API)
+
+const paused = data.paused || false
+
+document.querySelectorAll(".ai-card").forEach(card=>{
+
+const engine = key(card.querySelector("h3").innerText)
+
+const engineData = data[engine] || {}
+
+card.querySelectorAll(".ai-item").forEach(item=>{
+
+const label = item.innerText.trim()
+const setting = key(label)
+
+const input = item.querySelector("input")
+
+if(setting in engineData){
+input.checked = engineData[setting]
+}
+
+input.disabled = paused
+
+})
+
+})
+
+updatePauseButton(paused)
+
+}catch(err){
+
+console.error(err)
+
+}
+
+}
+
+function initListeners(){
+
+document.querySelectorAll(".ai-item input")
+.forEach(input=>{
+
+input.addEventListener("change", async()=>{
+
+try{
+
+const card = input.closest(".ai-card")
+
+const engine = key(card.querySelector("h3").innerText)
+
+const label = input.closest(".ai-item").innerText.trim()
+
+const setting = key(label)
+
+await apiFetch(AI_API,{
+method:"PATCH",
+body:JSON.stringify({
+engine,
+setting,
+value:input.checked
+})
+})
+
+}catch(err){
+
+alert("Update failed")
+loadAI()
+
+}
+
+})
+
+})
+
+}
+
+const pauseBtn = document.querySelector(".pause-btn")
+
+pauseBtn.onclick = async()=>{
+
+try{
+
+await apiFetch(AI_API+"/pause",{method:"PATCH"})
+
+loadAI()
+
+}catch(err){
+
+alert("Pause failed")
+
+}
+
+}
+
+function updatePauseButton(paused){
+
+if(paused){
+
+pauseBtn.innerText="▶ Resume All AI"
+pauseBtn.style.background="#1abc9c"
+
+}else{
+
+pauseBtn.innerText="⏸ Pause All AI"
+pauseBtn.style.background="#ffcc00"
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+initListeners()
+loadAI()
+
+})
 </script>
 
  
