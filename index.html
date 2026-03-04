@@ -214,114 +214,156 @@ body{
 
 </div>
 <script>
-/* ===============================
-   CONFIG
+  /* ===============================
+CONFIG
 ================================ */
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev";
-const DASH_API = API_BASE + "/api/admin/dashboard";
-const TOKEN_KEY = "AUTH_TOKEN";
+
+const API_BASE="https://animehunt-backend.animehunt715.workers.dev"
+const DASH_API=API_BASE+"/api/admin/dashboard"
+const TOKEN_KEY="AUTH_TOKEN"
+
+let refreshTimer=null
 
 /* ===============================
-   AUTH CHECK
+AUTH CHECK
 ================================ */
+
 function checkAuth(){
-  const token = localStorage.getItem(TOKEN_KEY);
-  if(!token){
-    window.location.href = "login.html";
-    return false;
-  }
-  return true;
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+if(!token){
+location.href="login.html"
+return false
+}
+
+return true
+
 }
 
 /* ===============================
-   SAFE FETCH WRAPPER
+SAFE FETCH
 ================================ */
+
 async function apiFetch(url){
 
-  try{
+try{
 
-    const token = localStorage.getItem(TOKEN_KEY);
+const token=localStorage.getItem(TOKEN_KEY)
 
-    const res = await fetch(url,{
-      headers:{
-        "Authorization":"Bearer " + token
-      }
-    });
+const res=await fetch(url,{
+headers:{
+Authorization:`Bearer ${token}`
+}
+})
 
-    if(res.status === 401){
-      localStorage.removeItem(TOKEN_KEY);
-      window.location.href = "login.html";
-      return null;
-    }
+if(res.status===401){
 
-    if(!res.ok){
-      console.warn("API Error:", res.status);
-      return null;
-    }
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+return null
 
-    return await res.json();
+}
 
-  }catch(err){
-    console.error("Network error:", err);
-    return null;
-  }
+if(!res.ok){
+
+console.warn("API error:",res.status)
+return null
+
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error("Network error:",err)
+return null
+
+}
+
 }
 
 /* ===============================
-   SAFE TEXT SETTER
+SAFE TEXT SETTER
 ================================ */
+
 function setText(id,value){
-  const el = document.getElementById(id);
-  if(el){
-    el.textContent = value;
-  }
+
+const el=document.getElementById(id)
+
+if(!el)return
+
+el.textContent=value
+
 }
 
 /* ===============================
-   LOAD DASHBOARD DATA
+LOAD DASHBOARD
 ================================ */
+
 async function loadDashboard(){
 
-  if(!checkAuth()) return;
+if(!checkAuth()) return
 
-  const data = await apiFetch(DASH_API);
+const data=await apiFetch(DASH_API)
 
-  if(!data){
-    console.warn("No dashboard data");
-    return;
-  }
+if(!data){
 
-  /* ===== CORE ===== */
-  setText("animeCount",     data.core?.animeCount ?? 0);
-  setText("episodeCount",   data.core?.episodeCount ?? 0);
-  setText("categoryCount",  data.core?.categoryCount ?? 0);
-  setText("bannerCount",    data.core?.bannerCount ?? 0);
-  setText("downloadCount",  data.core?.downloadCount ?? 0);
-  setText("serverCount",    data.core?.serverCount ?? 0);
+console.warn("Dashboard API returned null")
+return
 
-  /* ===== GROWTH ===== */
-  setText("activeAds",      data.growth?.activeAds ?? 0);
-  setText("todayRevenue",   "₹" + (data.growth?.todayRevenue ?? 0));
-  setText("adClicks",       data.growth?.adClicks ?? 0);
-  setText("trendingAnime",  data.growth?.trendingAnime ?? 0);
-  setText("ongoingAnime",   data.growth?.ongoingAnime ?? 0);
-  setText("topRated",       data.growth?.topRated ?? 0);
+}
 
-  /* ===== SYSTEM ===== */
-  setText("cmsStatus",      data.system?.cmsStatus ?? "OK");
-  setText("serverLoad",     data.system?.serverLoad ?? "Low");
-  setText("apiStatus",      data.system?.apiStatus ?? "Online");
-  setText("aiStatus",       data.system?.aiStatus ?? "Active");
-  setText("searchStatus",   data.system?.searchStatus ?? "Ready");
-  setText("backupStatus",   data.system?.backupStatus ?? "Synced");
+/* CORE */
+
+setText("animeCount",data.core?.animeCount ?? 0)
+setText("episodeCount",data.core?.episodeCount ?? 0)
+setText("categoryCount",data.core?.categoryCount ?? 0)
+setText("bannerCount",data.core?.bannerCount ?? 0)
+setText("downloadCount",data.core?.downloadCount ?? 0)
+setText("serverCount",data.core?.serverCount ?? 0)
+
+/* GROWTH */
+
+setText("activeAds",data.growth?.activeAds ?? 0)
+setText("todayRevenue","₹"+(data.growth?.todayRevenue ?? 0))
+setText("adClicks",data.growth?.adClicks ?? 0)
+setText("trendingAnime",data.growth?.trendingAnime ?? 0)
+setText("ongoingAnime",data.growth?.ongoingAnime ?? 0)
+setText("topRated",data.growth?.topRated ?? 0)
+
+/* SYSTEM */
+
+setText("cmsStatus",data.system?.cmsStatus ?? "OK")
+setText("serverLoad",data.system?.serverLoad ?? "Low")
+setText("apiStatus",data.system?.apiStatus ?? "Online")
+setText("aiStatus",data.system?.aiStatus ?? "Active")
+setText("searchStatus",data.system?.searchStatus ?? "Ready")
+setText("backupStatus",data.system?.backupStatus ?? "Synced")
+
 }
 
 /* ===============================
-   AUTO REFRESH
+AUTO REFRESH
 ================================ */
-setInterval(loadDashboard, 60000);
 
-/* INIT */
-document.addEventListener("DOMContentLoaded", loadDashboard);
+function startAutoRefresh(){
+
+if(refreshTimer) clearInterval(refreshTimer)
+
+refreshTimer=setInterval(loadDashboard,60000)
+
+}
+
+/* ===============================
+INIT
+================================ */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadDashboard()
+startAutoRefresh()
+
+})
 </script>
 
