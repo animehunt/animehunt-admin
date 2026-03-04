@@ -222,284 +222,255 @@ body{
 </div>
 
 <script>
+const API="/api/admin/deploy"
+const TOKEN_KEY="AUTH_TOKEN"
 
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/deploy";
-const TOKEN_KEY = "AUTH_TOKEN";
+async function apiFetch(url,options={}){
 
-/* ===============================
-   ELEMENT REFERENCES
-================================ */
-const deployBtn = document.getElementById("deploySite");
-const freezeBtn = document.getElementById("freezeSite");
-const unfreezeBtn = document.getElementById("unfreezeSite");
-const createVersionBtn = document.getElementById("createVersion");
-const createBackupBtn = document.getElementById("createBackup");
-const emergencyShutdownBtn = document.getElementById("emergencyShutdown");
-const emergencyRecoverBtn = document.getElementById("emergencyRecover");
+try{
 
-const versionList = document.getElementById("versionList");
-const backupList = document.getElementById("backupList");
-const restoreList = document.getElementById("restoreList");
+const token=localStorage.getItem(TOKEN_KEY)
 
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url, options = {}) {
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
+})
 
-  const token = localStorage.getItem(TOKEN_KEY);
+if(res.status===401){
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  });
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+return null
 
-  if (res.status === 401) {
-    localStorage.removeItem(TOKEN_KEY);
-    location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Request failed");
-  }
-
-  return res.json();
 }
 
-/* ===============================
-   BUTTON LOADING STATE
-================================ */
-function setLoading(btn, state, text = "") {
-  btn.disabled = state;
-  if (state) {
-    btn.dataset.original = btn.innerText;
-    btn.innerText = text || "Processing...";
-  } else {
-    btn.innerText = btn.dataset.original;
-  }
+if(!res.ok){
+
+console.warn("API error",res.status)
+return null
+
 }
 
-/* ===============================
-   LOAD DATA
-================================ */
-async function loadData() {
-  try {
+return await res.json()
 
-    const data = await apiFetch(API);
+}catch(err){
 
-    renderVersions(data.versions || []);
-    renderBackups(data.backups || []);
+console.error("Network error",err)
+return null
 
-    updateSystemState(data.state);
-
-  } catch (err) {
-    console.error("Load error:", err.message);
-  }
 }
 
-/* ===============================
-   UPDATE SYSTEM STATE UI
-================================ */
-function updateSystemState(state) {
-
-  if (!state) return;
-
-  if (state.frozen) {
-    freezeBtn.disabled = true;
-    unfreezeBtn.disabled = false;
-  } else {
-    freezeBtn.disabled = false;
-    unfreezeBtn.disabled = true;
-  }
-
-  if (state.emergency) {
-    emergencyShutdownBtn.disabled = true;
-    emergencyRecoverBtn.disabled = false;
-  } else {
-    emergencyShutdownBtn.disabled = false;
-    emergencyRecoverBtn.disabled = true;
-  }
 }
 
-/* ===============================
-   DEPLOY
-================================ */
-deployBtn.onclick = async () => {
-  try {
-    setLoading(deployBtn, true, "Deploying...");
-    await apiFetch(`${API}/deploy`, { method: "POST" });
-    alert("🚀 Deployment Logged");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(deployBtn, false);
-  }
-};
+function setLoading(btn,state,text="Processing..."){
 
-/* ===============================
-   FREEZE / UNFREEZE
-================================ */
-freezeBtn.onclick = async () => {
-  try {
-    setLoading(freezeBtn, true);
-    await apiFetch(`${API}/freeze`, { method: "PATCH" });
-    alert("🧊 Site Frozen");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(freezeBtn, false);
-  }
-};
+if(!btn) return
 
-unfreezeBtn.onclick = async () => {
-  try {
-    setLoading(unfreezeBtn, true);
-    await apiFetch(`${API}/unfreeze`, { method: "PATCH" });
-    alert("🔥 Site Live");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(unfreezeBtn, false);
-  }
-};
+btn.disabled=state
 
-/* ===============================
-   VERSION
-================================ */
-createVersionBtn.onclick = async () => {
-  try {
-    setLoading(createVersionBtn, true);
-    const data = await apiFetch(`${API}/version`, { method: "POST" });
-    renderVersions(data.versions || []);
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(createVersionBtn, false);
-  }
-};
+if(state){
 
-function renderVersions(versions) {
-  versionList.innerHTML = "";
+btn.dataset.original=btn.innerText
+btn.innerText=text
 
-  if (!versions.length) {
-    versionList.innerHTML = "<div class='list-item'>No versions</div>";
-    return;
-  }
+}else{
 
-  versions.forEach(v => {
-    const div = document.createElement("div");
-    div.className = "list-item";
-    div.innerText = `Version ${v.name} – ${new Date(v.date).toLocaleString()}`;
-    versionList.appendChild(div);
-  });
+btn.innerText=btn.dataset.original
+
 }
 
-/* ===============================
-   BACKUP
-================================ */
-createBackupBtn.onclick = async () => {
-  try {
-    setLoading(createBackupBtn, true);
-    const data = await apiFetch(`${API}/backup`, { method: "POST" });
-    renderBackups(data.backups || []);
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(createBackupBtn, false);
-  }
-};
-
-function renderBackups(backups) {
-
-  backupList.innerHTML = "";
-  restoreList.innerHTML = "";
-
-  if (!backups.length) {
-    backupList.innerHTML = "<div class='list-item'>No backups</div>";
-    return;
-  }
-
-  backups.forEach(b => {
-
-    const item = document.createElement("div");
-    item.className = "list-item";
-    item.innerText = `Backup ${b.name} – ${new Date(b.date).toLocaleString()}`;
-    backupList.appendChild(item);
-
-    const restore = document.createElement("div");
-    restore.className = "list-item";
-    restore.innerText = `Restore ${b.name}`;
-    restore.style.cursor = "pointer";
-    restore.onclick = () => restoreBackup(b.id);
-    restoreList.appendChild(restore);
-  });
 }
 
-/* ===============================
-   RESTORE
-================================ */
-async function restoreBackup(id) {
+async function loadData(){
 
-  if (!confirm("Restore this backup?")) return;
+const data=await apiFetch(API)
 
-  try {
-    await apiFetch(`${API}/restore/${id}`, { method: "POST" });
-    alert("🛟 Backup Restored");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  }
+if(!data) return
+
+renderVersions(data.versions || [])
+renderBackups(data.backups || [])
+
+updateSystemState(data.state)
+
 }
 
-/* ===============================
-   EMERGENCY
-================================ */
-emergencyShutdownBtn.onclick = async () => {
+function updateSystemState(state){
 
-  if (!confirm("⚠ Emergency Shutdown?")) return;
+if(!state) return
 
-  try {
-    setLoading(emergencyShutdownBtn, true);
-    await apiFetch(`${API}/emergency/shutdown`, { method: "POST" });
-    alert("🚨 Emergency Mode Activated");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(emergencyShutdownBtn, false);
-  }
-};
+freezeBtn.disabled=!!state.frozen
+unfreezeBtn.disabled=!state.frozen
 
-emergencyRecoverBtn.onclick = async () => {
+emergencyShutdownBtn.disabled=!!state.emergency
+emergencyRecoverBtn.disabled=!state.emergency
 
-  try {
-    setLoading(emergencyRecoverBtn, true);
-    await apiFetch(`${API}/emergency/recover`, { method: "POST" });
-    alert("🛟 System Recovered");
-    loadData();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(emergencyRecoverBtn, false);
-  }
-};
+}
 
-/* ===============================
-   INIT
-================================ */
-document.addEventListener("DOMContentLoaded", loadData);
+function renderVersions(list){
 
+versionList.innerHTML=""
+
+if(!list.length){
+
+versionList.innerHTML="<div class='list-item'>No versions</div>"
+return
+
+}
+
+list.forEach(v=>{
+
+const div=document.createElement("div")
+
+div.className="list-item"
+
+div.innerText=`Version ${v.name} – ${new Date(v.date).toLocaleString()}`
+
+versionList.appendChild(div)
+
+})
+
+}
+
+function renderBackups(list){
+
+backupList.innerHTML=""
+restoreList.innerHTML=""
+
+if(!list.length){
+
+backupList.innerHTML="<div class='list-item'>No backups</div>"
+return
+
+}
+
+list.forEach(b=>{
+
+const item=document.createElement("div")
+
+item.className="list-item"
+
+item.innerText=`Backup ${b.name} – ${new Date(b.date).toLocaleString()}`
+
+backupList.appendChild(item)
+
+const restore=document.createElement("div")
+
+restore.className="list-item"
+restore.style.cursor="pointer"
+
+restore.innerText=`Restore ${b.name}`
+
+restore.onclick=()=>restoreBackup(b.id)
+
+restoreList.appendChild(restore)
+
+})
+
+}
+
+async function restoreBackup(id){
+
+if(!confirm("Restore backup?")) return
+
+await apiFetch(`${API}/restore/${id}`,{method:"POST"})
+
+alert("Backup restored")
+
+loadData()
+
+}
+
+deployBtn.onclick=async()=>{
+
+setLoading(deployBtn,true)
+
+await apiFetch(`${API}/deploy`,{method:"POST"})
+
+setLoading(deployBtn,false)
+
+loadData()
+
+}
+
+freezeBtn.onclick=async()=>{
+
+setLoading(freezeBtn,true)
+
+await apiFetch(`${API}/freeze`,{method:"PATCH"})
+
+setLoading(freezeBtn,false)
+
+loadData()
+
+}
+
+unfreezeBtn.onclick=async()=>{
+
+setLoading(unfreezeBtn,true)
+
+await apiFetch(`${API}/unfreeze`,{method:"PATCH"})
+
+setLoading(unfreezeBtn,false)
+
+loadData()
+
+}
+
+createVersionBtn.onclick=async()=>{
+
+setLoading(createVersionBtn,true)
+
+const data=await apiFetch(`${API}/version`,{method:"POST"})
+
+setLoading(createVersionBtn,false)
+
+renderVersions(data?.versions || [])
+
+}
+
+createBackupBtn.onclick=async()=>{
+
+setLoading(createBackupBtn,true)
+
+const data=await apiFetch(`${API}/backup`,{method:"POST"})
+
+setLoading(createBackupBtn,false)
+
+renderBackups(data?.backups || [])
+
+}
+
+emergencyShutdownBtn.onclick=async()=>{
+
+if(!confirm("Emergency shutdown?")) return
+
+setLoading(emergencyShutdownBtn,true)
+
+await apiFetch(`${API}/emergency/shutdown`,{method:"POST"})
+
+setLoading(emergencyShutdownBtn,false)
+
+loadData()
+
+}
+
+emergencyRecoverBtn.onclick=async()=>{
+
+setLoading(emergencyRecoverBtn,true)
+
+await apiFetch(`${API}/emergency/recover`,{method:"POST"})
+
+setLoading(emergencyRecoverBtn,false)
+
+loadData()
+
+}
+
+document.addEventListener("DOMContentLoaded",loadData)
 </script>
 
 
