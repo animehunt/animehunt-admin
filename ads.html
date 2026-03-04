@@ -341,233 +341,230 @@ a{ text-decoration:none; color:inherit }
 
 
 <script>
+const API = "/api/admin/ads"
+const AUTH = "AUTH_TOKEN"
 
-/* ===============================
-   CONFIG
-================================ */
-const API_BASE = "/api/admin/ads";
+const saveBtn = document.querySelector(".ads-actions .btn-primary")
+const adsTable = document.querySelector(".ads-table")
 
-/* ===============================
-   ELEMENT REFERENCES
-================================ */
-const saveBtn = document.querySelector(".ads-actions .btn-primary");
-const bulkBtn = document.querySelector("#bulkData").parentElement.querySelector("button");
-const adsTable = document.querySelector(".ads-table");
+const nameEl = document.querySelector("input[placeholder='Ad Name']")
+const typeEl = document.querySelectorAll(".ads-card select")[0]
+const adCodeEl = document.querySelector("textarea[placeholder='Ad Code']")
 
-const nameEl = document.querySelector("input[placeholder='Ad Name']");
-const typeEl = document.querySelectorAll(".ads-card select")[0];
-const adCodeEl = document.querySelector("textarea[placeholder='Ad Code']");
+const pageEl = document.querySelectorAll(".ads-card select")[1]
+const positionEl = document.querySelectorAll(".ads-card select")[2]
 
-const pageEl = document.querySelectorAll(".ads-card select")[1];
-const positionEl = document.querySelectorAll(".ads-card select")[2];
-const maxPerPageEl = document.querySelector("input[placeholder='Max Ads Per Page']");
+const bulkDataEl = document.getElementById("bulkData")
+const bulkTypeEl = document.getElementById("bulkType")
 
-const startDateEl = document.querySelectorAll("input[type='datetime-local']")[0];
-const endDateEl = document.querySelectorAll("input[type='datetime-local']")[1];
-const priorityEl = document.querySelector("input[placeholder='Priority (1 = high)']");
+/* =======================
+SAFE FETCH
+======================= */
 
-const animeSlugEl = document.querySelector("input[placeholder='Anime Slug']");
-const episodeEl = document.querySelector("input[placeholder='Episode (optional)']");
-const countryEl = document.querySelector("input[placeholder='Country (IN, US)']");
-const languageEl = document.querySelectorAll(".ads-card select")[3];
-const maxViewsEl = document.querySelector("input[placeholder='Max Views Per Ad']");
+async function apiFetch(url,options={}){
 
-const bulkDataEl = document.getElementById("bulkData");
-const bulkTypeEl = document.getElementById("bulkType");
+const token = localStorage.getItem(AUTH)
 
-/* ===============================
-   SAFE FETCH
-================================ */
-async function apiFetch(url, options = {}) {
+const res = await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization": token ? "Bearer "+token : ""
+}
+})
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers
-    }
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(txt || "API Error");
-  }
-
-  return res.json();
+if(res.status===401){
+location.href="login.html"
+throw new Error("Unauthorized")
 }
 
-/* ===============================
-   VALIDATION
-================================ */
-function validateAd(data) {
-  if (!data.name) return "Ad name required";
-  if (!data.adCode) return "Ad code required";
-  if (!data.page) return "Page required";
-  if (!data.position) return "Position required";
-  return null;
+if(!res.ok){
+const txt = await res.text()
+throw new Error(txt)
 }
 
-/* ===============================
-   SAVE SINGLE AD
-================================ */
-saveBtn.addEventListener("click", async () => {
+return res.json()
 
-  try {
-
-    const adData = {
-      name: nameEl.value.trim(),
-      type: typeEl.value,
-      adCode: adCodeEl.value.trim(),
-      page: pageEl.value,
-      position: positionEl.value,
-      maxPerPage: Number(maxPerPageEl.value) || 1,
-      startDate: startDateEl.value || null,
-      endDate: endDateEl.value || null,
-      priority: Number(priorityEl.value) || 5,
-      animeSlug: animeSlugEl.value.trim() || null,
-      episode: episodeEl.value.trim() || null,
-      country: countryEl.value.trim() || null,
-      language: languageEl.value,
-      maxViews: Number(maxViewsEl.value) || null
-    };
-
-    const error = validateAd(adData);
-    if (error) return alert(error);
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
-
-    await apiFetch(API_BASE, {
-      method: "POST",
-      body: JSON.stringify(adData)
-    });
-
-    alert("✅ Ad Saved");
-    resetForm();
-    loadAds();
-
-  } catch (err) {
-    console.error(err);
-    alert("❌ Failed to save ad");
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Save Ad";
-  }
-});
-
-/* ===============================
-   BULK ADD
-================================ */
-bulkBtn.addEventListener("click", async () => {
-
-  try {
-
-    const raw = bulkDataEl.value.trim();
-    if (!raw) return alert("Paste bulk data");
-
-    if (bulkTypeEl.value !== "JSON")
-      return alert("Only JSON supported");
-
-    const ads = JSON.parse(raw);
-
-    if (!Array.isArray(ads))
-      return alert("Invalid JSON format");
-
-    await apiFetch(API_BASE + "/bulk", {
-      method: "POST",
-      body: JSON.stringify(ads)
-    });
-
-    alert("✅ Bulk ads added");
-    bulkDataEl.value = "";
-    loadAds();
-
-  } catch (err) {
-    console.error(err);
-    alert("❌ Invalid JSON");
-  }
-});
-
-/* ===============================
-   LOAD ADS
-================================ */
-async function loadAds() {
-
-  try {
-
-    const ads = await apiFetch(API_BASE);
-
-    adsTable.innerHTML = `
-      <tr>
-        <th>Name</th>
-        <th>Page</th>
-        <th>Position</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    `;
-
-    ads.forEach(ad => {
-
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${escapeHtml(ad.name)}</td>
-        <td>${escapeHtml(ad.page)}</td>
-        <td>${escapeHtml(ad.position)}</td>
-        <td class="status ${ad.status === "ON" ? "on" : "off"}">
-          ${ad.status}
-        </td>
-        <td>
-          <button onclick="toggleAd('${ad.id}')">
-            ${ad.status === "ON" ? "Pause" : "Resume"}
-          </button>
-        </td>
-      `;
-
-      adsTable.appendChild(row);
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
 }
 
-/* ===============================
-   TOGGLE
-================================ */
-async function toggleAd(id) {
 
-  try {
-    await apiFetch(API_BASE + "/" + id + "/toggle", {
-      method: "PATCH"
-    });
-    loadAds();
-  } catch (err) {
-    alert("Toggle failed");
-  }
+/* =======================
+SAVE AD
+======================= */
+
+saveBtn.onclick = async()=>{
+
+try{
+
+const data={
+name:nameEl.value.trim(),
+type:typeEl.value,
+adCode:adCodeEl.value.trim(),
+page:pageEl.value,
+position:positionEl.value
 }
 
-/* ===============================
-   RESET FORM
-================================ */
-function resetForm() {
-  document.querySelectorAll(".ads-card input, .ads-card textarea")
-    .forEach(el => el.value = "");
+if(!data.name) return alert("Ad name required")
+if(!data.adCode) return alert("Ad code required")
+
+saveBtn.disabled=true
+saveBtn.textContent="Saving..."
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(data)
+})
+
+alert("Ad saved")
+
+resetForm()
+
+loadAds()
+
+}catch(err){
+
+alert(err.message)
+
 }
 
-/* ===============================
-   ESCAPE HTML
-================================ */
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+finally{
+
+saveBtn.disabled=false
+saveBtn.textContent="Save Ad"
+
 }
+
+}
+
+
+/* =======================
+BULK ADD
+======================= */
+
+async function bulkAddAds(){
+
+try{
+
+const raw = bulkDataEl.value.trim()
+
+if(!raw) return alert("Paste JSON")
+
+const data = JSON.parse(raw)
+
+if(!Array.isArray(data)) return alert("Invalid JSON")
+
+await apiFetch(API+"/bulk",{
+method:"POST",
+body:JSON.stringify(data)
+})
+
+alert("Bulk ads added")
+
+bulkDataEl.value=""
+
+loadAds()
+
+}catch(err){
+
+alert("Invalid JSON")
+
+}
+
+}
+
+
+/* =======================
+LOAD ADS
+======================= */
+
+async function loadAds(){
+
+try{
+
+const ads = await apiFetch(API)
+
+adsTable.innerHTML=`
+<tr>
+<th>Name</th>
+<th>Page</th>
+<th>Position</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+`
+
+ads.forEach(ad=>{
+
+const tr=document.createElement("tr")
+
+tr.innerHTML=`
+<td>${escapeHtml(ad.name)}</td>
+<td>${escapeHtml(ad.page)}</td>
+<td>${escapeHtml(ad.position)}</td>
+<td class="status ${ad.status==="ON"?"on":"off"}">${ad.status}</td>
+<td>
+<button onclick="toggleAd('${ad.id}')">
+${ad.status==="ON"?"Pause":"Resume"}
+</button>
+</td>
+`
+
+adsTable.appendChild(tr)
+
+})
+
+}catch(err){
+
+console.error(err)
+
+}
+
+}
+
+
+/* =======================
+TOGGLE
+======================= */
+
+async function toggleAd(id){
+
+await apiFetch(API+"/"+id+"/toggle",{
+method:"PATCH"
+})
+
+loadAds()
+
+}
+
+
+/* =======================
+RESET
+======================= */
+
+function resetForm(){
+
+document.querySelectorAll(".ads-card input,.ads-card textarea")
+.forEach(el=>el.value="")
+
+}
+
+
+/* =======================
+ESCAPE
+======================= */
+
+function escapeHtml(text){
+
+const div=document.createElement("div")
+div.textContent=text
+return div.innerHTML
+
+}
+
 
 /* INIT */
-loadAds();
 
+loadAds()
 </script>
 
 
