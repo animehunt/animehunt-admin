@@ -232,155 +232,131 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
+const API="/api/admin/player"
+const AUTH_KEY="AUTH_TOKEN"
 
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/player";
-const AUTH_KEY = "AUTH_TOKEN";
+const saveBtn=document.getElementById("savePlayer")
 
-/* ===============================
-   ELEMENT REFERENCES
-================================ */
-const saveBtn        = document.getElementById("savePlayer");
+const defaultServer=document.getElementById("defaultServer")
+const autoplay=document.getElementById("autoplay")
+const resume=document.getElementById("resume")
+const autoswitch=document.getElementById("autoswitch")
+const mode=document.getElementById("mode")
 
-const defaultServer  = document.getElementById("defaultServer");
-const autoplay       = document.getElementById("autoplay");
-const resume         = document.getElementById("resume");
-const autoswitch     = document.getElementById("autoswitch");
-const mode           = document.getElementById("mode");
+const showServers=document.getElementById("showServers")
+const showDownload=document.getElementById("showDownload")
+const showSubscribe=document.getElementById("showSubscribe")
+const showRelated=document.getElementById("showRelated")
 
-const showServers    = document.getElementById("showServers");
-const showDownload   = document.getElementById("showDownload");
-const showSubscribe  = document.getElementById("showSubscribe");
-const showRelated    = document.getElementById("showRelated");
+function checkAuth(){
 
-/* ===============================
-   AUTH CHECK
-================================ */
-(function checkAuth(){
-  const token = localStorage.getItem(AUTH_KEY);
-  if(!token){
-    location.href = "login.html";
-  }
-})();
+const token=localStorage.getItem(AUTH_KEY)
 
-/* ===============================
-   SAFE FETCH
-================================ */
-async function apiFetch(url, options = {}) {
-
-  const token = localStorage.getItem(AUTH_KEY);
-
-  try {
-
-    const res = await fetch(url,{
-      ...options,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token,
-        ...options.headers
-      }
-    });
-
-    if(res.status === 401 || res.status === 403){
-      localStorage.removeItem(AUTH_KEY);
-      location.href="login.html";
-      throw new Error("Unauthorized");
-    }
-
-    if(!res.ok){
-      const text = await res.text();
-      throw new Error(text || "Request failed");
-    }
-
-    return await res.json().catch(()=>({}));
-
-  } catch(err){
-    console.error("API ERROR:", err);
-    alert("Server error occurred.");
-    throw err;
-  }
+if(!token){
+location.href="login.html"
 }
 
-/* ===============================
-   DISABLE BUTTON SAFE
-================================ */
+}
+
+checkAuth()
+
+async function apiFetch(url,options={}){
+
+try{
+
+const token=localStorage.getItem(AUTH_KEY)
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+
+localStorage.removeItem(AUTH_KEY)
+location.href="login.html"
+return {}
+
+}
+
+if(!res.ok){
+
+console.warn("API error",res.status)
+return {}
+
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error("Network error",err)
+return {}
+
+}
+
+}
+
 function setSaving(state){
-  saveBtn.disabled = state;
-  saveBtn.textContent = state ? "Saving..." : "💾 Save Player";
+
+saveBtn.disabled=state
+saveBtn.textContent=state?"Saving...":"💾 Save Player"
+
 }
 
-/* ===============================
-   LOAD PLAYER SETTINGS
-================================ */
 async function loadPlayer(){
 
-  try{
+const d=await apiFetch(API)
 
-    const d = await apiFetch(API);
+defaultServer.value=d.defaultServer || "Server 1"
 
-    defaultServer.value = d.defaultServer || "Server 1";
+autoplay.value=String(!!d.autoplay)
+resume.value=String(!!d.resume)
+autoswitch.value=String(!!d.autoswitch)
 
-    autoplay.value   = String(!!d.autoplay);
-    resume.value     = String(!!d.resume);
-    autoswitch.value = String(!!d.autoswitch);
-    mode.value       = d.mode || "responsive";
+mode.value=d.mode || "responsive"
 
-    showServers.value   = String(!!d.ui?.servers);
-    showDownload.value  = String(!!d.ui?.download);
-    showSubscribe.value = String(!!d.ui?.subscribe);
-    showRelated.value   = String(!!d.ui?.related);
-
-  } catch(err){
-    console.error("Load failed:", err);
-  }
+showServers.value=String(!!d.ui?.servers)
+showDownload.value=String(!!d.ui?.download)
+showSubscribe.value=String(!!d.ui?.subscribe)
+showRelated.value=String(!!d.ui?.related)
 
 }
 
-/* ===============================
-   SAVE PLAYER SETTINGS
-================================ */
-saveBtn.addEventListener("click", async ()=>{
+saveBtn.addEventListener("click",async()=>{
 
-  try{
+setSaving(true)
 
-    setSaving(true);
+const payload={
+defaultServer:defaultServer.value,
+autoplay:autoplay.value==="true",
+resume:resume.value==="true",
+autoswitch:autoswitch.value==="true",
+mode:mode.value,
+ui:{
+servers:showServers.value==="true",
+download:showDownload.value==="true",
+subscribe:showSubscribe.value==="true",
+related:showRelated.value==="true"
+}
+}
 
-    const payload = {
-      defaultServer: defaultServer.value,
-      autoplay: autoplay.value === "true",
-      resume: resume.value === "true",
-      autoswitch: autoswitch.value === "true",
-      mode: mode.value,
-      ui:{
-        servers: showServers.value === "true",
-        download: showDownload.value === "true",
-        subscribe: showSubscribe.value === "true",
-        related: showRelated.value === "true"
-      }
-    };
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
 
-    await apiFetch(API,{
-      method:"POST",
-      body: JSON.stringify(payload)
-    });
+setSaving(false)
 
-    alert("✅ Player settings saved successfully");
+alert("Player settings saved")
 
-  } catch(err){
-    console.error("Save failed:", err);
-  } finally {
-    setSaving(false);
-  }
+})
 
-});
-
-/* ===============================
-   INIT
-================================ */
-document.addEventListener("DOMContentLoaded", loadPlayer);
-
+document.addEventListener("DOMContentLoaded",loadPlayer)
 </script>
 
 </body>
