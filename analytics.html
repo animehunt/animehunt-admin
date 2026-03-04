@@ -275,150 +275,110 @@
 
 </div>
 <script>
+const API_BASE="/api/admin/analytics"
 
-/* ===============================
-   CONFIG (CLOUDFLARE SAFE)
-================================ */
-const API_BASE = "/api/admin/analytics";
+const rangeSelect=document.getElementById("range")
 
-/* ===============================
-   ELEMENTS
-================================ */
-const rangeSelect = document.getElementById("range");
+const visitorsEl=document.getElementById("visitors")
+const viewsEl=document.getElementById("views")
+const animeViewsEl=document.getElementById("animeViews")
+const episodeViewsEl=document.getElementById("episodeViews")
+const downloadsEl=document.getElementById("downloads")
+const searchesEl=document.getElementById("searches")
 
-const visitorsEl     = document.getElementById("visitors");
-const viewsEl        = document.getElementById("views");
-const animeViewsEl   = document.getElementById("animeViews");
-const episodeViewsEl = document.getElementById("episodeViews");
-const downloadsEl    = document.getElementById("downloads");
-const searchesEl     = document.getElementById("searches");
+const topAnimeEl=document.getElementById("topAnime")
+const topEpisodesEl=document.getElementById("topEpisodes")
+const topSearchesEl=document.getElementById("topSearches")
+const topCategoriesEl=document.getElementById("topCategories")
+const topBannersEl=document.getElementById("topBanners")
+const topServersEl=document.getElementById("topServers")
 
-const topAnimeEl      = document.getElementById("topAnime");
-const topEpisodesEl   = document.getElementById("topEpisodes");
-const topSearchesEl   = document.getElementById("topSearches");
-const topCategoriesEl = document.getElementById("topCategories");
-const topBannersEl    = document.getElementById("topBanners");
-const topServersEl    = document.getElementById("topServers");
-
-/* ===============================
-   SAFE FETCH
-================================ */
 async function apiFetch(url){
 
-  try{
-    const res = await fetch(url,{
-      headers:{
-        "Authorization": "Bearer " + (localStorage.getItem("AUTH_TOKEN") || "")
-      }
-    });
+try{
 
-    if(!res.ok){
-      console.warn("Analytics API failed:", res.status);
-      return null;
-    }
+const token=localStorage.getItem("AUTH_TOKEN")
 
-    return await res.json();
+const res=await fetch(url,{
+headers:{
+Authorization:token?`Bearer ${token}`:""
+}
+})
 
-  }catch(err){
-    console.error("Network error:", err);
-    return null;
-  }
+if(res.status===401){
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+return null
 }
 
-/* ===============================
-   SAFE TEXT SETTER
-================================ */
-function setText(el, value){
-  if(!el) return;
-  el.textContent = value ?? 0;
+if(!res.ok){
+console.warn("API failed:",res.status)
+return null
 }
 
-/* ===============================
-   SAFE LIST RENDER
-================================ */
-function fillList(element, arr, formatter){
+return await res.json()
 
-  if(!element) return;
+}catch(err){
 
-  element.innerHTML = "";
+console.error("Network error:",err)
+return null
 
-  if(!arr || arr.length === 0){
-    element.innerHTML = "<li>No data</li>";
-    return;
-  }
-
-  arr.forEach(item=>{
-    const li = document.createElement("li");
-    li.textContent = formatter(item);
-    element.appendChild(li);
-  });
 }
 
-/* ===============================
-   LOAD ANALYTICS
-================================ */
+}
+
+function setText(el,val){
+if(el) el.textContent=val||0
+}
+
+function fillList(el,list,format){
+
+if(!el) return
+
+el.innerHTML=""
+
+if(!list||list.length===0){
+el.innerHTML="<li>No data</li>"
+return
+}
+
+list.forEach(item=>{
+const li=document.createElement("li")
+li.textContent=format(item)
+el.appendChild(li)
+})
+
+}
+
 async function loadAnalytics(){
 
-  const range = rangeSelect?.value || "7";
+const range=rangeSelect?.value||"7"
 
-  const data = await apiFetch(`${API_BASE}?range=${range}`);
+const data=await apiFetch(`${API_BASE}?range=${range}`)
 
-  if(!data){
-    console.warn("No analytics data received");
-    return;
-  }
+if(!data) return
 
-  /* ===== STATS ===== */
-  setText(visitorsEl,     data.stats?.visitors);
-  setText(viewsEl,        data.stats?.pageViews);
-  setText(animeViewsEl,   data.stats?.animeViews);
-  setText(episodeViewsEl, data.stats?.episodeViews);
-  setText(downloadsEl,    data.stats?.downloads);
-  setText(searchesEl,     data.stats?.searches);
+setText(visitorsEl,data.stats?.visitors)
+setText(viewsEl,data.stats?.pageViews)
+setText(animeViewsEl,data.stats?.animeViews)
+setText(episodeViewsEl,data.stats?.episodeViews)
+setText(downloadsEl,data.stats?.downloads)
+setText(searchesEl,data.stats?.searches)
 
-  /* ===== LISTS ===== */
-  fillList(topAnimeEl, data.topAnime,
-    a => `${a.animeSlug} (${a.views})`
-  );
+fillList(topAnimeEl,data.topAnime,a=>`${a.animeSlug} (${a.views})`)
+fillList(topEpisodesEl,data.topEpisodes,e=>`EP ${e.episodeId} (${e.views})`)
+fillList(topSearchesEl,data.topSearches,s=>`${s.query} (${s.count})`)
+fillList(topCategoriesEl,data.topCategories,c=>`${c.category} (${c.views})`)
+fillList(topBannersEl,data.topBanners,b=>`${b.banner} (${b.clicks})`)
+fillList(topServersEl,data.topServers,s=>`${s.server} (${s.views})`)
 
-  fillList(topEpisodesEl, data.topEpisodes,
-    e => `EP ${e.episodeId} (${e.views})`
-  );
-
-  fillList(topSearchesEl, data.topSearches,
-    s => `${s.query} (${s.count})`
-  );
-
-  fillList(topCategoriesEl, data.topCategories,
-    c => `${c.category} (${c.views})`
-  );
-
-  fillList(topBannersEl, data.topBanners,
-    b => `${b.banner} (${b.clicks})`
-  );
-
-  fillList(topServersEl, data.topServers,
-    s => `${s.server} (${s.views})`
-  );
 }
 
-/* ===============================
-   RANGE CHANGE
-================================ */
-if(rangeSelect){
-  rangeSelect.addEventListener("change", loadAnalytics);
-}
+rangeSelect?.addEventListener("change",loadAnalytics)
 
-/* ===============================
-   AUTO REFRESH
-================================ */
-let refreshInterval = setInterval(loadAnalytics, 60000);
+setInterval(loadAnalytics,60000)
 
-/* ===============================
-   INIT
-================================ */
-document.addEventListener("DOMContentLoaded", loadAnalytics);
-
+document.addEventListener("DOMContentLoaded",loadAnalytics)
 </script>
 
 
