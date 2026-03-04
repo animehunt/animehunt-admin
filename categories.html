@@ -209,244 +209,262 @@ body{background:#060a14;color:#fff}
 
 
 <script>
+const AUTH_TOKEN_KEY="AUTH_TOKEN"
+const API="/api/admin/categories"
 
-/* =====================================
-   CONFIG
-===================================== */
-const AUTH_TOKEN_KEY = "AUTH_TOKEN"
-const API = "/api/admin/categories"
-let editingId = null
+let editingId=null
 
-/* =====================================
-   AUTH CHECK
-===================================== */
-(function checkAuth(){
-  const token = localStorage.getItem(AUTH_TOKEN_KEY)
-  if(!token){
-    window.location.href = "login.html"
-  }
-})()
+const nameInput=document.getElementById("name")
+const slugInput=document.getElementById("slug")
+const typeInput=document.getElementById("type")
+const orderInput=document.getElementById("order")
+const priorityInput=document.getElementById("priority")
 
-/* =====================================
-   SAFE FETCH
-===================================== */
-async function apiFetch(url, options = {}) {
+const showHomeInput=document.getElementById("showHome")
+const isActiveInput=document.getElementById("isActive")
+const isFeaturedInput=document.getElementById("isFeatured")
 
-  const token = localStorage.getItem(AUTH_TOKEN_KEY)
+const aiTrendingInput=document.getElementById("aiTrending")
+const aiPopularInput=document.getElementById("aiPopular")
+const aiAssignInput=document.getElementById("aiAssign")
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  })
+const list=document.getElementById("list")
+const modal=document.getElementById("modal")
 
-  if(res.status === 401 || res.status === 403){
-    localStorage.removeItem(AUTH_TOKEN_KEY)
-    window.location.href = "login.html"
-    throw new Error("Unauthorized")
-  }
+function checkAuth(){
 
-  if(!res.ok){
-    const text = await res.text()
-    throw new Error(text || "Server Error")
-  }
+const token=localStorage.getItem(AUTH_TOKEN_KEY)
 
-  return await res.json()
+if(!token){
+location.href="login.html"
 }
 
-/* =====================================
-   AUTO SLUG
-===================================== */
-name.addEventListener("input", () => {
-  slug.value = name.value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g,"")
-    .replace(/\s+/g,"-")
+}
+
+checkAuth()
+
+async function apiFetch(url,options={}){
+
+const token=localStorage.getItem(AUTH_TOKEN_KEY)
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
 })
 
-/* =====================================
-   LOAD CATEGORIES
-===================================== */
+if(res.status===401||res.status===403){
+localStorage.removeItem(AUTH_TOKEN_KEY)
+location.href="login.html"
+throw new Error("Unauthorized")
+}
+
+if(!res.ok){
+throw new Error(await res.text())
+}
+
+return res.json()
+
+}
+
+nameInput.addEventListener("input",()=>{
+
+slugInput.value=nameInput.value
+.toLowerCase()
+.replace(/[^a-z0-9\s-]/g,"")
+.replace(/\s+/g,"-")
+
+})
+
 async function loadCategories(){
 
-  try{
+try{
 
-    const data = await apiFetch(API)
+const data=await apiFetch(API)
 
-    list.innerHTML = ""
+list.innerHTML=""
 
-    if(!data.length){
-      list.innerHTML = "<div style='padding:20px;color:#888'>No Categories Found</div>"
-      return
-    }
+if(!data||!data.length){
 
-    data.forEach(cat => {
+list.innerHTML="<div style='padding:20px;color:#888'>No Categories</div>"
+return
 
-      const row = document.createElement("div")
-      row.className = "row"
-
-      row.innerHTML = `
-        <span>${escapeHTML(cat.name)}</span>
-        <span>${escapeHTML(cat.slug)}</span>
-        <span class="badge">${cat.type}</span>
-        <span class="${cat.active ? 'active':'inactive'}">
-          ${cat.active ? 'Active':'Inactive'}
-        </span>
-        <span>${cat.category_order}</span>
-        <span>${cat.priority}</span>
-        <span class="actions">
-          <button onclick="editCategory('${cat.id}')">✏️</button>
-          <button onclick="deleteCategory('${cat.id}')">🗑</button>
-        </span>
-      `
-
-      list.appendChild(row)
-    })
-
-  }catch(err){
-    alert(err.message)
-  }
 }
 
-/* =====================================
-   SAVE CATEGORY
-===================================== */
+data.forEach(cat=>{
+
+const row=document.createElement("div")
+
+row.className="row"
+
+row.innerHTML=`
+<span>${escapeHTML(cat.name)}</span>
+<span>${escapeHTML(cat.slug)}</span>
+<span class="badge">${cat.type}</span>
+<span class="${cat.active?'active':'inactive'}">
+${cat.active?'Active':'Inactive'}
+</span>
+<span>${cat.category_order||0}</span>
+<span>${cat.priority||1}</span>
+<span class="actions">
+<button onclick="editCategory('${cat.id}')">✏️</button>
+<button onclick="deleteCategory('${cat.id}')">🗑</button>
+</span>
+`
+
+list.appendChild(row)
+
+})
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
 async function saveCategory(){
 
-  try{
+try{
 
-    const payload = {
-      name: name.value.trim(),
-      slug: slug.value.trim(),
-      type: type.value,
-      order: Number(order.value || 0),
-      priority: Number(priority.value || 1),
-      showHome: showHome.checked,
-      isActive: isActive.checked,
-      isFeatured: isFeatured.checked,
-      aiTrending: aiTrending.checked,
-      aiPopular: aiPopular.checked,
-      aiAssign: aiAssign.checked
-    }
-
-    if(!payload.name || !payload.slug){
-      alert("Name & slug required")
-      return
-    }
-
-    if(editingId){
-      await apiFetch(API + "/" + editingId, {
-        method:"PUT",
-        body:JSON.stringify(payload)
-      })
-    }else{
-      await apiFetch(API, {
-        method:"POST",
-        body:JSON.stringify(payload)
-      })
-    }
-
-    closeModal()
-    resetForm()
-    loadCategories()
-
-  }catch(err){
-    alert(err.message)
-  }
+const payload={
+name:nameInput.value.trim(),
+slug:slugInput.value.trim(),
+type:typeInput.value,
+order:Number(orderInput.value||0),
+priority:Number(priorityInput.value||1),
+showHome:showHomeInput.checked,
+isActive:isActiveInput.checked,
+isFeatured:isFeaturedInput.checked,
+aiTrending:aiTrendingInput.checked,
+aiPopular:aiPopularInput.checked,
+aiAssign:aiAssignInput.checked
 }
 
-/* =====================================
-   EDIT CATEGORY
-===================================== */
-window.editCategory = async (id)=>{
-
-  try{
-
-    const data = await apiFetch(API)
-    const cat = data.find(c => c.id === id)
-
-    if(!cat) return
-
-    editingId = id
-
-    name.value = cat.name
-    slug.value = cat.slug
-    type.value = cat.type
-    order.value = cat.category_order
-    priority.value = cat.priority
-
-    showHome.checked = !!cat.showHome
-    isActive.checked = !!cat.active
-    isFeatured.checked = !!cat.featured
-    aiTrending.checked = !!cat.aiTrending
-    aiPopular.checked = !!cat.aiPopular
-    aiAssign.checked = !!cat.aiAssign
-
-    modal.style.display = "flex"
-
-  }catch(err){
-    alert("Failed to load category")
-  }
+if(!payload.name||!payload.slug){
+alert("Name & slug required")
+return
 }
 
-/* =====================================
-   DELETE CATEGORY
-===================================== */
-window.deleteCategory = async (id)=>{
+if(editingId){
 
-  if(!confirm("Delete this category?")) return
+await apiFetch(`${API}/${editingId}`,{
+method:"PUT",
+body:JSON.stringify(payload)
+})
 
-  try{
-    await apiFetch(API + "/" + id, {
-      method:"DELETE"
-    })
+}else{
 
-    loadCategories()
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
 
-  }catch(err){
-    alert(err.message)
-  }
 }
 
-/* =====================================
-   MODAL CONTROL
-===================================== */
+closeModal()
+resetForm()
+loadCategories()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
+window.editCategory=async function(id){
+
+try{
+
+const data=await apiFetch(API)
+
+const cat=data.find(c=>c.id===id)
+
+if(!cat)return
+
+editingId=id
+
+nameInput.value=cat.name
+slugInput.value=cat.slug
+typeInput.value=cat.type
+orderInput.value=cat.category_order
+priorityInput.value=cat.priority
+
+showHomeInput.checked=!!cat.showHome
+isActiveInput.checked=!!cat.active
+isFeaturedInput.checked=!!cat.featured
+aiTrendingInput.checked=!!cat.aiTrending
+aiPopularInput.checked=!!cat.aiPopular
+aiAssignInput.checked=!!cat.aiAssign
+
+modal.style.display="flex"
+
+}catch(err){
+
+alert("Failed to load category")
+
+}
+
+}
+
+window.deleteCategory=async function(id){
+
+if(!confirm("Delete category?"))return
+
+try{
+
+await apiFetch(`${API}/${id}`,{method:"DELETE"})
+
+loadCategories()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
 function openModal(){
-  editingId = null
-  modal.style.display = "flex"
+
+editingId=null
+modal.style.display="flex"
+
 }
 
 function closeModal(){
-  modal.style.display = "none"
+
+modal.style.display="none"
+
 }
 
-/* =====================================
-   RESET FORM
-===================================== */
 function resetForm(){
-  editingId = null
-  document.querySelectorAll(".form-grid input").forEach(el=>{
-    if(el.type === "checkbox") el.checked = false
-    else el.value = ""
-  })
+
+editingId=null
+
+document.querySelectorAll(".form-grid input").forEach(el=>{
+if(el.type==="checkbox")el.checked=false
+else el.value=""
+})
+
 }
 
-/* =====================================
-   ESCAPE HTML
-===================================== */
 function escapeHTML(str){
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
+
+return String(str)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+
 }
 
-/* INIT */
 loadCategories()
-
 </script>
 
 
