@@ -217,281 +217,248 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
-/* =====================================
-   CONFIG
-===================================== */
-const API = "/api/admin/sidebar"
-const TOKEN_KEY = "AUTH_TOKEN"
+const API="/api/admin/sidebar"
+const TOKEN_KEY="AUTH_TOKEN"
 
-let items = []
-let editId = null
+let items=[]
+let editId=null
+let saving=false
 
-/* =====================================
-   SAFE ELEMENT HELPER
-===================================== */
-function el(id){
-  return document.getElementById(id)
+function el(id){return document.getElementById(id)}
+
+async function apiFetch(url,options={}){
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?"Bearer "+token:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+throw new Error("Unauthorized")
 }
 
-/* =====================================
-   SAFE FETCH (JWT + Auto Redirect)
-===================================== */
-async function apiFetch(url, options = {}){
+if(!res.ok) throw new Error("Request failed")
 
-  const token = localStorage.getItem(TOKEN_KEY)
-
-  const res = await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + token,
-      ...options.headers
-    }
-  })
-
-  if(res.status === 401 || res.status === 403){
-    localStorage.removeItem(TOKEN_KEY)
-    location.href = "login.html"
-    throw new Error("Unauthorized")
-  }
-
-  if(!res.ok){
-    throw new Error("Request failed")
-  }
-
-  return res.json().catch(()=>[])
+return res.json().catch(()=>[])
 }
 
-/* =====================================
-   UTIL
-===================================== */
-function sanitize(str, max = 150){
-  return (str || "").trim().substring(0, max)
+function sanitize(str,max=150){
+return (str||"").trim().substring(0,max)
 }
 
-function clamp(v, min, max){
-  v = Number(v)
-  if(isNaN(v)) return min
-  return Math.max(min, Math.min(max, v))
+function clamp(v,min,max){
+v=Number(v)
+if(isNaN(v)) return min
+return Math.max(min,Math.min(max,v))
 }
 
 function isValidURL(u){
-  if(!u) return false
-  if(u.startsWith("/")) return true
-  try{
-    new URL(u)
-    return true
-  }catch{
-    return false
-  }
+
+if(!u) return false
+if(u.startsWith("/")) return true
+
+try{
+new URL(u)
+return true
+}catch{
+return false
 }
 
-/* =====================================
-   MODAL CONTROL
-===================================== */
+}
+
 function openModal(){
-  el("modal").style.display = "flex"
+el("modal").style.display="flex"
 }
 
 function closeModal(){
 
-  el("modal").style.display = "none"
+el("modal").style.display="none"
 
-  el("title").value = ""
-  el("icon").value = ""
-  el("url").value = ""
-  el("device").value = "All"
-  el("visibility").value = "All"
-  el("highlight").value = "None"
-  el("badgeText").value = ""
-  el("priority").value = ""
-  el("active").checked = true
-  el("newTab").checked = false
+el("title").value=""
+el("icon").value=""
+el("url").value=""
+el("device").value="All"
+el("visibility").value="All"
+el("highlight").value="None"
+el("badgeText").value=""
+el("priority").value=""
+el("active").checked=true
+el("newTab").checked=false
 
-  editId = null
+editId=null
+
 }
 
-/* =====================================
-   LOAD ITEMS
-===================================== */
+window.onclick=e=>{
+if(e.target===el("modal")) closeModal()
+}
+
 async function loadItems(){
 
-  try{
-    items = await apiFetch(API)
-    if(!Array.isArray(items)) items = []
-    render()
-  }catch(err){
-    console.error("Load failed:", err)
-  }
+try{
+
+items=await apiFetch(API)
+
+if(!Array.isArray(items)) items=[]
+
+render()
+
+}catch(e){
+console.error(e)
+}
 
 }
 
-/* =====================================
-   SAVE ITEM
-===================================== */
 async function saveItem(){
 
-  try{
+if(saving) return
 
-    const cleanTitle = sanitize(el("title").value,120)
-    const cleanURL   = sanitize(el("url").value,200)
+try{
 
-    if(!cleanTitle){
-      alert("Title required")
-      return
-    }
+const cleanTitle=sanitize(el("title").value,120)
+const cleanURL=sanitize(el("url").value,200)
 
-    if(!isValidURL(cleanURL)){
-      alert("Invalid URL")
-      return
-    }
+if(!cleanTitle){
+alert("Title required")
+return
+}
 
-    const payload = {
-      _id: editId,
-      title: cleanTitle,
-      icon: sanitize(el("icon").value,20),
-      url: cleanURL,
-      device: el("device").value,
-      visibility: el("visibility").value,
-      highlight: el("highlight").value,
-      badge: sanitize(el("badgeText").value,30),
-      priority: clamp(el("priority").value,1,99),
-      active: el("active").checked,
-      newTab: el("newTab").checked
-    }
+if(!isValidURL(cleanURL)){
+alert("Invalid URL")
+return
+}
 
-    await apiFetch(API,{
-      method:"POST",
-      body: JSON.stringify(payload)
-    })
+saving=true
 
-    closeModal()
-    loadItems()
+const payload={
 
-  }catch(err){
-    console.error("Save failed:", err)
-    alert("Save failed")
-  }
+_id:editId,
+title:cleanTitle,
+icon:sanitize(el("icon").value,20),
+url:cleanURL,
+device:el("device").value,
+visibility:el("visibility").value,
+highlight:el("highlight").value,
+badge:sanitize(el("badgeText").value,30),
+priority:clamp(el("priority").value,1,99),
+active:el("active").checked,
+newTab:el("newTab").checked
 
 }
 
-/* =====================================
-   DELETE ITEM
-===================================== */
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+closeModal()
+loadItems()
+
+}catch(e){
+
+console.error(e)
+alert("Save failed")
+
+}finally{
+
+saving=false
+
+}
+
+}
+
 async function delItem(id){
 
-  if(!confirm("Delete this sidebar item?")) return
+if(!confirm("Delete this sidebar item?")) return
 
-  try{
+try{
 
-    await apiFetch(API,{
-      method:"DELETE",
-      body: JSON.stringify({ id })
-    })
+await apiFetch(API,{
+method:"DELETE",
+body:JSON.stringify({id})
+})
 
-    loadItems()
+loadItems()
 
-  }catch(err){
-    console.error("Delete failed:", err)
-    alert("Delete failed")
-  }
+}catch(e){
+console.error(e)
+}
 
 }
 
-/* =====================================
-   EDIT ITEM
-===================================== */
 function editItem(id){
 
-  const i = items.find(x => x._id === id)
-  if(!i) return
+const i=items.find(x=>x._id===id)
 
-  editId = id
+if(!i) return
 
-  el("title").value      = i.title || ""
-  el("icon").value       = i.icon || ""
-  el("url").value        = i.url || ""
-  el("device").value     = i.device || "All"
-  el("visibility").value = i.visibility || "All"
-  el("highlight").value  = i.highlight || "None"
-  el("badgeText").value  = i.badge || ""
-  el("priority").value   = i.priority || 99
-  el("active").checked   = !!i.active
-  el("newTab").checked   = !!i.newTab
+editId=id
 
-  openModal()
+el("title").value=i.title||""
+el("icon").value=i.icon||""
+el("url").value=i.url||""
+el("device").value=i.device||"All"
+el("visibility").value=i.visibility||"All"
+el("highlight").value=i.highlight||"None"
+el("badgeText").value=i.badge||""
+el("priority").value=i.priority||99
+el("active").checked=!!i.active
+el("newTab").checked=!!i.newTab
+
+openModal()
+
 }
 
-/* =====================================
-   SAFE RENDER (XSS SAFE)
-===================================== */
 function render(){
 
-  const list = el("list")
-  list.innerHTML = ""
+const list=el("list")
 
-  items
-    .sort((a,b)=> (a.priority ?? 99) - (b.priority ?? 99))
-    .forEach((i, idx)=>{
+list.innerHTML=""
 
-      const row = document.createElement("div")
-      row.className = "row"
+items
+.sort((a,b)=>(a.priority??99)-(b.priority??99))
+.forEach((i,idx)=>{
 
-      const index = document.createElement("span")
-      index.textContent = idx + 1
+const row=document.createElement("div")
+row.className="row"
 
-      const titleSpan = document.createElement("span")
-      titleSpan.textContent = `${i.icon || ""} ${i.title}`
+row.innerHTML=`
 
-      if(i.highlight && i.highlight !== "None"){
-        const badge = document.createElement("span")
-        badge.className = "badge"
-        badge.textContent = i.highlight
-        badge.style.marginLeft = "6px"
-        titleSpan.appendChild(badge)
-      }
+<span>${idx+1}</span>
+<span>${(i.icon||"")} ${escapeHTML(i.title)}</span>
+<span>${escapeHTML(i.url)}</span>
+<span>${escapeHTML(i.device)}</span>
+<span class="badge">${i.active?"ON":"OFF"}</span>
+<span class="actions">
+<button onclick="editItem('${i._id}')">✏️</button>
+<button onclick="delItem('${i._id}')">🗑</button>
+</span>
 
-      const urlSpan = document.createElement("span")
-      urlSpan.textContent = i.url
+`
 
-      const deviceSpan = document.createElement("span")
-      deviceSpan.textContent = i.device
+list.appendChild(row)
 
-      const status = document.createElement("span")
-      status.className = "badge"
-      status.textContent = i.active ? "ON" : "OFF"
-
-      const actions = document.createElement("span")
-      actions.className = "actions"
-
-      const editBtn = document.createElement("button")
-      editBtn.textContent = "✏️"
-      editBtn.onclick = () => editItem(i._id)
-
-      const delBtn = document.createElement("button")
-      delBtn.textContent = "🗑"
-      delBtn.onclick = () => delItem(i._id)
-
-      actions.appendChild(editBtn)
-      actions.appendChild(delBtn)
-
-      row.appendChild(index)
-      row.appendChild(titleSpan)
-      row.appendChild(urlSpan)
-      row.appendChild(deviceSpan)
-      row.appendChild(status)
-      row.appendChild(actions)
-
-      list.appendChild(row)
-    })
+})
 
 }
 
-/* =====================================
-   INIT
-===================================== */
-document.addEventListener("DOMContentLoaded", loadItems)
+function escapeHTML(str){
+return String(str||"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+}
 
+document.addEventListener("DOMContentLoaded",loadItems)
 </script>
     
   
