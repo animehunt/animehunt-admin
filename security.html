@@ -539,239 +539,217 @@ color:#ccc;
 </main>
 </div>
 <script>
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/security";
-const STATS_API = "/api/security/stats";
-const TOKEN_KEY = "AUTH_TOKEN";
+const API="/api/admin/security"
+const STATS_API="/api/security/stats"
+const TOKEN_KEY="AUTH_TOKEN"
 
-let saveTimer = null;
-let statsTimer = null;
+let saveTimer=null
+let statsTimer=null
 
-/* ===============================
-   HELPER
-================================ */
-function el(id){ return document.getElementById(id); }
+function el(id){
+return document.getElementById(id)
+}
 
 function clamp(v,min,max){
-  if(isNaN(v)) return min;
-  return Math.max(min,Math.min(max,v));
+if(isNaN(v)) return min
+return Math.max(min,Math.min(max,v))
 }
 
-/* ===============================
-   SAFE FETCH
-================================ */
 async function apiFetch(url,options={}){
 
-  const token = localStorage.getItem(TOKEN_KEY);
+const token=localStorage.getItem(TOKEN_KEY)
 
-  const res = await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": token ? "Bearer "+token : "",
-      ...options.headers
-    }
-  });
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?"Bearer "+token:"",
+...options.headers
+}
+})
 
-  if(res.status===401){
-    localStorage.removeItem(TOKEN_KEY);
-    location.href="login.html";
-    throw new Error("Unauthorized");
-  }
+if(res.status===401){
 
-  if(!res.ok){
-    throw new Error("Request failed");
-  }
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+throw new Error("Unauthorized")
 
-  return res.json().catch(()=>({}));
 }
 
-/* ===============================
-   LOAD CONFIG
-================================ */
+if(!res.ok){
+throw new Error("Request failed")
+}
+
+return res.json().catch(()=>({}))
+
+}
+
 async function loadSecurity(){
 
-  try{
+try{
 
-    const d = await apiFetch(API);
-    if(!d) return;
+const d=await apiFetch(API)
 
-    el("ultraMode").checked = !!d.ultra;
-    el("firewallLevel").value = clamp(d.firewallLevel,1,5);
+if(!d) return
 
-    el("indiaOnly").checked = !!d.geo?.indiaOnly;
-    el("blockForeign").checked = !!d.geo?.blockForeign;
+el("ultraMode").checked=!!d.ultra
+el("firewallLevel").value=clamp(d.firewallLevel,1,5)
 
-    el("loginLimit").checked = !!d.admin?.loginLimit;
-    el("deviceLock").checked = !!d.admin?.deviceLock;
-    el("sessionMonitor").checked = !!d.admin?.sessionMonitor;
+el("indiaOnly").checked=!!d.geo?.indiaOnly
+el("blockForeign").checked=!!d.geo?.blockForeign
 
-    el("autoBan").checked = !!d.ai?.autoBan;
-    el("banBrute").checked = !!d.ai?.brute;
-    el("banBots").checked = !!d.ai?.bot;
-    el("aiLearn").checked = !!d.ai?.learning;
+el("loginLimit").checked=!!d.admin?.loginLimit
+el("deviceLock").checked=!!d.admin?.deviceLock
+el("sessionMonitor").checked=!!d.admin?.sessionMonitor
 
-    el("hideServerInfo").checked = !!d.system?.hideServer;
-    el("hideTechStack").checked = !!d.system?.hideTech;
+el("autoBan").checked=!!d.ai?.autoBan
+el("banBrute").checked=!!d.ai?.brute
+el("banBots").checked=!!d.ai?.bot
+el("aiLearn").checked=!!d.ai?.learning
 
-    updateFirewallLabel();
+el("hideServerInfo").checked=!!d.system?.hideServer
+el("hideTechStack").checked=!!d.system?.hideTech
 
-  }catch(err){
-    console.error("Load error:",err);
-  }
+updateFirewallLabel()
+
+}catch(e){
+
+console.error(e)
 
 }
 
-/* ===============================
-   SAVE (DEBOUNCED)
-================================ */
+}
+
 function scheduleSave(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveSecurity,400);
+clearTimeout(saveTimer)
+saveTimer=setTimeout(saveSecurity,400)
 }
 
 async function saveSecurity(){
 
-  try{
+try{
 
-    const payload = {
-      ultra: el("ultraMode").checked,
-      firewallLevel: clamp(+el("firewallLevel").value,1,5),
+const payload={
 
-      geo:{
-        indiaOnly: el("indiaOnly").checked,
-        blockForeign: el("blockForeign").checked
-      },
+ultra:el("ultraMode").checked,
+firewallLevel:clamp(+el("firewallLevel").value,1,5),
 
-      admin:{
-        loginLimit: el("loginLimit").checked,
-        deviceLock: el("deviceLock").checked,
-        sessionMonitor: el("sessionMonitor").checked
-      },
+geo:{
+indiaOnly:el("indiaOnly").checked,
+blockForeign:el("blockForeign").checked
+},
 
-      ai:{
-        autoBan: el("autoBan").checked,
-        brute: el("banBrute").checked,
-        bot: el("banBots").checked,
-        learning: el("aiLearn").checked
-      },
+admin:{
+loginLimit:el("loginLimit").checked,
+deviceLock:el("deviceLock").checked,
+sessionMonitor:el("sessionMonitor").checked
+},
 
-      system:{
-        hideServer: el("hideServerInfo").checked,
-        hideTech: el("hideTechStack").checked
-      }
-    };
+ai:{
+autoBan:el("autoBan").checked,
+brute:el("banBrute").checked,
+bot:el("banBots").checked,
+learning:el("aiLearn").checked
+},
 
-    await apiFetch(API,{
-      method:"POST",
-      body:JSON.stringify(payload)
-    });
-
-  }catch(err){
-    console.error("Save error:",err);
-    loadSecurity(); // rollback UI
-  }
+system:{
+hideServer:el("hideServerInfo").checked,
+hideTech:el("hideTechStack").checked
+}
 
 }
 
-/* ===============================
-   ULTRA MODE TOGGLE (INSTANT)
-================================ */
-el("ultraMode").addEventListener("change", async ()=>{
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
 
-  try{
+}catch(e){
 
-    await apiFetch(API+"/ultra",{
-      method:"POST",
-      body:JSON.stringify({ enable: el("ultraMode").checked })
-    });
+console.error(e)
+loadSecurity()
 
-  }catch{
-    el("ultraMode").checked = !el("ultraMode").checked;
-  }
+}
 
-});
+}
 
-/* ===============================
-   FIREWALL LABEL
-================================ */
 function updateFirewallLabel(){
 
-  const level = +el("firewallLevel").value;
+const level=+el("firewallLevel").value
 
-  const map = {
-    1:"Level 1 – Basic",
-    2:"Level 2 – Moderate",
-    3:"Level 3 – Strong",
-    4:"Level 4 – Aggressive",
-    5:"Level 5 – Extreme"
-  };
+const map={
+1:"Level 1 – Basic",
+2:"Level 2 – Moderate",
+3:"Level 3 – Strong",
+4:"Level 4 – Aggressive",
+5:"Level 5 – Extreme"
+}
 
-  el("fwLabel").innerText = map[level] || "Level 3 – Strong";
+el("fwLabel").innerText=map[level]
+
 }
 
 el("firewallLevel").addEventListener("input",()=>{
-  updateFirewallLabel();
-  scheduleSave();
-});
+updateFirewallLabel()
+scheduleSave()
+})
 
-/* ===============================
-   ATTACH LISTENERS
-================================ */
 [
-  "indiaOnly",
-  "blockForeign",
-  "loginLimit",
-  "deviceLock",
-  "sessionMonitor",
-  "autoBan",
-  "banBrute",
-  "banBots",
-  "aiLearn",
-  "hideServerInfo",
-  "hideTechStack"
+"indiaOnly",
+"blockForeign",
+"loginLimit",
+"deviceLock",
+"sessionMonitor",
+"autoBan",
+"banBrute",
+"banBots",
+"aiLearn",
+"hideServerInfo",
+"hideTechStack"
 ].forEach(id=>{
-  const element = el(id);
-  if(element){
-    element.addEventListener("change",scheduleSave);
-  }
-});
 
-/* ===============================
-   LIVE STATS
-================================ */
+const element=el(id)
+
+if(element){
+element.addEventListener("change",scheduleSave)
+}
+
+})
+
 async function loadStats(){
 
-  try{
+try{
 
-    const d = await apiFetch(STATS_API);
+const d=await apiFetch(STATS_API)
 
-    el("ipCount").innerText = d.blockedIPs ?? 0;
-    el("liveUsers").innerText = d.liveUsers ?? 0;
-    el("reqPerSec").innerText = d.reqPerSec ?? 0;
-    el("blockedReq").innerText = d.blockedReq ?? 0;
+el("ipCount").innerText=d.blockedIPs ?? 0
+el("liveUsers").innerText=d.liveUsers ?? 0
+el("reqPerSec").innerText=d.reqPerSec ?? 0
+el("blockedReq").innerText=d.blockedReq ?? 0
 
-  }catch(err){
-    console.error("Stats error:",err);
-  }
+}catch(e){
+
+console.error(e)
+
+}
 
 }
 
 function startStats(){
-  if(statsTimer) clearInterval(statsTimer);
-  statsTimer = setInterval(loadStats,5000);
+
+if(statsTimer) clearInterval(statsTimer)
+
+statsTimer=setInterval(loadStats,5000)
+
 }
 
-/* ===============================
-   INIT
-================================ */
 document.addEventListener("DOMContentLoaded",()=>{
-  loadSecurity();
-  loadStats();
-  startStats();
-});
+
+loadSecurity()
+loadStats()
+startStats()
+
+})
 </script>
 
 </body>
