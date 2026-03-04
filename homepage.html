@@ -153,238 +153,215 @@
 </div>
 
 <script>
+const API="/api/admin/homepage"
+let editId=null
 
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/homepage"
-let editId = null
+async function apiFetch(url,options={}){
 
-/* ===============================
-   SAFE FETCH (JWT + SAFE ERRORS)
-================================ */
-async function apiFetch(url, options = {}) {
+try{
 
-  const token = localStorage.getItem("AUTH_TOKEN")
+const token=localStorage.getItem("AUTH_TOKEN")
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  })
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
+})
 
-  if (res.status === 401) {
-    localStorage.removeItem("AUTH_TOKEN")
-    location.href = "login.html"
-    throw new Error("Unauthorized")
-  }
+if(res.status===401){
 
-  if (!res.ok) {
-    const msg = await res.text()
-    throw new Error(msg || "Request failed")
-  }
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+return null
 
-  return res.json().catch(() => ({}))
 }
 
-/* ===============================
-   ELEMENTS
-================================ */
-const rowModal  = document.getElementById("rowModal")
-const addRowBtn = document.getElementById("addRowBtn")
-const closeBtn  = document.getElementById("closeModal")
-const saveBtn   = document.getElementById("saveRow")
-const rowList   = document.getElementById("rowList")
+if(!res.ok){
 
-const rowTitle  = document.getElementById("rowTitle")
-const rowType   = document.getElementById("rowType")
-const rowSource = document.getElementById("rowSource")
-const rowLayout = document.getElementById("rowLayout")
-const rowLimit  = document.getElementById("rowLimit")
-const rowOrder  = document.getElementById("rowOrder")
-const rowActive = document.getElementById("rowActive")
-const rowAuto   = document.getElementById("rowAuto")
+console.warn("API error",res.status)
+return null
 
-/* ===============================
-   MODAL CONTROL
-================================ */
-addRowBtn.onclick = () => {
-  clearForm()
-  editId = null
-  rowModal.style.display = "flex"
 }
 
-closeBtn.onclick = () => {
-  rowModal.style.display = "none"
+return await res.json()
+
+}catch(err){
+
+console.error("Network error",err)
+return null
+
 }
 
-/* ===============================
-   LOAD ROWS
-================================ */
-async function loadRows() {
-  try {
-    const rows = await apiFetch(API)
-    renderRows(rows || [])
-  } catch (err) {
-    console.error(err)
-  }
 }
 
-/* ===============================
-   SAVE ROW
-================================ */
-saveBtn.onclick = async () => {
+const rowModal=document.getElementById("rowModal")
+const addRowBtn=document.getElementById("addRowBtn")
+const closeBtn=document.getElementById("closeModal")
+const saveBtn=document.getElementById("saveRow")
+const rowList=document.getElementById("rowList")
 
-  try {
+const rowTitle=document.getElementById("rowTitle")
+const rowType=document.getElementById("rowType")
+const rowSource=document.getElementById("rowSource")
+const rowLayout=document.getElementById("rowLayout")
+const rowLimit=document.getElementById("rowLimit")
+const rowOrder=document.getElementById("rowOrder")
+const rowActive=document.getElementById("rowActive")
+const rowAuto=document.getElementById("rowAuto")
 
-    if (!rowTitle.value.trim()) {
-      alert("Title required")
-      return
-    }
-
-    const payload = {
-      title: rowTitle.value.trim(),
-      type: rowType.value,
-      source: rowSource.value.trim(),
-      layout: rowLayout.value,
-      limit: Number(rowLimit.value || 10),
-      order: Number(rowOrder.value || 0),
-      active: rowActive.checked,
-      autoUpdate: rowAuto.checked
-    }
-
-    if (editId) {
-      await apiFetch(`${API}/${editId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload)
-      })
-    } else {
-      await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      })
-    }
-
-    rowModal.style.display = "none"
-    clearForm()
-    loadRows()
-
-  } catch (err) {
-    console.error(err)
-    alert("Save failed")
-  }
+addRowBtn.onclick=()=>{
+clearForm()
+editId=null
+rowModal.style.display="flex"
 }
 
-/* ===============================
-   DELETE
-================================ */
-window.deleteRow = async (id) => {
-
-  if (!confirm("Delete this row?")) return
-
-  try {
-    await apiFetch(`${API}/${id}`, {
-      method: "DELETE"
-    })
-    loadRows()
-  } catch (err) {
-    console.error(err)
-  }
+closeBtn.onclick=()=>{
+rowModal.style.display="none"
 }
 
-/* ===============================
-   EDIT
-================================ */
-window.editRow = async (id) => {
+async function loadRows(){
 
-  try {
+const rows=await apiFetch(API)
 
-    const row = await apiFetch(`${API}/${id}`)
-    editId = id
+renderRows(rows || [])
 
-    rowTitle.value = row.title || ""
-    rowType.value  = row.type || "auto"
-    rowSource.value = row.source || ""
-    rowLayout.value = row.layout || "scroll"
-    rowLimit.value  = row.limit || 10
-    rowOrder.value  = row.order || 0
-    rowActive.checked = !!row.active
-    rowAuto.checked   = !!row.autoUpdate
-
-    rowModal.style.display = "flex"
-
-  } catch (err) {
-    console.error(err)
-  }
 }
 
-/* ===============================
-   SAFE RENDER
-================================ */
-function renderRows(rows) {
+saveBtn.onclick=async()=>{
 
-  rowList.innerHTML = ""
+if(!rowTitle.value.trim()){
 
-  if (!rows.length) {
-    rowList.innerHTML = "<div style='padding:20px;color:#888'>No Rows Found</div>"
-    return
-  }
+alert("Title required")
+return
 
-  rows.forEach(r => {
-
-    const div = document.createElement("div")
-    div.className = "row"
-
-    div.innerHTML = `
-      <span>${escapeHTML(r.title)}</span>
-      <span>${escapeHTML(r.type)}</span>
-      <span>${escapeHTML(r.source || "-")}</span>
-      <span>${escapeHTML(r.layout)}</span>
-      <span class="badge">${r.order}</span>
-      <span class="status ${r.active ? "active" : "inactive"}">
-        ${r.active ? "Active" : "Off"}
-      </span>
-      <span class="actions">
-        <button onclick="editRow('${r._id}')">✏️</button>
-        <button onclick="deleteRow('${r._id}')">🗑</button>
-      </span>
-    `
-
-    rowList.appendChild(div)
-  })
 }
 
-/* ===============================
-   ESCAPE HTML (XSS SAFE)
-================================ */
-function escapeHTML(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+const payload={
+title:rowTitle.value.trim(),
+type:rowType.value,
+source:rowSource.value.trim(),
+layout:rowLayout.value,
+limit:Number(rowLimit.value||10),
+order:Number(rowOrder.value||0),
+active:rowActive.checked,
+autoUpdate:rowAuto.checked
 }
 
-/* ===============================
-   CLEAR FORM
-================================ */
-function clearForm() {
-  rowTitle.value = ""
-  rowType.value = "auto"
-  rowSource.value = ""
-  rowLayout.value = "scroll"
-  rowLimit.value = ""
-  rowOrder.value = ""
-  rowActive.checked = false
-  rowAuto.checked = false
+if(editId){
+
+await apiFetch(`${API}/${editId}`,{
+method:"PATCH",
+body:JSON.stringify(payload)
+})
+
+}else{
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
 }
 
-/* INIT */
+rowModal.style.display="none"
+clearForm()
 loadRows()
 
+}
+
+window.deleteRow=async(id)=>{
+
+if(!confirm("Delete row?")) return
+
+await apiFetch(`${API}/${id}`,{method:"DELETE"})
+
+loadRows()
+
+}
+
+window.editRow=async(id)=>{
+
+const row=await apiFetch(`${API}/${id}`)
+
+if(!row) return
+
+editId=id
+
+rowTitle.value=row.title||""
+rowType.value=row.type||"auto"
+rowSource.value=row.source||""
+rowLayout.value=row.layout||"scroll"
+rowLimit.value=row.limit||10
+rowOrder.value=row.order||0
+rowActive.checked=!!row.active
+rowAuto.checked=!!row.autoUpdate
+
+rowModal.style.display="flex"
+
+}
+
+function renderRows(rows){
+
+rowList.innerHTML=""
+
+if(!rows.length){
+
+rowList.innerHTML="<div style='padding:20px;color:#888'>No Rows Found</div>"
+return
+
+}
+
+rows.forEach(r=>{
+
+const div=document.createElement("div")
+div.className="row"
+
+div.innerHTML=`
+<span>${escapeHTML(r.title)}</span>
+<span>${escapeHTML(r.type)}</span>
+<span>${escapeHTML(r.source||"-")}</span>
+<span>${escapeHTML(r.layout)}</span>
+<span class="badge">${r.order}</span>
+<span class="status ${r.active?"active":"inactive"}">${r.active?"Active":"Off"}</span>
+<span class="actions">
+<button onclick="editRow('${r._id}')">✏️</button>
+<button onclick="deleteRow('${r._id}')">🗑</button>
+</span>
+`
+
+rowList.appendChild(div)
+
+})
+
+}
+
+function escapeHTML(str){
+
+return String(str||"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+
+}
+
+function clearForm(){
+
+rowTitle.value=""
+rowType.value="auto"
+rowSource.value=""
+rowLayout.value="scroll"
+rowLimit.value=""
+rowOrder.value=""
+rowActive.checked=false
+rowAuto.checked=false
+
+}
+
+loadRows()
     </script>
 
 </body>
