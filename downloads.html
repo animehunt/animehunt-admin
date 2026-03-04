@@ -171,257 +171,246 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 
 
   <script>
+const API="/api/admin/download"
+const TOKEN_KEY="AUTH_TOKEN"
 
-/* ======================================
-   CONFIG
-====================================== */
-const API = "/api/admin/download"
-const TOKEN_KEY = "AUTH_TOKEN"
+async function apiFetch(url,options={}){
 
-/* ======================================
-   SAFE FETCH
-====================================== */
-async function apiFetch(url, options = {}) {
+try{
 
-  const token = localStorage.getItem(TOKEN_KEY)
+const token=localStorage.getItem(TOKEN_KEY)
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  })
-
-  if (res.status === 401) {
-    localStorage.removeItem(TOKEN_KEY)
-    location.href = "login.html"
-    return
-  }
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || "Request failed")
-  }
-
-  return res.json()
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
 }
-
-/* ======================================
-   ELEMENTS
-====================================== */
-const modal = document.getElementById("downloadModal")
-const openBtn = document.getElementById("openModal")
-const closeBtn = document.getElementById("closeModal")
-const saveBtn = document.getElementById("saveDownload")
-const listEl = document.getElementById("downloadList")
-
-/* ======================================
-   MODAL CONTROL
-====================================== */
-openBtn.onclick = () => modal.style.display = "flex"
-closeBtn.onclick = () => closeModal()
-
-function closeModal(){
-  modal.style.display = "none"
-  resetForm()
-}
-
-/* ======================================
-   ADD QUALITY ROW (SAFE)
-====================================== */
-document.addEventListener("click", e => {
-
-  if (!e.target.classList.contains("add-quality")) return
-
-  const hostBox = e.target.closest(".download-host")
-  const template = hostBox.querySelector(".quality-row")
-  const clone = template.cloneNode(true)
-
-  clone.querySelector(".quality-link").value = ""
-  clone.querySelector("select").selectedIndex = 0
-
-  hostBox.appendChild(clone)
 })
 
-/* ======================================
-   LOAD DOWNLOADS
-====================================== */
-let downloads = []
+if(res.status===401){
 
-async function loadDownloads() {
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+return null
 
-  try {
-    downloads = await apiFetch(API)
-    render()
-  } catch (err) {
-    console.error(err)
-  }
 }
 
-/* ======================================
-   SAVE BULK
-====================================== */
-saveBtn.onclick = async () => {
+if(!res.ok){
 
-  try {
+console.warn("API error",res.status)
+return null
 
-    const anime = document.getElementById("anime").value.trim()
-    const season = document.getElementById("season").value.trim()
-    const episode = document.getElementById("episode").value.trim()
-
-    if (!anime) {
-      alert("Anime name required")
-      return
-    }
-
-    const payload = []
-
-    document.querySelectorAll(".download-host").forEach(hostBox => {
-
-      const host = hostBox.querySelector(".host-name").value.trim()
-      if (!host) return
-
-      hostBox.querySelectorAll(".quality-row").forEach(row => {
-
-        const quality = row.querySelector("select").value
-        const link = row.querySelector(".quality-link").value.trim()
-
-        if (!link) return
-
-        payload.push({
-          anime,
-          season,
-          episode,
-          host,
-          quality,
-          link
-        })
-      })
-    })
-
-    if (!payload.length) {
-      alert("No valid download links found")
-      return
-    }
-
-    saveBtn.disabled = true
-    saveBtn.textContent = "Saving..."
-
-    await apiFetch(`${API}/bulk`, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    })
-
-    closeModal()
-    loadDownloads()
-
-  } catch (err) {
-    alert("Save failed")
-  } finally {
-    saveBtn.disabled = false
-    saveBtn.textContent = "💾 Save"
-  }
 }
 
-/* ======================================
-   DELETE
-====================================== */
-async function removeDownload(id) {
+return await res.json()
 
-  if (!confirm("Delete download?")) return
+}catch(err){
 
-  try {
-    await apiFetch(`${API}/${id}`, { method: "DELETE" })
-    loadDownloads()
-  } catch (err) {
-    alert("Delete failed")
-  }
+console.error("Network error",err)
+return null
+
 }
 
-/* ======================================
-   RENDER SAFE
-====================================== */
-function render() {
-
-  listEl.innerHTML = ""
-
-  if (!downloads.length) {
-    listEl.innerHTML =
-      "<div style='padding:20px;color:#888'>No downloads found</div>"
-    return
-  }
-
-  downloads.forEach(d => {
-
-    const row = document.createElement("div")
-    row.className = "row"
-
-    row.innerHTML = `
-      <span>${escapeHTML(d.anime)}</span>
-      <span class="badge">S${escapeHTML(d.season || "-")}</span>
-      <span class="badge">E${escapeHTML(d.episode || "-")}</span>
-      <span>${escapeHTML(d.host)}</span>
-      <span class="badge">${escapeHTML(d.quality)}</span>
-      <span>
-        <a href="${escapeHTML(d.link)}" target="_blank" rel="noopener">
-          Open
-        </a>
-      </span>
-      <span class="actions">
-        <button data-id="${d.id}">🗑</button>
-      </span>
-    `
-
-    row.querySelector("button")
-       .addEventListener("click", () => removeDownload(d.id))
-
-    listEl.appendChild(row)
-  })
 }
 
-/* ======================================
-   ESCAPE HTML
-====================================== */
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
+const modal=document.getElementById("downloadModal")
+const openBtn=document.getElementById("openModal")
+const closeBtn=document.getElementById("closeModal")
+const saveBtn=document.getElementById("saveDownload")
+const listEl=document.getElementById("downloadList")
+
+openBtn.onclick=()=>modal.style.display="flex"
+
+closeBtn.onclick=closeModal
+
+function closeModal(){
+
+modal.style.display="none"
+resetForm()
+
 }
 
-/* ======================================
-   RESET FORM
-====================================== */
-function resetForm() {
+document.addEventListener("click",e=>{
 
-  document.getElementById("anime").value = ""
-  document.getElementById("season").value = ""
-  document.getElementById("episode").value = ""
+if(!e.target.classList.contains("add-quality")) return
 
-  const hosts = document.querySelectorAll(".download-host")
+const hostBox=e.target.closest(".download-host")
+const template=hostBox.querySelector(".quality-row")
+const clone=template.cloneNode(true)
 
-  hosts.forEach((box, i) => {
+clone.querySelector(".quality-link").value=""
+clone.querySelector("select").selectedIndex=0
 
-    if (i > 0) box.remove()
+hostBox.appendChild(clone)
 
-    box.querySelector(".host-name").value = ""
+})
 
-    const rows = box.querySelectorAll(".quality-row")
+let downloads=[]
 
-    rows.forEach((row, j) => {
-      if (j > 0) row.remove()
-      row.querySelector(".quality-link").value = ""
-      row.querySelector("select").selectedIndex = 0
-    })
-  })
+async function loadDownloads(){
+
+const data=await apiFetch(API)
+
+downloads=data || []
+
+render()
+
 }
 
-/* INIT */
+saveBtn.onclick=async()=>{
+
+const anime=document.getElementById("anime").value.trim()
+const season=document.getElementById("season").value.trim()
+const episode=document.getElementById("episode").value.trim()
+
+if(!anime){
+
+alert("Anime name required")
+return
+
+}
+
+const payload=[]
+
+document.querySelectorAll(".download-host").forEach(hostBox=>{
+
+const host=hostBox.querySelector(".host-name").value.trim()
+
+if(!host) return
+
+hostBox.querySelectorAll(".quality-row").forEach(row=>{
+
+const quality=row.querySelector("select").value
+const link=row.querySelector(".quality-link").value.trim()
+
+if(!link) return
+
+payload.push({
+anime,
+season,
+episode,
+host,
+quality,
+link
+})
+
+})
+
+})
+
+if(!payload.length){
+
+alert("No valid download links")
+return
+
+}
+
+saveBtn.disabled=true
+saveBtn.textContent="Saving..."
+
+await apiFetch(`${API}/bulk`,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+saveBtn.disabled=false
+saveBtn.textContent="💾 Save"
+
+closeModal()
 loadDownloads()
 
+}
+
+async function removeDownload(id){
+
+if(!confirm("Delete download?")) return
+
+await apiFetch(`${API}/${id}`,{method:"DELETE"})
+
+loadDownloads()
+
+}
+
+function render(){
+
+listEl.innerHTML=""
+
+if(!downloads.length){
+
+listEl.innerHTML="<div style='padding:20px;color:#888'>No downloads found</div>"
+return
+
+}
+
+downloads.forEach(d=>{
+
+const row=document.createElement("div")
+
+row.className="row"
+
+row.innerHTML=`
+<span>${escapeHTML(d.anime)}</span>
+<span class="badge">S${escapeHTML(d.season||"-")}</span>
+<span class="badge">E${escapeHTML(d.episode||"-")}</span>
+<span>${escapeHTML(d.host)}</span>
+<span class="badge">${escapeHTML(d.quality)}</span>
+<span><a href="${escapeHTML(d.link)}" target="_blank">Open</a></span>
+<span class="actions">
+<button data-id="${d.id}">🗑</button>
+</span>
+`
+
+row.querySelector("button")
+.addEventListener("click",()=>removeDownload(d.id))
+
+listEl.appendChild(row)
+
+})
+
+}
+
+function escapeHTML(str){
+
+return String(str)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+
+}
+
+function resetForm(){
+
+document.getElementById("anime").value=""
+document.getElementById("season").value=""
+document.getElementById("episode").value=""
+
+const hosts=document.querySelectorAll(".download-host")
+
+hosts.forEach((box,i)=>{
+
+if(i>0) box.remove()
+
+box.querySelector(".host-name").value=""
+
+const rows=box.querySelectorAll(".quality-row")
+
+rows.forEach((row,j)=>{
+
+if(j>0) row.remove()
+
+row.querySelector(".quality-link").value=""
+row.querySelector("select").selectedIndex=0
+
+})
+
+})
+
+}
+
+loadDownloads()
   </script>
 
     
