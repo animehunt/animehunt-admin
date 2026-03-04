@@ -196,221 +196,199 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 
 <script>
+  const API="/api/admin/footer"
+const AUTH_KEY="AUTH_TOKEN"
 
-/* ===============================
-   CONFIG
-================================ */
-const API = "/api/admin/footer";
-const AUTH_KEY = "AUTH_TOKEN";
+const statusEl=document.getElementById("status")
+const debugBox=document.getElementById("debugBox")
 
-const statusEl = document.getElementById("status");
-const debugBox = document.getElementById("debugBox");
+function checkAuth(){
 
-/* ===============================
-   AUTH CHECK
-================================ */
-(function checkAuth(){
-  const token = localStorage.getItem(AUTH_KEY);
-  if(!token){
-    window.location.href = "login.html";
-  }
-})();
+const token=localStorage.getItem(AUTH_KEY)
 
-/* ===============================
-   SAFE FETCH WRAPPER
-================================ */
-async function apiFetch(url, options = {}) {
-
-  const token = localStorage.getItem(AUTH_KEY);
-
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token ? "Bearer " + token : "",
-      ...options.headers
-    }
-  });
-
-  if(res.status === 401){
-    localStorage.removeItem(AUTH_KEY);
-    window.location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
-
-  if(!res.ok){
-    const text = await res.text();
-    throw new Error(text || "Request failed");
-  }
-
-  try{
-    return await res.json();
-  }catch{
-    return {};
-  }
+if(!token){
+location.href="login.html"
 }
 
-/* ===============================
-   CONFIG FIELDS
-================================ */
-const configFields = [
-  "footerOn","footerLazy","footerBlur","footerLock","footerTheme",
-  "about","privacy","disclaimer","dmca","telegram","linkBadges",
-  "azOn","azAuto","azSticky","azCompact","azMode",
-  "mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
-  "promoOn","promoText","promoLink","promoAutoHide"
-];
+}
 
-/* ===============================
-   LOAD FOOTER CONFIG
-================================ */
+checkAuth()
+
+async function apiFetch(url,options={}){
+
+try{
+
+const token=localStorage.getItem(AUTH_KEY)
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?`Bearer ${token}`:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+
+localStorage.removeItem(AUTH_KEY)
+location.href="login.html"
+return {}
+
+}
+
+if(!res.ok){
+
+console.warn("API error",res.status)
+return {}
+
+}
+
+try{
+return await res.json()
+}catch{
+return {}
+}
+
+}catch(err){
+
+console.error("Network error",err)
+return {}
+
+}
+
+}
+
+const configFields=[
+"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
+"about","privacy","disclaimer","dmca","telegram","linkBadges",
+"azOn","azAuto","azSticky","azCompact","azMode",
+"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
+"promoOn","promoText","promoLink","promoAutoHide"
+]
+
 async function loadFooter(){
 
-  try{
-    statusEl.innerText = "Loading...";
+statusEl.innerText="Loading..."
 
-    const data = await apiFetch(API);
+const data=await apiFetch(API)
 
-    configFields.forEach(id=>{
-      const el = document.getElementById(id);
-      if(!el) return;
+configFields.forEach(id=>{
 
-      if(data[id] !== undefined){
-        if(el.type === "checkbox"){
-          el.checked = !!data[id];
-        }else{
-          el.value = data[id];
-        }
-      }
-    });
+const el=document.getElementById(id)
 
-    statusEl.innerText = "Loaded ✔";
+if(!el) return
 
-  }catch(err){
-    console.error(err);
-    statusEl.innerText = "Load Failed ❌";
-  }
+if(data[id]!==undefined){
+
+if(el.type==="checkbox"){
+el.checked=!!data[id]
+}else{
+el.value=data[id]
 }
 
-/* ===============================
-   SAVE CONFIG
-================================ */
+}
+
+})
+
+statusEl.innerText="Loaded ✔"
+
+}
+
 async function save(){
 
-  try{
-    statusEl.innerText = "Saving...";
+statusEl.innerText="Saving..."
 
-    const payload = {};
+const payload={}
 
-    configFields.forEach(id=>{
-      const el = document.getElementById(id);
-      if(!el) return;
+configFields.forEach(id=>{
 
-      payload[id] = el.type === "checkbox"
-        ? el.checked
-        : el.value.trim();
-    });
+const el=document.getElementById(id)
 
-    await apiFetch(API,{
-      method:"POST",
-      body: JSON.stringify(payload)
-    });
+if(!el) return
 
-    statusEl.innerText = "Saved ✔";
+payload[id]=el.type==="checkbox"
+?el.checked
+:el.value.trim()
 
-  }catch(err){
-    console.error(err);
-    statusEl.innerText = "Save Failed ❌";
-  }
+})
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+statusEl.innerText="Saved ✔"
+
 }
 
-/* ===============================
-   KILL FOOTER
-================================ */
 async function kill(){
 
-  if(!confirm("Disable footer globally?")) return;
+if(!confirm("Disable footer globally?")) return
 
-  try{
-    await apiFetch(API + "/kill",{ method:"POST" });
-    statusEl.innerText = "Footer Disabled ❌";
-    loadFooter();
-  }catch(err){
-    console.error(err);
-  }
+await apiFetch(API+"/kill",{method:"POST"})
+
+statusEl.innerText="Footer Disabled"
+
+loadFooter()
+
 }
 
-/* ===============================
-   DEBUG JSON
-================================ */
 async function debug(){
 
-  try{
-    const json = await apiFetch(API);
+const json=await apiFetch(API)
 
-    debugBox.style.display = "block";
-    debugBox.textContent = JSON.stringify(json, null, 2);
+debugBox.style.display="block"
+debugBox.textContent=JSON.stringify(json,null,2)
 
-  }catch(err){
-    console.error(err);
-  }
 }
 
-/* ===============================
-   EXPORT CONFIG
-================================ */
 async function exportCfg(){
 
-  try{
-    const json = await apiFetch(API);
+const json=await apiFetch(API)
 
-    await navigator.clipboard.writeText(
-      JSON.stringify(json, null, 2)
-    );
+const text=JSON.stringify(json,null,2)
 
-    alert("Copied ✔");
+try{
 
-  }catch(err){
-    console.error(err);
-    alert("Export failed ❌");
-  }
+await navigator.clipboard.writeText(text)
+alert("Copied ✔")
+
+}catch{
+
+prompt("Copy config:",text)
+
 }
 
-/* ===============================
-   IMPORT CONFIG
-================================ */
+}
+
 async function importCfg(){
 
-  const input = prompt("Paste Footer JSON");
-  if(!input) return;
+const input=prompt("Paste Footer JSON")
 
-  let parsed;
+if(!input) return
 
-  try{
-    parsed = JSON.parse(input);
-  }catch{
-    alert("Invalid JSON ❌");
-    return;
-  }
+let parsed
 
-  try{
-    await apiFetch(API,{
-      method:"POST",
-      body: JSON.stringify(parsed)
-    });
-
-    statusEl.innerText = "Imported ✔";
-    loadFooter();
-
-  }catch(err){
-    console.error(err);
-    alert("Import failed ❌");
-  }
+try{
+parsed=JSON.parse(input)
+}catch{
+alert("Invalid JSON")
+return
 }
 
-/* INIT */
-loadFooter();
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(parsed)
+})
 
+statusEl.innerText="Imported ✔"
+
+loadFooter()
+
+}
+
+loadFooter()
 </script>
 
  
