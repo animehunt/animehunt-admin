@@ -226,241 +226,218 @@ select,input{
 </main>
 </div>
 <script>
+  
+const API="/api/admin/system"
+const statusEl=document.getElementById("statusText")
 
-/* =====================================
-   CONFIG
-===================================== */
-const API = "/api/admin/system"
-const statusEl = document.getElementById("statusText")
-
-/* All valid fields */
-const FIELD_IDS = [
-  "systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
-  "theme","animation","skeleton","imgBlur","mobileUI",
-  "autoHome","aiHome","trendBoost","manualPin","homeMode",
-  "geoBlock","ageLock","schedule","shadow",
-  "autoPlay","resume","autoNext","skipIntro","serverSwitch",
-  "downloads","zip","scan","limit",
-  "liveSearch","highlight","fuzzy","adult","maxResult",
-  "antiInspect","iframe","rateLimit","rightClick"
+const FIELD_IDS=[
+"systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
+"theme","animation","skeleton","imgBlur","mobileUI",
+"autoHome","aiHome","trendBoost","manualPin","homeMode",
+"geoBlock","ageLock","schedule","shadow",
+"autoPlay","resume","autoNext","skipIntro","serverSwitch",
+"downloads","zip","scan","limit",
+"liveSearch","highlight","fuzzy","adult","maxResult",
+"antiInspect","iframe","rateLimit","rightClick"
 ]
 
-/* =====================================
-   SAFE FETCH (NO CRASH VERSION)
-===================================== */
-async function apiFetch(url, options = {}) {
+async function apiFetch(url,options={}){
 
-  try {
+const token=localStorage.getItem("AUTH_TOKEN")||""
 
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("AUTH_TOKEN") || ""),
-        ...options.headers
-      }
-    })
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:token?"Bearer "+token:"",
+...options.headers
+}
+})
 
-    if (res.status === 401) {
-      localStorage.removeItem("AUTH_TOKEN")
-      location.href = "login.html"
-      throw new Error("Unauthorized")
-    }
-
-    if (!res.ok) {
-      const text = await res.text()
-      throw new Error(text || "Request failed")
-    }
-
-    return res.json().catch(() => ({}))
-
-  } catch (err) {
-    console.error("API Error:", err)
-    throw err
-  }
+if(res.status===401){
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+throw new Error("Unauthorized")
 }
 
-/* =====================================
-   UTIL
-===================================== */
-function clamp(v, min, max) {
-  v = Number(v)
-  if (isNaN(v)) return min
-  return Math.max(min, Math.min(max, v))
+if(!res.ok){
+const t=await res.text()
+throw new Error(t||"Request failed")
 }
 
-function showStatus(msg, isError = false) {
-  statusEl.innerText = msg
-  statusEl.style.color = isError ? "#ff4c4c" : "#4cff4c"
+return res.json().catch(()=>({}))
 
-  setTimeout(() => {
-    statusEl.innerText = "Ready"
-    statusEl.style.color = "#4cff4c"
-  }, 2000)
 }
 
-/* =====================================
-   LOAD CONFIG
-===================================== */
-async function loadSystem() {
-
-  try {
-
-    const data = await apiFetch(API)
-
-    FIELD_IDS.forEach(id => {
-      const el = document.getElementById(id)
-      if (!el) return
-
-      if (data[id] !== undefined) {
-        if (el.type === "checkbox") {
-          el.checked = !!data[id]
-        } else {
-          el.value = data[id]
-        }
-      }
-    })
-
-  } catch (err) {
-    showStatus("Load failed ❌", true)
-  }
+function clamp(v,min,max){
+v=Number(v)
+if(isNaN(v))return min
+return Math.max(min,Math.min(max,v))
 }
 
-/* =====================================
-   SAVE ALL
-===================================== */
-async function saveAll() {
+function showStatus(msg,error=false){
 
-  try {
+statusEl.innerText=msg
+statusEl.style.color=error?"#ff4c4c":"#4cff4c"
 
-    const payload = {}
+setTimeout(()=>{
+statusEl.innerText="Ready"
+statusEl.style.color="#4cff4c"
+},2000)
 
-    FIELD_IDS.forEach(id => {
-      const el = document.getElementById(id)
-      if (!el) return
-
-      if (id === "maxResult") {
-        payload[id] = clamp(el.value, 1, 100)
-      } else {
-        payload[id] = el.type === "checkbox"
-          ? el.checked
-          : el.value
-      }
-    })
-
-    await apiFetch(API, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    })
-
-    showStatus("Saved ✔")
-
-  } catch (err) {
-    showStatus("Save failed ❌", true)
-    loadSystem()
-  }
 }
 
-/* =====================================
-   KILL SWITCH
-===================================== */
-async function kill() {
+async function loadSystem(){
 
-  if (!confirm("⚠ This will stop the entire platform. Continue?"))
-    return
+try{
 
-  try {
+const data=await apiFetch(API)
 
-    await apiFetch(API + "/kill", {
-      method: "POST"
-    })
+FIELD_IDS.forEach(id=>{
 
-    showStatus("System halted ⚠", true)
+const el=document.getElementById(id)
+if(!el)return
 
-  } catch {
-    showStatus("Kill failed ❌", true)
-  }
+if(data[id]!==undefined){
+
+if(el.type==="checkbox")
+el.checked=!!data[id]
+else
+el.value=data[id]
+
 }
 
-/* =====================================
-   CLEAR CACHE (UI ONLY)
-===================================== */
-function clearCache() {
-  showStatus("Cache cleared ✔")
+})
+
+}catch{
+showStatus("Load failed ❌",true)
 }
 
-/* =====================================
-   EXPORT CONFIG
-===================================== */
-async function exportConfig() {
-
-  try {
-
-    const data = await apiFetch(API)
-
-    await navigator.clipboard.writeText(
-      JSON.stringify(data, null, 2)
-    )
-
-    showStatus("Copied ✔")
-
-  } catch {
-    showStatus("Export failed ❌", true)
-  }
 }
 
-/* =====================================
-   IMPORT CONFIG
-===================================== */
-async function importConfig() {
+async function saveAll(){
 
-  const input = prompt("Paste JSON config")
-  if (!input) return
+try{
 
-  try {
+const payload={}
 
-    const parsed = JSON.parse(input)
+FIELD_IDS.forEach(id=>{
 
-    await apiFetch(API, {
-      method: "POST",
-      body: JSON.stringify(parsed)
-    })
+const el=document.getElementById(id)
+if(!el)return
 
-    loadSystem()
-    showStatus("Imported ✔")
+if(id==="maxResult")
+payload[id]=clamp(el.value,1,100)
+else
+payload[id]=el.type==="checkbox"?el.checked:el.value
 
-  } catch {
-    showStatus("Invalid JSON ❌", true)
-  }
+})
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+showStatus("Saved ✔")
+
+}catch{
+
+showStatus("Save failed ❌",true)
+loadSystem()
+
 }
 
-/* =====================================
-   RESET SETTINGS
-===================================== */
-async function resetAll() {
-
-  if (!confirm("Reset all settings?")) return
-
-  try {
-
-    await apiFetch(API, {
-      method: "POST",
-      body: JSON.stringify({})
-    })
-
-    loadSystem()
-    showStatus("Reset ✔")
-
-  } catch {
-    showStatus("Reset failed ❌", true)
-  }
 }
 
-/* =====================================
-   AUTO INIT
-===================================== */
-document.addEventListener("DOMContentLoaded", loadSystem)
+async function kill(){
 
+if(!confirm("⚠ Stop entire platform?"))return
+
+try{
+
+await apiFetch(API+"/kill",{method:"POST"})
+showStatus("System halted ⚠",true)
+
+}catch{
+
+showStatus("Kill failed ❌",true)
+
+}
+
+}
+
+function clearCache(){
+showStatus("Cache cleared ✔")
+}
+
+async function exportConfig(){
+
+try{
+
+const data=await apiFetch(API)
+
+const text=JSON.stringify(data,null,2)
+
+if(navigator.clipboard)
+await navigator.clipboard.writeText(text)
+else
+prompt("Copy config:",text)
+
+showStatus("Copied ✔")
+
+}catch{
+
+showStatus("Export failed ❌",true)
+
+}
+
+}
+
+async function importConfig(){
+
+const input=prompt("Paste JSON config")
+if(!input)return
+
+try{
+
+const parsed=JSON.parse(input)
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(parsed)
+})
+
+loadSystem()
+showStatus("Imported ✔")
+
+}catch{
+
+showStatus("Invalid JSON ❌",true)
+
+}
+
+}
+
+async function resetAll(){
+
+if(!confirm("Reset settings?"))return
+
+try{
+
+await apiFetch(API,{method:"POST",body:JSON.stringify({})})
+
+loadSystem()
+showStatus("Reset ✔")
+
+}catch{
+
+showStatus("Reset failed ❌",true)
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",loadSystem)
 </script>
 
 </body>
