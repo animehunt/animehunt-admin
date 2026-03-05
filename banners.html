@@ -367,16 +367,25 @@ const bannerList=document.getElementById("bannerList")
 
 const banTitle=document.getElementById("banTitle")
 const banImageFile=document.getElementById("banImageFile")
-const banType=document.getElementById("banType")
-const banTarget=document.getElementById("banTarget")
+
+const banPage=document.getElementById("banPage")
+const banCategory=document.getElementById("banCategory")
 const banPosition=document.getElementById("banPosition")
+
+const banTarget=document.getElementById("banTarget")
 const banOrder=document.getElementById("banOrder")
 const banDevice=document.getElementById("banDevice")
+
 const banActive=document.getElementById("banActive")
 const banRotate=document.getElementById("banRotate")
 
 const previewImg=document.getElementById("previewImg")
 const previewError=document.getElementById("previewError")
+
+
+/* ===============================
+API FETCH
+================================ */
 
 async function apiFetch(url,options={}){
 
@@ -391,9 +400,12 @@ Authorization:token?`Bearer ${token}`:"",
 })
 
 if(res.status===401){
+
 localStorage.removeItem("AUTH_TOKEN")
 location.href="login.html"
+
 throw new Error("Unauthorized")
+
 }
 
 if(!res.ok){
@@ -404,6 +416,11 @@ return res.json()
 
 }
 
+
+/* ===============================
+IMAGE PREVIEW
+================================ */
+
 banImageFile.addEventListener("change",()=>{
 
 const file=banImageFile.files[0]
@@ -413,19 +430,28 @@ if(!file)return
 const reader=new FileReader()
 
 reader.onload=e=>{
+
 previewImg.src=e.target.result
 previewImg.style.display="block"
 previewError.style.display="none"
+
 }
 
 reader.onerror=()=>{
+
 previewImg.style.display="none"
 previewError.style.display="block"
+
 }
 
 reader.readAsDataURL(file)
 
 })
+
+
+/* ===============================
+LOAD BANNERS
+================================ */
 
 async function loadBanners(){
 
@@ -443,11 +469,16 @@ console.error(err)
 
 }
 
+
+/* ===============================
+RENDER TABLE
+================================ */
+
 function render(banners){
 
 bannerList.innerHTML=""
 
-if(!banners||!banners.length){
+if(!banners.length){
 
 bannerList.innerHTML="<div style='padding:20px;color:#888'>No banners</div>"
 return
@@ -461,10 +492,15 @@ const row=document.createElement("div")
 row.className="row"
 
 row.innerHTML=`
+
 <span>${escapeHTML(b.title)}</span>
-<span>${escapeHTML(b.type)}</span>
-<span>${escapeHTML(b.target||"-")}</span>
+
+<span>${escapeHTML(b.page)}</span>
+
+<span>${escapeHTML(b.category||"-")}</span>
+
 <span>${escapeHTML(b.position||"-")}</span>
+
 <span>${b.banner_order||0}</span>
 
 <span>
@@ -475,18 +511,16 @@ row.innerHTML=`
 </span>
 
 <span class="actions">
-<button data-id="${b.id}" class="delete-btn">Delete</button>
+<button onclick="deleteBanner('${b.id}')">Delete</button>
 </span>
+
 `
 
 row.querySelector("input")
 .addEventListener("change",e=>{
-toggleStatus(b.id,e.target.checked)
-})
 
-row.querySelector(".delete-btn")
-.addEventListener("click",()=>{
-deleteBanner(b.id)
+toggleStatus(b.id,e.target.checked)
+
 })
 
 bannerList.appendChild(row)
@@ -495,27 +529,39 @@ bannerList.appendChild(row)
 
 }
 
+
+/* ===============================
+SAVE BANNER
+================================ */
+
 async function saveBanner(){
 
 try{
 
 if(!banTitle.value.trim()){
+
 alert("Title required")
 return
+
 }
 
 if(!banImageFile.files.length){
+
 alert("Image required")
 return
+
 }
 
 const form=new FormData()
 
 form.append("title",banTitle.value.trim())
-form.append("type",banType.value)
-form.append("target",banTarget.value)
+form.append("page",banPage.value)
+form.append("category",banCategory.value)
 form.append("position",banPosition.value)
+
+form.append("target",banTarget.value)
 form.append("order",banOrder.value||0)
+
 form.append("device",banDevice.value)
 
 if(banActive.checked)form.append("active","1")
@@ -532,7 +578,9 @@ body:form
 })
 
 closeModal()
+
 resetForm()
+
 loadBanners()
 
 }catch(err){
@@ -543,24 +591,41 @@ alert(err.message)
 
 }
 
+
+/* ===============================
+TOGGLE STATUS
+================================ */
+
 async function toggleStatus(id,active){
 
 try{
 
 await apiFetch(`${API}/${id}/status`,{
+
 method:"PUT",
-headers:{"Content-Type":"application/json"},
+
+headers:{
+"Content-Type":"application/json"
+},
+
 body:JSON.stringify({active})
+
 })
 
-}catch(err){
+}catch{
 
 alert("Update failed")
+
 loadBanners()
 
 }
 
 }
+
+
+/* ===============================
+DELETE
+================================ */
 
 async function deleteBanner(id){
 
@@ -572,13 +637,18 @@ await apiFetch(`${API}/${id}`,{method:"DELETE"})
 
 loadBanners()
 
-}catch(err){
+}catch{
 
 alert("Delete failed")
 
 }
 
 }
+
+
+/* ===============================
+ESCAPE HTML
+================================ */
 
 function escapeHTML(str){
 
@@ -590,23 +660,43 @@ return String(str)
 
 }
 
+
+/* ===============================
+MODAL
+================================ */
+
 function openModal(){
+
 document.getElementById("bannerModal").style.display="flex"
+
 }
 
 function closeModal(){
+
 document.getElementById("bannerModal").style.display="none"
+
 }
+
+
+/* ===============================
+RESET FORM
+================================ */
 
 function resetForm(){
 
 banTitle.value=""
 banImageFile.value=""
-banType.value="Hero"
+
+banPage.value="home"
+banCategory.value=""
+
+banPosition.value="hero"
+
 banTarget.value=""
-banPosition.value=""
 banOrder.value=""
+
 banDevice.value="all"
+
 banActive.checked=false
 banRotate.checked=false
 
@@ -614,6 +704,11 @@ previewImg.style.display="none"
 previewError.style.display="none"
 
 }
+
+
+/* ===============================
+INIT
+================================ */
 
 loadBanners()
 </script>
