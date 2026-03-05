@@ -390,7 +390,28 @@ a{ text-decoration:none; color:inherit }
         <input id="language" placeholder="Language">
         <input id="duration" placeholder="Duration">
 
-        <input id="categories" placeholder="Categories (comma separated)">
+        <select id="genres" multiple size="6">
+
+<option value="action">Action</option>
+<option value="adventure">Adventure</option>
+<option value="comedy">Comedy</option>
+<option value="drama">Drama</option>
+<option value="fantasy">Fantasy</option>
+<option value="romance">Romance</option>
+<option value="school">School</option>
+<option value="supernatural">Supernatural</option>
+<option value="sports">Sports</option>
+<option value="horror">Horror</option>
+<option value="thriller">Thriller</option>
+<option value="sci-fi">Sci-Fi</option>
+<option value="mystery">Mystery</option>
+
+</select>
+
+<label class="check">
+<input type="checkbox" id="autoGenre">
+🎭 Auto Genre Detect
+</label>
         <input id="tags" placeholder="Tags (comma separated)">
 
         <label class="check">
