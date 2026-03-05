@@ -236,6 +236,9 @@ a{ text-decoration:none; color:inherit }
   font-size:11px;
   color:#aaa;
 }
+    #genres{
+height:120px;
+    }
   </style>
 </head>
 
@@ -444,242 +447,378 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 <script>
+/* ===============================
+CONFIG
+================================ */
+
+const BASE_URL = "https://animehunt-backend.animehunt715.workers.dev"
+const API = BASE_URL + "/api/admin/anime"
+
+let editId = null
 
 /* ===============================
-   CONFIG (ABSOLUTE BACKEND URL)
+SAFE FETCH
 ================================ */
-const BASE_URL = "https://animehunt-backend.animehunt715.workers.dev";
-const API = BASE_URL + "/api/admin/anime";
 
-let editId = null;
+async function apiFetch(url, options = {}){
 
-/* ===============================
-   SAFE FETCH
-================================ */
-async function apiFetch(url, options = {}) {
+const token = localStorage.getItem("AUTH_TOKEN")
 
-  const token = localStorage.getItem("AUTH_TOKEN");
+const res = await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+...(token && {"Authorization":"Bearer "+token})
+}
+})
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { "Authorization": "Bearer " + token }),
-      ...options.headers
-    }
-  });
+if(res.status === 401){
+alert("Session expired")
+location.href="login.html"
+throw new Error("Unauthorized")
+}
 
-  if (res.status === 401) {
-    alert("Session expired");
-    localStorage.removeItem("AUTH_TOKEN");
-    location.href = "login.html";
-    throw new Error("Unauthorized");
-  }
+const data = await res.json().catch(()=>({}))
 
-  const data = await res.json().catch(() => ({}));
+if(!res.ok){
+throw new Error(data.message || "API error")
+}
 
-  if (!res.ok) {
-    throw new Error(data.message || "API Error");
-  }
+return data
 
-  return data;
 }
 
 /* ===============================
-   LOAD ANIME
+AUTO SLUG
 ================================ */
-async function loadAnime() {
 
-  try {
+document.getElementById("title").addEventListener("input",()=>{
 
-    const query = new URLSearchParams({
-      type: document.getElementById("typeFilter").value,
-      status: document.getElementById("statusFilter").value,
-      home: document.getElementById("homeFilter").value,
-      search: document.getElementById("searchAnime").value
-    }).toString();
+const slug = document.getElementById("title").value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-|-$/g,"")
 
-    const data = await apiFetch(`${API}?${query}`);
+document.getElementById("slug").value = slug
 
-    const animeList = document.getElementById("animeList");
-    animeList.innerHTML = "";
+})
 
-    if (!data.length) {
-      animeList.innerHTML =
-        "<div style='padding:20px;color:#888'>No Anime Found</div>";
-      return;
-    }
+/* ===============================
+GENRE COLLECTOR
+================================ */
 
-    data.forEach(a => {
+function getSelectedGenres(){
 
-      const row = document.createElement("div");
-      row.className = "row";
+const select = document.getElementById("genres")
 
-      row.innerHTML = `
-        <span>
-          <img src="${a.poster || 'https://via.placeholder.com/40x60'}"
-               onerror="this.src='https://via.placeholder.com/40x60'">
-        </span>
-        <span>${escapeHTML(a.title)}</span>
-        <span class="badge">${a.type || '-'}</span>
-        <span class="badge">${a.status || '-'}</span>
-        <span>${escapeHTML(a.categories || "-")}</span>
-        <span>${a.isHome ? "Yes" : "No"}</span>
-        <span>${a.isTrending ? "Yes" : "No"}</span>
-        <span class="actions">
-          <button onclick="editAnime('${a.id}')">✏️</button>
-          <button onclick="deleteAnime('${a.id}')">🗑</button>
-        </span>
-      `;
+return Array.from(select.selectedOptions)
+.map(o=>o.value)
+.join(",")
 
-      animeList.appendChild(row);
-    });
-
-  } catch (err) {
-    alert(err.message);
-  }
 }
 
 /* ===============================
-   SAVE ANIME
+AUTO GENRE DETECT
 ================================ */
-document.getElementById("saveAnime").onclick = async () => {
 
-  try {
+function autoDetectGenres(title){
 
-    const payload = {
-      title: document.getElementById("title").value.trim(),
-      slug: document.getElementById("slug").value.trim(),
-      type: document.getElementById("type").value,
-      status: document.getElementById("status").value,
-      poster: document.getElementById("poster").value.trim(),
-      banner: document.getElementById("banner").value.trim(),
-      year: document.getElementById("year").value,
-      rating: document.getElementById("rating").value,
-      language: document.getElementById("language").value,
-      duration: document.getElementById("duration").value,
-      categories: document.getElementById("categories").value,
-      tags: document.getElementById("tags").value,
-      description: document.getElementById("description").value,
-      isHome: document.getElementById("isHome").checked,
-      isTrending: document.getElementById("isTrending").checked,
-      isMostViewed: document.getElementById("isMostViewed").checked,
-      isBanner: document.getElementById("isBanner").checked
-    };
+title = title.toLowerCase()
 
-    if (!payload.title) {
-      alert("Title required");
-      return;
-    }
+const map = {
 
-    if (editId) {
+action:["fight","battle","war"],
+romance:["love","romance"],
+comedy:["funny","comedy"],
+horror:["ghost","horror"],
+sports:["soccer","football","basketball"],
+school:["school","academy"],
+fantasy:["magic","demon","dragon"],
+adventure:["journey","adventure"],
+sciFi:["space","robot","future"]
 
-      await apiFetch(`${API}/${editId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload)
-      });
-
-      alert("Anime Updated");
-
-    } else {
-
-      await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      alert("Anime Created");
-    }
-
-    closeModal();
-    loadAnime();
-
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
-/* ===============================
-   DELETE
-================================ */
-window.deleteAnime = async (id) => {
-
-  if (!confirm("Delete this anime?")) return;
-
-  try {
-    await apiFetch(`${API}/${id}`, { method: "DELETE" });
-    loadAnime();
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
-/* ===============================
-   EDIT
-================================ */
-window.editAnime = async (id) => {
-
-  try {
-
-    const a = await apiFetch(`${API}/${id}`);
-
-    editId = id;
-
-    document.getElementById("title").value = a.title;
-    document.getElementById("slug").value = a.slug;
-    document.getElementById("type").value = a.type;
-    document.getElementById("status").value = a.status;
-    document.getElementById("poster").value = a.poster || "";
-    document.getElementById("banner").value = a.banner || "";
-    document.getElementById("year").value = a.year || "";
-    document.getElementById("rating").value = a.rating || "";
-    document.getElementById("language").value = a.language || "";
-    document.getElementById("duration").value = a.duration || "";
-    document.getElementById("categories").value = a.categories || "";
-    document.getElementById("tags").value = a.tags || "";
-    document.getElementById("description").value = a.description || "";
-
-    document.getElementById("isHome").checked = !!a.isHome;
-    document.getElementById("isTrending").checked = !!a.isTrending;
-    document.getElementById("isMostViewed").checked = !!a.isMostViewed;
-    document.getElementById("isBanner").checked = !!a.isBanner;
-
-    document.getElementById("animeModal").style.display = "flex";
-
-  } catch {
-    alert("Failed to load anime");
-  }
-};
-
-/* ===============================
-   CLOSE MODAL
-================================ */
-function closeModal() {
-  document.getElementById("animeModal").style.display = "none";
-  editId = null;
 }
 
-document.getElementById("openAddAnime").onclick = () => {
-  closeModal();
-  document.getElementById("animeModal").style.display = "flex";
-};
+let detected=[]
 
-document.getElementById("closeModal").onclick = closeModal;
+for(const g in map){
 
-/* ===============================
-   ESCAPE HTML
-================================ */
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+if(map[g].some(k=>title.includes(k))){
+detected.push(g)
 }
 
-/* INIT */
-loadAnime();
+}
 
+return detected.join(",")
+
+}
+
+/* ===============================
+LOAD ANIME
+================================ */
+
+async function loadAnime(){
+
+try{
+
+const query = new URLSearchParams({
+
+type:document.getElementById("typeFilter").value,
+status:document.getElementById("statusFilter").value,
+home:document.getElementById("homeFilter").value,
+search:document.getElementById("searchAnime").value
+
+}).toString()
+
+const data = await apiFetch(API+"?"+query)
+
+const list=document.getElementById("animeList")
+
+list.innerHTML=""
+
+if(!data.length){
+
+list.innerHTML="<div style='padding:20px;color:#888'>No Anime Found</div>"
+return
+
+}
+
+data.forEach(a=>{
+
+const row=document.createElement("div")
+
+row.className="row"
+
+row.innerHTML=`
+
+<span>
+<img src="${a.poster||'https://via.placeholder.com/40x60'}">
+</span>
+
+<span>${escapeHTML(a.title)}</span>
+
+<span class="badge">${a.type||"-"}</span>
+
+<span class="badge">${a.status||"-"}</span>
+
+<span>${escapeHTML(a.categories||"-")}</span>
+
+<span>${a.isHome?"Yes":"No"}</span>
+
+<span>${a.isTrending?"Yes":"No"}</span>
+
+<span class="actions">
+<button onclick="editAnime('${a.id}')">✏️</button>
+<button onclick="deleteAnime('${a.id}')">🗑</button>
+</span>
+`
+
+list.appendChild(row)
+
+})
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
+/* ===============================
+SAVE ANIME
+================================ */
+
+document.getElementById("saveAnime").onclick = async()=>{
+
+try{
+
+let genres = getSelectedGenres()
+
+const title=document.getElementById("title").value.trim()
+
+if(document.getElementById("autoGenre").checked){
+
+genres = autoDetectGenres(title)
+
+}
+
+const payload={
+
+title:title,
+slug:document.getElementById("slug").value.trim(),
+
+type:document.getElementById("type").value,
+status:document.getElementById("status").value,
+
+poster:document.getElementById("poster").value.trim(),
+banner:document.getElementById("banner").value.trim(),
+
+year:document.getElementById("year").value,
+rating:document.getElementById("rating").value,
+
+language:document.getElementById("language").value,
+duration:document.getElementById("duration").value,
+
+categories:genres,
+
+tags:document.getElementById("tags").value,
+
+description:document.getElementById("description").value,
+
+isHome:document.getElementById("isHome").checked,
+isTrending:document.getElementById("isTrending").checked,
+isMostViewed:document.getElementById("isMostViewed").checked,
+isBanner:document.getElementById("isBanner").checked
+
+}
+
+if(!payload.title){
+
+alert("Title required")
+return
+
+}
+
+if(editId){
+
+await apiFetch(API+"/"+editId,{
+method:"PATCH",
+body:JSON.stringify(payload)
+})
+
+alert("Anime Updated")
+
+}else{
+
+await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+alert("Anime Created")
+
+}
+
+closeModal()
+
+loadAnime()
+
+}catch(err){
+
+alert(err.message)
+
+}
+
+}
+
+/* ===============================
+DELETE
+================================ */
+
+window.deleteAnime = async(id)=>{
+
+if(!confirm("Delete this anime?")) return
+
+await apiFetch(API+"/"+id,{method:"DELETE"})
+
+loadAnime()
+
+}
+
+/* ===============================
+EDIT
+================================ */
+
+window.editAnime = async(id)=>{
+
+const a = await apiFetch(API+"/"+id)
+
+editId=id
+
+document.getElementById("title").value=a.title
+document.getElementById("slug").value=a.slug
+document.getElementById("type").value=a.type
+document.getElementById("status").value=a.status
+
+document.getElementById("poster").value=a.poster||""
+document.getElementById("banner").value=a.banner||""
+
+document.getElementById("year").value=a.year||""
+document.getElementById("rating").value=a.rating||""
+
+document.getElementById("language").value=a.language||""
+document.getElementById("duration").value=a.duration||""
+
+document.getElementById("tags").value=a.tags||""
+
+document.getElementById("description").value=a.description||""
+
+document.getElementById("isHome").checked=!!a.isHome
+document.getElementById("isTrending").checked=!!a.isTrending
+document.getElementById("isMostViewed").checked=!!a.isMostViewed
+document.getElementById("isBanner").checked=!!a.isBanner
+
+/* load genres */
+
+if(a.categories){
+
+const arr=a.categories.split(",")
+
+document.querySelectorAll("#genres option")
+.forEach(o=>{
+
+o.selected = arr.includes(o.value)
+
+})
+
+}
+
+document.getElementById("animeModal").style.display="flex"
+
+}
+
+/* ===============================
+MODAL
+================================ */
+
+function closeModal(){
+
+document.getElementById("animeModal").style.display="none"
+
+editId=null
+
+}
+
+document.getElementById("openAddAnime").onclick=()=>{
+
+closeModal()
+
+document.getElementById("animeModal").style.display="flex"
+
+}
+
+document.getElementById("closeModal").onclick=closeModal
+
+/* ===============================
+ESCAPE HTML
+================================ */
+
+function escapeHTML(str){
+
+return String(str)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+
+}
+
+/* ===============================
+INIT
+================================ */
+
+loadAnime()
 </script>
 
 
