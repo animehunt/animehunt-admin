@@ -274,19 +274,17 @@ a{ text-decoration:none; color:inherit }
 
     <div class="modal-body">
       <div class="form-grid">
-        <select id="banPage">
+
+<select id="banPage">
 
 <option value="home">Home Page</option>
-
 <option value="anime">Anime Page</option>
 <option value="cartoon">Cartoon Page</option>
 <option value="series">Series Page</option>
 <option value="movies">Movies Page</option>
-
 <option value="search">Search Page</option>
 <option value="episode">Episode Page</option>
 <option value="download">Download Page</option>
-
 <option value="category">Category Page</option>
 
 </select>
@@ -294,7 +292,7 @@ a{ text-decoration:none; color:inherit }
 
 <select id="banCategory">
 
-<option value="">Select Category</option>
+<option value="">No Category</option>
 
 <option value="action">Action</option>
 <option value="adventure">Adventure</option>
@@ -321,35 +319,27 @@ a{ text-decoration:none; color:inherit }
 <option value="bottom">Bottom</option>
 
 </select>
-        <input id="banTitle" placeholder="Banner Title">
-        <input id="banImage" placeholder="Image URL (optional)">
+
+<input id="banTitle" placeholder="Banner Title">
+
 <input type="file" id="banImageFile" accept="image/*">
-        <select id="banType">
-          <option>Hero</option><option>Slider</option>
-          <option>Category</option><option>Page</option>
-        </select>
 
-        <input id="banTarget" placeholder="Target">
-        <input id="banPosition" placeholder="Position">
-        <input id="banOrder" placeholder="Order">
-        
-        <select id="banDevice">
-          <option value="all">All Devices</option>
-          <option value="mobile">Mobile</option>
-          <option value="desktop">Desktop</option>
-        </select>
+<input id="banOrder" placeholder="Order">
 
-        <label class="check"><input type="checkbox" id="banActive"> Active</label>
-        <label class="check"><input type="checkbox" id="banRotate"> Auto Rotate</label>
+<label class="check">
+<input type="checkbox" id="banActive"> Active
+</label>
 
-        <!-- PREVIEW -->
-        <div class="preview-box">
-          <img id="previewImg">
-          <div class="preview-error" id="previewError">⚠ Image load failed</div>
-        </div>
+<label class="check">
+<input type="checkbox" id="banRotate"> Auto Rotate
+</label>
+
+<div class="preview-box">
+<img id="previewImg">
+<div class="preview-error" id="previewError">⚠ Image load failed</div>
+</div>
 
       </div>
-    </div>
 
     <div class="modal-footer">
       <button onclick="saveBanner()">💾 Save</button>
@@ -357,11 +347,9 @@ a{ text-decoration:none; color:inherit }
 
   </div>
 </div>
-
 <script>
-const API="/api/admin/banners"
 
-let editingId=null
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
 
@@ -372,15 +360,14 @@ const banPage=document.getElementById("banPage")
 const banCategory=document.getElementById("banCategory")
 const banPosition=document.getElementById("banPosition")
 
-const banTarget=document.getElementById("banTarget")
 const banOrder=document.getElementById("banOrder")
-const banDevice=document.getElementById("banDevice")
 
 const banActive=document.getElementById("banActive")
 const banRotate=document.getElementById("banRotate")
 
 const previewImg=document.getElementById("previewImg")
 const previewError=document.getElementById("previewError")
+
 
 
 /* ===============================
@@ -417,6 +404,7 @@ return res.json()
 }
 
 
+
 /* ===============================
 IMAGE PREVIEW
 ================================ */
@@ -449,6 +437,7 @@ reader.readAsDataURL(file)
 })
 
 
+
 /* ===============================
 LOAD BANNERS
 ================================ */
@@ -468,6 +457,7 @@ console.error(err)
 }
 
 }
+
 
 
 /* ===============================
@@ -530,6 +520,7 @@ bannerList.appendChild(row)
 }
 
 
+
 /* ===============================
 SAVE BANNER
 ================================ */
@@ -559,10 +550,7 @@ form.append("page",banPage.value)
 form.append("category",banCategory.value)
 form.append("position",banPosition.value)
 
-form.append("target",banTarget.value)
 form.append("order",banOrder.value||0)
-
-form.append("device",banDevice.value)
 
 if(banActive.checked)form.append("active","1")
 if(banRotate.checked)form.append("autoRotate","1")
@@ -590,6 +578,7 @@ alert(err.message)
 }
 
 }
+
 
 
 /* ===============================
@@ -623,6 +612,7 @@ loadBanners()
 }
 
 
+
 /* ===============================
 DELETE
 ================================ */
@@ -646,6 +636,7 @@ alert("Delete failed")
 }
 
 
+
 /* ===============================
 ESCAPE HTML
 ================================ */
@@ -659,6 +650,7 @@ return String(str)
 .replace(/"/g,"&quot;")
 
 }
+
 
 
 /* ===============================
@@ -678,6 +670,7 @@ document.getElementById("bannerModal").style.display="none"
 }
 
 
+
 /* ===============================
 RESET FORM
 ================================ */
@@ -692,10 +685,7 @@ banCategory.value=""
 
 banPosition.value="hero"
 
-banTarget.value=""
 banOrder.value=""
-
-banDevice.value="all"
 
 banActive.checked=false
 banRotate.checked=false
@@ -706,14 +696,14 @@ previewError.style.display="none"
 }
 
 
+
 /* ===============================
 INIT
 ================================ */
 
 loadBanners()
+
 </script>
-
-
 
 </body>
 </html>
