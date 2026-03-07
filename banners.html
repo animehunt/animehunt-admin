@@ -359,7 +359,6 @@ a{ text-decoration:none; color:inherit }
   </div>
 </div>
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
@@ -389,10 +388,18 @@ async function apiFetch(url,options={}){
 
 const token=localStorage.getItem("AUTH_TOKEN")
 
+const headers={
+Authorization:token?`Bearer ${token}`:""
+}
+
+if(!(options.body instanceof FormData)){
+headers["Content-Type"]="application/json"
+}
+
 const res=await fetch(url,{
 ...options,
 headers:{
-Authorization:token?`Bearer ${token}`:"",
+...headers,
 ...options.headers
 }
 })
@@ -429,18 +436,14 @@ if(!file)return
 const reader=new FileReader()
 
 reader.onload=e=>{
-
 previewImg.src=e.target.result
 previewImg.style.display="block"
 previewError.style.display="none"
-
 }
 
 reader.onerror=()=>{
-
 previewImg.style.display="none"
 previewError.style.display="block"
-
 }
 
 reader.readAsDataURL(file)
@@ -472,7 +475,7 @@ console.error(err)
 
 
 /* ===============================
-RENDER TABLE
+RENDER
 ================================ */
 
 function render(banners){
@@ -495,13 +498,9 @@ row.className="row"
 row.innerHTML=`
 
 <span>${escapeHTML(b.title)}</span>
-
 <span>${escapeHTML(b.page)}</span>
-
 <span>${escapeHTML(b.category||"-")}</span>
-
 <span>${escapeHTML(b.position||"-")}</span>
-
 <span>${b.banner_order||0}</span>
 
 <span>
@@ -514,14 +513,10 @@ row.innerHTML=`
 <span class="actions">
 <button onclick="deleteBanner('${b.id}')">Delete</button>
 </span>
-
 `
 
-row.querySelector("input")
-.addEventListener("change",e=>{
-
+row.querySelector("input").addEventListener("change",e=>{
 toggleStatus(b.id,e.target.checked)
-
 })
 
 bannerList.appendChild(row)
@@ -533,7 +528,7 @@ bannerList.appendChild(row)
 
 
 /* ===============================
-SAVE BANNER
+SAVE
 ================================ */
 
 async function saveBanner(){
@@ -541,17 +536,13 @@ async function saveBanner(){
 try{
 
 if(!banTitle.value.trim()){
-
 alert("Title required")
 return
-
 }
 
 if(!banImageFile.files.length){
-
 alert("Image required")
 return
-
 }
 
 const form=new FormData()
@@ -560,7 +551,6 @@ form.append("title",banTitle.value.trim())
 form.append("page",banPage.value)
 form.append("category",banCategory.value)
 form.append("position",banPosition.value)
-
 form.append("order",banOrder.value||0)
 
 if(banActive.checked)form.append("active","1")
@@ -568,18 +558,13 @@ if(banRotate.checked)form.append("autoRotate","1")
 
 form.append("image",banImageFile.files[0])
 
-await fetch(API,{
+await apiFetch(API,{
 method:"POST",
-headers:{
-Authorization:"Bearer "+localStorage.getItem("AUTH_TOKEN")
-},
 body:form
 })
 
 closeModal()
-
 resetForm()
-
 loadBanners()
 
 }catch(err){
@@ -593,32 +578,15 @@ alert(err.message)
 
 
 /* ===============================
-TOGGLE STATUS
+STATUS
 ================================ */
 
 async function toggleStatus(id,active){
 
-try{
-
 await apiFetch(`${API}/${id}/status`,{
-
 method:"PUT",
-
-headers:{
-"Content-Type":"application/json"
-},
-
 body:JSON.stringify({active})
-
 })
-
-}catch{
-
-alert("Update failed")
-
-loadBanners()
-
-}
 
 }
 
@@ -632,24 +600,16 @@ async function deleteBanner(id){
 
 if(!confirm("Delete banner?"))return
 
-try{
-
 await apiFetch(`${API}/${id}`,{method:"DELETE"})
 
 loadBanners()
-
-}catch{
-
-alert("Delete failed")
-
-}
 
 }
 
 
 
 /* ===============================
-ESCAPE HTML
+ESCAPE
 ================================ */
 
 function escapeHTML(str){
@@ -658,7 +618,6 @@ return String(str)
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
 
 }
 
@@ -669,21 +628,17 @@ MODAL
 ================================ */
 
 function openModal(){
-
 document.getElementById("bannerModal").style.display="flex"
-
 }
 
 function closeModal(){
-
 document.getElementById("bannerModal").style.display="none"
-
 }
 
 
 
 /* ===============================
-RESET FORM
+RESET
 ================================ */
 
 function resetForm(){
@@ -693,7 +648,6 @@ banImageFile.value=""
 
 banPage.value="home"
 banCategory.value=""
-
 banPosition.value="hero"
 
 banOrder.value=""
@@ -713,7 +667,6 @@ INIT
 ================================ */
 
 loadBanners()
-
 </script>
 
 </body>
