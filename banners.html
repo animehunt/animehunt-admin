@@ -359,314 +359,102 @@ a{ text-decoration:none; color:inherit }
   </div>
 </div>
 <script>
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
-
-const bannerList=document.getElementById("bannerList")
-
-const banTitle=document.getElementById("banTitle")
-const banImageFile=document.getElementById("banImageFile")
-
-const banPage=document.getElementById("banPage")
-const banCategory=document.getElementById("banCategory")
-const banPosition=document.getElementById("banPosition")
-
-const banOrder=document.getElementById("banOrder")
-
-const banActive=document.getElementById("banActive")
-const banRotate=document.getElementById("banRotate")
-
-const previewImg=document.getElementById("previewImg")
-const previewError=document.getElementById("previewError")
-
-
+let currentEditId = null;
+let existingImageUrl = "";
 
 /* ===============================
-API FETCH
-================================ */
-
-async function apiFetch(url,options={}){
-
-const token=localStorage.getItem("AUTH_TOKEN")
-
-const headers={
-Authorization:token?`Bearer ${token}`:""
+MODAL CONTROL
+=============================== */
+function openModal(data = null) {
+    const modal = document.getElementById("bannerModal");
+    modal.style.display = "flex";
+    
+    if (data) {
+        // Edit Mode
+        currentEditId = data.id;
+        existingImageUrl = data.image;
+        document.getElementById("banTitle").value = data.title;
+        document.getElementById("banPage").value = data.page;
+        document.getElementById("banCategory").value = data.category || "";
+        document.getElementById("banPosition").value = data.position;
+        document.getElementById("banOrder").value = data.banner_order;
+        document.getElementById("banActive").checked = !!data.active;
+        document.getElementById("banRotate").checked = !!data.autoRotate;
+        
+        document.getElementById("previewImg").src = data.image;
+        document.getElementById("previewImg").style.display = "block";
+    } else {
+        resetForm();
+    }
 }
 
-if(!(options.body instanceof FormData)){
-headers["Content-Type"]="application/json"
+async function saveBanner() {
+    const btn = document.querySelector(".modal-footer button");
+    try {
+        const title = document.getElementById("banTitle").value.trim();
+        const file = document.getElementById("banImageFile").files[0];
+
+        if (!title) return alert("Title required");
+        if (!currentEditId && !file) return alert("Image required for new banner");
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        const form = new FormData();
+        if (currentEditId) form.append("id", currentEditId);
+        form.append("title", title);
+        form.append("page", document.getElementById("banPage").value);
+        form.append("category", document.getElementById("banCategory").value);
+        form.append("position", document.getElementById("banPosition").value);
+        form.append("order", document.getElementById("banOrder").value || 0);
+        form.append("active", document.getElementById("banActive").checked ? "1" : "0");
+        form.append("autoRotate", document.getElementById("banRotate").checked ? "1" : "0");
+        
+        if (file) {
+            form.append("image", file);
+        } else {
+            form.append("existingImage", existingImageUrl);
+        }
+
+        await apiFetch(API, { method: "POST", body: form });
+
+        closeModal();
+        loadBanners();
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "💾 Save";
+    }
 }
 
-const res=await fetch(url,{
-...options,
-headers:{
-...headers,
-...options.headers
+// Add Edit Button in Render function
+function render(banners) {
+    bannerList.innerHTML = banners.length ? "" : "<div style='padding:20px;color:#888'>No banners</div>";
+    banners.forEach(b => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+            <span style="font-weight:600">${escapeHTML(b.title)}</span>
+            <span class="badge">${b.page}</span>
+            <span>${escapeHTML(b.category || "-")}</span>
+            <span>${b.position}</span>
+            <span>${b.banner_order}</span>
+            <span>
+                <label class="switch">
+                    <input type="checkbox" ${b.active ? "checked" : ""} onchange="toggleStatus('${b.id}', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </span>
+            <span class="actions">
+                <button onclick='openModal(${JSON.stringify(b)})'>✏️ Edit</button>
+                <button onclick="deleteBanner('${b.id}')" style="color:#ff4d4d">🗑 Delete</button>
+            </span>
+        `;
+        bannerList.appendChild(row);
+    });
 }
-})
-
-if(res.status===401){
-
-localStorage.removeItem("AUTH_TOKEN")
-location.href="login.html"
-
-throw new Error("Unauthorized")
-
-}
-
-if(!res.ok){
-throw new Error(await res.text())
-}
-
-return res.json()
-
-}
-
-
-
-/* ===============================
-IMAGE PREVIEW
-================================ */
-
-banImageFile.addEventListener("change",()=>{
-
-const file=banImageFile.files[0]
-
-if(!file)return
-
-const reader=new FileReader()
-
-reader.onload=e=>{
-previewImg.src=e.target.result
-previewImg.style.display="block"
-previewError.style.display="none"
-}
-
-reader.onerror=()=>{
-previewImg.style.display="none"
-previewError.style.display="block"
-}
-
-reader.readAsDataURL(file)
-
-})
-
-
-
-/* ===============================
-LOAD BANNERS
-================================ */
-
-async function loadBanners(){
-
-try{
-
-const banners=await apiFetch(API)
-
-render(banners)
-
-}catch(err){
-
-console.error(err)
-
-}
-
-}
-
-
-
-/* ===============================
-RENDER
-================================ */
-
-function render(banners){
-
-bannerList.innerHTML=""
-
-if(!banners.length){
-
-bannerList.innerHTML="<div style='padding:20px;color:#888'>No banners</div>"
-return
-
-}
-
-banners.forEach(b=>{
-
-const row=document.createElement("div")
-
-row.className="row"
-
-row.innerHTML=`
-
-<span>${escapeHTML(b.title)}</span>
-<span>${escapeHTML(b.page)}</span>
-<span>${escapeHTML(b.category||"-")}</span>
-<span>${escapeHTML(b.position||"-")}</span>
-<span>${b.banner_order||0}</span>
-
-<span>
-<label class="switch">
-<input type="checkbox" ${b.active?"checked":""}>
-<span class="slider"></span>
-</label>
-</span>
-
-<span class="actions">
-<button onclick="deleteBanner('${b.id}')">Delete</button>
-</span>
-`
-
-row.querySelector("input").addEventListener("change",e=>{
-toggleStatus(b.id,e.target.checked)
-})
-
-bannerList.appendChild(row)
-
-})
-
-}
-
-
-
-/* ===============================
-SAVE
-================================ */
-
-async function saveBanner(){
-
-try{
-
-if(!banTitle.value.trim()){
-alert("Title required")
-return
-}
-
-if(!banImageFile.files.length){
-alert("Image required")
-return
-}
-
-const form=new FormData()
-
-form.append("title",banTitle.value.trim())
-form.append("page",banPage.value)
-form.append("category",banCategory.value)
-form.append("position",banPosition.value)
-form.append("order",banOrder.value||0)
-
-if(banActive.checked)form.append("active","1")
-if(banRotate.checked)form.append("autoRotate","1")
-
-form.append("image",banImageFile.files[0])
-
-await apiFetch(API,{
-method:"POST",
-body:form
-})
-
-closeModal()
-resetForm()
-loadBanners()
-
-}catch(err){
-
-alert(err.message)
-
-}
-
-}
-
-
-
-/* ===============================
-STATUS
-================================ */
-
-async function toggleStatus(id,active){
-
-await apiFetch(`${API}/${id}/status`,{
-method:"PUT",
-body:JSON.stringify({active})
-})
-
-}
-
-
-
-/* ===============================
-DELETE
-================================ */
-
-async function deleteBanner(id){
-
-if(!confirm("Delete banner?"))return
-
-await apiFetch(`${API}/${id}`,{method:"DELETE"})
-
-loadBanners()
-
-}
-
-
-
-/* ===============================
-ESCAPE
-================================ */
-
-function escapeHTML(str){
-
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-
-}
-
-
-
-/* ===============================
-MODAL
-================================ */
-
-function openModal(){
-document.getElementById("bannerModal").style.display="flex"
-}
-
-function closeModal(){
-document.getElementById("bannerModal").style.display="none"
-}
-
-
-
-/* ===============================
-RESET
-================================ */
-
-function resetForm(){
-
-banTitle.value=""
-banImageFile.value=""
-
-banPage.value="home"
-banCategory.value=""
-banPosition.value="hero"
-
-banOrder.value=""
-
-banActive.checked=false
-banRotate.checked=false
-
-previewImg.style.display="none"
-previewError.style.display="none"
-
-}
-
-
-
-/* ===============================
-INIT
-================================ */
-
-loadBanners()
+  
 </script>
 
 </body>
