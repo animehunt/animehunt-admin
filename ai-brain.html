@@ -217,164 +217,130 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-  const AI_API = "/api/admin/ai"
+  const AI_API = "/api/admin/ai";
+const AUTH_TOKEN = "AUTH_TOKEN";
 
+const pauseBtn = document.querySelector(".pause-btn");
+
+/* =======================
+API FETCH WRAPPER
+======================= */
 async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(AUTH_TOKEN);
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : ""
+        }
+    });
 
-const token = localStorage.getItem("AUTH_TOKEN")
-
-const res = await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-"Authorization": token ? "Bearer "+token : ""
-}
-})
-
-if(res.status===401){
-localStorage.removeItem("AUTH_TOKEN")
-location.href="login.html"
-throw new Error("Unauthorized")
-}
-
-if(!res.ok){
-const txt = await res.text()
-throw new Error(txt || "API Error")
+    if (res.status === 401) {
+        location.href = "login.html";
+        return;
+    }
+    if (!res.ok) throw new Error("API Error");
+    return res.json();
 }
 
-return res.json()
-
+// Convert "Auto Server Engine" to "auto_server_engine"
+function formatKey(text) {
+    return text.toLowerCase().trim()
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, "_");
 }
 
-function key(text){
+/* =======================
+LOAD AI STATE
+======================= */
+async function loadAI() {
+    try {
+        const data = await apiFetch(AI_API);
+        const isPaused = data.paused;
 
-return text
-.toLowerCase()
-.replace(/[^\w\s]/g,"")
-.replace(/\s+/g,"_")
+        updatePauseButton(isPaused);
 
+        document.querySelectorAll(".ai-card").forEach(card => {
+            const engineName = formatKey(card.querySelector("h3").innerText);
+            const engineSettings = data.engines[engineName] || {};
+
+            card.querySelectorAll(".ai-item").forEach(item => {
+                const settingName = formatKey(item.innerText);
+                const input = item.querySelector("input");
+
+                // Set value if exists in DB
+                if (settingName in engineSettings) {
+                    input.checked = engineSettings[settingName];
+                }
+
+                // Disable inputs if AI is globally paused
+                input.disabled = isPaused;
+                item.style.opacity = isPaused ? "0.5" : "1";
+            });
+        });
+    } catch (err) {
+        console.error("Load Failed:", err);
+    }
 }
 
-async function loadAI(){
+/* =======================
+EVENT LISTENERS
+======================= */
+function initListeners() {
+    // Checkbox Change
+    document.querySelectorAll(".ai-item input").forEach(input => {
+        input.addEventListener("change", async () => {
+            const card = input.closest(".ai-card");
+            const engine = formatKey(card.querySelector("h3").innerText);
+            const setting = formatKey(input.closest(".ai-item").innerText);
 
-try{
+            try {
+                input.style.outline = "2px solid #ffcc00"; // Visual feedback
+                await apiFetch(AI_API, {
+                    method: "PATCH",
+                    body: JSON.stringify({ engine, setting, value: input.checked })
+                });
+            } catch (err) {
+                alert("Setting update failed!");
+                input.checked = !input.checked; // Revert on error
+            } finally {
+                input.style.outline = "none";
+            }
+        });
+    });
 
-const data = await apiFetch(AI_API)
-
-const paused = data.paused || false
-
-document.querySelectorAll(".ai-card").forEach(card=>{
-
-const engine = key(card.querySelector("h3").innerText)
-
-const engineData = data[engine] || {}
-
-card.querySelectorAll(".ai-item").forEach(item=>{
-
-const label = item.innerText.trim()
-const setting = key(label)
-
-const input = item.querySelector("input")
-
-if(setting in engineData){
-input.checked = engineData[setting]
+    // Global Pause Toggle
+    pauseBtn.onclick = async () => {
+        pauseBtn.disabled = true;
+        try {
+            const res = await apiFetch(`${AI_API}/pause`, { method: "PATCH" });
+            loadAI(); // Reload UI to disable/enable all checkboxes
+        } catch (err) {
+            alert("Pause toggle failed");
+        } finally {
+            pauseBtn.disabled = false;
+        }
+    };
 }
 
-input.disabled = paused
-
-})
-
-})
-
-updatePauseButton(paused)
-
-}catch(err){
-
-console.error(err)
-
+function updatePauseButton(paused) {
+    if (paused) {
+        pauseBtn.innerText = "▶ Resume All AI Systems";
+        pauseBtn.style.background = "#1abc9c";
+        pauseBtn.style.color = "#fff";
+    } else {
+        pauseBtn.innerText = "⏸ Pause All AI Systems";
+        pauseBtn.style.background = "#ffcc00";
+        pauseBtn.style.color = "#000";
+    }
 }
 
-}
-
-function initListeners(){
-
-document.querySelectorAll(".ai-item input")
-.forEach(input=>{
-
-input.addEventListener("change", async()=>{
-
-try{
-
-const card = input.closest(".ai-card")
-
-const engine = key(card.querySelector("h3").innerText)
-
-const label = input.closest(".ai-item").innerText.trim()
-
-const setting = key(label)
-
-await apiFetch(AI_API,{
-method:"PATCH",
-body:JSON.stringify({
-engine,
-setting,
-value:input.checked
-})
-})
-
-}catch(err){
-
-alert("Update failed")
-loadAI()
-
-}
-
-})
-
-})
-
-}
-
-const pauseBtn = document.querySelector(".pause-btn")
-
-pauseBtn.onclick = async()=>{
-
-try{
-
-await apiFetch(AI_API+"/pause",{method:"PATCH"})
-
-loadAI()
-
-}catch(err){
-
-alert("Pause failed")
-
-}
-
-}
-
-function updatePauseButton(paused){
-
-if(paused){
-
-pauseBtn.innerText="▶ Resume All AI"
-pauseBtn.style.background="#1abc9c"
-
-}else{
-
-pauseBtn.innerText="⏸ Pause All AI"
-pauseBtn.style.background="#ffcc00"
-
-}
-
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-initListeners()
-loadAI()
-
-})
+// Start
+document.addEventListener("DOMContentLoaded", () => {
+    initListeners();
+    loadAI();
+});
+  
 </script>
 
  
