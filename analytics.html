@@ -275,110 +275,81 @@
 
 </div>
 <script>
-const API_BASE="/api/admin/analytics"
+const API_BASE = "/api/admin/analytics";
+const rangeSelect = document.getElementById("range");
 
-const rangeSelect=document.getElementById("range")
+// Utility to render lists with a "Progress Bar" feel
+function fillList(el, list, keyName, valName, label) {
+    if (!el) return;
+    el.innerHTML = "";
+    if (!list || list.length === 0) {
+        el.innerHTML = `<li style="color:#666; text-align:center; padding:20px">No data for this period</li>`;
+        return;
+    }
 
-const visitorsEl=document.getElementById("visitors")
-const viewsEl=document.getElementById("views")
-const animeViewsEl=document.getElementById("animeViews")
-const episodeViewsEl=document.getElementById("episodeViews")
-const downloadsEl=document.getElementById("downloads")
-const searchesEl=document.getElementById("searches")
+    const maxVal = Math.max(...list.map(i => i[valName]));
 
-const topAnimeEl=document.getElementById("topAnime")
-const topEpisodesEl=document.getElementById("topEpisodes")
-const topSearchesEl=document.getElementById("topSearches")
-const topCategoriesEl=document.getElementById("topCategories")
-const topBannersEl=document.getElementById("topBanners")
-const topServersEl=document.getElementById("topServers")
-
-async function apiFetch(url){
-
-try{
-
-const token=localStorage.getItem("AUTH_TOKEN")
-
-const res=await fetch(url,{
-headers:{
-Authorization:token?`Bearer ${token}`:""
-}
-})
-
-if(res.status===401){
-localStorage.removeItem("AUTH_TOKEN")
-location.href="login.html"
-return null
+    list.forEach(item => {
+        const percent = (item[valName] / maxVal) * 100;
+        const li = document.createElement("li");
+        li.style.position = "relative";
+        li.style.zIndex = "1";
+        li.innerHTML = `
+            <div style="position:absolute; left:0; top:0; height:100%; width:${percent}%; background:rgba(255,204,0,0.05); z-index:-1; border-radius:4px"></div>
+            <div style="display:flex; justify-content:space-between; width:100%">
+                <span>${item[keyName]}</span>
+                <b style="color:#ffcc00">${item[valName]}</b>
+            </div>
+        `;
+        el.appendChild(li);
+    });
 }
 
-if(!res.ok){
-console.warn("API failed:",res.status)
-return null
+async function loadAnalytics() {
+    const range = rangeSelect?.value || "7";
+    
+    // UI Feedback: Loading state
+    document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "0.5");
+
+    try {
+        const token = localStorage.getItem("AUTH_TOKEN");
+        const res = await fetch(`${API_BASE}?range=${range}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.status === 401) { location.href = "login.html"; return; }
+        const data = await res.json();
+
+        // Update Stats
+        document.getElementById("visitors").textContent = data.stats.visitors || 0;
+        document.getElementById("views").textContent = data.stats.pageViews || 0;
+        document.getElementById("animeViews").textContent = data.stats.animeViews || 0;
+        document.getElementById("episodeViews").textContent = data.stats.episodeViews || 0;
+        document.getElementById("downloads").textContent = data.stats.downloads || 0;
+        document.getElementById("searches").textContent = data.stats.searches || 0;
+
+        // Fill Lists
+        fillList(document.getElementById("topAnime"), data.topAnime, 'slug', 'v');
+        fillList(document.getElementById("topEpisodes"), data.topEpisodes, 'id', 'v');
+        fillList(document.getElementById("topSearches"), data.topSearches, 'q', 'c');
+        fillList(document.getElementById("topCategories"), data.topCategories, 'cat', 'v');
+        fillList(document.getElementById("topBanners"), data.topBanners, 'ban', 'c');
+        fillList(document.getElementById("topServers"), data.topServers, 'srv', 'v');
+
+    } catch (err) {
+        console.error("Failed to load analytics");
+    } finally {
+        document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "1");
+    }
 }
 
-return await res.json()
+// Initializing
+rangeSelect?.addEventListener("change", loadAnalytics);
+document.addEventListener("DOMContentLoaded", loadAnalytics);
 
-}catch(err){
-
-console.error("Network error:",err)
-return null
-
-}
-
-}
-
-function setText(el,val){
-if(el) el.textContent=val||0
-}
-
-function fillList(el,list,format){
-
-if(!el) return
-
-el.innerHTML=""
-
-if(!list||list.length===0){
-el.innerHTML="<li>No data</li>"
-return
-}
-
-list.forEach(item=>{
-const li=document.createElement("li")
-li.textContent=format(item)
-el.appendChild(li)
-})
-
-}
-
-async function loadAnalytics(){
-
-const range=rangeSelect?.value||"7"
-
-const data=await apiFetch(`${API_BASE}?range=${range}`)
-
-if(!data) return
-
-setText(visitorsEl,data.stats?.visitors)
-setText(viewsEl,data.stats?.pageViews)
-setText(animeViewsEl,data.stats?.animeViews)
-setText(episodeViewsEl,data.stats?.episodeViews)
-setText(downloadsEl,data.stats?.downloads)
-setText(searchesEl,data.stats?.searches)
-
-fillList(topAnimeEl,data.topAnime,a=>`${a.animeSlug} (${a.views})`)
-fillList(topEpisodesEl,data.topEpisodes,e=>`EP ${e.episodeId} (${e.views})`)
-fillList(topSearchesEl,data.topSearches,s=>`${s.query} (${s.count})`)
-fillList(topCategoriesEl,data.topCategories,c=>`${c.category} (${c.views})`)
-fillList(topBannersEl,data.topBanners,b=>`${b.banner} (${b.clicks})`)
-fillList(topServersEl,data.topServers,s=>`${s.server} (${s.views})`)
-
-}
-
-rangeSelect?.addEventListener("change",loadAnalytics)
-
-setInterval(loadAnalytics,60000)
-
-document.addEventListener("DOMContentLoaded",loadAnalytics)
+// Auto Refresh every 5 minutes
+setInterval(loadAnalytics, 300000);
+  
 </script>
 
 
