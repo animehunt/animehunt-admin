@@ -209,262 +209,95 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-const AUTH_TOKEN_KEY="AUTH_TOKEN"
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
+/* ===============================
+LOAD CATEGORIES (With Visual Improvements)
+================================ */
+async function loadCategories() {
+    const list = document.getElementById("list");
+    list.innerHTML = "<div style='padding:20px; color:#ffcc00'>Refreshing list...</div>";
 
-let editingId=null
+    try {
+        const data = await apiFetch(API);
+        list.innerHTML = "";
 
-const nameInput=document.getElementById("name")
-const slugInput=document.getElementById("slug")
-const typeInput=document.getElementById("type")
-const orderInput=document.getElementById("order")
-const priorityInput=document.getElementById("priority")
+        if (!data || data.length === 0) {
+            list.innerHTML = "<div style='padding:20px;color:#888'>No Categories found. Click 'Add Category' to start.</div>";
+            return;
+        }
 
-const showHomeInput=document.getElementById("showHome")
-const isActiveInput=document.getElementById("isActive")
-const isFeaturedInput=document.getElementById("isFeatured")
-
-const aiTrendingInput=document.getElementById("aiTrending")
-const aiPopularInput=document.getElementById("aiPopular")
-const aiAssignInput=document.getElementById("aiAssign")
-
-const list=document.getElementById("list")
-const modal=document.getElementById("modal")
-
-function checkAuth(){
-
-const token=localStorage.getItem(AUTH_TOKEN_KEY)
-
-if(!token){
-location.href="login.html"
+        data.forEach(cat => {
+            const row = document.createElement("div");
+            row.className = "row";
+            row.innerHTML = `
+                <span style="font-weight:600; color:#fff">${escapeHTML(cat.name)}</span>
+                <span style="color:#888; font-family:monospace">${escapeHTML(cat.slug)}</span>
+                <span class="badge" style="text-transform:uppercase">${cat.type}</span>
+                <span class="${cat.active ? 'active' : 'inactive'}">
+                    ${cat.active ? '● Online' : '○ Offline'}
+                </span>
+                <span style="text-align:center">${cat.category_order || 0}</span>
+                <span style="text-align:center">P${cat.priority || 1}</span>
+                <span class="actions">
+                    <button onclick="editCategory('${cat.id}')" title="Edit">✏️</button>
+                    <button onclick="deleteCategory('${cat.id}')" title="Delete" style="color:#ff4d4d">🗑</button>
+                    ${cat.featured ? '⭐' : ''}
+                    ${cat.showHome ? '🏠' : ''}
+                </span>
+            `;
+            list.appendChild(row);
+        });
+    } catch (err) {
+        list.innerHTML = `<div style="color:red; padding:20px">Error: ${err.message}</div>`;
+    }
 }
 
+/* ===============================
+SAVE CATEGORY (UI Feedback)
+================================ */
+async function saveCategory() {
+    const saveBtn = document.querySelector(".modal-footer button");
+    try {
+        const payload = {
+            name: nameInput.value.trim(),
+            slug: slugInput.value.trim(),
+            type: typeInput.value,
+            order: Number(orderInput.value || 0),
+            priority: Number(priorityInput.value || 1),
+            showHome: showHomeInput.checked,
+            isActive: isActiveInput.checked,
+            isFeatured: isFeaturedInput.checked,
+            aiTrending: aiTrendingInput.checked,
+            aiPopular: aiPopularInput.checked,
+            aiAssign: aiAssignInput.checked
+        };
+
+        if (!payload.name || !payload.slug) return alert("Title and Slug are required!");
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Saving...";
+
+        const method = editingId ? "PUT" : "POST";
+        const url = editingId ? `${API}/${editingId}` : API;
+
+        await apiFetch(url, { method, body: JSON.stringify(payload) });
+
+        closeModal();
+        loadCategories();
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "💾 Save";
+    }
 }
 
-checkAuth()
-
-async function apiFetch(url,options={}){
-
-const token=localStorage.getItem(AUTH_TOKEN_KEY)
-
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?`Bearer ${token}`:"",
-...options.headers
+// Fixed Modal Open logic to clear previous data
+function openModal() {
+    editingId = null;
+    resetForm();
+    document.getElementById("modal").style.display = "flex";
 }
-})
-
-if(res.status===401||res.status===403){
-localStorage.removeItem(AUTH_TOKEN_KEY)
-location.href="login.html"
-throw new Error("Unauthorized")
-}
-
-if(!res.ok){
-throw new Error(await res.text())
-}
-
-return res.json()
-
-}
-
-nameInput.addEventListener("input",()=>{
-
-slugInput.value=nameInput.value
-.toLowerCase()
-.replace(/[^a-z0-9\s-]/g,"")
-.replace(/\s+/g,"-")
-
-})
-
-async function loadCategories(){
-
-try{
-
-const data=await apiFetch(API)
-
-list.innerHTML=""
-
-if(!data||!data.length){
-
-list.innerHTML="<div style='padding:20px;color:#888'>No Categories</div>"
-return
-
-}
-
-data.forEach(cat=>{
-
-const row=document.createElement("div")
-
-row.className="row"
-
-row.innerHTML=`
-<span>${escapeHTML(cat.name)}</span>
-<span>${escapeHTML(cat.slug)}</span>
-<span class="badge">${cat.type}</span>
-<span class="${cat.active?'active':'inactive'}">
-${cat.active?'Active':'Inactive'}
-</span>
-<span>${cat.category_order||0}</span>
-<span>${cat.priority||1}</span>
-<span class="actions">
-<button onclick="editCategory('${cat.id}')">✏️</button>
-<button onclick="deleteCategory('${cat.id}')">🗑</button>
-</span>
-`
-
-list.appendChild(row)
-
-})
-
-}catch(err){
-
-alert(err.message)
-
-}
-
-}
-
-async function saveCategory(){
-
-try{
-
-const payload={
-name:nameInput.value.trim(),
-slug:slugInput.value.trim(),
-type:typeInput.value,
-order:Number(orderInput.value||0),
-priority:Number(priorityInput.value||1),
-showHome:showHomeInput.checked,
-isActive:isActiveInput.checked,
-isFeatured:isFeaturedInput.checked,
-aiTrending:aiTrendingInput.checked,
-aiPopular:aiPopularInput.checked,
-aiAssign:aiAssignInput.checked
-}
-
-if(!payload.name||!payload.slug){
-alert("Name & slug required")
-return
-}
-
-if(editingId){
-
-await apiFetch(`${API}/${editingId}`,{
-method:"PUT",
-body:JSON.stringify(payload)
-})
-
-}else{
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-}
-
-closeModal()
-resetForm()
-loadCategories()
-
-}catch(err){
-
-alert(err.message)
-
-}
-
-}
-
-window.editCategory=async function(id){
-
-try{
-
-const data=await apiFetch(API)
-
-const cat=data.find(c=>c.id===id)
-
-if(!cat)return
-
-editingId=id
-
-nameInput.value=cat.name
-slugInput.value=cat.slug
-typeInput.value=cat.type
-orderInput.value=cat.category_order
-priorityInput.value=cat.priority
-
-showHomeInput.checked=!!cat.showHome
-isActiveInput.checked=!!cat.active
-isFeaturedInput.checked=!!cat.featured
-aiTrendingInput.checked=!!cat.aiTrending
-aiPopularInput.checked=!!cat.aiPopular
-aiAssignInput.checked=!!cat.aiAssign
-
-modal.style.display="flex"
-
-}catch(err){
-
-alert("Failed to load category")
-
-}
-
-}
-
-window.deleteCategory=async function(id){
-
-if(!confirm("Delete category?"))return
-
-try{
-
-await apiFetch(`${API}/${id}`,{method:"DELETE"})
-
-loadCategories()
-
-}catch(err){
-
-alert(err.message)
-
-}
-
-}
-
-function openModal(){
-
-editingId=null
-modal.style.display="flex"
-
-}
-
-function closeModal(){
-
-modal.style.display="none"
-
-}
-
-function resetForm(){
-
-editingId=null
-
-document.querySelectorAll(".form-grid input").forEach(el=>{
-if(el.type==="checkbox")el.checked=false
-else el.value=""
-})
-
-}
-
-function escapeHTML(str){
-
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-
-}
-
-loadCategories()
+  
 </script>
 
 
