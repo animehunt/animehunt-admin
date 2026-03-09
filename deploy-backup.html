@@ -222,255 +222,61 @@ body{
 </div>
 
 <script>
-const API="/api/admin/deploy"
-const TOKEN_KEY="AUTH_TOKEN"
+  // Variable Definitions (Missing in your code)
+const deployBtn = document.getElementById("deploySite");
+const freezeBtn = document.getElementById("freezeSite");
+const unfreezeBtn = document.getElementById("unfreezeSite");
+const createVersionBtn = document.getElementById("createVersion");
+const createBackupBtn = document.getElementById("createBackup");
+const emergencyShutdownBtn = document.getElementById("emergencyShutdown");
+const emergencyRecoverBtn = document.getElementById("emergencyRecover");
 
-async function apiFetch(url,options={}){
+const versionList = document.getElementById("versionList");
+const backupList = document.getElementById("backupList");
+const restoreList = document.getElementById("restoreList");
 
-try{
+/* ===============================
+   CORE LOGIC
+=============================== */
+async function updateSystemState(state) {
+    if (!state) return;
 
-const token=localStorage.getItem(TOKEN_KEY)
-
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?`Bearer ${token}`:"",
-...options.headers
-}
-})
-
-if(res.status===401){
-
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-return null
-
-}
-
-if(!res.ok){
-
-console.warn("API error",res.status)
-return null
-
+    // UI Feedback: Agar site frozen hai toh button red dikhega
+    freezeBtn.style.background = state.frozen ? "#ff4d4d" : "";
+    freezeBtn.innerText = state.frozen ? "🧊 Site Frozen" : "Freeze Site";
+    
+    emergencyShutdownBtn.style.background = state.emergency ? "#ff0000" : "";
+    emergencyShutdownBtn.innerText = state.emergency ? "🚨 UNDER MAINTENANCE" : "Emergency Shutdown";
 }
 
-return await res.json()
-
-}catch(err){
-
-console.error("Network error",err)
-return null
-
+async function apiAction(endpoint, method = "POST", body = null) {
+    const res = await apiFetch(`${API}${endpoint}`, {
+        method,
+        body: body ? JSON.stringify(body) : null
+    });
+    if (res) loadData();
+    return res;
 }
 
-}
+// Event Listeners
+deployBtn.onclick = () => apiAction("/deploy");
 
-function setLoading(btn,state,text="Processing..."){
+freezeBtn.onclick = () => apiAction("/state", "PATCH", { type: 'freeze', value: true });
+unfreezeBtn.onclick = () => apiAction("/state", "PATCH", { type: 'freeze', value: false });
 
-if(!btn) return
+createBackupBtn.onclick = () => apiAction("/backup");
 
-btn.disabled=state
+emergencyShutdownBtn.onclick = async () => {
+    if (confirm("WARNING: This will take the entire site offline. Proceed?")) {
+        await apiAction("/state", "PATCH", { type: 'emergency', value: true });
+    }
+};
 
-if(state){
+emergencyRecoverBtn.onclick = () => apiAction("/state", "PATCH", { type: 'emergency', value: false });
 
-btn.dataset.original=btn.innerText
-btn.innerText=text
-
-}else{
-
-btn.innerText=btn.dataset.original
-
-}
-
-}
-
-async function loadData(){
-
-const data=await apiFetch(API)
-
-if(!data) return
-
-renderVersions(data.versions || [])
-renderBackups(data.backups || [])
-
-updateSystemState(data.state)
-
-}
-
-function updateSystemState(state){
-
-if(!state) return
-
-freezeBtn.disabled=!!state.frozen
-unfreezeBtn.disabled=!state.frozen
-
-emergencyShutdownBtn.disabled=!!state.emergency
-emergencyRecoverBtn.disabled=!state.emergency
-
-}
-
-function renderVersions(list){
-
-versionList.innerHTML=""
-
-if(!list.length){
-
-versionList.innerHTML="<div class='list-item'>No versions</div>"
-return
-
-}
-
-list.forEach(v=>{
-
-const div=document.createElement("div")
-
-div.className="list-item"
-
-div.innerText=`Version ${v.name} – ${new Date(v.date).toLocaleString()}`
-
-versionList.appendChild(div)
-
-})
-
-}
-
-function renderBackups(list){
-
-backupList.innerHTML=""
-restoreList.innerHTML=""
-
-if(!list.length){
-
-backupList.innerHTML="<div class='list-item'>No backups</div>"
-return
-
-}
-
-list.forEach(b=>{
-
-const item=document.createElement("div")
-
-item.className="list-item"
-
-item.innerText=`Backup ${b.name} – ${new Date(b.date).toLocaleString()}`
-
-backupList.appendChild(item)
-
-const restore=document.createElement("div")
-
-restore.className="list-item"
-restore.style.cursor="pointer"
-
-restore.innerText=`Restore ${b.name}`
-
-restore.onclick=()=>restoreBackup(b.id)
-
-restoreList.appendChild(restore)
-
-})
-
-}
-
-async function restoreBackup(id){
-
-if(!confirm("Restore backup?")) return
-
-await apiFetch(`${API}/restore/${id}`,{method:"POST"})
-
-alert("Backup restored")
-
-loadData()
-
-}
-
-deployBtn.onclick=async()=>{
-
-setLoading(deployBtn,true)
-
-await apiFetch(`${API}/deploy`,{method:"POST"})
-
-setLoading(deployBtn,false)
-
-loadData()
-
-}
-
-freezeBtn.onclick=async()=>{
-
-setLoading(freezeBtn,true)
-
-await apiFetch(`${API}/freeze`,{method:"PATCH"})
-
-setLoading(freezeBtn,false)
-
-loadData()
-
-}
-
-unfreezeBtn.onclick=async()=>{
-
-setLoading(unfreezeBtn,true)
-
-await apiFetch(`${API}/unfreeze`,{method:"PATCH"})
-
-setLoading(unfreezeBtn,false)
-
-loadData()
-
-}
-
-createVersionBtn.onclick=async()=>{
-
-setLoading(createVersionBtn,true)
-
-const data=await apiFetch(`${API}/version`,{method:"POST"})
-
-setLoading(createVersionBtn,false)
-
-renderVersions(data?.versions || [])
-
-}
-
-createBackupBtn.onclick=async()=>{
-
-setLoading(createBackupBtn,true)
-
-const data=await apiFetch(`${API}/backup`,{method:"POST"})
-
-setLoading(createBackupBtn,false)
-
-renderBackups(data?.backups || [])
-
-}
-
-emergencyShutdownBtn.onclick=async()=>{
-
-if(!confirm("Emergency shutdown?")) return
-
-setLoading(emergencyShutdownBtn,true)
-
-await apiFetch(`${API}/emergency/shutdown`,{method:"POST"})
-
-setLoading(emergencyShutdownBtn,false)
-
-loadData()
-
-}
-
-emergencyRecoverBtn.onclick=async()=>{
-
-setLoading(emergencyRecoverBtn,true)
-
-await apiFetch(`${API}/emergency/recover`,{method:"POST"})
-
-setLoading(emergencyRecoverBtn,false)
-
-loadData()
-
-}
-
-document.addEventListener("DOMContentLoaded",loadData)
+// Init
+document.addEventListener("DOMContentLoaded", loadData);
+  
 </script>
 
 
