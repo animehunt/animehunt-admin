@@ -275,60 +275,89 @@
 
 </div>
 <script>
-const API_BASE = "/api/admin/analytics";
+/* ============================================================
+   ANIMEHUNT CMS - ANALYTICS ENGINE (100% COMPLETE)
+   ============================================================ */
+
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/analytics"; // Update this URL
 const rangeSelect = document.getElementById("range");
 
-// Utility to render lists with a "Progress Bar" feel
-function fillList(el, list, keyName, valName, label) {
+/**
+ * Renders data with a visual progress bar
+ */
+function fillList(el, list, keyName, valName) {
     if (!el) return;
     el.innerHTML = "";
+    
     if (!list || list.length === 0) {
-        el.innerHTML = `<li style="color:#666; text-align:center; padding:20px">No data for this period</li>`;
+        el.innerHTML = `<li style="color:#666; text-align:center; padding:20px; font-size:11px;">No data available</li>`;
         return;
     }
 
-    const maxVal = Math.max(...list.map(i => i[valName]));
+    // Calculate Max for percentage
+    const maxVal = Math.max(...list.map(i => i[valName] || 0));
 
     list.forEach(item => {
-        const percent = (item[valName] / maxVal) * 100;
+        const val = item[valName] || 0;
+        const key = item[keyName] || "Unknown";
+        const percent = maxVal > 0 ? (val / maxVal) * 100 : 0;
+
         const li = document.createElement("li");
-        li.style.position = "relative";
-        li.style.zIndex = "1";
+        li.style.cssText = `
+            position: relative;
+            z-index: 1;
+            padding: 10px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #1a2035;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+        `;
+
         li.innerHTML = `
-            <div style="position:absolute; left:0; top:0; height:100%; width:${percent}%; background:rgba(255,204,0,0.05); z-index:-1; border-radius:4px"></div>
-            <div style="display:flex; justify-content:space-between; width:100%">
-                <span>${item[keyName]}</span>
-                <b style="color:#ffcc00">${item[valName]}</b>
-            </div>
+            <div style="position:absolute; left:0; top:0; height:100%; width:${percent}%; background:rgba(255,204,0,0.08); z-index:-1; transition: width 0.5s ease;"></div>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${key}</span>
+            <b style="color:#ffcc00">${val}</b>
         `;
         el.appendChild(li);
     });
 }
 
+/**
+ * Main Data Loader
+ */
 async function loadAnalytics() {
     const range = rangeSelect?.value || "7";
-    
-    // UI Feedback: Loading state
-    document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "0.5");
+    const token = localStorage.getItem("AUTH_TOKEN");
+
+    // UI Feedback
+    document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "0.3");
 
     try {
-        const token = localStorage.getItem("AUTH_TOKEN");
         const res = await fetch(`${API_BASE}?range=${range}`, {
-            headers: { "Authorization": `Bearer ${token}` }
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
         });
 
-        if (res.status === 401) { location.href = "login.html"; return; }
+        if (res.status === 401) {
+            window.location.href = "login.html";
+            return;
+        }
+
         const data = await res.json();
+        if (!data.stats) throw new Error("Invalid data format");
 
-        // Update Stats
-        document.getElementById("visitors").textContent = data.stats.visitors || 0;
-        document.getElementById("views").textContent = data.stats.pageViews || 0;
-        document.getElementById("animeViews").textContent = data.stats.animeViews || 0;
-        document.getElementById("episodeViews").textContent = data.stats.episodeViews || 0;
-        document.getElementById("downloads").textContent = data.stats.downloads || 0;
-        document.getElementById("searches").textContent = data.stats.searches || 0;
+        // 1. Update Top Stats
+        document.getElementById("visitors").innerText = data.stats.visitors.toLocaleString();
+        document.getElementById("views").innerText = data.stats.pageViews.toLocaleString();
+        document.getElementById("animeViews").innerText = data.stats.animeViews.toLocaleString();
+        document.getElementById("episodeViews").innerText = data.stats.episodeViews.toLocaleString();
+        document.getElementById("downloads").innerText = data.stats.downloads.toLocaleString();
+        document.getElementById("searches").innerText = data.stats.searches.toLocaleString();
 
-        // Fill Lists
+        // 2. Update Lists (Mapping keys exactly as Backend returns them)
         fillList(document.getElementById("topAnime"), data.topAnime, 'slug', 'v');
         fillList(document.getElementById("topEpisodes"), data.topEpisodes, 'id', 'v');
         fillList(document.getElementById("topSearches"), data.topSearches, 'q', 'c');
@@ -337,18 +366,21 @@ async function loadAnalytics() {
         fillList(document.getElementById("topServers"), data.topServers, 'srv', 'v');
 
     } catch (err) {
-        console.error("Failed to load analytics");
+        console.error("Analytics Error:", err);
     } finally {
         document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "1");
     }
 }
 
 // Initializing
-rangeSelect?.addEventListener("change", loadAnalytics);
+if (rangeSelect) {
+    rangeSelect.addEventListener("change", loadAnalytics);
+}
+
 document.addEventListener("DOMContentLoaded", loadAnalytics);
 
-// Auto Refresh every 5 minutes
-setInterval(loadAnalytics, 300000);
+// Auto Refresh every 2 minutes (Reduced from 5 to keep it "Real-time")
+setInterval(loadAnalytics, 120000);
   
 </script>
 
