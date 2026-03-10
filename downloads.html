@@ -171,68 +171,100 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 
 
   <script>
-/* ===============================
-   DYNAMIC UI: ADD HOST & QUALITY
-================================ */
+/* ============================================================
+   ANIMEHUNT CMS - DOWNLOAD MANAGER (FIXED)
+   ============================================================ */
 
-// Quality Row Template function
-function createQualityRow() {
-    const div = document.createElement('div');
-    div.className = 'quality-row';
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads";
+const downloadList = document.getElementById("downloadList");
+const modal = document.getElementById("downloadModal");
+const saveBtn = document.getElementById("saveDownload");
+const section = document.querySelector(".download-section");
+
+/** 1. Load Data **/
+async function loadDownloads() {
+    downloadList.innerHTML = "<div style='padding:20px; color:#ffcc00'>Loading links...</div>";
+    try {
+        const res = await fetch(API);
+        const data = await res.json();
+        render(data);
+    } catch (e) { downloadList.innerHTML = "Error loading data"; }
+}
+
+function render(data) {
+    downloadList.innerHTML = data.length ? "" : "<div style='padding:20px; color:#666'>No links found.</div>";
+    data.forEach(d => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+            <span style="font-weight:600">${d.anime}</span>
+            <span>S${d.season}</span>
+            <span>E${d.episode}</span>
+            <span class="badge">${d.host}</span>
+            <span style="color:#ffcc00">${d.quality}</span>
+            <span style="color:#888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${d.link}</span>
+            <div class="actions">
+                <button onclick="deleteLink('${d.id}')">🗑</button>
+            </div>
+        `;
+        downloadList.appendChild(row);
+    });
+}
+
+/** 2. Dynamic UI Logic **/
+function addHostBlock() {
+    const div = document.createElement("div");
+    div.className = "download-host-card";
+    div.style.background = "#0e1424";
+    div.style.padding = "12px";
+    div.style.borderRadius = "8px";
+    div.style.marginBottom = "10px";
+    div.style.border = "1px solid #1a2035";
+
     div.innerHTML = `
-        <select class="q-val">
+        <div style="display:flex; gap:10px; margin-bottom:10px">
+            <input class="host-name" placeholder="Host Name (e.g. Terabox)" style="flex:1; background:#0b0f1a; border:1px solid #1a2035; color:#fff; padding:6px; border-radius:4px">
+            <button type="button" onclick="this.parentElement.parentElement.remove()" style="color:#ff4d4d; border:none; background:none; cursor:pointer">✕</button>
+        </div>
+        <div class="quality-container"></div>
+        <button type="button" onclick="addQualityRow(this)" style="width:100%; padding:5px; background:none; border:1px dashed #444; color:#aaa; cursor:pointer; font-size:11px">＋ Add Link</button>
+    `;
+    section.appendChild(div);
+    addQualityRow(div.querySelector("button")); // Add first link row automatically
+}
+
+function addQualityRow(btn) {
+    const container = btn.previousElementSibling;
+    const row = document.createElement("div");
+    row.className = "quality-row";
+    row.style.display = "flex";
+    row.style.gap = "5px";
+    row.style.marginTop = "5px";
+    row.innerHTML = `
+        <select class="q-val" style="background:#0b0f1a; color:#fff; border:1px solid #1a2035; border-radius:4px">
             <option>480p</option><option selected>720p</option>
             <option>1080p</option><option>4K</option><option>ZIP</option>
         </select>
-        <input class="quality-link" placeholder="Download Link">
-        <button type="button" class="remove-row" onclick="this.parentElement.remove()" style="color:#ff4c4c; border:none; background:none; cursor:pointer">✕</button>
+        <input class="quality-link" placeholder="Download Link" style="flex:1; background:#0b0f1a; border:1px solid #1a2035; color:#fff; padding:6px; border-radius:4px">
+        <button type="button" onclick="this.parentElement.remove()" style="color:#666; border:none; background:none; cursor:pointer">✕</button>
     `;
-    return div;
+    container.appendChild(row);
 }
 
-// Host Block Template function
-function addHostBlock() {
-    const section = document.querySelector(".download-section");
-    const div = document.createElement("div");
-    div.className = "download-host";
-    div.style.borderBottom = "1px solid #1a2035";
-    div.style.paddingBottom = "10px";
-    div.style.marginTop = "10px";
-    
-    div.innerHTML = `
-        <div style="display:flex; gap:10px; margin-bottom:8px">
-            <input class="host-name" placeholder="Host (e.g. Terabox, GDrive)" style="flex:1">
-            <button type="button" onclick="this.closest('.download-host').remove()" style="background:none; border:none; color:#ff4d4d; cursor:pointer">Remove Host</button>
-        </div>
-        <div class="quality-container"></div>
-        <button type="button" class="add-quality" onclick="addQualityToHost(this)" style="margin-top:5px; width:100%">＋ Add Quality Link</button>
-    `;
-    section.appendChild(div);
-    // Add first quality row by default
-    div.querySelector(".quality-container").appendChild(createQualityRow());
-}
-
-function addQualityToHost(btn) {
-    const container = btn.previousElementSibling;
-    container.appendChild(createQualityRow());
-}
-
-/* ===============================
-   SAVE LOGIC (Updated for Multiple Hosts)
-=============================== */
+/** 3. Save Bulk Data **/
 saveBtn.onclick = async () => {
     const anime = document.getElementById("anime").value.trim();
-    const season = document.getElementById("season").value.trim();
+    const season = document.getElementById("season").value.trim() || "1";
     const episode = document.getElementById("episode").value.trim();
 
-    if (!anime || !episode) return alert("Anime and Episode are mandatory");
+    if (!anime || !episode) return alert("Anime Name and Episode are required!");
 
     const payload = [];
-    document.querySelectorAll(".download-host").forEach(hostBlock => {
-        const host = hostBlock.querySelector(".host-name").value.trim();
+    document.querySelectorAll(".download-host-card").forEach(card => {
+        const host = card.querySelector(".host-name").value.trim();
         if (!host) return;
 
-        hostBlock.querySelectorAll(".quality-row").forEach(row => {
+        card.querySelectorAll(".quality-row").forEach(row => {
             const quality = row.querySelector(".q-val").value;
             const link = row.querySelector(".quality-link").value.trim();
             if (link) {
@@ -241,34 +273,52 @@ saveBtn.onclick = async () => {
         });
     });
 
-    if (payload.length === 0) return alert("Please add at least one valid link");
+    if (payload.length === 0) return alert("Please add at least one valid download link.");
 
     try {
+        saveBtn.innerText = "Processing...";
         saveBtn.disabled = true;
-        saveBtn.innerText = "Uploading...";
-        
-        await apiFetch(`${API}/bulk`, {
+
+        const res = await fetch(`${API}/bulk`, {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
-        closeModal();
-        loadDownloads();
-    } catch (err) {
-        alert("Error saving: " + err.message);
-    } finally {
-        saveBtn.disabled = false;
+        if (res.ok) {
+            closeModal();
+            loadDownloads();
+        } else {
+            alert("Failed to save links");
+        }
+    } catch (e) { alert("Server error"); }
+    finally {
         saveBtn.innerText = "💾 Save";
+        saveBtn.disabled = false;
     }
 };
 
-// Initialize with one host block on open
-openBtn.onclick = () => {
-    resetForm();
-    addHostBlock(); 
+/** 4. Actions & Modal Controls **/
+window.deleteLink = async (id) => {
+    if (!confirm("Delete this link?")) return;
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    loadDownloads();
+};
+
+document.getElementById("openModal").onclick = () => {
+    document.getElementById("anime").value = "";
+    document.getElementById("episode").value = "";
+    section.innerHTML = ""; // Clear previous host blocks
+    addHostBlock(); // Start with one fresh block
     modal.style.display = "flex";
 };
 
+document.getElementById("closeModal").onclick = closeModal;
+function closeModal() { modal.style.display = "none"; }
+
+// Initial Load
+loadDownloads();
+    
   </script>
 
     
