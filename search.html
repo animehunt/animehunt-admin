@@ -235,142 +235,128 @@ body{background:#060a14;color:#fff}
 </main>
 </div>
 <script>
-const API="/api/admin/search"
-const TOKEN_KEY="AUTH_TOKEN"
+const API = "/api/admin/search";
+const TOKEN_KEY = "AUTH_TOKEN";
 
-function el(id){
-return document.getElementById(id)
+function el(id) { return document.getElementById(id); }
+
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+            ...options.headers
+        }
+    });
+
+    if (res.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.href = "login.html";
+        return null;
+    }
+    return res.json();
 }
 
-async function apiFetch(url,options={}){
+// Data Mapping (Boolean strings to elements)
+async function loadSearch() {
+    const d = await apiFetch(API);
+    if (!d) return;
 
-const token=localStorage.getItem(TOKEN_KEY)
+    // Core
+    el("enableSearch").value = String(d.enableSearch);
+    el("liveSearch").value = String(d.liveSearch);
+    el("searchMode").value = d.mode;
+    el("debounce").value = d.debounce;
 
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?"Bearer "+token:"",
-...options.headers
-}
-})
+    // Ranking
+    el("ranking").value = d.ranking.mode;
+    el("boost").value = String(d.ranking.boost);
+    el("boostWeight").value = d.ranking.weight;
 
-if(res.status===401){
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-throw new Error("Unauthorized")
-}
+    // Sources
+    el("sAnime").value = String(d.sources.anime);
+    el("sEpisode").value = String(d.sources.episode);
+    el("sCategory").value = String(d.sources.category);
+    el("sPages").value = String(d.sources.pages);
 
-if(!res.ok){
-throw new Error("Request failed")
-}
+    // Smart
+    el("typo").value = String(d.smart.typo);
+    el("alias").value = String(d.smart.alias);
+    el("language").value = d.smart.language;
 
-return res.json().catch(()=>({}))
+    // UI
+    el("maxResults").value = d.ui.max;
+    el("thumb").value = String(d.ui.thumb);
+    el("group").value = String(d.ui.group);
+    el("highlight").value = String(d.ui.highlight);
 
-}
-
-function clamp(v,min,max){
-if(isNaN(v)) return min
-return Math.max(min,Math.min(max,v))
-}
-
-async function loadSearch(){
-
-try{
-
-const d=await apiFetch(API)
-
-if(!d) return
-
-el("enableSearch").value=String(!!d.enableSearch)
-el("liveSearch").value=String(!!d.liveSearch)
-el("searchMode").value=d.mode || "instant"
-el("debounce").value=d.debounce ?? 300
-
-el("ranking").value=d.ranking?.mode || "smart"
-el("boost").value=String(!!d.ranking?.boost)
-el("boostWeight").value=d.ranking?.weight ?? 5
-
-el("sAnime").value=String(!!d.sources?.anime)
-el("sEpisode").value=String(!!d.sources?.episode)
-el("sCategory").value=String(!!d.sources?.category)
-el("sPages").value=String(!!d.sources?.pages)
-
-el("typo").value=String(!!d.smart?.typo)
-el("alias").value=String(!!d.smart?.alias)
-el("language").value=d.smart?.language || "all"
-
-el("maxResults").value=d.ui?.max ?? 8
-el("thumb").value=String(!!d.ui?.thumb)
-el("group").value=String(!!d.ui?.group)
-el("highlight").value=String(!!d.ui?.highlight)
-
-el("safe").value=d.safety?.safe || "medium"
-el("track").value=String(!!d.safety?.track)
-el("seo").value=String(!!d.safety?.seo)
-el("cache").value=d.safety?.cache ?? 60
-
-}catch(e){
-console.error(e)
+    // Safety
+    el("safe").value = d.safety.safe;
+    el("track").value = String(d.safety.track);
+    el("seo").value = String(d.safety.seo);
+    el("cache").value = d.safety.cache;
 }
 
+async function saveSearch() {
+    const btn = document.querySelector('.save-btn');
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    const payload = {
+        enableSearch: el("enableSearch").value === "true",
+        liveSearch: el("liveSearch").value === "true",
+        mode: el("searchMode").value,
+        debounce: parseInt(el("debounce").value) || 300,
+        ranking: {
+            mode: el("ranking").value,
+            boost: el("boost").value === "true",
+            weight: parseInt(el("boostWeight").value) || 5
+        },
+        sources: {
+            anime: el("sAnime").value === "true",
+            episode: el("sEpisode").value === "true",
+            category: el("sCategory").value === "true",
+            pages: el("sPages").value === "true"
+        },
+        smart: {
+            typo: el("typo").value === "true",
+            alias: el("alias").value === "true",
+            language: el("language").value
+        },
+        ui: {
+            max: parseInt(el("maxResults").value) || 8,
+            thumb: el("thumb").value === "true",
+            group: el("group").value === "true",
+            highlight: el("highlight").value === "true"
+        },
+        safety: {
+            safe: el("safe").value,
+            track: el("track").value === "true",
+            seo: el("seo").value === "true",
+            cache: parseInt(el("cache").value) || 60
+        }
+    };
+
+    const res = await apiFetch(API, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+
+    if (res && res.success) {
+        alert("Search settings updated successfully! 🚀");
+    } else {
+        alert("Error saving search settings.");
+    }
+    
+    btn.disabled = false;
+    btn.textContent = "💾 Save Search Settings";
 }
 
-async function saveSearch(){
-
-const payload={
-
-enableSearch:el("enableSearch").value==="true",
-liveSearch:el("liveSearch").value==="true",
-mode:el("searchMode").value,
-debounce:clamp(+el("debounce").value,0,2000),
-
-ranking:{
-mode:el("ranking").value,
-boost:el("boost").value==="true",
-weight:clamp(+el("boostWeight").value,1,10)
-},
-
-sources:{
-anime:el("sAnime").value==="true",
-episode:el("sEpisode").value==="true",
-category:el("sCategory").value==="true",
-pages:el("sPages").value==="true"
-},
-
-smart:{
-typo:el("typo").value==="true",
-alias:el("alias").value==="true",
-language:el("language").value
-},
-
-ui:{
-max:clamp(+el("maxResults").value,1,50),
-thumb:el("thumb").value==="true",
-group:el("group").value==="true",
-highlight:el("highlight").value==="true"
-},
-
-safety:{
-safe:el("safe").value,
-track:el("track").value==="true",
-seo:el("seo").value==="true",
-cache:clamp(+el("cache").value,0,600)
-}
-
-}
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-alert("Search settings saved")
-
-}
-
-document.addEventListener("DOMContentLoaded",loadSearch)
-</script>
+document.addEventListener("DOMContentLoaded", loadSearch);
+  
+  </script>
 
         
 </body>
