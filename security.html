@@ -538,141 +538,139 @@ color:#ccc;
 </section>
 </main>
 </div>
+
+<div class="card">
+<h3>Core Protection</h3>
+<div class="toggle">Bot Protection<label class="switch"><input type="checkbox" id="botProt"><span class="slider"></span></label></div>
+<div class="toggle">Scraper Shield<label class="switch"><input type="checkbox" id="scraperShield"><span class="slider"></span></label></div>
+<div class="toggle">Hotlink Block<label class="switch"><input type="checkbox" id="hotlinkBlock"><span class="slider"></span></label></div>
+<div class="toggle">Embed Lock<label class="switch"><input type="checkbox" id="embedLock"><span class="slider"></span></label></div>
+</div>
+
 <script>
 const API = "/api/admin/security";
+const STATS_API = "/api/admin/stats"; // Live Traffic ke liye
 const TOKEN_KEY = "AUTH_TOKEN";
 
-function el(id) { return document.getElementById(id); }
+const el = (id) => document.getElementById(id);
 
+/** Helper for API Calls **/
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...options.headers
-        }
-    });
-    if (res.status === 401) { location.href = "login.html"; return null; }
-    return res.json();
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
+        if (res.status === 401) { location.href = "login.html"; return null; }
+        return await res.json();
+    } catch (err) { return null; }
 }
 
+/** Load Live Statistics (Traffic, Blocked IPs) **/
+async function loadStats() {
+    const s = await apiFetch(STATS_API);
+    if (!s) return;
+    el("ipCount").innerText = s.blockedIPs || 0;
+    el("liveUsers").innerText = s.liveUsers || 0;
+    el("reqPerSec").innerText = s.reqPerSec || 0;
+    el("blockedReq").innerText = s.blockedReq || 0;
+}
+
+/** Load Main Security Settings **/
 async function loadSecurity() {
     const d = await apiFetch(API);
     if (!d) return;
 
-    // Load Checkboxes & Ranges
+    // Mapping Database Values to UI
     el("ultraMode").checked = d.ultra;
     el("firewallLevel").value = d.firewallLevel;
     
-    // Core (Add IDs to your HTML checkboxes if missing)
-    // Example: <input type="checkbox" id="botProt">
-    if(el("indiaOnly")) el("indiaOnly").checked = d.geo.indiaOnly;
-    if(el("blockForeign")) el("blockForeign").checked = d.geo.blockForeign;
+    // Core
+    if(d.core) {
+        el("botProt").checked = d.core.bot;
+        el("scraperShield").checked = d.core.scraper;
+        el("hotlinkBlock").checked = d.core.hotlink;
+        el("embedLock").checked = d.core.embed;
+    }
     
-    // Admin Security
+    // Admin & Geo
+    el("indiaOnly").checked = d.geo.indiaOnly;
+    el("blockForeign").checked = d.geo.blockForeign;
     el("loginLimit").checked = d.admin.loginLimit;
     el("deviceLock").checked = d.admin.deviceLock;
-    el("sessionMonitor").checked = d.admin.sessionMonitor;
 
-    // AI & Auto Ban
+    // AI
     el("autoBan").checked = d.ai.autoBan;
     el("banBrute").checked = d.ai.brute;
     el("banBots").checked = d.ai.bot;
-    el("aiLearn").checked = d.ai.learning;
-
-    // System
-    el("hideServerInfo").checked = d.system.hideServer;
-    el("hideTechStack").checked = d.system.hideTech;
 
     updateFirewallLabel();
     updateThreatUI(d.ultra);
 }
 
-// Debounced Save Function
-let saveTimeout;
-function syncWithServer() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(async () => {
+/** Auto-Sync Logic (Debounced) **/
+let saveTimer;
+function sync() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
         const payload = {
             ultra: el("ultraMode").checked,
             firewallLevel: parseInt(el("firewallLevel").value),
+            core: {
+                bot: el("botProt").checked,
+                scraper: el("scraperShield").checked,
+                hotlink: el("hotlinkBlock").checked,
+                embed: el("embedLock").checked
+            },
             geo: {
                 indiaOnly: el("indiaOnly").checked,
                 blockForeign: el("blockForeign").checked
             },
             admin: {
                 loginLimit: el("loginLimit").checked,
-                deviceLock: el("deviceLock").checked,
-                sessionMonitor: el("sessionMonitor").checked
+                deviceLock: el("deviceLock").checked
             },
             ai: {
                 autoBan: el("autoBan").checked,
                 brute: el("banBrute").checked,
-                bot: el("banBots").checked,
-                learning: el("aiLearn").checked
-            },
-            system: {
-                hideServer: el("hideServerInfo").checked,
-                hideTech: el("hideTechStack").checked
+                bot: el("banBots").checked
             }
         };
 
-        const res = await apiFetch(API, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        
-        if (res?.success) {
-            console.log("Security Synced ✅");
-        }
-    }, 500);
+        const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
+        if(res?.success) console.log("Security Shield Updated");
+    }, 800);
 }
 
 function updateFirewallLabel() {
-    const level = el("firewallLevel").value;
-    const labels = ["", "Basic", "Moderate", "Strong", "Aggressive", "Extreme"];
-    el("fwLabel").innerText = `Level ${level} – ${labels[level]}`;
+    const levels = ["None", "Basic", "Standard", "Strong", "Aggressive", "Full Shield"];
+    el("fwLabel").innerText = `Level ${el("firewallLevel").value} – ${levels[el("firewallLevel").value]}`;
+    el("fwLive").innerText = el("firewallLevel").value;
 }
 
 function updateThreatUI(isUltra) {
     const fill = el("threatFill");
-    if (isUltra) {
-        fill.style.width = "10%";
-        fill.style.background = "#00ffb3";
-        el("threat").innerText = "Ultra Protected";
-    } else {
-        fill.style.width = "40%";
-        fill.style.background = "#ffcc00";
-        el("threat").innerText = "Monitor Mode";
-    }
+    fill.style.width = isUltra ? "5%" : "45%";
+    fill.style.background = isUltra ? "#00ffb3" : "#ffcc00";
+    el("protStatus").innerText = isUltra ? "Lockdown" : "Active";
 }
 
-// Activate Lockdown Button
-async function activateLockdown() {
-    if(!confirm("Are you sure? This will block all suspicious traffic immediately.")) return;
-    el("ultraMode").checked = true;
-    updateThreatUI(true);
-    syncWithServer();
-    alert("🚨 FULL LOCKDOWN ACTIVATED");
-}
-
-// Initialize listeners
 document.addEventListener("DOMContentLoaded", () => {
     loadSecurity();
-    
-    // Attach change events to all inputs
-    const allInputs = document.querySelectorAll('input[type="checkbox"], input[type="range"]');
-    allInputs.forEach(input => {
-        input.addEventListener("change", syncWithServer);
-    });
+    loadStats();
+    setInterval(loadStats, 10000); // Har 10 sec mein stats refresh
 
-    el("firewallLevel").addEventListener("input", updateFirewallLabel);
+    // Har input par listener lagana
+    document.querySelectorAll('input').forEach(i => i.addEventListener('change', sync));
+    el("firewallLevel").oninput = updateFirewallLabel;
 });
-  
-
 </script>
+  
 
 </body>
 </html>
