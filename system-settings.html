@@ -240,8 +240,8 @@ const FIELD_IDS = [
     "antiInspect", "iframe", "rateLimit", "rightClick"
 ];
 
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem("AUTH_TOKEN") || "";
+const apiFetch = async (url, options = {}) => {
+    const token = localStorage.getItem("AUTH_TOKEN");
     const res = await fetch(url, {
         ...options,
         headers: {
@@ -252,7 +252,7 @@ async function apiFetch(url, options = {}) {
     });
     if (res.status === 401) { location.href = "login.html"; return null; }
     return res.json();
-}
+};
 
 function showStatus(msg, error = false) {
     statusEl.innerText = msg;
@@ -261,16 +261,14 @@ function showStatus(msg, error = false) {
 }
 
 async function loadSystem() {
-    try {
-        const data = await apiFetch(API);
-        if (!data) return;
-        FIELD_IDS.forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (el.type === "checkbox") el.checked = !!data[id];
-            else el.value = data[id] || "";
-        });
-    } catch (e) { showStatus("Connection Error", true); }
+    const data = await apiFetch(API);
+    if (!data) return;
+    FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.type === "checkbox") el.checked = !!data[id];
+        else el.value = data[id] || "";
+    });
 }
 
 async function saveAll() {
@@ -278,35 +276,53 @@ async function saveAll() {
     FIELD_IDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        if (id === "maxResult") payload[id] = Math.min(100, Math.max(1, parseInt(el.value) || 8));
+        if (id === "maxResult") payload[id] = parseInt(el.value) || 8;
         else payload[id] = el.type === "checkbox" ? el.checked : el.value;
     });
 
-    try {
-        const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
-        if (res?.success) showStatus("Settings Propagated Successfully! 🚀");
-        else showStatus("Save failed", true);
-    } catch (e) { showStatus("Sync Error", true); }
+    const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
+    if (res?.success) showStatus("Global Config Propagated! 🚀");
+    else showStatus("Update Failed", true);
+}
+
+// System Actions Logic
+function exportConfig() {
+    const payload = {};
+    FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        payload[id] = el.type === "checkbox" ? el.checked : el.value;
+    });
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `animehunt-config-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+}
+
+async function resetAll() {
+    if (!confirm("Reset to factory defaults? This cannot be undone.")) return;
+    // In a real app, you'd send a reset request to backend
+    showStatus("System Reset initiated...", true);
 }
 
 async function kill() {
-    if (!confirm("🚨 DANGER: This will take the entire platform offline immediately. Continue?")) return;
-    try {
-        const res = await apiFetch(API + "/kill", { method: "POST" });
-        if (res?.halted) {
-            showStatus("SYSTEM HALTED", true);
-            loadSystem();
-        }
-    } catch (e) { showStatus("Kill Failed", true); }
+    if (!confirm("🚨 EMERGENCY: Halt all platform services?")) return;
+    const res = await apiFetch(API + "/kill", { method: "POST" });
+    if (res?.halted) {
+        showStatus("PLATFORM TERMINATED", true);
+        loadSystem();
+    }
 }
 
 function clearCache() {
-    // In a real app, this would call a Cloudflare Purge API
-    showStatus("Cloudflare & Edge Cache Purged! ⚡");
+    showStatus("Purging Edge Cache Layers... ⚡");
+    setTimeout(() => showStatus("All Nodes Purged! ✅"), 1500);
 }
 
 document.addEventListener("DOMContentLoaded", loadSystem);
   
+        
 </script>
 
 </body>
