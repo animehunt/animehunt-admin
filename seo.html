@@ -294,166 +294,116 @@
 </div>
 
 <script>
-const API="/api/admin/seo"
-const TOKEN_KEY="AUTH_TOKEN"
-const saveBtn=document.getElementById("saveSEO")
+const API = "/api/admin/seo";
+const TOKEN_KEY = "AUTH_TOKEN";
+const saveBtn = document.getElementById("saveSEO");
 
-function el(id){
-return document.getElementById(id)
+function el(id) { return document.getElementById(id); }
+
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+            ...options.headers
+        }
+    });
+
+    if (res.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        location.href = "login.html";
+        return null;
+    }
+    return res.json();
 }
 
-async function apiFetch(url,options={}){
+async function loadSEO() {
+    const d = await apiFetch(API);
+    if (!d) return;
 
-const token=localStorage.getItem(TOKEN_KEY)
+    // Mapping Data to UI
+    el("siteTitle").value = d.global.title;
+    el("siteDesc").value = d.global.desc;
+    el("siteKeywords").value = d.global.keywords;
+    el("canonical").value = d.global.canonical;
+    el("indexing").value = d.global.indexing;
 
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?"Bearer "+token:"",
-...options.headers
-}
-})
+    el("homeTitle").value = d.home.title;
+    el("homeDesc").value = d.home.desc;
+    el("homeKeywords").value = d.home.keywords;
+    el("homeOG").value = d.home.og;
 
-if(res.status===401){
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-throw new Error("Unauthorized")
-}
+    el("animeTemplate").value = d.templates.anime;
+    el("categoryTemplate").value = d.templates.category;
+    el("episodeTemplate").value = d.templates.episode;
+    el("searchTemplate").value = d.templates.search;
 
-if(!res.ok){
-throw new Error("Request failed")
-}
-
-return res.json().catch(()=>({}))
-}
-
-function sanitize(str,max=300){
-return String(str||"").trim().substring(0,max)
+    el("ogTitle").value = d.social.ogTitle;
+    el("ogDesc").value = d.social.ogDesc;
+    el("twTitle").value = d.social.twTitle;
+    el("twDesc").value = d.social.twDesc;
+    el("twCard").value = d.social.twCard;
 }
 
-function isValidURL(url){
+async function saveSEO() {
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
 
-if(!url) return true
+    const payload = {
+        global: {
+            title: el("siteTitle").value,
+            desc: el("siteDesc").value,
+            keywords: el("siteKeywords").value,
+            canonical: el("canonical").value,
+            indexing: el("indexing").value
+        },
+        home: {
+            title: el("homeTitle").value,
+            desc: el("homeDesc").value,
+            keywords: el("homeKeywords").value,
+            og: el("homeOG").value
+        },
+        templates: {
+            anime: el("animeTemplate").value,
+            category: el("categoryTemplate").value,
+            episode: el("episodeTemplate").value,
+            search: el("searchTemplate").value
+        },
+        social: {
+            ogTitle: el("ogTitle").value,
+            ogDesc: el("ogDesc").value,
+            twTitle: el("twTitle").value,
+            twDesc: el("twDesc").value,
+            twCard: el("twCard").value
+        }
+    };
 
-try{
-new URL(url)
-return true
-}catch{
-return false
+    try {
+        const res = await apiFetch(API, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        if (res && res.success) {
+            alert("SEO Settings Saved Successfully! 🚀");
+        } else {
+            alert("Error saving settings.");
+        }
+    } catch (e) {
+        alert("Network Error.");
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "💾 Save SEO";
+    }
 }
 
-}
-
-async function loadSEO(){
-
-try{
-
-const d=await apiFetch(API)
-
-if(!d) return
-
-el("siteTitle").value=d.global?.title||""
-el("siteDesc").value=d.global?.desc||""
-el("siteKeywords").value=d.global?.keywords||""
-el("canonical").value=d.global?.canonical||""
-el("indexing").value=d.global?.indexing||"index"
-
-el("homeTitle").value=d.home?.title||""
-el("homeDesc").value=d.home?.desc||""
-el("homeKeywords").value=d.home?.keywords||""
-el("homeOG").value=d.home?.og||""
-
-el("animeTemplate").value=d.templates?.anime||""
-el("categoryTemplate").value=d.templates?.category||""
-el("episodeTemplate").value=d.templates?.episode||""
-el("searchTemplate").value=d.templates?.search||""
-
-el("ogTitle").value=d.social?.ogTitle||""
-el("ogDesc").value=d.social?.ogDesc||""
-el("twTitle").value=d.social?.twTitle||""
-el("twDesc").value=d.social?.twDesc||""
-el("twCard").value=d.social?.twCard||"summary_large_image"
-
-}catch(e){
-console.error(e)
-}
-
-}
-
-async function saveSEO(){
-
-try{
-
-const canonicalURL=sanitize(el("canonical").value,200)
-
-if(!isValidURL(canonicalURL)){
-alert("Invalid canonical URL")
-return
-}
-
-const payload={
-
-global:{
-title:sanitize(el("siteTitle").value,120),
-desc:sanitize(el("siteDesc").value,300),
-keywords:sanitize(el("siteKeywords").value,200),
-canonical:canonicalURL,
-indexing:el("indexing").value
-},
-
-home:{
-title:sanitize(el("homeTitle").value,120),
-desc:sanitize(el("homeDesc").value,300),
-keywords:sanitize(el("homeKeywords").value,200),
-og:sanitize(el("homeOG").value,200)
-},
-
-templates:{
-anime:sanitize(el("animeTemplate").value,200),
-category:sanitize(el("categoryTemplate").value,200),
-episode:sanitize(el("episodeTemplate").value,200),
-search:sanitize(el("searchTemplate").value,200)
-},
-
-social:{
-ogTitle:sanitize(el("ogTitle").value,120),
-ogDesc:sanitize(el("ogDesc").value,300),
-twTitle:sanitize(el("twTitle").value,120),
-twDesc:sanitize(el("twDesc").value,300),
-twCard:el("twCard").value
-}
-
-}
-
-saveBtn.disabled=true
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-alert("SEO Saved")
-
-}catch(e){
-
-console.error(e)
-alert("Save failed")
-
-}finally{
-
-saveBtn.disabled=false
-
-}
-
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-saveBtn.addEventListener("click",saveSEO)
-loadSEO()
-
-})
+document.addEventListener("DOMContentLoaded", () => {
+    loadSEO();
+    saveBtn.addEventListener("click", saveSEO);
+});
+          
 </script>
 
 </body>
