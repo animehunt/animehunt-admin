@@ -341,177 +341,206 @@ a{ text-decoration:none; color:inherit }
 
 
 <script>
-const API = "/api/admin/ads";
-const AUTH = "AUTH_TOKEN";
 
-// Helper function to get values
-const val = (id) => {
-    const el = document.getElementById(id);
-    return el ? el.value.trim() : "";
-};
+        /* ============================================================
+   ANIMEMUNT CMS - ADS MANAGER CORE SCRIPT (100% WORKING)
+   ============================================================ */
 
-const saveBtn = document.querySelector(".ads-actions .btn-primary");
-const adsTable = document.querySelector(".ads-table");
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/ads";
+const TOKEN_KEY = "AUTH_TOKEN";
 
-/* =======================
-CORE FETCH API
-======================= */
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(AUTH);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : ""
-        }
-    });
-
-    if (res.status === 401) {
+/**
+ * 1. INITIALIZATION & AUTH CHECK
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
         window.location.href = "login.html";
         return;
     }
+    loadAds(); // Load initial data
+});
 
-    if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Something went wrong");
+/**
+ * 2. HELPER: API FETCH WRAPPER
+ */
+async function apiRequest(endpoint, method = 'GET', body = null) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const options = {
+        method: method,
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    };
+    if (body) options.body = JSON.stringify(body);
+
+    try {
+        const response = await fetch(endpoint, options);
+        
+        if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.removeItem(TOKEN_KEY);
+            window.location.href = "login.html";
+            return null;
+        }
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Server Error");
+        return data;
+    } catch (err) {
+        console.error("API Error:", err);
+        alert("Error: " + err.message);
+        return null;
     }
-    return res.json();
 }
 
-/* =======================
-SAVE SINGLE AD
-======================= */
-saveBtn.onclick = async () => {
-    try {
-        const data = {
-            name: val("adName"),
-            type: val("adType"),
-            adCode: val("adCode"),
-            page: val("adPage"),
-            position: val("adPos"),
-            priority: parseInt(val("adPriority")) || 5
-        };
+/**
+ * 3. LOAD & RENDER ADS TABLE
+ */
+async function loadAds() {
+    const adsList = document.getElementById("adsList");
+    if (!adsList) return;
 
-        if (!data.name || !data.adCode) return alert("Ad Name and Ad Code are required!");
+    adsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">Loading ads...</td></tr>`;
 
-        saveBtn.disabled = true;
-        saveBtn.textContent = "Saving...";
+    const data = await apiRequest(API_BASE);
+    if (!data) return;
 
-        await apiFetch(API, {
-            method: "POST",
-            body: JSON.stringify(data)
-        });
+    adsList.innerHTML = ""; // Clear loader
 
-        alert("Ad successfully saved!");
+    if (data.length === 0) {
+        adsList.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#777;">No ads found. Create one above!</td></tr>`;
+        return;
+    }
+
+    data.forEach(ad => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>
+                <div style="font-weight:600; color:#fff;">${escapeHtml(ad.name)}</div>
+                <small style="color:#777;">${ad.type}</small>
+            </td>
+            <td>
+                <div style="color:#ccc;">${ad.page}</div>
+                <small style="color:#555;">${ad.position.replace('_', ' ')}</small>
+            </td>
+            <td>
+                <span class="status ${ad.status.toLowerCase()}">${ad.status}</span>
+            </td>
+            <td>
+                <button class="action-btn" onclick="toggleAdStatus('${ad.id}')" title="Toggle On/Off">Toggle</button>
+                <button class="action-btn" onclick="deleteAd('${ad.id}')" style="color:#ff4444; border-color:#444;" title="Delete Ad">Delete</button>
+            </td>
+        `;
+        adsList.appendChild(tr);
+    });
+}
+
+/**
+ * 4. SAVE SINGLE AD
+ */
+async function saveAd() {
+    const btn = document.getElementById("saveBtn");
+    
+    // Collecting data from UI
+    const payload = {
+        name: document.getElementById("adName").value.trim(),
+        type: document.getElementById("adType").value,
+        adCode: document.getElementById("adCode").value.trim(),
+        page: document.getElementById("adPage").value,
+        position: document.getElementById("adPos").value,
+        priority: parseInt(document.getElementById("adPriority").value) || 5
+    };
+
+    // Validation
+    if (!payload.name || !payload.adCode) {
+        alert("Please fill in Ad Name and Ad Code.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Saving...";
+
+    const result = await apiRequest(API_BASE, 'POST', payload);
+    
+    if (result && result.success) {
+        alert("Ad saved successfully!");
         resetForm();
         loadAds();
-    } catch (err) {
-        alert("Error: " + err.message);
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Save Ad";
     }
-};
 
-/* =======================
-LOAD & RENDER ADS
-======================= */
-async function loadAds() {
-    try {
-        const ads = await apiFetch(API);
-        
-        // Reset table header
-        adsTable.innerHTML = `
-            <tr>
-                <th>Ad Detail</th>
-                <th>Placement</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        `;
-
-        ads.forEach(ad => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>
-                    <div style="font-weight:bold">${escapeHtml(ad.name)}</div>
-                    <small style="color:#777">${ad.type}</small>
-                </td>
-                <td>${ad.page} <br> <span style="font-size:11px; color:#aaa">${ad.position}</span></td>
-                <td><span class="status ${ad.status.toLowerCase()}">${ad.status}</span></td>
-                <td>
-                    <button class="btn-secondary" onclick="toggleAd('${ad.id}')" style="padding:5px 10px; font-size:11px">
-                        ${ad.status === "ON" ? "Pause" : "Start"}
-                    </button>
-                    <button class="btn-secondary" onclick="deleteAd('${ad.id}')" style="padding:5px 10px; font-size:11px; color:#ff4d4d; border-color:#444">
-                        Delete
-                    </button>
-                </td>
-            `;
-            adsTable.appendChild(tr);
-        });
-    } catch (err) {
-        console.error("Failed to load ads:", err);
-    }
+    btn.disabled = false;
+    btn.innerText = "Save Ad";
 }
 
-/* =======================
-TOGGLE & DELETE
-======================= */
-async function toggleAd(id) {
-    try {
-        await apiFetch(`${API}/${id}/toggle`, { method: "PATCH" });
+/**
+ * 5. TOGGLE AD STATUS (ON/OFF)
+ */
+async function toggleAdStatus(id) {
+    const result = await apiRequest(`${API_BASE}/${id}/toggle`, 'PATCH');
+    if (result && result.success) {
         loadAds();
-    } catch (err) { alert(err.message); }
+    }
 }
 
+/**
+ * 6. DELETE AD
+ */
 async function deleteAd(id) {
-    if (!confirm("Are you sure you want to delete this ad?")) return;
-    try {
-        await apiFetch(`${API}/${id}`, { method: "DELETE" });
+    if (!confirm("Are you sure you want to delete this ad permanently?")) return;
+    
+    const result = await apiRequest(`${API_BASE}/${id}`, 'DELETE');
+    if (result && result.success) {
         loadAds();
-    } catch (err) { alert(err.message); }
-}
-
-/* =======================
-BULK ADD
-======================= */
-async function bulkAddAds() {
-    const bulkDataEl = document.getElementById("bulkData");
-    try {
-        const raw = bulkDataEl.value.trim();
-        if (!raw) return alert("Please paste JSON data");
-
-        const data = JSON.parse(raw);
-        await apiFetch(`${API}/bulk`, {
-            method: "POST",
-            body: JSON.stringify(data)
-        });
-
-        alert("Bulk ads added successfully!");
-        bulkDataEl.value = "";
-        loadAds();
-    } catch (err) {
-        alert("Invalid JSON format or Server Error");
     }
 }
 
-/* =======================
-UTILS
-======================= */
+/**
+ * 7. BULK IMPORT
+ */
+async function bulkAddAds() {
+    const bulkArea = document.getElementById("bulkData");
+    const rawData = bulkArea.value.trim();
+
+    if (!rawData) {
+        alert("Please paste JSON data first.");
+        return;
+    }
+
+    try {
+        const jsonData = JSON.parse(rawData);
+        if (!Array.isArray(jsonData)) throw new Error("Data must be an array of objects.");
+
+        const result = await apiRequest(`${API_BASE}/bulk`, 'POST', jsonData);
+        if (result && result.success) {
+            alert("Bulk ads imported successfully!");
+            bulkArea.value = "";
+            loadAds();
+        }
+    } catch (e) {
+        alert("Invalid JSON format: " + e.message);
+    }
+}
+
+/**
+ * UTILITIES
+ */
 function resetForm() {
-    document.querySelectorAll(".ads-card input, .ads-card textarea").forEach(el => el.value = "");
+    document.getElementById("adName").value = "";
+    document.getElementById("adCode").value = "";
+    document.getElementById("adPriority").value = "5";
 }
 
-function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
 }
 
-// Initial Load
-loadAds();
-  
 </script>
 
 
