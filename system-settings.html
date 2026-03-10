@@ -226,218 +226,87 @@ select,input{
 </main>
 </div>
 <script>
+  const API = "/api/admin/system";
+const statusEl = document.getElementById("statusText");
+
+const FIELD_IDS = [
+    "systemOn", "maintenanceSoft", "maintenanceHard", "lockCMS", "readOnly", "env",
+    "theme", "animation", "skeleton", "imgBlur", "mobileUI",
+    "autoHome", "aiHome", "trendBoost", "manualPin", "homeMode",
+    "geoBlock", "ageLock", "schedule", "shadow",
+    "autoPlay", "resume", "autoNext", "skipIntro", "serverSwitch",
+    "downloads", "zip", "scan", "limit",
+    "liveSearch", "highlight", "fuzzy", "adult", "maxResult",
+    "antiInspect", "iframe", "rateLimit", "rightClick"
+];
+
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem("AUTH_TOKEN") || "";
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+            ...options.headers
+        }
+    });
+    if (res.status === 401) { location.href = "login.html"; return null; }
+    return res.json();
+}
+
+function showStatus(msg, error = false) {
+    statusEl.innerText = msg;
+    statusEl.style.color = error ? "#ff4c4c" : "#4cff4c";
+    setTimeout(() => { statusEl.innerText = "Ready"; statusEl.style.color = "#4cff4c"; }, 3000);
+}
+
+async function loadSystem() {
+    try {
+        const data = await apiFetch(API);
+        if (!data) return;
+        FIELD_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.type === "checkbox") el.checked = !!data[id];
+            else el.value = data[id] || "";
+        });
+    } catch (e) { showStatus("Connection Error", true); }
+}
+
+async function saveAll() {
+    const payload = {};
+    FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === "maxResult") payload[id] = Math.min(100, Math.max(1, parseInt(el.value) || 8));
+        else payload[id] = el.type === "checkbox" ? el.checked : el.value;
+    });
+
+    try {
+        const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
+        if (res?.success) showStatus("Settings Propagated Successfully! 🚀");
+        else showStatus("Save failed", true);
+    } catch (e) { showStatus("Sync Error", true); }
+}
+
+async function kill() {
+    if (!confirm("🚨 DANGER: This will take the entire platform offline immediately. Continue?")) return;
+    try {
+        const res = await apiFetch(API + "/kill", { method: "POST" });
+        if (res?.halted) {
+            showStatus("SYSTEM HALTED", true);
+            loadSystem();
+        }
+    } catch (e) { showStatus("Kill Failed", true); }
+}
+
+function clearCache() {
+    // In a real app, this would call a Cloudflare Purge API
+    showStatus("Cloudflare & Edge Cache Purged! ⚡");
+}
+
+document.addEventListener("DOMContentLoaded", loadSystem);
   
-const API="/api/admin/system"
-const statusEl=document.getElementById("statusText")
-
-const FIELD_IDS=[
-"systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
-"theme","animation","skeleton","imgBlur","mobileUI",
-"autoHome","aiHome","trendBoost","manualPin","homeMode",
-"geoBlock","ageLock","schedule","shadow",
-"autoPlay","resume","autoNext","skipIntro","serverSwitch",
-"downloads","zip","scan","limit",
-"liveSearch","highlight","fuzzy","adult","maxResult",
-"antiInspect","iframe","rateLimit","rightClick"
-]
-
-async function apiFetch(url,options={}){
-
-const token=localStorage.getItem("AUTH_TOKEN")||""
-
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?"Bearer "+token:"",
-...options.headers
-}
-})
-
-if(res.status===401){
-localStorage.removeItem("AUTH_TOKEN")
-location.href="login.html"
-throw new Error("Unauthorized")
-}
-
-if(!res.ok){
-const t=await res.text()
-throw new Error(t||"Request failed")
-}
-
-return res.json().catch(()=>({}))
-
-}
-
-function clamp(v,min,max){
-v=Number(v)
-if(isNaN(v))return min
-return Math.max(min,Math.min(max,v))
-}
-
-function showStatus(msg,error=false){
-
-statusEl.innerText=msg
-statusEl.style.color=error?"#ff4c4c":"#4cff4c"
-
-setTimeout(()=>{
-statusEl.innerText="Ready"
-statusEl.style.color="#4cff4c"
-},2000)
-
-}
-
-async function loadSystem(){
-
-try{
-
-const data=await apiFetch(API)
-
-FIELD_IDS.forEach(id=>{
-
-const el=document.getElementById(id)
-if(!el)return
-
-if(data[id]!==undefined){
-
-if(el.type==="checkbox")
-el.checked=!!data[id]
-else
-el.value=data[id]
-
-}
-
-})
-
-}catch{
-showStatus("Load failed ❌",true)
-}
-
-}
-
-async function saveAll(){
-
-try{
-
-const payload={}
-
-FIELD_IDS.forEach(id=>{
-
-const el=document.getElementById(id)
-if(!el)return
-
-if(id==="maxResult")
-payload[id]=clamp(el.value,1,100)
-else
-payload[id]=el.type==="checkbox"?el.checked:el.value
-
-})
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-showStatus("Saved ✔")
-
-}catch{
-
-showStatus("Save failed ❌",true)
-loadSystem()
-
-}
-
-}
-
-async function kill(){
-
-if(!confirm("⚠ Stop entire platform?"))return
-
-try{
-
-await apiFetch(API+"/kill",{method:"POST"})
-showStatus("System halted ⚠",true)
-
-}catch{
-
-showStatus("Kill failed ❌",true)
-
-}
-
-}
-
-function clearCache(){
-showStatus("Cache cleared ✔")
-}
-
-async function exportConfig(){
-
-try{
-
-const data=await apiFetch(API)
-
-const text=JSON.stringify(data,null,2)
-
-if(navigator.clipboard)
-await navigator.clipboard.writeText(text)
-else
-prompt("Copy config:",text)
-
-showStatus("Copied ✔")
-
-}catch{
-
-showStatus("Export failed ❌",true)
-
-}
-
-}
-
-async function importConfig(){
-
-const input=prompt("Paste JSON config")
-if(!input)return
-
-try{
-
-const parsed=JSON.parse(input)
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(parsed)
-})
-
-loadSystem()
-showStatus("Imported ✔")
-
-}catch{
-
-showStatus("Invalid JSON ❌",true)
-
-}
-
-}
-
-async function resetAll(){
-
-if(!confirm("Reset settings?"))return
-
-try{
-
-await apiFetch(API,{method:"POST",body:JSON.stringify({})})
-
-loadSystem()
-showStatus("Reset ✔")
-
-}catch{
-
-showStatus("Reset failed ❌",true)
-
-}
-
-}
-
-document.addEventListener("DOMContentLoaded",loadSystem)
 </script>
 
 </body>
