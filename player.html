@@ -231,30 +231,42 @@ body{background:#060a14;color:#fff}
 </main>
 </div>
 
+
+            <div class="card">
+<h3>Security & Limits</h3>
+<div class="form">
+    <label>External Embed Only</label>
+    <select id="secEmbed">
+        <option value="true">Enabled</option>
+        <option value="false">Disabled</option>
+    </select>
+
+    <label>Cloudflare Protection</label>
+    <select id="secCloud">
+        <option value="true">Enabled</option>
+        <option value="false">Disabled</option>
+    </select>
+
+    <label>Iframe Sandbox</label>
+    <select id="secSandbox">
+        <option value="true">Enabled</option>
+        <option value="false">Disabled</option>
+    </select>
+
+    <label>Referrer Policy</label>
+    <select id="secReferrer">
+        <option value="strict">Strict-Origin</option>
+        <option value="no-referrer">No-Referrer</option>
+    </select>
+</div>
+</div>
+
 <script>
 const API = "/api/admin/player";
 const AUTH_KEY = "AUTH_TOKEN";
-
 const saveBtn = document.getElementById("savePlayer");
 
-// Elements Mapping
-const fields = {
-    defaultServer: 'defaultServer',
-    autoplay: 'autoplay',
-    resume: 'resume',
-    autoswitch: 'autoswitch',
-    mode: 'mode',
-    'ui.servers': 'showServers',
-    'ui.download': 'showDownload',
-    'ui.subscribe': 'showSubscribe',
-    'ui.related': 'showRelated',
-    // Security Fields (Add IDs to your HTML inputs as well)
-    'security.embedOnly': 'secEmbed',
-    'security.cloudflare': 'secCloud',
-    'security.sandbox': 'secSandbox',
-    'security.referrer': 'secReferrer'
-};
-
+/** Helper for API Calls **/
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(AUTH_KEY);
     try {
@@ -268,36 +280,48 @@ async function apiFetch(url, options = {}) {
         });
         if (res.status === 401) { location.href = "login.html"; return null; }
         return await res.json();
-    } catch (err) { return null; }
+    } catch (err) { 
+        console.error("Fetch Error:", err);
+        return null; 
+    }
 }
 
+/** Load Settings into UI **/
 async function loadPlayer() {
     const d = await apiFetch(API);
     if (!d) return;
 
-    // Direct Fields
-    document.getElementById("defaultServer").value = d.defaultServer;
-    document.getElementById("autoplay").value = String(d.autoplay);
-    document.getElementById("resume").value = String(d.resume);
-    document.getElementById("autoswitch").value = String(d.autoswitch);
-    document.getElementById("mode").value = d.mode;
+    // Helper to set select values safely
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.value = String(val);
+    };
 
-    // Nested UI Fields
-    document.getElementById("showServers").value = String(d.ui.servers);
-    document.getElementById("showDownload").value = String(d.ui.download);
-    document.getElementById("showSubscribe").value = String(d.ui.subscribe);
-    document.getElementById("showRelated").value = String(d.ui.related);
+    setVal("defaultServer", d.defaultServer);
+    setVal("autoplay", d.autoplay);
+    setVal("resume", d.resume);
+    setVal("autoswitch", d.autoswitch);
+    setVal("mode", d.mode);
 
-    // Security Fields (Initial load check)
+    if(d.ui) {
+        setVal("showServers", d.ui.servers);
+        setVal("showDownload", d.ui.download);
+        setVal("showSubscribe", d.ui.subscribe);
+        setVal("showRelated", d.ui.related);
+    }
+
     if(d.security) {
-        if(document.getElementById("secEmbed")) document.getElementById("secEmbed").value = String(d.security.embedOnly);
-        if(document.getElementById("secReferrer")) document.getElementById("secReferrer").value = d.security.referrer;
+        setVal("secEmbed", d.security.embedOnly);
+        setVal("secCloud", d.security.cloudflare);
+        setVal("secSandbox", d.security.sandbox);
+        setVal("secReferrer", d.security.referrer);
     }
 }
 
-saveBtn.addEventListener("click", async () => {
+/** Save Settings **/
+saveBtn.onclick = async () => {
     saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
+    saveBtn.innerText = "Syncing...";
 
     const payload = {
         defaultServer: document.getElementById("defaultServer").value,
@@ -312,10 +336,10 @@ saveBtn.addEventListener("click", async () => {
             related: document.getElementById("showRelated").value === "true"
         },
         security: {
-            embedOnly: true, // Defaulting to true for security
-            cloudflare: true,
-            sandbox: true,
-            referrer: "strict"
+            embedOnly: document.getElementById("secEmbed").value === "true",
+            cloudflare: document.getElementById("secCloud").value === "true",
+            sandbox: document.getElementById("secSandbox").value === "true",
+            referrer: document.getElementById("secReferrer").value
         }
     };
 
@@ -325,24 +349,18 @@ saveBtn.addEventListener("click", async () => {
     });
 
     if (res && res.success) {
-        alert("Success: Player settings updated.");
+        alert("Settings Synced with Database!");
     } else {
-        alert("Error: Could not save settings.");
+        alert("Failed to update player settings.");
     }
 
     saveBtn.disabled = false;
-    saveBtn.textContent = "💾 Save Player";
-});
+    saveBtn.innerText = "💾 Save Player";
+};
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (!localStorage.getItem(AUTH_KEY)) {
-        location.href = "login.html";
-    } else {
-        loadPlayer();
-    }
-});
-  
+document.addEventListener("DOMContentLoaded", loadPlayer);
 </script>
+
 
 </body>
 </html>
