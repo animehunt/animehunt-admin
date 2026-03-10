@@ -1,92 +1,257 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Admin Login – AnimeHunt</title>
-<style>
-body{
-  background:#060a14;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  font-family:system-ui;
-}
-.box{
-  background:#0b0f1a;
-  padding:30px;
-  border-radius:12px;
-  border:1px solid #1a2035;
-  width:320px;
-}
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:12px;
-  background:#0e1424;
-  border:1px solid #1a2035;
-  color:#fff;
-  border-radius:6px;
-}
-button{
-  width:100%;
-  padding:10px;
-  background:#ffcc00;
-  border:none;
-  border-radius:6px;
-  font-weight:600;
-  cursor:pointer;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Login – AnimeHunt CMS</title>
+    <style>
+        :root {
+            --bg: #060a14;
+            --card: #0b0f1a;
+            --border: #1a2035;
+            --primary: #ffcc00;
+            --input-bg: #0e1424;
+            --text: #ffffff;
+            --error: #ff4c4c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .login-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .brand {
+            margin-bottom: 30px;
+        }
+
+        .brand h1 {
+            font-size: 28px;
+            letter-spacing: -1px;
+        }
+
+        .brand h1 span { color: var(--primary); }
+
+        .brand p {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.1);
+        }
+
+        button {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        button:hover {
+            background: #e6b800;
+            transform: translateY(-2px);
+        }
+
+        button:active { transform: translateY(0); }
+
+        button:disabled {
+            background: #222;
+            color: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-msg {
+            margin-top: 15px;
+            font-size: 13px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status-error {
+            display: block;
+            background: rgba(255, 76, 76, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(255, 76, 76, 0.2);
+        }
+
+        /* Simple Spinner */
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #000;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
 
-<div class="box">
-<h3 style="color:#ffcc00">Admin Login</h3>
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
-<script>
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev"
-const TOKEN_KEY = "AUTH_TOKEN"
+    <div class="login-card">
+        <div class="brand">
+            <h1>Anime<span>Hunt</span></h1>
+            <p>Master Control Panel</p>
+        </div>
 
-async function login(){
+        <div class="form-group">
+            <label>MODERATOR ID</label>
+            <input type="text" id="username" placeholder="Enter username..." autocomplete="off">
+        </div>
 
-  const username = document.getElementById('username').value.trim()
-  const password = document.getElementById('password').value.trim()
+        <div class="form-group">
+            <label>ACCESS KEY</label>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
 
-  if(!username || !password){
-    alert("Fill all fields")
-    return
-  }
+        <button id="loginBtn" onclick="handleLogin()">Unlock CMS</button>
 
-  try{
+        <div id="statusBox" class="status-msg"></div>
+    </div>
 
-    const res = await fetch(
-      API_BASE + "/api/admin/login",
-      {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({username,password})
-      }
-    )
+    
 
-    if(!res.ok){
-      alert("Invalid credentials")
-      return
-    }
+    <script>
+        const API_URL = "https://animehunt-backend.animehunt715.workers.dev/api/admin/login";
+        const REDIRECT_URL = "dashboard.html"; // Aapka jo bhi main dashboard page ho
+        const TOKEN_KEY = "AUTH_TOKEN";
 
-    const data = await res.json()
+        // Pre-check: Agar token pehle se hai toh direct bhej do
+        if (localStorage.getItem(TOKEN_KEY)) {
+            window.location.href = REDIRECT_URL;
+        }
 
-    localStorage.setItem(TOKEN_KEY, data.token)
+        async function handleLogin() {
+            const userEl = document.getElementById('username');
+            const passEl = document.getElementById('password');
+            const btn = document.getElementById('loginBtn');
+            const status = document.getElementById('statusBox');
 
-    window.location.href = "index.html"
+            const username = userEl.value.trim();
+            const password = passEl.value.trim();
 
-  }catch(err){
-    alert("Network error")
-    console.error(err)
-  }
-}
-</script>
+            if (!username || !password) {
+                showError("Missing credentials!");
+                return;
+            }
+
+            // Set Loading State
+            btn.disabled = true;
+            btn.innerHTML = `<span class="loader"></span> Verifying...`;
+            status.style.display = "none";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // SUCCESS
+                    localStorage.setItem(TOKEN_KEY, data.token);
+                    btn.innerHTML = "Access Granted! Redirecting...";
+                    btn.style.background = "#00ffb3";
+                    
+                    setTimeout(() => {
+                        window.location.href = REDIRECT_URL;
+                    }, 800);
+                } else {
+                    // AUTH FAILED
+                    showError(data.error || "Invalid moderator credentials");
+                    resetButton();
+                }
+            } catch (err) {
+                // NETWORK/SERVER ERROR
+                showError("Backend connection failed!");
+                resetButton();
+                console.error("Login Error:", err);
+            }
+        }
+
+        function showError(msg) {
+            const status = document.getElementById('statusBox');
+            status.innerText = msg;
+            status.className = "status-msg status-error";
+            status.style.display = "block";
+        }
+
+        function resetButton() {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = false;
+            btn.innerHTML = "Unlock CMS";
+        }
+
+        // Enter key se login allow karein
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    </script>
 </body>
 </html>
