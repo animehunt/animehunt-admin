@@ -294,61 +294,80 @@
 </div>
 
 <script>
-const API = "/api/admin/seo";
+
+    const API = "/api/admin/seo";
 const TOKEN_KEY = "AUTH_TOKEN";
 const saveBtn = document.getElementById("saveSEO");
 
 function el(id) { return document.getElementById(id); }
 
+/** Helper for API Fetch **/
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...options.headers
-        }
-    });
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
 
-    if (res.status === 401) {
-        localStorage.removeItem(TOKEN_KEY);
-        location.href = "login.html";
+        if (res.status === 401) {
+            alert("Session expired. Redirecting to login...");
+            localStorage.removeItem(TOKEN_KEY);
+            location.href = "login.html";
+            return null;
+        }
+        return await res.json();
+    } catch (err) {
+        console.error("Fetch error:", err);
         return null;
     }
-    return res.json();
 }
 
+/** Load SEO Settings into UI **/
 async function loadSEO() {
     const d = await apiFetch(API);
     if (!d) return;
 
-    // Mapping Data to UI
-    el("siteTitle").value = d.global.title;
-    el("siteDesc").value = d.global.desc;
-    el("siteKeywords").value = d.global.keywords;
-    el("canonical").value = d.global.canonical;
-    el("indexing").value = d.global.indexing;
+    // Mapping Data safely (using fallbacks for empty values)
+    if (d.global) {
+        el("siteTitle").value = d.global.title || "";
+        el("siteDesc").value = d.global.desc || "";
+        el("siteKeywords").value = d.global.keywords || "";
+        el("canonical").value = d.global.canonical || "";
+        el("indexing").value = d.global.indexing || "index";
+    }
 
-    el("homeTitle").value = d.home.title;
-    el("homeDesc").value = d.home.desc;
-    el("homeKeywords").value = d.home.keywords;
-    el("homeOG").value = d.home.og;
+    if (d.home) {
+        el("homeTitle").value = d.home.title || "";
+        el("homeDesc").value = d.home.desc || "";
+        el("homeKeywords").value = d.home.keywords || "";
+        el("homeOG").value = d.home.og || "";
+    }
 
-    el("animeTemplate").value = d.templates.anime;
-    el("categoryTemplate").value = d.templates.category;
-    el("episodeTemplate").value = d.templates.episode;
-    el("searchTemplate").value = d.templates.search;
+    if (d.templates) {
+        el("animeTemplate").value = d.templates.anime || "";
+        el("categoryTemplate").value = d.templates.category || "";
+        el("episodeTemplate").value = d.templates.episode || "";
+        el("searchTemplate").value = d.templates.search || "";
+    }
 
-    el("ogTitle").value = d.social.ogTitle;
-    el("ogDesc").value = d.social.ogDesc;
-    el("twTitle").value = d.social.twTitle;
-    el("twDesc").value = d.social.twDesc;
-    el("twCard").value = d.social.twCard;
+    if (d.social) {
+        el("ogTitle").value = d.social.ogTitle || "";
+        el("ogDesc").value = d.social.ogDesc || "";
+        el("twTitle").value = d.social.twTitle || "";
+        el("twDesc").value = d.social.twDesc || "";
+        el("twCard").value = d.social.twCard || "summary_large_image";
+    }
 }
 
+/** Save SEO Settings **/
 async function saveSEO() {
     saveBtn.disabled = true;
+    const originalText = saveBtn.textContent;
     saveBtn.textContent = "Saving...";
 
     const payload = {
@@ -380,29 +399,26 @@ async function saveSEO() {
         }
     };
 
-    try {
-        const res = await apiFetch(API, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
+    const res = await apiFetch(API, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
 
-        if (res && res.success) {
-            alert("SEO Settings Saved Successfully! 🚀");
-        } else {
-            alert("Error saving settings.");
-        }
-    } catch (e) {
-        alert("Network Error.");
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "💾 Save SEO";
+    if (res && res.success) {
+        alert("SEO Settings Synced with Live Site! 🚀");
+    } else {
+        alert("Error: Settings could not be saved.");
     }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     loadSEO();
     saveBtn.addEventListener("click", saveSEO);
 });
+  
           
 </script>
 
