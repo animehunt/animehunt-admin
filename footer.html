@@ -196,13 +196,17 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 
 <script>
-const API = "/api/admin/footer";
-const AUTH_KEY = "AUTH_TOKEN";
+/* ============================================================
+   ANIMEHUNT CMS - FOOTER PRO LOGIC (FIXED)
+   ============================================================ */
+
+// Backend Endpoint (Verify this matches your Worker route)
+const API = "/api/admin/footer"; 
 
 const statusEl = document.getElementById("status");
 const debugBox = document.getElementById("debugBox");
 
-// Configuration field mapping
+// Saare IDs jo HTML mein hain unki list
 const configFields = [
     "footerOn", "footerLazy", "footerBlur", "footerLock", "footerTheme",
     "about", "privacy", "disclaimer", "dmca", "telegram", "linkBadges",
@@ -211,45 +215,35 @@ const configFields = [
     "promoOn", "promoText", "promoLink", "promoAutoHide"
 ];
 
-/* ===============================
-   CORE API CALLER
-=============================== */
-async function apiCall(method = "GET", body = null) {
-    const token = localStorage.getItem(AUTH_KEY);
+/** 1. Core API Helper 
+ **/
+async function apiCall(method = "GET", body = null, subPath = "") {
     const options = {
         method,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : ""
-        }
+        headers: { "Content-Type": "application/json" }
     };
     if (body) options.body = JSON.stringify(body);
 
     try {
-        const res = await fetch(API, options);
-        if (res.status === 401) {
-            alert("Session Expired!");
-            location.href = "login.html";
-            return null;
-        }
+        const res = await fetch(`${API}${subPath}`, options);
+        if (!res.ok) throw new Error("Network response was not ok");
         return await res.json();
     } catch (err) {
-        showStatus("Connection Error!", "red");
+        updateStatus("API Error: " + err.message, "red");
         return null;
     }
 }
 
-function showStatus(msg, color = "#4cff4c") {
+function updateStatus(msg, color = "#4cff4c") {
     statusEl.innerText = msg;
     statusEl.style.color = color;
     setTimeout(() => { statusEl.innerText = "Ready"; statusEl.style.color = ""; }, 3000);
 }
 
-/* ===============================
-   LOAD SETTINGS
-=============================== */
+/** 2. Load Function 
+ **/
 async function loadFooter() {
-    statusEl.innerText = "Syncing...";
+    statusEl.innerText = "Fetching Settings...";
     const data = await apiCall("GET");
     if (!data) return;
 
@@ -260,81 +254,65 @@ async function loadFooter() {
         if (el.type === "checkbox") {
             el.checked = !!data[id];
         } else {
-            el.value = data[id] || "";
+            el.value = data[id] || (el.tagName === "SELECT" ? el.options[0].value : "");
         }
     });
-    showStatus("Data Synced");
+    updateStatus("Synced with DB");
 }
 
-/* ===============================
-   SAVE SETTINGS
-=============================== */
+/** 3. Save Function 
+ **/
 async function save() {
-    statusEl.innerText = "Saving to Database...";
     const payload = {};
-
     configFields.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        payload[id] = el.type === "checkbox" ? el.checked : el.value.trim();
+        payload[id] = el.type === "checkbox" ? el.checked : el.value;
     });
 
+    statusEl.innerText = "Saving...";
     const res = await apiCall("POST", payload);
     if (res && res.success) {
-        showStatus("Footer Updated Successfully!");
+        updateStatus("Changes Saved Successfully!");
     }
 }
 
-/* ===============================
-   EMERGENCY & DEBUG
-=============================== */
+/** 4. Emergency & Utils 
+ **/
 async function kill() {
-    if (!confirm("This will hide the footer on the live site. Continue?")) return;
-    const res = await apiCall("POST", { action: 'kill' }); // Use internal /kill if route exists
-    // Fallback: Manually save with footerOn: false
-    const payload = {};
-    configFields.forEach(id => {
-        const el = document.getElementById(id);
-        payload[id] = el.type === "checkbox" ? el.checked : el.value;
-    });
-    payload.footerOn = false;
-    await apiCall("POST", payload);
-    loadFooter();
+    if (!confirm("Confirm? This will disable the footer on the live site.")) return;
+    const res = await apiCall("POST", {}, "/kill");
+    if (res && res.success) {
+        loadFooter();
+        updateStatus("Footer Killed", "orange");
+    }
 }
 
 async function debug() {
-    const json = await apiCall("GET");
+    const data = await apiCall("GET");
     debugBox.style.display = debugBox.style.display === "none" ? "block" : "none";
-    debugBox.textContent = JSON.stringify(json, null, 2);
+    debugBox.textContent = JSON.stringify(data, null, 2);
 }
 
-// Export/Import for Backups
-async function exportCfg() {
-    const json = await apiCall("GET");
-    const blob = new Blob([JSON.stringify(json, null, 2)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
+function resetCfg() {
+    if (!confirm("Reset to default UI values? (Won't save until you click Save)")) return;
+    document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+    document.getElementById("footerOn").checked = true;
+    updateStatus("Form Reset locally");
+}
+
+// Export/Import
+function exportCfg() {
+    const payload = {};
+    configFields.forEach(id => { payload[id] = document.getElementById(id).type === "checkbox" ? document.getElementById(id).checked : document.getElementById(id).value; });
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `footer-config-${Date.now()}.json`;
+    a.href = URL.createObjectURL(blob);
+    a.download = "footer-backup.json";
     a.click();
 }
 
-async function importCfg() {
-    const input = prompt("Paste Footer JSON Configuration here:");
-    if (!input) return;
-    try {
-        const parsed = JSON.parse(input);
-        const res = await apiCall("POST", parsed);
-        if(res.success) {
-            loadFooter();
-            showStatus("Import Successful");
-        }
-    } catch (e) {
-        alert("Invalid JSON format!");
-    }
-}
-
-// Initialize
+// Init load
 document.addEventListener("DOMContentLoaded", loadFooter);
   
 
