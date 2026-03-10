@@ -447,128 +447,143 @@ height:120px;
 </div>
 
 <script>
-/* ===============================
-SEARCH DEBOUNCING (Performance Feature)
-================================ */
-let searchTimeout;
-document.getElementById("searchAnime").addEventListener("input", (e) => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        loadAnime();
-    }, 500); // 500ms wait karega type khatam hone ka
-});
+const API = "/api/admin/anime";
+const CLOUD_API = "/api/admin/cloudinary-sign";
+let editId = null;
+
+// Selectors
+const animeModal = document.getElementById("animeModal");
+const animeList = document.getElementById("animeList");
+const saveBtn = document.getElementById("saveAnime");
+const posterInput = document.getElementById("posterInput");
+const posterPreview = document.getElementById("posterPreview");
 
 /* ===============================
-MODAL CONTROL
-================================ */
-const openModal = (title = "Add Anime") => {
-    document.getElementById("modalTitle").innerText = title;
-    document.getElementById("animeModal").style.display = "flex";
-};
-
-const closeModal = () => {
-    document.getElementById("animeModal").style.display = "none";
-    editId = null;
-    document.getElementById("animeForm").reset(); // Form clear karega
-    // Reset Select Options
-    document.querySelectorAll("#genres option").forEach(o => o.selected = false);
-};
-
-/* ===============================
-LOAD ANIME (With UI Feedback)
-================================ */
-async function loadAnime() {
-    const list = document.getElementById("animeList");
-    list.innerHTML = "<div style='padding:20px; color:#ffcc00'>Loading Anime...</div>";
-
+   IMAGE UPLOAD LOGIC
+=============================== */
+async function uploadToCloudinary(file) {
     try {
-        const query = new URLSearchParams({
-            type: document.getElementById("typeFilter").value,
-            status: document.getElementById("statusFilter").value,
-            home: document.getElementById("homeFilter").value,
-            search: document.getElementById("searchAnime").value
-        }).toString();
+        const signRes = await fetch(CLOUD_API, { method: "POST" });
+        const s = await signRes.json();
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("api_key", s.apiKey);
+        formData.append("timestamp", s.timestamp);
+        formData.append("signature", s.signature);
+        formData.append("folder", "animehunt/posters");
 
-        const data = await apiFetch(API + "?" + query);
-        list.innerHTML = "";
-
-        if (!data.length) {
-            list.innerHTML = "<div style='padding:20px;color:#888'>No Anime Found</div>";
-            return;
-        }
-
-        data.forEach(a => {
-            const row = document.createElement("div");
-            row.className = "row";
-            row.innerHTML = `
-                <span><img src="${a.poster || 'https://via.placeholder.com/40x60'}" onerror="this.src='https://via.placeholder.com/40x60'"></span>
-                <span style="font-weight:600">${escapeHTML(a.title)}</span>
-                <span class="badge">${a.type}</span>
-                <span class="badge" style="background:${a.status==='ongoing'?'#123c1a':'#1a2035'}">${a.status}</span>
-                <span style="font-size:10px; color:#888">${escapeHTML(a.categories || "-")}</span>
-                <span>${a.isHome ? "✅" : "❌"}</span>
-                <span>${a.isTrending ? "🔥" : "➖"}</span>
-                <span class="actions">
-                    <button onclick="editAnime('${a.id}')" title="Edit">✏️</button>
-                    <button onclick="deleteAnime('${a.id}')" title="Delete" style="color:#ff4d4d">🗑</button>
-                </span>
-            `;
-            list.appendChild(row);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${s.cloudName}/image/upload`, {
+            method: "POST", body: formData
         });
+        const data = await res.json();
+        return data.secure_url;
     } catch (err) {
-        list.innerHTML = `<div style='padding:20px;color:red'>Error: ${err.message}</div>`;
+        console.error("Upload Error:", err);
+        return null;
     }
 }
 
 /* ===============================
-SAVE ANIME (Added Validation)
-================================ */
-document.getElementById("saveAnime").onclick = async () => {
-    const saveBtn = document.getElementById("saveAnime");
-    
-    try {
-        const payload = {
-            title: document.getElementById("title").value.trim(),
-            slug: document.getElementById("slug").value.trim(),
-            type: document.getElementById("type").value,
-            status: document.getElementById("status").value,
-            poster: document.getElementById("poster").value.trim(),
-            banner: document.getElementById("banner").value.trim(),
-            year: document.getElementById("year").value,
-            rating: document.getElementById("rating").value,
-            language: document.getElementById("language").value,
-            duration: document.getElementById("duration").value,
-            categories: document.getElementById("autoGenre").checked ? 
-                        autoDetectGenres(document.getElementById("title").value) : 
-                        getSelectedGenres(),
-            tags: document.getElementById("tags").value,
-            description: document.getElementById("description").value,
-            isHome: document.getElementById("isHome").checked,
-            isTrending: document.getElementById("isTrending").checked,
-            isMostViewed: document.getElementById("isMostViewed").checked,
-            isBanner: document.getElementById("isBanner").checked
-        };
+   CORE ACTIONS
+=============================== */
+saveBtn.onclick = async () => {
+    const file = posterInput.files[0];
+    let posterUrl = document.getElementById("posterUrl").value;
 
-        if (!payload.title || !payload.slug) return alert("Title and Slug are mandatory!");
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving Data...";
 
-        saveBtn.disabled = true;
-        saveBtn.innerText = "Saving...";
+    // Agar file select ki hai toh upload karo
+    if (file) {
+        const uploadedUrl = await uploadToCloudinary(file);
+        if (uploadedUrl) posterUrl = uploadedUrl;
+    }
 
-        const method = editId ? "PATCH" : "POST";
-        const url = editId ? `${API}/${editId}` : API;
+    const payload = {
+        title: document.getElementById("title").value.trim(),
+        nativeTitle: document.getElementById("nativeTitle").value.trim(),
+        type: document.getElementById("type").value,
+        status: document.getElementById("status").value,
+        releaseDate: document.getElementById("releaseDate").value,
+        poster: posterUrl,
+        banner: document.getElementById("bannerUrl").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        genres: document.getElementById("genres").value.trim(),
+        rating: document.getElementById("rating").value || "0"
+    };
 
-        await apiFetch(url, { method, body: JSON.stringify(payload) });
+    const method = editId ? "PATCH" : "POST";
+    const url = editId ? `${API}/${editId}` : API;
 
-        alert(editId ? "Anime Updated!" : "Anime Created!");
+    const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+        alert("Anime Saved Successfully!");
         closeModal();
         loadAnime();
-    } catch (err) {
-        alert(err.message);
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerText = "💾 Save Anime";
+    } else {
+        alert("Error saving anime");
     }
+    saveBtn.disabled = false;
+    saveBtn.innerText = "💾 Save Anime";
 };
+
+/* ===============================
+   UI RENDERING
+=============================== */
+async function loadAnime(search = "") {
+    const res = await fetch(`${API}${search ? '?q='+search : ''}`);
+    const data = await res.json();
+    
+    animeList.innerHTML = data.length ? data.map(a => `
+        <div class="row">
+            <img src="${a.poster || 'placeholder.jpg'}" width="45" height="65" style="object-fit:cover; border-radius:4px">
+            <div style="flex:1; padding-left:10px">
+                <div style="font-weight:600">${escapeHTML(a.title)}</div>
+                <small style="color:#888">${a.type} • ${a.status}</small>
+            </div>
+            <span class="badge">⭐ ${a.rating}</span>
+            <div class="actions">
+                <button onclick="editAnime('${a.id}')">✏️</button>
+                <button onclick="deleteAnime('${a.id}')" style="color:#ff4d4d">🗑</button>
+            </div>
+        </div>
+    `).join('') : '<div style="padding:20px; color:#666">No Anime Found</div>';
+}
+
+window.editAnime = async (id) => {
+    const res = await fetch(`${API}/${id}`);
+    const a = await res.json();
+    editId = id;
+    
+    // Fill Form
+    document.getElementById("title").value = a.title;
+    document.getElementById("nativeTitle").value = a.nativeTitle || "";
+    document.getElementById("type").value = a.type;
+    document.getElementById("status").value = a.status;
+    document.getElementById("releaseDate").value = a.releaseDate || "";
+    document.getElementById("posterUrl").value = a.poster;
+    document.getElementById("bannerUrl").value = a.banner || "";
+    document.getElementById("description").value = a.description || "";
+    document.getElementById("genres").value = a.genres || "";
+    document.getElementById("rating").value = a.rating || "";
+    
+    animeModal.style.display = "flex";
+};
+
+function resetForm() {
+    editId = null;
+    document.querySelectorAll(".form-grid input, textarea").forEach(i => i.value = "");
+    posterInput.value = "";
+}
+
+// Init
+loadAnime();
   
 </script>
 
