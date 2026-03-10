@@ -3,256 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <title>AnimeHunt CMS – Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-/* Base Reset */
-*{box-sizing:border-box;margin:0;padding:0;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-body{background:#060a14;color:#fff;overflow-x:hidden}
-.cms-app{display:flex;min-height:100vh}
+/* ===== BASE LAYOUT ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#070b17;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:13px;
+}
+.cms-app{
+  display:flex;
+  min-height:100vh;
+}
 
-/* Sidebar Fixes */
-.cms-sidebar{width:240px;background:#070b16;border-right:1px solid #1a2035;padding:15px;position:fixed;height:100vh}
-.brand{padding:10px 15px;font-size:22px;margin-bottom:20px}
+/* ===== SIDEBAR (UNCHANGED) ===== */
+.cms-sidebar{
+  width:240px;
+  background:#0b0f1a;
+  border-right:1px solid #1a2035;
+  padding:20px;
+}
+.brand{
+  font-size:18px;
+  margin-bottom:30px;
+}
 .brand b{color:#ffcc00}
-.brand small{display:block;font-size:10px;color:#666;letter-spacing:1px}
-.cms-menu a{display:block;padding:12px 15px;color:#aaa;text-decoration:none;font-size:14px;border-radius:8px;transition:0.3s}
-.cms-menu a:hover, .cms-menu a.active{background:#111827;color:#ffcc00;border-left:3px solid #ffcc00}
+.brand small{
+  display:block;
+  font-size:11px;
+  color:#777;
+}
 
-/* Main Layout */
-.cms-main{flex:1;margin-left:240px;padding:25px}
-.cms-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;border-bottom:1px solid #1a2035;padding-bottom:15px}
-.title{font-size:20px;font-weight:bold;color:#ffcc00}
+.cms-menu a{
+  display:block;
+  padding:10px 12px;
+  margin-bottom:6px;
+  color:#ccc;
+  text-decoration:none;
+  border-radius:8px;
+  font-size:13px;
+}
+.cms-menu a.active,
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
+}
 
-/* Stats Cards */
-.section-title{font-size:13px;color:#555;margin-bottom:15px;text-transform:uppercase;letter-spacing:1px;font-weight:bold}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:15px;margin-bottom:30px}
-.stat-card{background:#0b0f1a;border:1px solid #1a2035;padding:18px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;transition:0.3s}
-.stat-card:hover{border-color:#ffcc00;transform:translateY(-3px)}
-.stat-card div{font-size:13px;color:#999}
-.stat-card span{font-size:18px;color:#ffcc00;font-weight:bold}
+/* ===== MAIN CONTENT ===== */
+.cms-main{
+  flex:1;
+  padding:12px 10px;   /* wide feel */
+}
 
-/* Quick Action Buttons */
-.action-card{cursor:pointer;background:linear-gradient(145deg, #0b0f1a, #070b16);border:1px dashed #333}
-.action-card:hover{background:#ffcc00;border-style:solid}
-.action-card:hover *{color:#000 !important}
+.cms-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+.cms-header .title{
+  font-size:18px;
+  font-weight:600;
+}
+.cms-header .profile{
+  font-size:12px;
+  color:#ccc;
+}
 
-/* Status Colors */
-.status-online{color:#00ffb3 !important}
-.status-warning{color:#ffcc00 !important}
+.cms-content{
+  padding-bottom:30px;
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap:20px;
+  padding-bottom:6px;
+}
+/* ===== STAT CARD ===== */
+.stat-card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.stat-card span{
+  font-size:14px;
+  color:#ffcc00;
+  font-weight:600;
+  letter-spacing:0.2px;
+}
 </style>
 </head>
 
 <body>
 <div class="cms-app">
-    <aside class="cms-sidebar">
-        <div class="brand"><span>Anime</span><b>Hunt</b><small>ADMIN PANEL</small></div>
-        <nav class="cms-menu">
-            <a href="dashboard.html" class="active">🏠 Dashboard</a>
-            <a href="anime.html">🎬 Anime</a>
-            <a href="episodes.html">📺 Episodes</a>
-            <a href="servers.html">🌐 Servers</a>
-            <a href="ads.html">📢 Ads</a>
-            <a href="system-settings.html">⚙ System Settings</a>
-            <a href="#" onclick="logout()">🚪 Logout</a>
-        </nav>
-    </aside>
 
-    <main class="cms-main">
-        <header class="cms-header">
-            <div class="title">Platform Overview</div>
-            <div id="lastUpdate" style="font-size:11px;color:#444">Last sync: Just now</div>
-        </header>
+<!-- SIDEBAR -->
+<aside class="cms-sidebar">
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
 
-        <section class="cms-content">
-            <div class="section-title">Core Library</div>
-            <div class="stats-grid">
-                <div class="stat-card"><div>🎬 Total Anime</div><span id="animeCount">0</span></div>
-                <div class="stat-card"><div>📺 Episodes</div><span id="episodeCount">0</span></div>
-                <div class="stat-card"><div>🌐 Active Servers</div><span id="serverCount">0</span></div>
-                <div class="stat-card"><div>📥 Download Links</div><span id="downloadCount">0</span></div>
-            </div>
+  <nav class="cms-menu">
 
-            <div class="section-title">Revenue & Traffic</div>
-            <div class="stats-grid">
-                <div class="stat-card"><div>💰 Today Revenue</div><span id="todayRevenue">₹0</span></div>
-                <div class="stat-card"><div>🖱 Ad Clicks</div><span id="adClicks">0</span></div>
-                <div class="stat-card"><div>🔥 Trending</div><span id="trendingAnime">0</span></div>
-                <div class="stat-card"><div>📢 Active Ads</div><span id="activeAds">0</span></div>
-            </div>
+    <!-- CORE -->
+    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
 
-            <div class="section-title">System Health</div>
-            <div class="stats-grid">
-                <div class="stat-card"><div>⚙ CMS Status</div><span id="cmsStatus" class="status-online">OK</span></div>
-                <div class="stat-card"><div>🚀 API Latency</div><span id="apiStatus" class="status-online">Stable</span></div>
-                <div class="stat-card"><div>🧠 AI Engine</div><span id="aiStatus">Idle</span></div>
-                <div class="stat-card"><div>💾 Last Backup</div><span id="backupStatus">Today</span></div>
-            </div>
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
 
-            <div class="section-title">Quick Actions</div>
-            <div class="stats-grid">
-                <div class="stat-card action-card" onclick="location.href='anime.html'"><div>Add New Anime</div><span>+</span></div>
-                <div class="stat-card action-card" onclick="location.href='ads.html'"><div>Manage Ads</div><span>$</span></div>
-                <div class="stat-card action-card" onclick="refreshData()"><div>Manual Sync</div><span>↻</span></div>
-                <div class="stat-card action-card" style="border-color:#ff4c4c" onclick="emergencyStop()"><div>Platform Kill</div><span>!</span></div>
-            </div>
-        </section>
-    </main>
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html">⚙ System-settings</a>
+
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="cms-main">
+<header class="cms-header">
+  <div class="title">Dashboard</div>
+  <div class="profile">Admin</div>
+</header>
+
+<section class="cms-content">
+
+<!-- 🔥 ROW 1 – CORE STATS -->
+<div class="stats-grid">
+  <div class="stat-card">🎬 Anime <span id="animeCount">0</span></div>
+  <div class="stat-card">📺 Episodes <span id="episodeCount">0</span></div>
+  <div class="stat-card">🗂 Categories <span id="categoryCount">0</span></div>
+  <div class="stat-card">🖼 Banners <span id="bannerCount">0</span></div>
+  <div class="stat-card">📥 Downloads <span id="downloadCount">0</span></div>
+  <div class="stat-card">🌐 Servers <span id="serverCount">0</span></div>
 </div>
 
+<br>
+
+<!-- 🔥 ROW 2 – GROWTH & ADS -->
+<div class="stats-grid">
+  <div class="stat-card">📢 Active Ads <span id="activeAds">0</span></div>
+  <div class="stat-card">💰 Today Revenue <span id="todayRevenue">₹0</span></div>
+  <div class="stat-card">🖱 Ad Clicks <span id="adClicks">0</span></div>
+  <div class="stat-card">🔥 Trending Anime <span id="trendingAnime">0</span></div>
+  <div class="stat-card">🕒 Ongoing Anime <span id="ongoingAnime">0</span></div>
+  <div class="stat-card">⭐ Top Rated <span id="topRated">0</span></div>
+</div>
+
+<br>
+
+<!-- 🔥 ROW 3 – SYSTEM HEALTH -->
+<div class="stats-grid">
+  <div class="stat-card">⚙ CMS Status <span id="cmsStatus">OK</span></div>
+  <div class="stat-card">🚀 Server Load <span id="serverLoad">Low</span></div>
+  <div class="stat-card">📡 API Status <span id="apiStatus">Online</span></div>
+  <div class="stat-card">🧠 AI Engine <span id="aiStatus">Active</span></div>
+  <div class="stat-card">🔍 Search Index <span id="searchStatus">Ready</span></div>
+  <div class="stat-card">💾 Backup <span id="backupStatus">Synced</span></div>
+</div>
+
+<br>
+
+<!-- 🔥 ROW 4 – QUICK ACTIONS -->
+<div class="stats-grid">
+  <div class="stat-card">➕ Add Anime <span>+</span></div>
+  <div class="stat-card">📢 Manage Ads <span>→</span></div>
+  <div class="stat-card">🖼 Upload Banner <span>+</span></div>
+  <div class="stat-card">🔄 Sync Content <span>↻</span></div>
+  <div class="stat-card">🧠 AI Scan <span>Run</span></div>
+  <div class="stat-card">🚨 Emergency Stop <span>!</span></div>
+</div>
+
+</section>
+</main>
+
+</div>
+  
 <script>
-  /* =================================
-   CONFIG & STATE
-   ================================= */
-const API_DASHBOARD = "/api/admin/dashboard";
+// Configuration
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev";
+const DASH_API = `${API_BASE}/api/admin/dashboard`;
 const TOKEN_KEY = "AUTH_TOKEN";
-let isSyncing = false;
 
-/* =================================
-   CORE UTILITIES
-   ================================= */
-const el = (id) => document.getElementById(id);
-
-const formatCurrency = (num) => {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-    }).format(num || 0);
-};
-
-/* =================================
-   DATA FETCHING (ROBUST)
-   ================================= */
-async function apiFetch(url) {
+/**
+ * 1. Security Check: Token check karein aur logout handle karein
+ */
+function checkAuth() {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
         window.location.href = "login.html";
         return null;
     }
+    return token;
+}
+
+/**
+ * 2. Helper function to update text safely
+ */
+function updateText(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = value !== undefined ? value : "---";
+    }
+}
+
+/**
+ * 3. Main Loader: Data fetch aur UI update
+ */
+async function loadDashboard() {
+    const token = checkAuth();
+    if (!token) return;
 
     try {
-        const res = await fetch(url, {
+        const res = await fetch(DASH_API, {
+            method: 'GET',
             headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "application/json"
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         });
 
-        if (res.status === 401) {
-            localStorage.removeItem(TOKEN_KEY);
-            window.location.href = "login.html";
-            return null;
+        // Agar token invalid ho gaya ho (401 Unauthorized)
+        if (res.status === 401 || res.status === 403) {
+            throw new Error("Session expired");
         }
 
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        return await res.json();
+        if (!res.ok) {
+            throw new Error("Failed to fetch dashboard data");
+        }
+
+        const data = await res.json();
+
+        // --- Update Row 1: CORE STATS ---
+        updateText("animeCount", data.core?.animeCount);
+        updateText("episodeCount", data.core?.episodeCount);
+        updateText("categoryCount", data.core?.categoryCount);
+        updateText("bannerCount", data.core?.bannerCount);
+        updateText("downloadCount", data.core?.downloadCount);
+        updateText("serverCount", data.core?.serverCount);
+
+        // --- Update Row 2: GROWTH & ADS ---
+        updateText("activeAds", data.growth?.activeAds);
+        updateText("todayRevenue", "₹" + (data.growth?.todayRevenue || 0));
+        updateText("adClicks", data.growth?.adClicks);
+        updateText("trendingAnime", data.growth?.trendingAnime);
+        updateText("ongoingAnime", data.growth?.ongoingAnime);
+        updateText("topRated", data.growth?.topRated);
+
+        // --- Update Row 3: SYSTEM HEALTH ---
+        updateText("cmsStatus", data.system?.cmsStatus);
+        updateText("serverLoad", data.system?.serverLoad);
+        updateText("apiStatus", data.system?.apiStatus);
+        updateText("aiStatus", data.system?.aiStatus);
+        updateText("searchStatus", data.system?.searchStatus);
+        updateText("backupStatus", data.system?.backupStatus);
+
     } catch (err) {
-        console.error("Dashboard Sync Error:", err);
-        return null;
+        console.error("Dashboard Error:", err);
+        // Error aane par user ko login page par bhej dein
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = "login.html?msg=session_expired";
     }
 }
 
-/* =================================
-   UI UPDATER
-   ================================= */
-async function loadDashboard() {
-    if (isSyncing) return;
-    isSyncing = true;
-
-    // Optional: Add a small loading indicator to the profile name
-    const profileEl = document.querySelector('.profile');
-    const originalProfile = profileEl.innerText;
-    profileEl.innerText = "Syncing...";
-
-    const data = await apiFetch(API_DASHBOARD);
-    isSyncing = false;
-    profileEl.innerText = originalProfile;
-
-    if (!data) return;
-
-    // 🎬 Core Stats Update
-    el("animeCount").textContent = data.core?.animeCount ?? "0";
-    el("episodeCount").textContent = data.core?.episodeCount ?? "0";
-    el("categoryCount").textContent = data.core?.categoryCount ?? "0";
-    el("bannerCount").textContent = data.core?.bannerCount ?? "0";
-    el("downloadCount").textContent = data.core?.downloadCount ?? "0";
-    el("serverCount").textContent = data.core?.serverCount ?? "0";
-
-    // 💰 Growth & Ads Update
-    el("activeAds").textContent = data.growth?.activeAds ?? "0";
-    el("todayRevenue").textContent = formatCurrency(data.growth?.todayRevenue);
-    el("adClicks").textContent = (data.growth?.adClicks ?? 0).toLocaleString();
-    el("trendingAnime").textContent = data.growth?.trendingAnime ?? "0";
-    el("ongoingAnime").textContent = data.growth?.ongoingAnime ?? "0";
-    el("topRated").textContent = data.growth?.topRated ?? "0";
-
-    // 🚀 System Health Update
-    updateStatus("cmsStatus", data.system?.cmsStatus);
-    updateStatus("apiStatus", data.system?.apiStatus);
-    updateStatus("aiStatus", data.system?.aiStatus);
-    updateStatus("searchStatus", data.system?.searchStatus);
-    
-    el("serverLoad").textContent = data.system?.serverLoad ?? "Low";
-    el("backupStatus").textContent = data.system?.backupStatus ?? "Synced";
-}
-
-function updateStatus(id, status) {
-    const target = el(id);
-    if (!target) return;
-    target.textContent = status || "Unknown";
-    // Green color for 'Online' or 'OK'
-    target.style.color = (status === "OK" || status === "Online" || status === "Active") ? "#4cff4c" : "#ffcc00";
-}
-
-/* =================================
-   QUICK ACTIONS LOGIC
-   ================================= */
-function setupQuickActions() {
-    const cards = document.querySelectorAll('.stats-grid:last-child .stat-card');
-    
-    const actions = [
-        () => window.location.href = 'anime.html',        // Add Anime
-        () => window.location.href = 'ads.html',          // Manage Ads
-        () => window.location.href = 'banners.html',      // Upload Banner
-        () => loadDashboard(),                            // Sync Content
-        () => alert("AI Scanning Started..."),            // AI Scan
-        () => emergencyStop()                             // Emergency Stop
-    ];
-
-    cards.forEach((card, index) => {
-        card.style.cursor = "pointer";
-        card.onclick = actions[index];
-    });
-}
-
-async function emergencyStop() {
-    if (!confirm("🚨 ALERT: This will trigger the Kill Switch. Stop all services?")) return;
-    
-    try {
-        const res = await fetch("/api/admin/system/kill", { 
-            method: "POST",
-            headers: { "Authorization": `Bearer ${localStorage.getItem(TOKEN_KEY)}` }
-        });
-        if (res.ok) {
-            alert("System HALTED successfully.");
-            loadDashboard();
-        }
-    } catch (e) {
-        alert("Action failed. Check console.");
-    }
-}
-
-/* =================================
-   INITIALIZE
-   ================================= */
-document.addEventListener("DOMContentLoaded", () => {
+/**
+ * 4. Event Listeners for Quick Actions
+ * Aapke cards par click karne par functions trigger honge
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Dashboard load karein
     loadDashboard();
-    setupQuickActions();
-    
-    // Auto refresh every 2 minutes to keep it live
-    setInterval(loadDashboard, 120000);
+
+    // Logout button agar aapne profile section mein rakha ho to
+    const profileBtn = document.querySelector('.profile');
+    if (profileBtn) {
+        profileBtn.style.cursor = "pointer";
+        profileBtn.title = "Click to Logout";
+        profileBtn.onclick = () => {
+            if(confirm("Logout confirm?")) {
+                localStorage.removeItem(TOKEN_KEY);
+                location.href = "login.html";
+            }
+        };
+    }
 });
-  
+    
 </script>
-</body>
-</html>
+
+
