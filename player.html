@@ -232,131 +232,116 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
-const API="/api/admin/player"
-const AUTH_KEY="AUTH_TOKEN"
+const API = "/api/admin/player";
+const AUTH_KEY = "AUTH_TOKEN";
 
-const saveBtn=document.getElementById("savePlayer")
+const saveBtn = document.getElementById("savePlayer");
 
-const defaultServer=document.getElementById("defaultServer")
-const autoplay=document.getElementById("autoplay")
-const resume=document.getElementById("resume")
-const autoswitch=document.getElementById("autoswitch")
-const mode=document.getElementById("mode")
+// Elements Mapping
+const fields = {
+    defaultServer: 'defaultServer',
+    autoplay: 'autoplay',
+    resume: 'resume',
+    autoswitch: 'autoswitch',
+    mode: 'mode',
+    'ui.servers': 'showServers',
+    'ui.download': 'showDownload',
+    'ui.subscribe': 'showSubscribe',
+    'ui.related': 'showRelated',
+    // Security Fields (Add IDs to your HTML inputs as well)
+    'security.embedOnly': 'secEmbed',
+    'security.cloudflare': 'secCloud',
+    'security.sandbox': 'secSandbox',
+    'security.referrer': 'secReferrer'
+};
 
-const showServers=document.getElementById("showServers")
-const showDownload=document.getElementById("showDownload")
-const showSubscribe=document.getElementById("showSubscribe")
-const showRelated=document.getElementById("showRelated")
-
-function checkAuth(){
-
-const token=localStorage.getItem(AUTH_KEY)
-
-if(!token){
-location.href="login.html"
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(AUTH_KEY);
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
+        if (res.status === 401) { location.href = "login.html"; return null; }
+        return await res.json();
+    } catch (err) { return null; }
 }
 
+async function loadPlayer() {
+    const d = await apiFetch(API);
+    if (!d) return;
+
+    // Direct Fields
+    document.getElementById("defaultServer").value = d.defaultServer;
+    document.getElementById("autoplay").value = String(d.autoplay);
+    document.getElementById("resume").value = String(d.resume);
+    document.getElementById("autoswitch").value = String(d.autoswitch);
+    document.getElementById("mode").value = d.mode;
+
+    // Nested UI Fields
+    document.getElementById("showServers").value = String(d.ui.servers);
+    document.getElementById("showDownload").value = String(d.ui.download);
+    document.getElementById("showSubscribe").value = String(d.ui.subscribe);
+    document.getElementById("showRelated").value = String(d.ui.related);
+
+    // Security Fields (Initial load check)
+    if(d.security) {
+        if(document.getElementById("secEmbed")) document.getElementById("secEmbed").value = String(d.security.embedOnly);
+        if(document.getElementById("secReferrer")) document.getElementById("secReferrer").value = d.security.referrer;
+    }
 }
 
-checkAuth()
+saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
 
-async function apiFetch(url,options={}){
+    const payload = {
+        defaultServer: document.getElementById("defaultServer").value,
+        autoplay: document.getElementById("autoplay").value === "true",
+        resume: document.getElementById("resume").value === "true",
+        autoswitch: document.getElementById("autoswitch").value === "true",
+        mode: document.getElementById("mode").value,
+        ui: {
+            servers: document.getElementById("showServers").value === "true",
+            download: document.getElementById("showDownload").value === "true",
+            subscribe: document.getElementById("showSubscribe").value === "true",
+            related: document.getElementById("showRelated").value === "true"
+        },
+        security: {
+            embedOnly: true, // Defaulting to true for security
+            cloudflare: true,
+            sandbox: true,
+            referrer: "strict"
+        }
+    };
 
-try{
+    const res = await apiFetch(API, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
 
-const token=localStorage.getItem(AUTH_KEY)
+    if (res && res.success) {
+        alert("Success: Player settings updated.");
+    } else {
+        alert("Error: Could not save settings.");
+    }
 
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?`Bearer ${token}`:"",
-...options.headers
-}
-})
+    saveBtn.disabled = false;
+    saveBtn.textContent = "💾 Save Player";
+});
 
-if(res.status===401){
-
-localStorage.removeItem(AUTH_KEY)
-location.href="login.html"
-return {}
-
-}
-
-if(!res.ok){
-
-console.warn("API error",res.status)
-return {}
-
-}
-
-return await res.json()
-
-}catch(err){
-
-console.error("Network error",err)
-return {}
-
-}
-
-}
-
-function setSaving(state){
-
-saveBtn.disabled=state
-saveBtn.textContent=state?"Saving...":"💾 Save Player"
-
-}
-
-async function loadPlayer(){
-
-const d=await apiFetch(API)
-
-defaultServer.value=d.defaultServer || "Server 1"
-
-autoplay.value=String(!!d.autoplay)
-resume.value=String(!!d.resume)
-autoswitch.value=String(!!d.autoswitch)
-
-mode.value=d.mode || "responsive"
-
-showServers.value=String(!!d.ui?.servers)
-showDownload.value=String(!!d.ui?.download)
-showSubscribe.value=String(!!d.ui?.subscribe)
-showRelated.value=String(!!d.ui?.related)
-
-}
-
-saveBtn.addEventListener("click",async()=>{
-
-setSaving(true)
-
-const payload={
-defaultServer:defaultServer.value,
-autoplay:autoplay.value==="true",
-resume:resume.value==="true",
-autoswitch:autoswitch.value==="true",
-mode:mode.value,
-ui:{
-servers:showServers.value==="true",
-download:showDownload.value==="true",
-subscribe:showSubscribe.value==="true",
-related:showRelated.value==="true"
-}
-}
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-setSaving(false)
-
-alert("Player settings saved")
-
-})
-
-document.addEventListener("DOMContentLoaded",loadPlayer)
+document.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem(AUTH_KEY)) {
+        location.href = "login.html";
+    } else {
+        loadPlayer();
+    }
+});
+  
 </script>
 
 </body>
