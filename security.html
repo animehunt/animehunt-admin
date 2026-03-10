@@ -539,217 +539,139 @@ color:#ccc;
 </main>
 </div>
 <script>
-const API="/api/admin/security"
-const STATS_API="/api/security/stats"
-const TOKEN_KEY="AUTH_TOKEN"
+const API = "/api/admin/security";
+const TOKEN_KEY = "AUTH_TOKEN";
 
-let saveTimer=null
-let statsTimer=null
+function el(id) { return document.getElementById(id); }
 
-function el(id){
-return document.getElementById(id)
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : "",
+            ...options.headers
+        }
+    });
+    if (res.status === 401) { location.href = "login.html"; return null; }
+    return res.json();
 }
 
-function clamp(v,min,max){
-if(isNaN(v)) return min
-return Math.max(min,Math.min(max,v))
+async function loadSecurity() {
+    const d = await apiFetch(API);
+    if (!d) return;
+
+    // Load Checkboxes & Ranges
+    el("ultraMode").checked = d.ultra;
+    el("firewallLevel").value = d.firewallLevel;
+    
+    // Core (Add IDs to your HTML checkboxes if missing)
+    // Example: <input type="checkbox" id="botProt">
+    if(el("indiaOnly")) el("indiaOnly").checked = d.geo.indiaOnly;
+    if(el("blockForeign")) el("blockForeign").checked = d.geo.blockForeign;
+    
+    // Admin Security
+    el("loginLimit").checked = d.admin.loginLimit;
+    el("deviceLock").checked = d.admin.deviceLock;
+    el("sessionMonitor").checked = d.admin.sessionMonitor;
+
+    // AI & Auto Ban
+    el("autoBan").checked = d.ai.autoBan;
+    el("banBrute").checked = d.ai.brute;
+    el("banBots").checked = d.ai.bot;
+    el("aiLearn").checked = d.ai.learning;
+
+    // System
+    el("hideServerInfo").checked = d.system.hideServer;
+    el("hideTechStack").checked = d.system.hideTech;
+
+    updateFirewallLabel();
+    updateThreatUI(d.ultra);
 }
 
-async function apiFetch(url,options={}){
+// Debounced Save Function
+let saveTimeout;
+function syncWithServer() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        const payload = {
+            ultra: el("ultraMode").checked,
+            firewallLevel: parseInt(el("firewallLevel").value),
+            geo: {
+                indiaOnly: el("indiaOnly").checked,
+                blockForeign: el("blockForeign").checked
+            },
+            admin: {
+                loginLimit: el("loginLimit").checked,
+                deviceLock: el("deviceLock").checked,
+                sessionMonitor: el("sessionMonitor").checked
+            },
+            ai: {
+                autoBan: el("autoBan").checked,
+                brute: el("banBrute").checked,
+                bot: el("banBots").checked,
+                learning: el("aiLearn").checked
+            },
+            system: {
+                hideServer: el("hideServerInfo").checked,
+                hideTech: el("hideTechStack").checked
+            }
+        };
 
-const token=localStorage.getItem(TOKEN_KEY)
-
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?"Bearer "+token:"",
-...options.headers
-}
-})
-
-if(res.status===401){
-
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-throw new Error("Unauthorized")
-
-}
-
-if(!res.ok){
-throw new Error("Request failed")
-}
-
-return res.json().catch(()=>({}))
-
-}
-
-async function loadSecurity(){
-
-try{
-
-const d=await apiFetch(API)
-
-if(!d) return
-
-el("ultraMode").checked=!!d.ultra
-el("firewallLevel").value=clamp(d.firewallLevel,1,5)
-
-el("indiaOnly").checked=!!d.geo?.indiaOnly
-el("blockForeign").checked=!!d.geo?.blockForeign
-
-el("loginLimit").checked=!!d.admin?.loginLimit
-el("deviceLock").checked=!!d.admin?.deviceLock
-el("sessionMonitor").checked=!!d.admin?.sessionMonitor
-
-el("autoBan").checked=!!d.ai?.autoBan
-el("banBrute").checked=!!d.ai?.brute
-el("banBots").checked=!!d.ai?.bot
-el("aiLearn").checked=!!d.ai?.learning
-
-el("hideServerInfo").checked=!!d.system?.hideServer
-el("hideTechStack").checked=!!d.system?.hideTech
-
-updateFirewallLabel()
-
-}catch(e){
-
-console.error(e)
-
+        const res = await apiFetch(API, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        
+        if (res?.success) {
+            console.log("Security Synced ✅");
+        }
+    }, 500);
 }
 
+function updateFirewallLabel() {
+    const level = el("firewallLevel").value;
+    const labels = ["", "Basic", "Moderate", "Strong", "Aggressive", "Extreme"];
+    el("fwLabel").innerText = `Level ${level} – ${labels[level]}`;
 }
 
-function scheduleSave(){
-clearTimeout(saveTimer)
-saveTimer=setTimeout(saveSecurity,400)
+function updateThreatUI(isUltra) {
+    const fill = el("threatFill");
+    if (isUltra) {
+        fill.style.width = "10%";
+        fill.style.background = "#00ffb3";
+        el("threat").innerText = "Ultra Protected";
+    } else {
+        fill.style.width = "40%";
+        fill.style.background = "#ffcc00";
+        el("threat").innerText = "Monitor Mode";
+    }
 }
 
-async function saveSecurity(){
-
-try{
-
-const payload={
-
-ultra:el("ultraMode").checked,
-firewallLevel:clamp(+el("firewallLevel").value,1,5),
-
-geo:{
-indiaOnly:el("indiaOnly").checked,
-blockForeign:el("blockForeign").checked
-},
-
-admin:{
-loginLimit:el("loginLimit").checked,
-deviceLock:el("deviceLock").checked,
-sessionMonitor:el("sessionMonitor").checked
-},
-
-ai:{
-autoBan:el("autoBan").checked,
-brute:el("banBrute").checked,
-bot:el("banBots").checked,
-learning:el("aiLearn").checked
-},
-
-system:{
-hideServer:el("hideServerInfo").checked,
-hideTech:el("hideTechStack").checked
+// Activate Lockdown Button
+async function activateLockdown() {
+    if(!confirm("Are you sure? This will block all suspicious traffic immediately.")) return;
+    el("ultraMode").checked = true;
+    updateThreatUI(true);
+    syncWithServer();
+    alert("🚨 FULL LOCKDOWN ACTIVATED");
 }
 
-}
+// Initialize listeners
+document.addEventListener("DOMContentLoaded", () => {
+    loadSecurity();
+    
+    // Attach change events to all inputs
+    const allInputs = document.querySelectorAll('input[type="checkbox"], input[type="range"]');
+    allInputs.forEach(input => {
+        input.addEventListener("change", syncWithServer);
+    });
 
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
+    el("firewallLevel").addEventListener("input", updateFirewallLabel);
+});
+  
 
-}catch(e){
-
-console.error(e)
-loadSecurity()
-
-}
-
-}
-
-function updateFirewallLabel(){
-
-const level=+el("firewallLevel").value
-
-const map={
-1:"Level 1 – Basic",
-2:"Level 2 – Moderate",
-3:"Level 3 – Strong",
-4:"Level 4 – Aggressive",
-5:"Level 5 – Extreme"
-}
-
-el("fwLabel").innerText=map[level]
-
-}
-
-el("firewallLevel").addEventListener("input",()=>{
-updateFirewallLabel()
-scheduleSave()
-})
-
-[
-"indiaOnly",
-"blockForeign",
-"loginLimit",
-"deviceLock",
-"sessionMonitor",
-"autoBan",
-"banBrute",
-"banBots",
-"aiLearn",
-"hideServerInfo",
-"hideTechStack"
-].forEach(id=>{
-
-const element=el(id)
-
-if(element){
-element.addEventListener("change",scheduleSave)
-}
-
-})
-
-async function loadStats(){
-
-try{
-
-const d=await apiFetch(STATS_API)
-
-el("ipCount").innerText=d.blockedIPs ?? 0
-el("liveUsers").innerText=d.liveUsers ?? 0
-el("reqPerSec").innerText=d.reqPerSec ?? 0
-el("blockedReq").innerText=d.blockedReq ?? 0
-
-}catch(e){
-
-console.error(e)
-
-}
-
-}
-
-function startStats(){
-
-if(statsTimer) clearInterval(statsTimer)
-
-statsTimer=setInterval(loadStats,5000)
-
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-loadSecurity()
-loadStats()
-startStats()
-
-})
 </script>
 
 </body>
