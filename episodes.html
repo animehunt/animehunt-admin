@@ -221,355 +221,254 @@ body{background:#060a14;color:#fff;}
 </div>
 
 <script>
-
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
 const AUTH_KEY = "AUTH_TOKEN"
 
 let editId = null
 
+// DOM Elements
 const episodeModal = document.getElementById("episodeModal")
 const openAddBtn = document.getElementById("openAddEpisode")
 const closeModalBtn = document.getElementById("closeModal")
 const saveBtn = document.getElementById("saveEpisode")
 const episodeList = document.getElementById("episodeList")
 
+// Form Inputs
 const animeName = document.getElementById("animeName")
 const seasonNo = document.getElementById("seasonNo")
 const episodeNo = document.getElementById("episodeNo")
 const episodeTitle = document.getElementById("episodeTitle")
 const description = document.getElementById("description")
-
 const server1 = document.getElementById("server1")
 const server2 = document.getElementById("server2")
 const server3 = document.getElementById("server3")
-
 const isOngoing = document.getElementById("isOngoing")
 const isFeatured = document.getElementById("isFeatured")
+const downloadSection = document.querySelector(".download-section")
 
 /* ===============================
-SAFE FETCH
+   API HELPER (With Auth)
 =============================== */
-async function apiFetch(url, options={}){
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem(AUTH_KEY)
+    const res = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : ""
+        }
+    })
 
-  const token = localStorage.getItem(AUTH_KEY)
-
-  const res = await fetch(url,{
-    ...options,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization": token ? "Bearer "+token : ""
+    if (res.status === 401) {
+        localStorage.removeItem(AUTH_KEY);
+        location.href = "login.html";
+        throw new Error("Session Expired");
     }
-  })
-
-  if(res.status===401){
-    localStorage.removeItem(AUTH_KEY)
-    location.href="login.html"
-    throw new Error("Session expired")
-  }
-
-  if(!res.ok){
-    const text = await res.text()
-    throw new Error(text || "Request failed")
-  }
-
-  return res.json()
+    if (!res.ok) throw new Error(await res.text() || "Request Failed");
+    return res.json();
 }
 
 /* ===============================
-MODAL
+   DYNAMIC DOWNLOAD UI
 =============================== */
+function createHostBlock(hostName = "", links = []) {
+    const div = document.createElement("div");
+    div.className = "download-host";
+    div.style.borderTop = "1px solid #1a2035";
+    div.style.paddingTop = "15px";
+    div.style.marginTop = "15px";
 
-openAddBtn.onclick = ()=>{
-  editId=null
-  resetForm()
-  episodeModal.style.display="flex"
+    let rowsHTML = "";
+    if (links.length > 0) {
+        links.forEach(l => rowsHTML += createQualityRowHTML(l.quality, l.url));
+    } else {
+        rowsHTML = createQualityRowHTML();
+    }
+
+    div.innerHTML = `
+        <div style="display:flex; gap:10px; margin-bottom:10px">
+            <input class="host-name" placeholder="Host Name (e.g. Terabox)" value="${hostName}" style="flex:1">
+            <button type="button" onclick="this.closest('.download-host').remove()" style="background:none; border:none; color:#ff4d4d; cursor:pointer">✕ Remove Host</button>
+        </div>
+        <div class="quality-container">${rowsHTML}</div>
+        <button type="button" class="add-quality-btn" style="width:100%; margin-top:5px; background:#1a2035; color:#ffcc00; border:1px solid #333; cursor:pointer; padding:5px; border-radius:6px">＋ Add Quality</button>
+    `;
+    downloadSection.appendChild(div);
 }
 
-closeModalBtn.onclick = ()=>{
-  episodeModal.style.display="none"
+function createQualityRowHTML(q = "720p", url = "") {
+    return `
+        <div class="quality-row" style="display:flex; gap:8px; margin-top:6px">
+            <select style="width:100px">
+                <option ${q === '480p' ? 'selected' : ''}>480p</option>
+                <option ${q === '720p' ? 'selected' : ''}>720p</option>
+                <option ${q === '1080p' ? 'selected' : ''}>1080p</option>
+                <option ${q === '4K' ? 'selected' : ''}>4K</option>
+                <option ${q === 'ZIP' ? 'selected' : ''}>ZIP</option>
+            </select>
+            <input class="quality-link" placeholder="Download Link" value="${url}" style="flex:1">
+            <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff4d4d; cursor:pointer">✕</button>
+        </div>
+    `;
 }
+
+// Event Delegation for "Add Quality" buttons
+document.addEventListener("click", e => {
+    if (e.target.classList.contains("add-quality-btn")) {
+        const container = e.target.previousElementSibling;
+        const temp = document.createElement('div');
+        temp.innerHTML = createQualityRowHTML();
+        container.appendChild(temp.firstElementChild);
+    }
+});
 
 /* ===============================
-ADD QUALITY
+   CORE ACTIONS (Save, Load, Edit)
 =============================== */
+saveBtn.onclick = async () => {
+    try {
+        const anime = animeName.value.trim();
+        if (!anime) return alert("Anime Name is required!");
 
-document.addEventListener("click",e=>{
+        const servers = [server1.value.trim(), server2.value.trim(), server3.value.trim()].filter(s => s !== "");
+        
+        const downloads = [];
+        document.querySelectorAll(".download-host").forEach(block => {
+            const host = block.querySelector(".host-name").value.trim();
+            if (!host) return;
 
-  if(e.target.classList.contains("add-quality")){
+            const links = [];
+            block.querySelectorAll(".quality-row").forEach(row => {
+                const quality = row.querySelector("select").value;
+                const url = row.querySelector(".quality-link").value.trim();
+                if (url) links.push({ quality, url });
+            });
 
-    const row = e.target.closest(".quality-row")
-    const clone = row.cloneNode(true)
+            if (links.length > 0) downloads.push({ host, links });
+        });
 
-    clone.querySelector(".quality-link").value=""
-    clone.querySelector("select").selectedIndex=0
+        const payload = {
+            anime,
+            season: seasonNo.value || "1",
+            episode: episodeNo.value || "1",
+            title: episodeTitle.value.trim(),
+            description: description.value.trim(),
+            servers,
+            downloads,
+            ongoing: isOngoing.checked,
+            featured: isFeatured.checked
+        };
 
-    row.parentElement.appendChild(clone)
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Saving...";
 
-  }
+        const method = editId ? "PATCH" : "POST";
+        const url = editId ? `${API}/${editId}` : API;
 
-})
+        await apiFetch(url, { method, body: JSON.stringify(payload) });
+
+        episodeModal.style.display = "none";
+        loadEpisodes();
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "💾 Save Episode";
+    }
+};
+
+window.editEpisode = async (id) => {
+    try {
+        const e = await apiFetch(`${API}/${id}`);
+        editId = id;
+        resetForm();
+
+        animeName.value = e.anime;
+        seasonNo.value = e.season;
+        episodeNo.value = e.episode;
+        episodeTitle.value = e.title;
+        description.value = e.description;
+        server1.value = e.servers?.[0] || "";
+        server2.value = e.servers?.[1] || "";
+        server3.value = e.servers?.[2] || "";
+        isOngoing.checked = e.ongoing;
+        isFeatured.checked = e.featured;
+
+        // Clear default host and render saved ones
+        downloadSection.innerHTML = "";
+        if (e.downloads && e.downloads.length > 0) {
+            e.downloads.forEach(d => createHostBlock(d.host, d.links));
+        } else {
+            createHostBlock();
+        }
+
+        episodeModal.style.display = "flex";
+        document.querySelector(".modal-header h3").innerText = "Edit Episode";
+    } catch (err) {
+        alert("Failed to load episode details");
+    }
+};
+
+window.removeEpisode = async (id) => {
+    if (!confirm("Are you sure? This cannot be undone.")) return;
+    await apiFetch(`${API}/${id}`, { method: "DELETE" });
+    loadEpisodes();
+};
 
 /* ===============================
-LOAD
+   UI HELPERS
 =============================== */
+function render(list) {
+    episodeList.innerHTML = "";
+    list.forEach(e => {
+        const row = document.createElement("div");
+        row.className = "row";
+        const dlTotal = e.downloads?.reduce((acc, h) => acc + h.links.length, 0) || 0;
 
-async function loadEpisodes(){
-
-  try{
-
-    const data = await apiFetch(API)
-
-    render(data)
-
-  }catch(err){
-
-    console.error(err)
-
-  }
-
+        row.innerHTML = `
+            <span style="font-weight:600">${escapeHTML(e.anime)}</span>
+            <span class="badge">S${e.season}</span>
+            <span class="badge">E${e.episode}</span>
+            <span style="color:#aaa">${escapeHTML(e.title || '---')}</span>
+            <span>${e.servers?.length || 0} Srv</span>
+            <span>${dlTotal} DL</span>
+            <span class="actions">
+                <button onclick="editEpisode('${e.id}')">✏️</button>
+                <button onclick="removeEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
+            </span>
+        `;
+        episodeList.appendChild(row);
+    });
 }
 
-/* ===============================
-SAVE
-=============================== */
-
-saveBtn.onclick = async ()=>{
-
-try{
-
-const anime = animeName.value.trim()
-
-if(!anime) return alert("Anime required")
-
-const servers = [
-server1.value.trim(),
-server2.value.trim(),
-server3.value.trim()
-].filter(Boolean)
-
-const downloads=[]
-
-document.querySelectorAll(".download-host").forEach(hostBox=>{
-
-const host = hostBox.querySelector(".host-name").value.trim()
-
-if(!host) return
-
-const links=[]
-
-hostBox.querySelectorAll(".quality-row").forEach(row=>{
-
-const quality = row.querySelector("select").value
-const url = row.querySelector(".quality-link").value.trim()
-
-if(url){
-
-links.push({
-quality,
-url
-})
-
+function resetForm() {
+    editId = null;
+    document.querySelectorAll(".form-grid input, .form-grid textarea").forEach(i => i.value = "");
+    isOngoing.checked = false;
+    isFeatured.checked = false;
+    downloadSection.innerHTML = "";
+    createHostBlock(); // Default first block
+    document.querySelector(".modal-header h3").innerText = "Add New Episode";
 }
 
-})
-
-if(links.length){
-
-downloads.push({
-host,
-links
-})
-
+function escapeHTML(str) {
+    return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
-})
+// Modal Toggle
+openAddBtn.onclick = () => { resetForm(); episodeModal.style.display = "flex"; };
+closeModalBtn.onclick = () => { episodeModal.style.display = "none"; };
 
-const payload={
-anime,
-season:seasonNo.value.trim(),
-episode:episodeNo.value.trim(),
-title:episodeTitle.value.trim(),
-description:description.value.trim(),
-servers,
-downloads,
-ongoing:isOngoing.checked,
-featured:isFeatured.checked
+// Initial Load
+async function loadEpisodes() {
+    try {
+        const data = await apiFetch(API);
+        render(data);
+    } catch (err) { console.error(err); }
 }
 
-if(editId){
-
-await apiFetch(`${API}/${editId}`,{
-method:"PATCH",
-body:JSON.stringify(payload)
-})
-
-}else{
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-}
-
-episodeModal.style.display="none"
-
-resetForm()
-
-loadEpisodes()
-
-}catch(err){
-
-alert(err.message)
-
-}
-
-}
-
-/* ===============================
-DELETE
-=============================== */
-
-window.removeEpisode = async(id)=>{
-
-if(!confirm("Delete episode?")) return
-
-await apiFetch(`${API}/${id}`,{
-method:"DELETE"
-})
-
-loadEpisodes()
-
-}
-
-/* ===============================
-EDIT
-=============================== */
-
-window.editEpisode = async(id)=>{
-
-try{
-
-const e = await apiFetch(`${API}/${id}`)
-
-editId=id
-
-resetForm()
-
-animeName.value=e.anime||""
-seasonNo.value=e.season||""
-episodeNo.value=e.episode||""
-episodeTitle.value=e.title||""
-description.value=e.description||""
-
-server1.value=e.servers?.[0]||""
-server2.value=e.servers?.[1]||""
-server3.value=e.servers?.[2]||""
-
-isOngoing.checked=!!e.ongoing
-isFeatured.checked=!!e.featured
-
-episodeModal.style.display="flex"
-
-}catch(err){
-
-alert("Load failed")
-
-}
-
-}
-
-/* ===============================
-RENDER
-=============================== */
-
-function render(list){
-
-episodeList.innerHTML=""
-
-list.forEach(e=>{
-
-const row=document.createElement("div")
-row.className="row"
-
-const downloadsCount =
-e.downloads?.reduce((t,h)=>t+h.links.length,0) || 0
-
-row.innerHTML=`
-<span>${escapeHTML(e.anime)}</span>
-<span class="badge">S${escapeHTML(e.season)}</span>
-<span class="badge">E${escapeHTML(e.episode)}</span>
-<span>${escapeHTML(e.title)}</span>
-<span>${e.servers?.length||0}</span>
-<span>${downloadsCount}</span>
-<span class="actions">
-<button onclick="editEpisode('${e.id}')">✏️</button>
-<button onclick="removeEpisode('${e.id}')">🗑</button>
-</span>
-`
-
-episodeList.appendChild(row)
-
-})
-
-}
-
-/* ===============================
-ESCAPE
-=============================== */
-
-function escapeHTML(str){
-
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-
-}
-
-/* ===============================
-RESET
-=============================== */
-
-function resetForm(){
-
-animeName.value=""
-seasonNo.value=""
-episodeNo.value=""
-episodeTitle.value=""
-description.value=""
-
-server1.value=""
-server2.value=""
-server3.value=""
-
-isOngoing.checked=false
-isFeatured.checked=false
-
-document.querySelector(".download-section").innerHTML=`
-<div class="download-host">
-<input class="host-name" placeholder="Host Name">
-<div class="quality-row">
-<select>
-<option>480p</option>
-<option>720p</option>
-<option>1080p</option>
-<option>4K</option>
-<option>ZIP</option>
-</select>
-<input class="quality-link" placeholder="Download Link">
-<button type="button" class="add-quality">＋</button>
-</div>
-</div>
-`
-
-}
-
-/* INIT */
-
-loadEpisodes()
-
+loadEpisodes();
+                                                            
 </script>
 
 </body>
