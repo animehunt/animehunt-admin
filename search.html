@@ -235,74 +235,98 @@ body{background:#060a14;color:#fff}
 </main>
 </div>
 <script>
+   /* ============================================================
+   ANIMEHUNT CMS - SEARCH ENGINE LOGIC (FIXED)
+   ============================================================ */
+
 const API = "/api/admin/search";
 const TOKEN_KEY = "AUTH_TOKEN";
 
+// Short helper for document.getElementById
 function el(id) { return document.getElementById(id); }
 
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...options.headers
-        }
-    });
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
 
-    if (res.status === 401) {
-        localStorage.removeItem(TOKEN_KEY);
-        location.href = "login.html";
+        if (res.status === 401) {
+            alert("Session expired. Please login again.");
+            location.href = "login.html";
+            return null;
+        }
+        return await res.json();
+    } catch (err) {
+        console.error("Network Error:", err);
         return null;
     }
-    return res.json();
 }
 
-// Data Mapping (Boolean strings to elements)
+/** Load Data into UI **/
 async function loadSearch() {
     const d = await apiFetch(API);
     if (!d) return;
 
+    // Helper to set values only if element exists
+    const set = (id, val) => { if(el(id)) el(id).value = String(val); };
+
     // Core
-    el("enableSearch").value = String(d.enableSearch);
-    el("liveSearch").value = String(d.liveSearch);
-    el("searchMode").value = d.mode;
-    el("debounce").value = d.debounce;
+    set("enableSearch", d.enableSearch);
+    set("liveSearch", d.liveSearch);
+    set("searchMode", d.mode);
+    set("debounce", d.debounce);
 
     // Ranking
-    el("ranking").value = d.ranking.mode;
-    el("boost").value = String(d.ranking.boost);
-    el("boostWeight").value = d.ranking.weight;
+    if(d.ranking) {
+        set("ranking", d.ranking.mode);
+        set("boost", d.ranking.boost);
+        set("boostWeight", d.ranking.weight);
+    }
 
     // Sources
-    el("sAnime").value = String(d.sources.anime);
-    el("sEpisode").value = String(d.sources.episode);
-    el("sCategory").value = String(d.sources.category);
-    el("sPages").value = String(d.sources.pages);
+    if(d.sources) {
+        set("sAnime", d.sources.anime);
+        set("sEpisode", d.sources.episode);
+        set("sCategory", d.sources.category);
+        set("sPages", d.sources.pages);
+    }
 
     // Smart
-    el("typo").value = String(d.smart.typo);
-    el("alias").value = String(d.smart.alias);
-    el("language").value = d.smart.language;
+    if(d.smart) {
+        set("typo", d.smart.typo);
+        set("alias", d.smart.alias);
+        set("language", d.smart.language);
+    }
 
     // UI
-    el("maxResults").value = d.ui.max;
-    el("thumb").value = String(d.ui.thumb);
-    el("group").value = String(d.ui.group);
-    el("highlight").value = String(d.ui.highlight);
+    if(d.ui) {
+        set("maxResults", d.ui.max);
+        set("thumb", d.ui.thumb);
+        set("group", d.ui.group);
+        set("highlight", d.ui.highlight);
+    }
 
     // Safety
-    el("safe").value = d.safety.safe;
-    el("track").value = String(d.safety.track);
-    el("seo").value = String(d.safety.seo);
-    el("cache").value = d.safety.cache;
+    if(d.safety) {
+        set("safe", d.safety.safe);
+        set("track", d.safety.track);
+        set("seo", d.safety.seo);
+        set("cache", d.safety.cache);
+    }
 }
 
+/** Save UI to Backend **/
 async function saveSearch() {
     const btn = document.querySelector('.save-btn');
     btn.disabled = true;
-    btn.textContent = "Saving...";
+    btn.textContent = "Updating Database...";
 
     const payload = {
         enableSearch: el("enableSearch").value === "true",
@@ -344,19 +368,19 @@ async function saveSearch() {
         body: JSON.stringify(payload)
     });
 
-    if (res && res.success) {
-        alert("Search settings updated successfully! 🚀");
-    } else {
-        alert("Error saving search settings.");
-    }
-    
     btn.disabled = false;
     btn.textContent = "💾 Save Search Settings";
+
+    if (res && res.success) {
+        alert("Search Settings Synced! 🚀");
+    } else {
+        alert("Error: Settings could not be saved.");
+    }
 }
 
 document.addEventListener("DOMContentLoaded", loadSearch);
   
-  </script>
+</script>
 
         
 </body>
