@@ -196,199 +196,148 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 
 <script>
-  const API="/api/admin/footer"
-const AUTH_KEY="AUTH_TOKEN"
+const API = "/api/admin/footer";
+const AUTH_KEY = "AUTH_TOKEN";
 
-const statusEl=document.getElementById("status")
-const debugBox=document.getElementById("debugBox")
+const statusEl = document.getElementById("status");
+const debugBox = document.getElementById("debugBox");
 
-function checkAuth(){
+// Configuration field mapping
+const configFields = [
+    "footerOn", "footerLazy", "footerBlur", "footerLock", "footerTheme",
+    "about", "privacy", "disclaimer", "dmca", "telegram", "linkBadges",
+    "azOn", "azAuto", "azSticky", "azCompact", "azMode",
+    "mobileNav", "mobileFloat", "mobileBlur", "mobileHideScroll",
+    "promoOn", "promoText", "promoLink", "promoAutoHide"
+];
 
-const token=localStorage.getItem(AUTH_KEY)
+/* ===============================
+   CORE API CALLER
+=============================== */
+async function apiCall(method = "GET", body = null) {
+    const token = localStorage.getItem(AUTH_KEY);
+    const options = {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : ""
+        }
+    };
+    if (body) options.body = JSON.stringify(body);
 
-if(!token){
-location.href="login.html"
+    try {
+        const res = await fetch(API, options);
+        if (res.status === 401) {
+            alert("Session Expired!");
+            location.href = "login.html";
+            return null;
+        }
+        return await res.json();
+    } catch (err) {
+        showStatus("Connection Error!", "red");
+        return null;
+    }
 }
 
+function showStatus(msg, color = "#4cff4c") {
+    statusEl.innerText = msg;
+    statusEl.style.color = color;
+    setTimeout(() => { statusEl.innerText = "Ready"; statusEl.style.color = ""; }, 3000);
 }
 
-checkAuth()
+/* ===============================
+   LOAD SETTINGS
+=============================== */
+async function loadFooter() {
+    statusEl.innerText = "Syncing...";
+    const data = await apiCall("GET");
+    if (!data) return;
 
-async function apiFetch(url,options={}){
+    configFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
 
-try{
-
-const token=localStorage.getItem(AUTH_KEY)
-
-const res=await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-Authorization:token?`Bearer ${token}`:"",
-...options.headers
-}
-})
-
-if(res.status===401){
-
-localStorage.removeItem(AUTH_KEY)
-location.href="login.html"
-return {}
-
+        if (el.type === "checkbox") {
+            el.checked = !!data[id];
+        } else {
+            el.value = data[id] || "";
+        }
+    });
+    showStatus("Data Synced");
 }
 
-if(!res.ok){
+/* ===============================
+   SAVE SETTINGS
+=============================== */
+async function save() {
+    statusEl.innerText = "Saving to Database...";
+    const payload = {};
 
-console.warn("API error",res.status)
-return {}
+    configFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        payload[id] = el.type === "checkbox" ? el.checked : el.value.trim();
+    });
 
+    const res = await apiCall("POST", payload);
+    if (res && res.success) {
+        showStatus("Footer Updated Successfully!");
+    }
 }
 
-try{
-return await res.json()
-}catch{
-return {}
+/* ===============================
+   EMERGENCY & DEBUG
+=============================== */
+async function kill() {
+    if (!confirm("This will hide the footer on the live site. Continue?")) return;
+    const res = await apiCall("POST", { action: 'kill' }); // Use internal /kill if route exists
+    // Fallback: Manually save with footerOn: false
+    const payload = {};
+    configFields.forEach(id => {
+        const el = document.getElementById(id);
+        payload[id] = el.type === "checkbox" ? el.checked : el.value;
+    });
+    payload.footerOn = false;
+    await apiCall("POST", payload);
+    loadFooter();
 }
 
-}catch(err){
-
-console.error("Network error",err)
-return {}
-
+async function debug() {
+    const json = await apiCall("GET");
+    debugBox.style.display = debugBox.style.display === "none" ? "block" : "none";
+    debugBox.textContent = JSON.stringify(json, null, 2);
 }
 
+// Export/Import for Backups
+async function exportCfg() {
+    const json = await apiCall("GET");
+    const blob = new Blob([JSON.stringify(json, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `footer-config-${Date.now()}.json`;
+    a.click();
 }
 
-const configFields=[
-"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
-"about","privacy","disclaimer","dmca","telegram","linkBadges",
-"azOn","azAuto","azSticky","azCompact","azMode",
-"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
-"promoOn","promoText","promoLink","promoAutoHide"
-]
-
-async function loadFooter(){
-
-statusEl.innerText="Loading..."
-
-const data=await apiFetch(API)
-
-configFields.forEach(id=>{
-
-const el=document.getElementById(id)
-
-if(!el) return
-
-if(data[id]!==undefined){
-
-if(el.type==="checkbox"){
-el.checked=!!data[id]
-}else{
-el.value=data[id]
+async function importCfg() {
+    const input = prompt("Paste Footer JSON Configuration here:");
+    if (!input) return;
+    try {
+        const parsed = JSON.parse(input);
+        const res = await apiCall("POST", parsed);
+        if(res.success) {
+            loadFooter();
+            showStatus("Import Successful");
+        }
+    } catch (e) {
+        alert("Invalid JSON format!");
+    }
 }
 
-}
+// Initialize
+document.addEventListener("DOMContentLoaded", loadFooter);
+  
 
-})
-
-statusEl.innerText="Loaded ✔"
-
-}
-
-async function save(){
-
-statusEl.innerText="Saving..."
-
-const payload={}
-
-configFields.forEach(id=>{
-
-const el=document.getElementById(id)
-
-if(!el) return
-
-payload[id]=el.type==="checkbox"
-?el.checked
-:el.value.trim()
-
-})
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(payload)
-})
-
-statusEl.innerText="Saved ✔"
-
-}
-
-async function kill(){
-
-if(!confirm("Disable footer globally?")) return
-
-await apiFetch(API+"/kill",{method:"POST"})
-
-statusEl.innerText="Footer Disabled"
-
-loadFooter()
-
-}
-
-async function debug(){
-
-const json=await apiFetch(API)
-
-debugBox.style.display="block"
-debugBox.textContent=JSON.stringify(json,null,2)
-
-}
-
-async function exportCfg(){
-
-const json=await apiFetch(API)
-
-const text=JSON.stringify(json,null,2)
-
-try{
-
-await navigator.clipboard.writeText(text)
-alert("Copied ✔")
-
-}catch{
-
-prompt("Copy config:",text)
-
-}
-
-}
-
-async function importCfg(){
-
-const input=prompt("Paste Footer JSON")
-
-if(!input) return
-
-let parsed
-
-try{
-parsed=JSON.parse(input)
-}catch{
-alert("Invalid JSON")
-return
-}
-
-await apiFetch(API,{
-method:"POST",
-body:JSON.stringify(parsed)
-})
-
-statusEl.innerText="Imported ✔"
-
-loadFooter()
-
-}
-
-loadFooter()
 </script>
 
  
