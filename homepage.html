@@ -153,6 +153,10 @@
 </div>
 
 <script>
+/* ============================================================
+   ANIMEHUNT CMS - HOMEPAGE BUILDER LOGIC (FIXED)
+   ============================================================ */
+
 const API = "/api/admin/homepage";
 const AUTH_KEY = "AUTH_TOKEN";
 let editId = null;
@@ -160,9 +164,7 @@ let editId = null;
 const rowModal = document.getElementById("rowModal");
 const rowList = document.getElementById("rowList");
 
-/* ===============================
-   HELPER: API FETCH
-=============================== */
+/** 1. Helper API Fetch **/
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(AUTH_KEY);
     try {
@@ -174,22 +176,25 @@ async function apiFetch(url, options = {}) {
                 ...options.headers
             }
         });
-        if (res.status === 401) { location.href = "login.html"; return null; }
+        if (res.status === 401) { 
+            alert("Session expired. Please login again.");
+            location.href = "login.html"; 
+            return null; 
+        }
         return await res.json();
     } catch (err) {
-        console.error("API Error:", err);
+        console.error("Fetch Error:", err);
         return null;
     }
 }
 
-/* ===============================
-   LOAD & RENDER
-=============================== */
+/** 2. Load & Render Rows **/
 async function loadRows() {
     const rows = await apiFetch(API);
     rowList.innerHTML = "";
+    
     if (!rows || rows.length === 0) {
-        rowList.innerHTML = "<div style='padding:20px;color:#888'>No Layout Rows Defined</div>";
+        rowList.innerHTML = "<div style='padding:20px; text-align:center; color:#555'>No Sections Created Yet</div>";
         return;
     }
 
@@ -198,10 +203,10 @@ async function loadRows() {
         div.className = "row";
         div.innerHTML = `
             <span style="font-weight:600">${escapeHTML(r.title)}</span>
-            <span class="badge" style="background:#0e1424">${r.type.toUpperCase()}</span>
-            <span style="color:#888">${escapeHTML(r.source || "Latest Updates")}</span>
-            <span>${r.layout}</span>
-            <span class="badge" style="color:#ffcc00">${r.order}</span>
+            <span class="badge" style="background:#0e1424; color:#ccc">${r.type.toUpperCase()}</span>
+            <span style="color:#888; font-style:italic">${escapeHTML(r.source || "Latest Updates")}</span>
+            <span style="text-transform: capitalize">${r.layout}</span>
+            <span class="badge" style="color:#ffcc00; background:rgba(255,204,0,0.1)">#${r.order}</span>
             <span class="status ${r.active ? "active" : "inactive"}">${r.active ? "● Active" : "○ Hidden"}</span>
             <span class="actions">
                 <button onclick="editRow('${r.id}')">✏️ Edit</button>
@@ -212,12 +217,10 @@ async function loadRows() {
     });
 }
 
-/* ===============================
-   SAVE ROW
-=============================== */
+/** 3. Save / Update Logic **/
 document.getElementById("saveRow").onclick = async () => {
     const title = document.getElementById("rowTitle").value.trim();
-    if (!title) return alert("Row Title is mandatory");
+    if (!title) return alert("Title is required!");
 
     const payload = {
         title,
@@ -230,20 +233,27 @@ document.getElementById("saveRow").onclick = async () => {
         autoUpdate: document.getElementById("rowAuto").checked
     };
 
+    const saveBtn = document.getElementById("saveRow");
+    saveBtn.innerText = "Processing...";
+    saveBtn.disabled = true;
+
     const method = editId ? "PATCH" : "POST";
     const url = editId ? `${API}/${editId}` : API;
 
     const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
-    if (res) {
+    
+    saveBtn.disabled = false;
+    saveBtn.innerText = "💾 Save Row";
+
+    if (res && (res.success || !res.error)) {
         rowModal.style.display = "none";
-        clearForm();
         loadRows();
+    } else {
+        alert("Failed to save row settings.");
     }
 };
 
-/* ===============================
-   EDIT & DELETE
-=============================== */
+/** 4. Edit & Delete **/
 window.editRow = async (id) => {
     const row = await apiFetch(`${API}/${id}`);
     if (!row) return;
@@ -258,33 +268,33 @@ window.editRow = async (id) => {
     document.getElementById("rowActive").checked = row.active;
     document.getElementById("rowAuto").checked = row.autoUpdate;
 
-    rowModal.style.display = "flex";
     document.querySelector(".modal-header h3").innerText = "Edit Layout Row";
+    rowModal.style.display = "flex";
 };
 
 window.deleteRow = async (id) => {
-    if (!confirm("Delete this homepage section?")) return;
+    if (!confirm("Are you sure you want to remove this section?")) return;
     await apiFetch(`${API}/${id}`, { method: "DELETE" });
     loadRows();
 };
 
-function clearForm() {
+/** UI Toggles **/
+document.getElementById("addRowBtn").onclick = () => {
     editId = null;
     document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
     document.getElementById("rowActive").checked = true;
     document.getElementById("rowAuto").checked = false;
     document.querySelector(".modal-header h3").innerText = "Create Homepage Row";
-}
+    rowModal.style.display = "flex";
+};
+
+document.getElementById("closeModal").onclick = () => rowModal.style.display = "none";
 
 function escapeHTML(str) {
     return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
-// UI Toggles
-document.getElementById("addRowBtn").onclick = () => { clearForm(); rowModal.style.display = "flex"; };
-document.getElementById("closeModal").onclick = () => { rowModal.style.display = "none"; };
-
-// Init
+// Initial Run
 loadRows();
   
     </script>
