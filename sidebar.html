@@ -215,7 +215,6 @@ body{background:#060a14;color:#fff}
 </div>
 </div>
 </div>
-
 <script>
 const API = "/api/admin/sidebar";
 const TOKEN_KEY = "AUTH_TOKEN";
@@ -223,47 +222,46 @@ const TOKEN_KEY = "AUTH_TOKEN";
 let items = [];
 let editId = null;
 
-function el(id) { return document.getElementById(id); }
+const el = (id) => document.getElementById(id);
 
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...options.headers
-        }
-    });
-    if (res.status === 401) { location.href = "login.html"; return null; }
-    return res.json();
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
+        if (res.status === 401) { location.href = "login.html"; return null; }
+        return await res.json();
+    } catch (e) { return null; }
 }
 
 async function loadItems() {
-    try {
-        items = await apiFetch(API);
-        render();
-    } catch (e) { console.error(e); }
+    items = await apiFetch(API) || [];
+    render();
 }
 
 function render() {
     const list = el("list");
-    list.innerHTML = "";
+    list.innerHTML = items.length === 0 ? `<div style="padding:20px;color:#555">No sidebar items found.</div>` : "";
 
-    items.forEach((i, idx) => {
+    items.forEach((i) => {
         const row = document.createElement("div");
         row.className = "row";
         
-        // Highlight logic for UI
-        let hClass = i.highlight !== "None" ? `badge` : "";
-        let hColor = i.highlight === "HOT" ? "background:#ff4c4c" : (i.highlight === "NEW" ? "background:#00ffb3;color:#000" : "");
+        let hColor = i.highlight === "HOT" ? "background:#ff4c4c" : (i.highlight === "NEW" ? "background:#00ffb3;color:#000" : "background:#1a2035");
+        let highlightTag = i.highlight !== 'None' ? `<small style="font-size:9px;padding:2px 4px;border-radius:4px;margin-left:5px;${hColor}">${i.highlight}</small>` : '';
 
         row.innerHTML = `
             <span>${i.priority}</span>
-            <span>${i.icon} ${i.title} ${i.highlight !== 'None' ? `<small style="font-size:9px;padding:2px 4px;border-radius:4px;margin-left:5px;${hColor}">${i.highlight}</small>` : ''}</span>
-            <span style="color:#777;font-size:10px">${i.url}</span>
+            <span>${i.icon} ${i.title} ${highlightTag}</span>
+            <span style="color:#777;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i.url}</span>
             <span><small class="badge">${i.device}</small></span>
-            <span class="status ${i.active ? 'active' : 'inactive'}" style="color:${i.active ? '#00ffb3':'#ff4c4c'}">${i.active ? 'Active' : 'Hidden'}</span>
+            <span style="color:${i.active ? '#00ffb3':'#ff4c4c'}">${i.active ? '● Active' : '○ Hidden'}</span>
             <span class="actions">
                 <button onclick="editItem('${i._id}')">✏️</button>
                 <button onclick="delItem('${i._id}')" style="color:#ff4c4c">🗑</button>
@@ -274,7 +272,7 @@ function render() {
 }
 
 async function saveItem() {
-    const btn = el("saveItemBtn");
+    const btn = el("saveItemBtn"); // Added ID to your HTML button or changed here
     const payload = {
         _id: editId,
         title: el("title").value.trim(),
@@ -300,6 +298,8 @@ async function saveItem() {
     if (res?.success) {
         closeModal();
         loadItems();
+    } else {
+        alert("Failed to save item.");
     }
     btn.disabled = false;
 }
@@ -323,11 +323,10 @@ function editItem(id) {
 
 async function delItem(id) {
     if (!confirm("Delete this menu item?")) return;
-    await apiFetch(API, { method: "DELETE", body: JSON.stringify({ id }) });
-    loadItems();
+    const res = await apiFetch(`${API}/${id}`, { method: "DELETE" });
+    if (res?.success) loadItems();
 }
 
-// Global modal controls (fixed)
 window.openModal = () => {
     editId = null;
     document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
@@ -338,8 +337,12 @@ window.openModal = () => {
 window.closeModal = () => el("modal").style.display = "none";
 
 document.addEventListener("DOMContentLoaded", loadItems);
-  
+</script>
 
+<div class="modal-footer">
+<button id="saveItemBtn" onclick="saveItem()">💾 Save Item</button>
+</div>
+  
 </script>
     
   
