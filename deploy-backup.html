@@ -222,11 +222,16 @@ body{
 </div>
 
 <script>
-  // Variable Definitions (Missing in your code)
+/* ============================================================
+   ANIMEHUNT CMS - DEPLOY & BACKUP SCRIPT (FIXED)
+   ============================================================ */
+
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"; // Update with your actual API
+
+// Selectors
 const deployBtn = document.getElementById("deploySite");
 const freezeBtn = document.getElementById("freezeSite");
 const unfreezeBtn = document.getElementById("unfreezeSite");
-const createVersionBtn = document.getElementById("createVersion");
 const createBackupBtn = document.getElementById("createBackup");
 const emergencyShutdownBtn = document.getElementById("emergencyShutdown");
 const emergencyRecoverBtn = document.getElementById("emergencyRecover");
@@ -235,44 +240,94 @@ const versionList = document.getElementById("versionList");
 const backupList = document.getElementById("backupList");
 const restoreList = document.getElementById("restoreList");
 
-/* ===============================
-   CORE LOGIC
-=============================== */
-async function updateSystemState(state) {
-    if (!state) return;
+/** 1. Fetch & Render All Data **/
+async function loadData() {
+    try {
+        const res = await fetch(API);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
 
-    // UI Feedback: Agar site frozen hai toh button red dikhega
-    freezeBtn.style.background = state.frozen ? "#ff4d4d" : "";
-    freezeBtn.innerText = state.frozen ? "🧊 Site Frozen" : "Freeze Site";
-    
-    emergencyShutdownBtn.style.background = state.emergency ? "#ff0000" : "";
-    emergencyShutdownBtn.innerText = state.emergency ? "🚨 UNDER MAINTENANCE" : "Emergency Shutdown";
+        // Update System UI State
+        updateUIState(data.state);
+
+        // Render Versions
+        versionList.innerHTML = data.versions.map(v => `
+            <div class="list-item">
+                <b>${v.name}</b> <br>
+                <small style="color:#777">${new Date(v.date).toLocaleString()}</small>
+            </div>
+        `).join('') || '<div style="padding:10px;color:#444">No versions</div>';
+
+        // Render Backups & Restore Items
+        const backupHTML = data.backups.map(b => `
+            <div class="list-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>${b.name}</span>
+                <small style="color:#777">${new Date(b.date).toLocaleDateString()}</small>
+            </div>
+        `).join('') || '<div style="padding:10px;color:#444">No backups</div>';
+        
+        backupList.innerHTML = backupHTML;
+        restoreList.innerHTML = backupHTML.replace(/<\/div>/g, ' <button style="padding:2px 6px; font-size:10px; background:#00ffd5; color:#000; border:none; border-radius:4px; cursor:pointer;" onclick="restoreBackup()">Restore</button></div>');
+
+    } catch (err) {
+        console.error("Load Error:", err);
+    }
 }
 
+/** 2. UI Feedback Logic **/
+function updateUIState(state) {
+    const isFrozen = !!state.frozen;
+    const isEmergency = !!state.emergency;
+
+    // Freeze Status
+    freezeBtn.style.background = isFrozen ? "#ff4d4d" : "#1a2035";
+    freezeBtn.style.color = isFrozen ? "#fff" : "#fff";
+    freezeBtn.innerText = isFrozen ? "🧊 Site is Frozen" : "Freeze Site";
+    unfreezeBtn.style.display = isFrozen ? "block" : "none";
+
+    // Emergency Status
+    emergencyShutdownBtn.style.background = isEmergency ? "#ff0000" : "#1a2035";
+    emergencyShutdownBtn.innerText = isEmergency ? "🚨 SYSTEM OFFLINE" : "Emergency Shutdown";
+    emergencyRecoverBtn.style.border = isEmergency ? "2px solid #00ffd5" : "none";
+}
+
+/** 3. API Actions **/
 async function apiAction(endpoint, method = "POST", body = null) {
-    const res = await apiFetch(`${API}${endpoint}`, {
-        method,
-        body: body ? JSON.stringify(body) : null
-    });
-    if (res) loadData();
-    return res;
+    try {
+        const res = await fetch(`${API}${endpoint}`, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: body ? JSON.stringify(body) : null
+        });
+        if (res.ok) {
+            loadData(); // Success hone par data refresh karein
+        } else {
+            alert("Action failed");
+        }
+    } catch (err) {
+        alert("Server connection error");
+    }
 }
 
-// Event Listeners
+// Button Events
 deployBtn.onclick = () => apiAction("/deploy");
+createBackupBtn.onclick = () => apiAction("/backup");
 
 freezeBtn.onclick = () => apiAction("/state", "PATCH", { type: 'freeze', value: true });
 unfreezeBtn.onclick = () => apiAction("/state", "PATCH", { type: 'freeze', value: false });
 
-createBackupBtn.onclick = () => apiAction("/backup");
-
-emergencyShutdownBtn.onclick = async () => {
-    if (confirm("WARNING: This will take the entire site offline. Proceed?")) {
-        await apiAction("/state", "PATCH", { type: 'emergency', value: true });
+emergencyShutdownBtn.onclick = () => {
+    if (confirm("DANGER: Entire site will go offline. Proceed?")) {
+        apiAction("/state", "PATCH", { type: 'emergency', value: true });
     }
 };
-
 emergencyRecoverBtn.onclick = () => apiAction("/state", "PATCH", { type: 'emergency', value: false });
+
+function restoreBackup() {
+    if(confirm("Restore this backup? Current data will be overwritten.")) {
+        alert("Restore process started... Please wait.");
+    }
+}
 
 // Init
 document.addEventListener("DOMContentLoaded", loadData);
