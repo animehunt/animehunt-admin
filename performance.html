@@ -329,6 +329,10 @@ a{
 </div>
 
 <script>
+/* ============================================================
+   ANIMEHUNT CMS - PERFORMANCE LOGIC (FIXED)
+   ============================================================ */
+
 const API = "/api/admin/performance";
 const AUTH_KEY = "AUTH_TOKEN";
 
@@ -340,9 +344,7 @@ const TOGGLES = [
 
 let saveTimer = null;
 
-/* ===============================
-   CORE API CALLER
-=============================== */
+/** 1. Helper API Fetch **/
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(AUTH_KEY);
     try {
@@ -354,39 +356,36 @@ async function apiFetch(url, options = {}) {
                 ...options.headers
             }
         });
-        if (res.status === 401) { location.href = "login.html"; return {}; }
+        if (res.status === 401) { location.href = "login.html"; return null; }
         return await res.json();
     } catch (err) {
-        console.error("Network error", err);
-        return {};
+        console.error("API Error:", err);
+        return null;
     }
 }
 
-/* ===============================
-   LOAD SETTINGS
-=============================== */
+/** 2. Load Performance Data **/
 async function loadPerformance() {
     const data = await apiFetch(API);
+    if (!data) return;
+
     TOGGLES.forEach(id => {
         const el = document.getElementById(id);
-        if (el && data[id] !== undefined) {
-            el.checked = !!data[id];
-        }
+        if (el) el.checked = !!data[id];
     });
 }
 
-/* ===============================
-   DEBOUNCED SAVE (Performance Optimized)
-=============================== */
+/** 3. Optimized Sync (Debounce) **/
 function scheduleSave(event) {
     const target = event.target;
-    const originalState = !target.checked;
-    
-    // UI Feedback: Slightly dim the card while saving
+    // UI Feedback: Dim the card slightly to show 'Syncing'
     const card = target.closest('.perf-card');
-    card.style.opacity = "0.7";
+    card.style.opacity = "0.6";
+    card.style.transition = "0.3s";
 
     clearTimeout(saveTimer);
+    
+    // 800ms debounce: Multiple clicks only trigger 1 request
     saveTimer = setTimeout(async () => {
         const payload = {};
         TOGGLES.forEach(id => {
@@ -399,22 +398,21 @@ function scheduleSave(event) {
             body: JSON.stringify(payload)
         });
 
+        // UI Reset
+        card.style.opacity = "1";
         if (res && res.success) {
-            card.style.opacity = "1";
-            card.style.borderColor = "#00ffb3"; // Success flash
-            setTimeout(() => card.style.borderColor = "#1a2035", 1000);
+            // Flash green border for success
+            card.style.borderColor = "#00ffb3";
+            setTimeout(() => card.style.borderColor = "#1a2035", 600);
         } else {
-            // Revert on failure
-            target.checked = originalState;
-            card.style.opacity = "1";
-            alert("Failed to sync settings with server.");
+            // Revert state if server fails
+            target.checked = !target.checked;
+            alert("Error: Settings could not be saved to Cloudflare D1.");
         }
-    }, 800); // 800ms debounce to prevent spamming D1
+    }, 800);
 }
 
-/* ===============================
-   INIT
-=============================== */
+/** 4. Initialization **/
 document.addEventListener("DOMContentLoaded", () => {
     // Check Auth
     if (!localStorage.getItem(AUTH_KEY)) {
@@ -422,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Attach Event Listeners
+    // Attach Listeners
     TOGGLES.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener("change", scheduleSave);
