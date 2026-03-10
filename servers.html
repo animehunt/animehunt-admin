@@ -200,6 +200,15 @@ body{background:#060a14;color:#fff}
 
 </div>
 </div>
+<header class="cms-header">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <div>🌐 Streaming Servers</div>
+    <input type="text" id="searchInput" placeholder="Search anime or server..." 
+           style="background:#0e1424; border:1px solid #1a2035; color:#fff; padding:6px 12px; border-radius:6px; font-size:12px; width:250px;">
+  </div>
+  <button class="add-btn" id="addServerBtn">➕ Add Server</button>
+</header>
+
 <script>
 const API = "/api/admin/servers";
 const TOKEN_KEY = "AUTH_TOKEN";
@@ -207,37 +216,38 @@ const TOKEN_KEY = "AUTH_TOKEN";
 let servers = [];
 let editId = null;
 
-function el(id) { return document.getElementById(id); }
+const el = (id) => document.getElementById(id);
 
 async function apiFetch(url, options = {}) {
     const token = localStorage.getItem(TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...options.headers
-        }
-    });
-    if (res.status === 401) { location.href = "login.html"; return null; }
-    return res.json();
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : "",
+                ...options.headers
+            }
+        });
+        if (res.status === 401) { location.href = "login.html"; return null; }
+        return await res.json();
+    } catch (e) { return null; }
 }
 
-// Logic for Search
 async function loadServers(query = "") {
-    try {
-        const url = query ? `${API}?q=${encodeURIComponent(query)}` : API;
-        servers = await apiFetch(url);
+    const url = query ? `${API}?q=${encodeURIComponent(query)}` : API;
+    const data = await apiFetch(url);
+    if (data) {
+        servers = data;
         render();
-    } catch (e) { console.error(e); }
+    }
 }
 
 function render() {
     const list = el("serverList");
     list.innerHTML = "";
-
     if (servers.length === 0) {
-        list.innerHTML = `<div style="padding:20px; text-align:center; color:#555;">No servers found.</div>`;
+        list.innerHTML = `<div style="padding:40px; text-align:center; color:#555;">No streaming sources found.</div>`;
         return;
     }
 
@@ -261,47 +271,38 @@ function render() {
     });
 }
 
+/** Save Function **/
 async function saveServer() {
     const btn = el("saveServer");
     const payload = {
         _id: editId,
-        name: el("serverName").value,
-        anime: el("animeName").value,
-        season: el("seasonNo").value,
-        episode: el("episodeNo").value,
-        embed: el("embedUrl").value,
+        name: el("serverName").value.trim(),
+        anime: el("animeName").value.trim(),
+        season: el("seasonNo").value || "1",
+        episode: el("episodeNo").value || "1",
+        embed: el("embedUrl").value.trim(),
         priority: parseInt(el("priority").value) || 99,
         active: el("active").checked
     };
 
     if (!payload.name || !payload.anime || !payload.embed) {
-        return alert("Please fill Name, Anime and Embed URL");
+        alert("Server Name, Anime, and Embed URL are mandatory.");
+        return;
     }
 
     btn.disabled = true;
-    btn.textContent = "Saving...";
-
-    const res = await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+    const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
 
     if (res?.success) {
         el("serverModal").style.display = "none";
-        loadServers();
+        loadServers(el("searchInput").value); // Refresh with current search
     } else {
-        alert("Error saving server.");
+        alert("Sync Error: Could not save to database.");
     }
     btn.disabled = false;
-    btn.textContent = "💾 Save";
 }
 
-async function deleteServer(id) {
-    if (!confirm("Are you sure? This will remove the stream source.")) return;
-    const res = await apiFetch(`${API}/${id}`, { method: "DELETE" });
-    if (res?.success) loadServers();
-}
-
+/** Actions **/
 function editServer(id) {
     const s = servers.find(x => x._id === id);
     if (!s) return;
@@ -313,16 +314,22 @@ function editServer(id) {
     el("embedUrl").value = s.embed;
     el("priority").value = s.priority;
     el("active").checked = s.active;
-    el("modalTitle").innerText = "Edit Server";
+    el("modalTitle").innerText = "Edit Stream Source";
     el("serverModal").style.display = "flex";
 }
 
-// Search input handler
-let searchTimer;
-function handleSearch(val) {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadServers(val), 400);
+async function deleteServer(id) {
+    if (!confirm("Are you sure? Episodes using this server will stop working.")) return;
+    const res = await apiFetch(`${API}/${id}`, { method: "DELETE" });
+    if (res?.success) loadServers(el("searchInput").value);
 }
+
+/** Search Debounce **/
+let timer;
+el("searchInput").oninput = (e) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => loadServers(e.target.value), 400);
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     loadServers();
@@ -331,14 +338,13 @@ document.addEventListener("DOMContentLoaded", () => {
         editId = null;
         el("modalTitle").innerText = "Add New Server";
         el("serverModal").style.display = "flex";
-        // Reset form
         document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
         el("active").checked = true;
     };
     el("closeModal").onclick = () => el("serverModal").style.display = "none";
 });
-  
 </script>
+  
         
 </body>
 </html>
