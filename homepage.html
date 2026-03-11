@@ -153,149 +153,164 @@
 </div>
 
 <script>
-/* ============================================================
-   ANIMEHUNT CMS - HOMEPAGE BUILDER LOGIC (FIXED)
-   ============================================================ */
+const API="/api/admin/homepage"
 
-const API = "/api/admin/homepage";
-const AUTH_KEY = "AUTH_TOKEN";
-let editId = null;
+let editId=null
 
-const rowModal = document.getElementById("rowModal");
-const rowList = document.getElementById("rowList");
+const rowList=document.getElementById("rowList")
+const modal=document.getElementById("rowModal")
 
-/** 1. Helper API Fetch **/
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(AUTH_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-        if (res.status === 401) { 
-            alert("Session expired. Please login again.");
-            location.href = "login.html"; 
-            return null; 
-        }
-        return await res.json();
-    } catch (err) {
-        console.error("Fetch Error:", err);
-        return null;
-    }
+async function loadRows(){
+
+const res=await fetch(API)
+
+const rows=await res.json()
+
+rowList.innerHTML=""
+
+if(!rows.length){
+
+rowList.innerHTML="<div style='padding:20px;color:#666'>No Rows</div>"
+return
+
 }
 
-/** 2. Load & Render Rows **/
-async function loadRows() {
-    const rows = await apiFetch(API);
-    rowList.innerHTML = "";
-    
-    if (!rows || rows.length === 0) {
-        rowList.innerHTML = "<div style='padding:20px; text-align:center; color:#555'>No Sections Created Yet</div>";
-        return;
-    }
+rows.forEach(r=>{
 
-    rows.forEach(r => {
-        const div = document.createElement("div");
-        div.className = "row";
-        div.innerHTML = `
-            <span style="font-weight:600">${escapeHTML(r.title)}</span>
-            <span class="badge" style="background:#0e1424; color:#ccc">${r.type.toUpperCase()}</span>
-            <span style="color:#888; font-style:italic">${escapeHTML(r.source || "Latest Updates")}</span>
-            <span style="text-transform: capitalize">${r.layout}</span>
-            <span class="badge" style="color:#ffcc00; background:rgba(255,204,0,0.1)">#${r.order}</span>
-            <span class="status ${r.active ? "active" : "inactive"}">${r.active ? "● Active" : "○ Hidden"}</span>
-            <span class="actions">
-                <button onclick="editRow('${r.id}')">✏️ Edit</button>
-                <button onclick="deleteRow('${r.id}')" style="color:#ff4c4c">🗑</button>
-            </span>
-        `;
-        rowList.appendChild(div);
-    });
+rowList.innerHTML+=`
+
+<div class="row">
+
+<span>${r.title}</span>
+
+<span class="badge">${r.type}</span>
+
+<span>${r.source || "Latest"}</span>
+
+<span>${r.layout}</span>
+
+<span>#${r.order}</span>
+
+<span class="status ${r.active?"active":"inactive"}">
+${r.active?"● Active":"○ Hidden"}
+</span>
+
+<span class="actions">
+
+<button onclick="editRow('${r.id}')">✏️</button>
+
+<button onclick="deleteRow('${r.id}')" style="color:#ff4c4c">🗑</button>
+
+</span>
+
+</div>
+
+`
+
+})
+
 }
 
-/** 3. Save / Update Logic **/
-document.getElementById("saveRow").onclick = async () => {
-    const title = document.getElementById("rowTitle").value.trim();
-    if (!title) return alert("Title is required!");
+/* SAVE */
 
-    const payload = {
-        title,
-        type: document.getElementById("rowType").value,
-        source: document.getElementById("rowSource").value.trim(),
-        layout: document.getElementById("rowLayout").value,
-        limit: parseInt(document.getElementById("rowLimit").value) || 10,
-        order: parseInt(document.getElementById("rowOrder").value) || 0,
-        active: document.getElementById("rowActive").checked,
-        autoUpdate: document.getElementById("rowAuto").checked
-    };
+document.getElementById("saveRow").onclick=async()=>{
 
-    const saveBtn = document.getElementById("saveRow");
-    saveBtn.innerText = "Processing...";
-    saveBtn.disabled = true;
+const payload={
 
-    const method = editId ? "PATCH" : "POST";
-    const url = editId ? `${API}/${editId}` : API;
+title:document.getElementById("rowTitle").value,
 
-    const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
-    
-    saveBtn.disabled = false;
-    saveBtn.innerText = "💾 Save Row";
+type:document.getElementById("rowType").value,
 
-    if (res && (res.success || !res.error)) {
-        rowModal.style.display = "none";
-        loadRows();
-    } else {
-        alert("Failed to save row settings.");
-    }
-};
+source:document.getElementById("rowSource").value,
 
-/** 4. Edit & Delete **/
-window.editRow = async (id) => {
-    const row = await apiFetch(`${API}/${id}`);
-    if (!row) return;
+layout:document.getElementById("rowLayout").value,
 
-    editId = id;
-    document.getElementById("rowTitle").value = row.title;
-    document.getElementById("rowType").value = row.type;
-    document.getElementById("rowSource").value = row.source;
-    document.getElementById("rowLayout").value = row.layout;
-    document.getElementById("rowLimit").value = row.limit;
-    document.getElementById("rowOrder").value = row.order;
-    document.getElementById("rowActive").checked = row.active;
-    document.getElementById("rowAuto").checked = row.autoUpdate;
+limit:Number(document.getElementById("rowLimit").value)||10,
 
-    document.querySelector(".modal-header h3").innerText = "Edit Layout Row";
-    rowModal.style.display = "flex";
-};
+order:Number(document.getElementById("rowOrder").value)||0,
 
-window.deleteRow = async (id) => {
-    if (!confirm("Are you sure you want to remove this section?")) return;
-    await apiFetch(`${API}/${id}`, { method: "DELETE" });
-    loadRows();
-};
+active:document.getElementById("rowActive").checked,
 
-/** UI Toggles **/
-document.getElementById("addRowBtn").onclick = () => {
-    editId = null;
-    document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
-    document.getElementById("rowActive").checked = true;
-    document.getElementById("rowAuto").checked = false;
-    document.querySelector(".modal-header h3").innerText = "Create Homepage Row";
-    rowModal.style.display = "flex";
-};
+autoUpdate:document.getElementById("rowAuto").checked
 
-document.getElementById("closeModal").onclick = () => rowModal.style.display = "none";
-
-function escapeHTML(str) {
-    return String(str || "").replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
-// Initial Run
-loadRows();
+const method=editId?"PATCH":"POST"
+
+const url=editId?`${API}/${editId}`:API
+
+await fetch(url,{
+
+method,
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+
+})
+
+modal.style.display="none"
+
+loadRows()
+
+}
+
+/* EDIT */
+
+window.editRow=async(id)=>{
+
+const res=await fetch(`${API}/${id}`)
+
+const r=await res.json()
+
+editId=id
+
+document.getElementById("rowTitle").value=r.title
+document.getElementById("rowType").value=r.type
+document.getElementById("rowSource").value=r.source
+document.getElementById("rowLayout").value=r.layout
+document.getElementById("rowLimit").value=r.limit
+document.getElementById("rowOrder").value=r.order
+
+document.getElementById("rowActive").checked=r.active
+document.getElementById("rowAuto").checked=r.autoUpdate
+
+modal.style.display="flex"
+
+}
+
+/* DELETE */
+
+window.deleteRow=async(id)=>{
+
+if(!confirm("Delete this row?")) return
+
+await fetch(`${API}/${id}`,{method:"DELETE"})
+
+loadRows()
+
+}
+
+/* ADD BUTTON */
+
+document.getElementById("addRowBtn").onclick=()=>{
+
+editId=null
+
+document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
+
+document.getElementById("rowActive").checked=true
+
+modal.style.display="flex"
+
+}
+
+document.getElementById("closeModal").onclick=()=>{
+
+modal.style.display="none"
+
+}
+
+loadRows()
+        
   
     </script>
 
