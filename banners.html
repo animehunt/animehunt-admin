@@ -359,184 +359,190 @@ a{ text-decoration:none; color:inherit }
   </div>
 </div>
 <script>
-/* ============================================================
-   ANIMEHUNT CMS - BANNER MANAGER SCRIPT (FIXED)
-   ============================================================ */
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banners";
-const bannerList = document.getElementById("bannerList");
-let currentEditId = null;
-let existingImageUrl = "";
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 
-/** 1. Load Banners **/
-async function loadBanners() {
-    bannerList.innerHTML = `<div style="padding:20px; color:#666">Syncing banners...</div>`;
-    try {
-        const res = await fetch(API);
-        const data = await res.json();
-        render(data);
-    } catch (err) {
-        bannerList.innerHTML = `<div style="padding:20px; color:red">Error loading data</div>`;
-    }
+const bannerList=document.getElementById("bannerList")
+
+let editId=null
+let existingImage=""
+
+async function loadBanners(){
+
+bannerList.innerHTML="Loading..."
+
+const res=await fetch(API)
+
+const data=await res.json()
+
+bannerList.innerHTML=data.map(b=>`
+
+<div class="row">
+
+<div style="display:flex;gap:10px">
+
+<img src="${b.image}" style="width:50px;height:30px;object-fit:cover">
+
+<span>${escapeHTML(b.title)}</span>
+
+</div>
+
+<span class="badge">${b.page}</span>
+
+<span>${b.category||"-"}</span>
+
+<span>${b.position}</span>
+
+<span>${b.banner_order}</span>
+
+<span>
+
+<label class="switch">
+
+<input type="checkbox"
+${b.active?"checked":""}
+onchange="toggleStatus('${b.id}',this.checked)">
+
+<span class="slider"></span>
+
+</label>
+
+</span>
+
+<div class="actions">
+
+<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+
+<button onclick="deleteBanner('${b.id}')">🗑</button>
+
+</div>
+
+</div>
+
+`).join("")
+
 }
 
-/** 2. Render List **/
-function render(banners) {
-    bannerList.innerHTML = "";
-    if (banners.length === 0) {
-        bannerList.innerHTML = `<div style="padding:20px; color:#888">No banners found.</div>`;
-        return;
-    }
+function openModal(){
 
-    banners.forEach(b => {
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px">
-                <img src="${b.image}" style="width:50px; height:30px; object-fit:cover; border-radius:4px">
-                <span style="font-weight:600">${escapeHTML(b.title)}</span>
-            </div>
-            <span class="badge">${b.page}</span>
-            <span>${escapeHTML(b.category || "-")}</span>
-            <span>${b.position}</span>
-            <span>${b.banner_order}</span>
-            <span>
-                <label class="switch">
-                    <input type="checkbox" ${b.active ? "checked" : ""} onchange="toggleStatus('${b.id}', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </span>
-            <div class="actions">
-                <button onclick='openEditModal(${JSON.stringify(b).replace(/'/g, "&apos;")})'>✏️</button>
-                <button onclick="deleteBanner('${b.id}')" style="color:#ff4d4d">🗑</button>
-            </div>
-        `;
-        bannerList.appendChild(row);
-    });
+editId=null
+existingImage=""
+
+document.getElementById("bannerModal").style.display="flex"
+
 }
 
-/** 3. Modal & Form Logic **/
-function openModal() {
-    resetForm();
-    document.getElementById("bannerModal").style.display = "flex";
+function closeModal(){
+
+document.getElementById("bannerModal").style.display="none"
+
 }
 
-function closeModal() {
-    document.getElementById("bannerModal").style.display = "none";
+window.editBanner=(b)=>{
+
+editId=b.id
+existingImage=b.image
+
+banTitle.value=b.title
+banPage.value=b.page
+banCategory.value=b.category||""
+banPosition.value=b.position
+banOrder.value=b.banner_order
+
+banActive.checked=b.active
+banRotate.checked=b.autoRotate
+
+previewImg.src=b.image
+previewImg.style.display="block"
+
+openModal()
+
 }
 
-window.openEditModal = (data) => {
-    resetForm();
-    currentEditId = data.id;
-    existingImageUrl = data.image;
-    
-    document.getElementById("banTitle").value = data.title;
-    document.getElementById("banPage").value = data.page;
-    document.getElementById("banCategory").value = data.category || "";
-    document.getElementById("banPosition").value = data.position;
-    document.getElementById("banOrder").value = data.banner_order;
-    document.getElementById("banActive").checked = !!data.active;
-    document.getElementById("banRotate").checked = !!data.autoRotate;
+async function saveBanner(){
 
-    const preview = document.getElementById("previewImg");
-    preview.src = data.image;
-    preview.style.display = "block";
+const form=new FormData()
 
-    document.getElementById("bannerModal").style.display = "flex";
-};
+if(editId)
+form.append("id",editId)
 
-/** 4. Save Logic **/
-async function saveBanner() {
-    const btn = document.querySelector(".modal-footer button");
-    const title = document.getElementById("banTitle").value.trim();
-    const file = document.getElementById("banImageFile").files[0];
+form.append("title",banTitle.value)
+form.append("page",banPage.value)
+form.append("category",banCategory.value)
+form.append("position",banPosition.value)
 
-    if (!title) return alert("Title is required");
-    if (!currentEditId && !file) return alert("Please select an image");
+form.append("order",banOrder.value)
 
-    btn.disabled = true;
-    btn.innerText = "Saving...";
+form.append("active",banActive.checked?1:0)
+form.append("autoRotate",banRotate.checked?1:0)
 
-    const formData = new FormData();
-    if (currentEditId) formData.append("id", currentEditId);
-    
-    formData.append("title", title);
-    formData.append("page", document.getElementById("banPage").value);
-    formData.append("category", document.getElementById("banCategory").value);
-    formData.append("position", document.getElementById("banPosition").value);
-    formData.append("order", document.getElementById("banOrder").value || "0");
-    formData.append("active", document.getElementById("banActive").checked ? "1" : "0");
-    formData.append("autoRotate", document.getElementById("banRotate").checked ? "1" : "0");
+const file=banImageFile.files[0]
 
-    if (file) {
-        formData.append("image", file);
-    } else {
-        formData.append("existingImage", existingImageUrl);
-    }
+if(file)
+form.append("image",file)
+else
+form.append("existingImage",existingImage)
 
-    try {
-        const res = await fetch(API, { method: "POST", body: formData });
-        if (res.ok) {
-            closeModal();
-            loadBanners();
-        } else {
-            const err = await res.json();
-            alert(err.error || "Failed to save banner");
-        }
-    } catch (e) {
-        alert("Server connection error");
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "💾 Save";
-    }
+await fetch(API,{
+method:"POST",
+body:form
+})
+
+closeModal()
+
+loadBanners()
+
 }
 
-/** 5. Actions: Delete & Toggle **/
-window.deleteBanner = async (id) => {
-    if (!confirm("Are you sure?")) return;
-    await fetch(`${API}/${id}`, { method: "DELETE" });
-    loadBanners();
-};
+async function deleteBanner(id){
 
-window.toggleStatus = async (id, active) => {
-    await fetch(`${API}/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active })
-    });
-};
+if(!confirm("Delete banner?")) return
 
-/** Utils **/
-function resetForm() {
-    currentEditId = null;
-    existingImageUrl = "";
-    document.getElementById("banTitle").value = "";
-    document.getElementById("banOrder").value = "";
-    document.getElementById("banImageFile").value = "";
-    document.getElementById("previewImg").style.display = "none";
-    document.getElementById("banActive").checked = true;
-    document.getElementById("banRotate").checked = false;
+await fetch(`${API}/${id}`,{method:"DELETE"})
+
+loadBanners()
+
 }
 
-function escapeHTML(str) {
-    if (!str) return "";
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function toggleStatus(id,active){
+
+await fetch(`${API}/${id}/status`,{
+
+method:"PATCH",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({active})
+
+})
+
 }
 
-// Preview Image when selected
-document.getElementById("banImageFile").onchange = function(e) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const preview = document.getElementById("previewImg");
-        preview.src = event.target.result;
-        preview.style.display = "block";
-    };
-    if (this.files[0]) reader.readAsDataURL(this.files[0]);
-};
+function escapeHTML(str){
 
-// Initial Load
-loadBanners();
-  
+return str
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+
+}
+
+banImageFile.onchange=function(){
+
+const reader=new FileReader()
+
+reader.onload=e=>{
+previewImg.src=e.target.result
+previewImg.style.display="block"
+}
+
+reader.readAsDataURL(this.files[0])
+
+}
+
+loadBanners()
   
 </script>
 
