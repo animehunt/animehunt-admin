@@ -262,103 +262,73 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
-const API = "/api/admin/player";
-const AUTH_KEY = "AUTH_TOKEN";
-const saveBtn = document.getElementById("savePlayer");
+const API="/api/admin/player"
 
-/** Helper for API Calls **/
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(AUTH_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-        if (res.status === 401) { location.href = "login.html"; return null; }
-        return await res.json();
-    } catch (err) { 
-        console.error("Fetch Error:", err);
-        return null; 
-    }
+async function loadPlayer(){
+
+const res=await fetch(API)
+
+const d=await res.json()
+
+document.getElementById("defaultServer").value=d.defaultServer
+document.getElementById("autoplay").value=d.autoplay
+document.getElementById("resume").value=d.resume
+document.getElementById("autoswitch").value=d.autoswitch
+document.getElementById("mode").value=d.mode
+
+document.getElementById("showServers").value=d.ui.servers
+document.getElementById("showDownload").value=d.ui.download
+document.getElementById("showSubscribe").value=d.ui.subscribe
+document.getElementById("showRelated").value=d.ui.related
+
+document.getElementById("secEmbed").value=d.security.embedOnly
+document.getElementById("secCloud").value=d.security.cloudflare
+document.getElementById("secSandbox").value=d.security.sandbox
+document.getElementById("secReferrer").value=d.security.referrer
+
 }
 
-/** Load Settings into UI **/
-async function loadPlayer() {
-    const d = await apiFetch(API);
-    if (!d) return;
+document.getElementById("savePlayer").onclick=async()=>{
 
-    // Helper to set select values safely
-    const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if(el) el.value = String(val);
-    };
+const payload={
 
-    setVal("defaultServer", d.defaultServer);
-    setVal("autoplay", d.autoplay);
-    setVal("resume", d.resume);
-    setVal("autoswitch", d.autoswitch);
-    setVal("mode", d.mode);
+defaultServer:document.getElementById("defaultServer").value,
 
-    if(d.ui) {
-        setVal("showServers", d.ui.servers);
-        setVal("showDownload", d.ui.download);
-        setVal("showSubscribe", d.ui.subscribe);
-        setVal("showRelated", d.ui.related);
-    }
+autoplay:document.getElementById("autoplay").value==="true",
+resume:document.getElementById("resume").value==="true",
+autoswitch:document.getElementById("autoswitch").value==="true",
 
-    if(d.security) {
-        setVal("secEmbed", d.security.embedOnly);
-        setVal("secCloud", d.security.cloudflare);
-        setVal("secSandbox", d.security.sandbox);
-        setVal("secReferrer", d.security.referrer);
-    }
+mode:document.getElementById("mode").value,
+
+ui:{
+servers:document.getElementById("showServers").value==="true",
+download:document.getElementById("showDownload").value==="true",
+subscribe:document.getElementById("showSubscribe").value==="true",
+related:document.getElementById("showRelated").value==="true"
+},
+
+security:{
+embedOnly:document.getElementById("secEmbed").value==="true",
+cloudflare:document.getElementById("secCloud").value==="true",
+sandbox:document.getElementById("secSandbox").value==="true",
+referrer:document.getElementById("secReferrer").value
 }
 
-/** Save Settings **/
-saveBtn.onclick = async () => {
-    saveBtn.disabled = true;
-    saveBtn.innerText = "Syncing...";
+}
 
-    const payload = {
-        defaultServer: document.getElementById("defaultServer").value,
-        autoplay: document.getElementById("autoplay").value === "true",
-        resume: document.getElementById("resume").value === "true",
-        autoswitch: document.getElementById("autoswitch").value === "true",
-        mode: document.getElementById("mode").value,
-        ui: {
-            servers: document.getElementById("showServers").value === "true",
-            download: document.getElementById("showDownload").value === "true",
-            subscribe: document.getElementById("showSubscribe").value === "true",
-            related: document.getElementById("showRelated").value === "true"
-        },
-        security: {
-            embedOnly: document.getElementById("secEmbed").value === "true",
-            cloudflare: document.getElementById("secCloud").value === "true",
-            sandbox: document.getElementById("secSandbox").value === "true",
-            referrer: document.getElementById("secReferrer").value
-        }
-    };
+await fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(payload)
+})
 
-    const res = await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+alert("Player Settings Saved")
 
-    if (res && res.success) {
-        alert("Settings Synced with Database!");
-    } else {
-        alert("Failed to update player settings.");
-    }
+}
 
-    saveBtn.disabled = false;
-    saveBtn.innerText = "💾 Save Player";
-};
-
-document.addEventListener("DOMContentLoaded", loadPlayer);
+loadPlayer()
 </script>
 
 
