@@ -235,151 +235,108 @@ body{background:#060a14;color:#fff}
 </main>
 </div>
 <script>
-   /* ============================================================
-   ANIMEHUNT CMS - SEARCH ENGINE LOGIC (FIXED)
-   ============================================================ */
+   const API="/api/admin/search"
 
-const API = "/api/admin/search";
-const TOKEN_KEY = "AUTH_TOKEN";
+async function loadSearch(){
 
-// Short helper for document.getElementById
-function el(id) { return document.getElementById(id); }
+const res=await fetch(API)
 
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(TOKEN_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
+const d=await res.json()
 
-        if (res.status === 401) {
-            alert("Session expired. Please login again.");
-            location.href = "login.html";
-            return null;
-        }
-        return await res.json();
-    } catch (err) {
-        console.error("Network Error:", err);
-        return null;
-    }
+const set=(id,val)=>{
+const el=document.getElementById(id)
+if(el) el.value=String(val)
 }
 
-/** Load Data into UI **/
-async function loadSearch() {
-    const d = await apiFetch(API);
-    if (!d) return;
+set("enableSearch",d.enableSearch)
+set("liveSearch",d.liveSearch)
 
-    // Helper to set values only if element exists
-    const set = (id, val) => { if(el(id)) el(id).value = String(val); };
+set("searchMode",d.mode)
+set("debounce",d.debounce)
 
-    // Core
-    set("enableSearch", d.enableSearch);
-    set("liveSearch", d.liveSearch);
-    set("searchMode", d.mode);
-    set("debounce", d.debounce);
+set("ranking",d.ranking.mode)
+set("boost",d.ranking.boost)
+set("boostWeight",d.ranking.weight)
 
-    // Ranking
-    if(d.ranking) {
-        set("ranking", d.ranking.mode);
-        set("boost", d.ranking.boost);
-        set("boostWeight", d.ranking.weight);
-    }
+set("sAnime",d.sources.anime)
+set("sEpisode",d.sources.episode)
+set("sCategory",d.sources.category)
+set("sPages",d.sources.pages)
 
-    // Sources
-    if(d.sources) {
-        set("sAnime", d.sources.anime);
-        set("sEpisode", d.sources.episode);
-        set("sCategory", d.sources.category);
-        set("sPages", d.sources.pages);
-    }
+set("typo",d.smart.typo)
+set("alias",d.smart.alias)
+set("language",d.smart.language)
 
-    // Smart
-    if(d.smart) {
-        set("typo", d.smart.typo);
-        set("alias", d.smart.alias);
-        set("language", d.smart.language);
-    }
+set("maxResults",d.ui.max)
+set("thumb",d.ui.thumb)
+set("group",d.ui.group)
+set("highlight",d.ui.highlight)
 
-    // UI
-    if(d.ui) {
-        set("maxResults", d.ui.max);
-        set("thumb", d.ui.thumb);
-        set("group", d.ui.group);
-        set("highlight", d.ui.highlight);
-    }
+set("safe",d.safety.safe)
+set("track",d.safety.track)
+set("seo",d.safety.seo)
+set("cache",d.safety.cache)
 
-    // Safety
-    if(d.safety) {
-        set("safe", d.safety.safe);
-        set("track", d.safety.track);
-        set("seo", d.safety.seo);
-        set("cache", d.safety.cache);
-    }
 }
 
-/** Save UI to Backend **/
-async function saveSearch() {
-    const btn = document.querySelector('.save-btn');
-    btn.disabled = true;
-    btn.textContent = "Updating Database...";
+async function saveSearch(){
 
-    const payload = {
-        enableSearch: el("enableSearch").value === "true",
-        liveSearch: el("liveSearch").value === "true",
-        mode: el("searchMode").value,
-        debounce: parseInt(el("debounce").value) || 300,
-        ranking: {
-            mode: el("ranking").value,
-            boost: el("boost").value === "true",
-            weight: parseInt(el("boostWeight").value) || 5
-        },
-        sources: {
-            anime: el("sAnime").value === "true",
-            episode: el("sEpisode").value === "true",
-            category: el("sCategory").value === "true",
-            pages: el("sPages").value === "true"
-        },
-        smart: {
-            typo: el("typo").value === "true",
-            alias: el("alias").value === "true",
-            language: el("language").value
-        },
-        ui: {
-            max: parseInt(el("maxResults").value) || 8,
-            thumb: el("thumb").value === "true",
-            group: el("group").value === "true",
-            highlight: el("highlight").value === "true"
-        },
-        safety: {
-            safe: el("safe").value,
-            track: el("track").value === "true",
-            seo: el("seo").value === "true",
-            cache: parseInt(el("cache").value) || 60
-        }
-    };
+const payload={
 
-    const res = await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+enableSearch:enableSearch.value==="true",
+liveSearch:liveSearch.value==="true",
 
-    btn.disabled = false;
-    btn.textContent = "💾 Save Search Settings";
+mode:searchMode.value,
+debounce:Number(debounce.value),
 
-    if (res && res.success) {
-        alert("Search Settings Synced! 🚀");
-    } else {
-        alert("Error: Settings could not be saved.");
-    }
+ranking:{
+mode:ranking.value,
+boost:boost.value==="true",
+weight:Number(boostWeight.value)
+},
+
+sources:{
+anime:sAnime.value==="true",
+episode:sEpisode.value==="true",
+category:sCategory.value==="true",
+pages:sPages.value==="true"
+},
+
+smart:{
+typo:typo.value==="true",
+alias:alias.value==="true",
+language:language.value
+},
+
+ui:{
+max:Number(maxResults.value),
+thumb:thumb.value==="true",
+group:group.value==="true",
+highlight:highlight.value==="true"
+},
+
+safety:{
+safe:safe.value,
+track:track.value==="true",
+seo:seo.value==="true",
+cache:Number(cache.value)
 }
 
-document.addEventListener("DOMContentLoaded", loadSearch);
-  
+}
+
+await fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(payload)
+})
+
+alert("Search settings saved")
+
+}
+
+document.addEventListener("DOMContentLoaded",loadSearch)
 </script>
 
         
