@@ -217,134 +217,172 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-  const AI_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/ai";
-const AUTH_TOKEN_KEY = "AUTH_TOKEN"; // Make sure this matches your login storage key
-
-const pauseBtn = document.querySelector(".pause-btn");
-
-// Helper to clean keys (e.g., "🌐 Auto Server Engine" -> "auto_server_engine")
-function formatKey(text) {
-    return text.toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "") // Remove emojis/symbols
-        .trim()
-        .replace(/\s+/g, "_");    // Replace spaces with underscores
-}
-
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": token ? `Bearer ${token}` : "",
-            ...(options.headers || {})
-        }
-    });
-
-    if (res.status === 401) {
-        window.location.href = "login.html";
-        return;
-    }
-    if (!res.ok) throw new Error("API request failed");
-    return res.json();
-}
-
-/* LOAD ALL SETTINGS */
-async function loadAI() {
-    try {
-        const data = await apiFetch(AI_API);
-        if (!data) return;
-
-        const isPaused = data.paused;
-        updatePauseUI(isPaused);
-
-        document.querySelectorAll(".ai-card").forEach(card => {
-            const h3Text = card.querySelector("h3").innerText;
-            const engineKey = formatKey(h3Text);
-            const engineData = data.engines[engineKey] || {};
-
-            card.querySelectorAll(".ai-item").forEach(item => {
-                const settingKey = formatKey(item.innerText);
-                const checkbox = item.querySelector("input");
-
-                // Update checkbox state if found in DB
-                if (settingKey in engineData) {
-                    checkbox.checked = engineData[settingKey];
-                }
-
-                // UI Lock if paused
-                checkbox.disabled = isPaused;
-                item.style.opacity = isPaused ? "0.5" : "1";
-            });
-        });
-    } catch (err) {
-        console.error("AI Load Error:", err);
-    }
-}
-
-/* SYNC INDIVIDUAL CHECKBOX */
-async function handleToggle(e) {
-    const checkbox = e.target;
-    const item = checkbox.closest(".ai-item");
-    const card = checkbox.closest(".ai-card");
-
-    const engine = formatKey(card.querySelector("h3").innerText);
-    const setting = formatKey(item.innerText);
-    const value = checkbox.checked;
-
-    try {
-        checkbox.style.boxShadow = "0 0 5px #ffcc00"; // Visual feedback
-        await apiFetch(AI_API, {
-            method: "PATCH",
-            body: JSON.stringify({ engine, setting, value })
-        });
-    } catch (err) {
-        alert("Sync failed!");
-        checkbox.checked = !value; // Revert
-    } finally {
-        setTimeout(() => checkbox.style.boxShadow = "none", 500);
-    }
-}
-
-/* GLOBAL PAUSE TOGGLE */
-async function toggleGlobalPause() {
-    pauseBtn.disabled = true;
-    pauseBtn.innerText = "Processing...";
-
-    try {
-        const res = await apiFetch(`${AI_API}/pause`, { method: "PATCH" });
-        if (res) loadAI(); // Full refresh to lock/unlock UI
-    } catch (err) {
-        alert("Global toggle failed");
-    } finally {
-        pauseBtn.disabled = false;
-    }
-}
-
-function updatePauseUI(paused) {
-    if (paused) {
-        pauseBtn.innerText = "▶ Resume All AI Systems";
-        pauseBtn.style.background = "#1abc9c";
-        pauseBtn.style.color = "#fff";
-    } else {
-        pauseBtn.innerText = "⏸ Pause All AI Systems";
-        pauseBtn.style.background = "#ffcc00";
-        pauseBtn.style.color = "#000";
-    }
-}
-
-// Event Bindings
-document.addEventListener("DOMContentLoaded", () => {
-    loadAI();
-    
-    // Delegate events to inputs
-    document.querySelectorAll(".ai-item input").forEach(input => {
-        input.addEventListener("change", handleToggle);
-    });
-
-    if (pauseBtn) pauseBtn.onclick = toggleGlobalPause;
-});
   
+const AI_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ai"
+const TOKEN_KEY="AUTH_TOKEN"
+
+const pauseBtn=document.querySelector(".pause-btn")
+
+function formatKey(text){
+
+return text
+.toLowerCase()
+.replace(/[^a-z0-9\s]/g,"")
+.trim()
+.replace(/\s+/g,"_")
+
+}
+
+async function apiFetch(url,options={}){
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":token?`Bearer ${token}`:"",
+...(options.headers||{})
+}
+})
+
+if(res.status===401){
+window.location.href="login.html"
+return
+}
+
+if(!res.ok) throw new Error("API failed")
+
+return res.json()
+
+}
+
+/* LOAD AI STATE */
+
+async function loadAI(){
+
+try{
+
+const data=await apiFetch(AI_API)
+
+if(!data) return
+
+updatePauseUI(data.paused)
+
+document.querySelectorAll(".ai-card").forEach(card=>{
+
+const engine=formatKey(card.querySelector("h3").innerText)
+
+const engineData=data.engines[engine]||{}
+
+card.querySelectorAll(".ai-item").forEach(item=>{
+
+const setting=formatKey(item.innerText)
+
+const checkbox=item.querySelector("input")
+
+if(setting in engineData)
+checkbox.checked=engineData[setting]
+
+checkbox.disabled=data.paused
+
+item.style.opacity=data.paused?0.5:1
+
+})
+
+})
+
+}
+catch(err){
+console.error("AI load error",err)
+}
+
+}
+
+/* HANDLE TOGGLE */
+
+async function handleToggle(e){
+
+const checkbox=e.target
+const item=checkbox.closest(".ai-item")
+const card=checkbox.closest(".ai-card")
+
+const engine=formatKey(card.querySelector("h3").innerText)
+const setting=formatKey(item.innerText)
+
+const value=checkbox.checked
+
+try{
+
+await apiFetch(AI_API,{
+method:"PATCH",
+body:JSON.stringify({
+engine,
+setting,
+value
+})
+})
+
+}
+catch(err){
+
+checkbox.checked=!value
+alert("Update failed")
+
+}
+
+}
+
+/* GLOBAL PAUSE */
+
+async function togglePause(){
+
+pauseBtn.disabled=true
+
+try{
+
+await apiFetch(`${AI_API}/pause`,{
+method:"PATCH"
+})
+
+loadAI()
+
+}
+catch(err){
+alert("Toggle failed")
+}
+
+pauseBtn.disabled=false
+
+}
+
+function updatePauseUI(paused){
+
+if(paused){
+
+pauseBtn.innerText="▶ Resume All AI Systems"
+pauseBtn.style.background="#1abc9c"
+
+}
+else{
+
+pauseBtn.innerText="⏸ Pause All AI Systems"
+pauseBtn.style.background="#ffcc00"
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadAI()
+
+document.querySelectorAll(".ai-item input")
+.forEach(input=>input.addEventListener("change",handleToggle))
+
+pauseBtn.onclick=togglePause
+
+})
 </script>
 
  
