@@ -329,105 +329,73 @@ a{
 </div>
 
 <script>
-/* ============================================================
-   ANIMEHUNT CMS - PERFORMANCE LOGIC (FIXED)
-   ============================================================ */
+const API="/api/admin/performance"
 
-const API = "/api/admin/performance";
-const AUTH_KEY = "AUTH_TOKEN";
+const TOGGLES=[
+"lazyLoad","smartPreload","assetMinify","imgOptimize",
+"jsOptimize","cssOptimize","smartCache","mobilePriority",
+"cdnMode","adaptiveLoad","preconnect","bandwidth"
+]
 
-const TOGGLES = [
-    "lazyLoad", "smartPreload", "assetMinify", "imgOptimize",
-    "jsOptimize", "cssOptimize", "smartCache", "mobilePriority",
-    "cdnMode", "adaptiveLoad", "preconnect", "bandwidth"
-];
+let saveTimer=null
 
-let saveTimer = null;
+async function loadPerformance(){
 
-/** 1. Helper API Fetch **/
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(AUTH_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-        if (res.status === 401) { location.href = "login.html"; return null; }
-        return await res.json();
-    } catch (err) {
-        console.error("API Error:", err);
-        return null;
-    }
+const res=await fetch(API)
+
+const data=await res.json()
+
+TOGGLES.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(el) el.checked=!!data[id]
+
+})
+
 }
 
-/** 2. Load Performance Data **/
-async function loadPerformance() {
-    const data = await apiFetch(API);
-    if (!data) return;
+function scheduleSave(e){
 
-    TOGGLES.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.checked = !!data[id];
-    });
+clearTimeout(saveTimer)
+
+saveTimer=setTimeout(async()=>{
+
+const payload={}
+
+TOGGLES.forEach(id=>{
+
+const el=document.getElementById(id)
+
+payload[id]=el.checked
+
+})
+
+await fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(payload)
+})
+
+},600)
+
 }
 
-/** 3. Optimized Sync (Debounce) **/
-function scheduleSave(event) {
-    const target = event.target;
-    // UI Feedback: Dim the card slightly to show 'Syncing'
-    const card = target.closest('.perf-card');
-    card.style.opacity = "0.6";
-    card.style.transition = "0.3s";
+document.addEventListener("DOMContentLoaded",()=>{
 
-    clearTimeout(saveTimer);
-    
-    // 800ms debounce: Multiple clicks only trigger 1 request
-    saveTimer = setTimeout(async () => {
-        const payload = {};
-        TOGGLES.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) payload[id] = el.checked;
-        });
+TOGGLES.forEach(id=>{
 
-        const res = await apiFetch(API, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
+const el=document.getElementById(id)
 
-        // UI Reset
-        card.style.opacity = "1";
-        if (res && res.success) {
-            // Flash green border for success
-            card.style.borderColor = "#00ffb3";
-            setTimeout(() => card.style.borderColor = "#1a2035", 600);
-        } else {
-            // Revert state if server fails
-            target.checked = !target.checked;
-            alert("Error: Settings could not be saved to Cloudflare D1.");
-        }
-    }, 800);
-}
+if(el) el.addEventListener("change",scheduleSave)
 
-/** 4. Initialization **/
-document.addEventListener("DOMContentLoaded", () => {
-    // Check Auth
-    if (!localStorage.getItem(AUTH_KEY)) {
-        location.href = "login.html";
-        return;
-    }
+})
 
-    // Attach Listeners
-    TOGGLES.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("change", scheduleSave);
-    });
+loadPerformance()
 
-    loadPerformance();
-});
+})
   
 </script>
 
