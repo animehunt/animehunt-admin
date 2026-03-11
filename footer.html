@@ -196,126 +196,204 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 
 <script>
-/* ============================================================
-   ANIMEHUNT CMS - FOOTER PRO LOGIC (FIXED)
-   ============================================================ */
+/* ===============================================
+ANIMEHUNT FOOTER CMS FRONTEND
+=============================================== */
 
-// Backend Endpoint (Verify this matches your Worker route)
-const API = "/api/admin/footer"; 
+const API="/api/admin/footer"
 
-const statusEl = document.getElementById("status");
-const debugBox = document.getElementById("debugBox");
+const status=document.getElementById("status")
+const debugBox=document.getElementById("debugBox")
 
-// Saare IDs jo HTML mein hain unki list
-const configFields = [
-    "footerOn", "footerLazy", "footerBlur", "footerLock", "footerTheme",
-    "about", "privacy", "disclaimer", "dmca", "telegram", "linkBadges",
-    "azOn", "azAuto", "azSticky", "azCompact", "azMode",
-    "mobileNav", "mobileFloat", "mobileBlur", "mobileHideScroll",
-    "promoOn", "promoText", "promoLink", "promoAutoHide"
-];
+const fields=[
 
-/** 1. Core API Helper 
- **/
-async function apiCall(method = "GET", body = null, subPath = "") {
-    const options = {
-        method,
-        headers: { "Content-Type": "application/json" }
-    };
-    if (body) options.body = JSON.stringify(body);
+"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
 
-    try {
-        const res = await fetch(`${API}${subPath}`, options);
-        if (!res.ok) throw new Error("Network response was not ok");
-        return await res.json();
-    } catch (err) {
-        updateStatus("API Error: " + err.message, "red");
-        return null;
-    }
+"about","privacy","disclaimer","dmca","telegram","linkBadges",
+
+"azOn","azAuto","azSticky","azCompact","azMode",
+
+"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
+
+"promoOn","promoText","promoLink","promoAutoHide"
+
+]
+
+function setStatus(msg,color="#4cff4c"){
+
+status.innerText=msg
+status.style.color=color
+
+setTimeout(()=>{
+
+status.innerText="Ready"
+status.style.color=""
+
+},2500)
+
 }
 
-function updateStatus(msg, color = "#4cff4c") {
-    statusEl.innerText = msg;
-    statusEl.style.color = color;
-    setTimeout(() => { statusEl.innerText = "Ready"; statusEl.style.color = ""; }, 3000);
+/* LOAD CONFIG */
+
+async function loadFooter(){
+
+status.innerText="Loading..."
+
+try{
+
+const res=await fetch(API)
+
+const data=await res.json()
+
+fields.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(el.type==="checkbox"){
+
+el.checked=!!data[id]
+
+}else{
+
+el.value=data[id] || ""
+
 }
 
-/** 2. Load Function 
- **/
-async function loadFooter() {
-    statusEl.innerText = "Fetching Settings...";
-    const data = await apiCall("GET");
-    if (!data) return;
+})
 
-    configFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
+setStatus("Synced")
 
-        if (el.type === "checkbox") {
-            el.checked = !!data[id];
-        } else {
-            el.value = data[id] || (el.tagName === "SELECT" ? el.options[0].value : "");
-        }
-    });
-    updateStatus("Synced with DB");
+}catch(e){
+
+setStatus("API Error","red")
+
 }
 
-/** 3. Save Function 
- **/
-async function save() {
-    const payload = {};
-    configFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        payload[id] = el.type === "checkbox" ? el.checked : el.value;
-    });
-
-    statusEl.innerText = "Saving...";
-    const res = await apiCall("POST", payload);
-    if (res && res.success) {
-        updateStatus("Changes Saved Successfully!");
-    }
 }
 
-/** 4. Emergency & Utils 
- **/
-async function kill() {
-    if (!confirm("Confirm? This will disable the footer on the live site.")) return;
-    const res = await apiCall("POST", {}, "/kill");
-    if (res && res.success) {
-        loadFooter();
-        updateStatus("Footer Killed", "orange");
-    }
+/* SAVE */
+
+async function save(){
+
+const payload={}
+
+fields.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+payload[id]=el.type==="checkbox"
+? el.checked
+: el.value
+
+})
+
+status.innerText="Saving..."
+
+const res=await fetch(API,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+})
+
+if(res.ok){
+
+setStatus("Saved")
+
+}else{
+
+setStatus("Save Failed","red")
+
 }
 
-async function debug() {
-    const data = await apiCall("GET");
-    debugBox.style.display = debugBox.style.display === "none" ? "block" : "none";
-    debugBox.textContent = JSON.stringify(data, null, 2);
 }
 
-function resetCfg() {
-    if (!confirm("Reset to default UI values? (Won't save until you click Save)")) return;
-    document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-    document.getElementById("footerOn").checked = true;
-    updateStatus("Form Reset locally");
+/* KILL */
+
+async function kill(){
+
+if(!confirm("Disable footer on live site?")) return
+
+await fetch(`${API}/kill`,{method:"POST"})
+
+setStatus("Footer Disabled","orange")
+
+loadFooter()
+
 }
 
-// Export/Import
-function exportCfg() {
-    const payload = {};
-    configFields.forEach(id => { payload[id] = document.getElementById(id).type === "checkbox" ? document.getElementById(id).checked : document.getElementById(id).value; });
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = "footer-backup.json";
-    a.click();
+/* DEBUG */
+
+async function debug(){
+
+const res=await fetch(API)
+
+const data=await res.json()
+
+debugBox.style.display=
+debugBox.style.display==="none"
+? "block"
+: "none"
+
+debugBox.textContent=
+JSON.stringify(data,null,2)
+
 }
 
-// Init load
-document.addEventListener("DOMContentLoaded", loadFooter);
-  
+/* EXPORT */
 
+function exportCfg(){
+
+const payload={}
+
+fields.forEach(id=>{
+
+const el=document.getElementById(id)
+
+payload[id]=
+el.type==="checkbox"
+? el.checked
+: el.value
+
+})
+
+const blob=new Blob(
+[JSON.stringify(payload,null,2)],
+{type:"application/json"}
+)
+
+const a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+
+a.download="footer-config.json"
+
+a.click()
+
+}
+
+/* RESET */
+
+function resetCfg(){
+
+document
+.querySelectorAll("input[type='checkbox']")
+.forEach(c=>c.checked=false)
+
+document.getElementById("footerOn").checked=true
+
+setStatus("Reset locally")
+
+}
+
+document.addEventListener(
+"DOMContentLoaded",
+loadFooter
+)
+        
 </script>
 
  
