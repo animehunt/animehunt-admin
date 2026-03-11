@@ -221,179 +221,369 @@ body{background:#060a14;color:#fff;}
 </div>
 
 <script>
- /* ============================================================
-   ANIMEHUNT CMS - EPISODE MANAGER (FIXED)
+/* ============================================================
+   ANIMEHUNT CMS - EPISODE MANAGER (TURSO VERSION)
    ============================================================ */
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes";
-let editId = null;
+const API =
+"https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
 
-// Helpers
-const apiFetch = async (url, options = {}) => {
-    const res = await fetch(url, {
-        ...options,
-        headers: { "Content-Type": "application/json", ...options.headers }
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-};
+let editId=null
 
-function createQualityRowHTML(q = "720p", url = "") {
-    return `
-        <div class="quality-row" style="display:flex; gap:8px; margin-top:6px">
-            <select style="width:100px; background:#0e1424; color:#fff; border:1px solid #1a2035; border-radius:6px">
-                <option ${q==='480p'?'selected':''}>480p</option>
-                <option ${q==='720p'?'selected':''}>720p</option>
-                <option ${q==='1080p'?'selected':''}>1080p</option>
-                <option ${q==='4K'?'selected':''}>4K</option>
-                <option ${q==='ZIP'?'selected':''}>ZIP</option>
-            </select>
-            <input class="quality-link" placeholder="Download Link" value="${url}" style="flex:1; background:#0e1424; border:1px solid #1a2035; color:#fff; padding:6px; border-radius:6px">
-            <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff4d4d; cursor:pointer">✕</button>
-        </div>`;
+const modal=document.getElementById("episodeModal")
+const list=document.getElementById("episodeList")
+
+/* ------------------------------------------------
+LOAD EPISODES
+------------------------------------------------ */
+
+async function loadEpisodes(){
+
+list.innerHTML="Loading..."
+
+try{
+
+const res=await fetch(API)
+
+const data=await res.json()
+
+list.innerHTML=""
+
+if(!data.length){
+
+list.innerHTML="<div style='padding:20px;color:#777'>No Episodes</div>"
+
+return
 }
 
-function createHostBlock(hostName = "", links = []) {
-    const div = document.createElement("div");
-    div.className = "download-host";
-    div.style.background = "#0e1424";
-    div.style.padding = "10px";
-    div.style.borderRadius = "8px";
-    div.style.marginTop = "10px";
+data.forEach(e=>{
 
-    let rowsHTML = links.length > 0 
-        ? links.map(l => createQualityRowHTML(l.quality, l.url)).join('') 
-        : createQualityRowHTML();
+const dlCount=e.downloads.reduce((acc,h)=>acc+h.links.length,0)
 
-    div.innerHTML = `
-        <div style="display:flex; gap:10px; margin-bottom:10px">
-            <input class="host-name" placeholder="Host (e.g. Terabox)" value="${hostName}" style="flex:1; background:#0b0f1a; border:1px solid #1a2035; color:#fff; padding:6px; border-radius:6px">
-            <button type="button" onclick="this.closest('.download-host').remove()" style="background:none; border:none; color:#ff4d4d; cursor:pointer">✕ Remove</button>
-        </div>
-        <div class="quality-container">${rowsHTML}</div>
-        <button type="button" class="add-quality-btn" style="width:100%; margin-top:5px; background:#1a2035; color:#ffcc00; border:1px solid #333; cursor:pointer; padding:4px; border-radius:6px">＋ Add Quality</button>
-    `;
-    document.querySelector(".download-section").appendChild(div);
+list.innerHTML+=`
+
+<div class="row">
+
+<span>${e.anime}</span>
+
+<span class="badge">S${e.season}</span>
+
+<span class="badge">E${e.episode}</span>
+
+<span style="color:#888">${e.title||"-"}</span>
+
+<span>${e.servers.length}</span>
+
+<span>${dlCount}</span>
+
+<span class="actions">
+
+<button onclick="editEpisode('${e.id}')">✏️</button>
+
+<button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
+
+</span>
+
+</div>
+
+`
+
+})
+
+}catch(e){
+
+list.innerHTML="Failed to load"
+
 }
 
-// Global Click for "Add Quality"
-document.addEventListener("click", e => {
-    if (e.target.classList.contains("add-quality-btn")) {
-        const container = e.target.previousElementSibling;
-        const temp = document.createElement('div');
-        temp.innerHTML = createQualityRowHTML();
-        container.appendChild(temp.firstElementChild);
-    }
-});
-
-/** 1. SAVE EPISODE **/
-document.getElementById("saveEpisode").onclick = async () => {
-    const saveBtn = document.getElementById("saveEpisode");
-    try {
-        const payload = {
-            anime: document.getElementById("animeName").value.trim(),
-            season: document.getElementById("seasonNo").value || "1",
-            episode: document.getElementById("episodeNo").value || "1",
-            title: document.getElementById("episodeTitle").value.trim(),
-            description: document.getElementById("description").value,
-            servers: [
-                document.getElementById("server1").value.trim(),
-                document.getElementById("server2").value.trim(),
-                document.getElementById("server3").value.trim()
-            ].filter(s => s !== ""),
-            downloads: [],
-            ongoing: document.getElementById("isOngoing").checked,
-            featured: document.getElementById("isFeatured").checked
-        };
-
-        if (!payload.anime || !payload.episode) return alert("Anime and Episode are mandatory");
-
-        document.querySelectorAll(".download-host").forEach(block => {
-            const host = block.querySelector(".host-name").value.trim();
-            const links = [];
-            block.querySelectorAll(".quality-row").forEach(row => {
-                const url = row.querySelector(".quality-link").value.trim();
-                if (url) links.push({ quality: row.querySelector("select").value, url });
-            });
-            if (host && links.length > 0) payload.downloads.push({ host, links });
-        });
-
-        saveBtn.disabled = true;
-        saveBtn.innerText = "Processing...";
-
-        const method = editId ? "PATCH" : "POST";
-        const url = editId ? `${API}/${editId}` : API;
-
-        await apiFetch(url, { method, body: JSON.stringify(payload) });
-        location.reload(); 
-
-    } catch (e) { alert(e.message); saveBtn.disabled = false; }
-};
-
-/** 2. LOAD & EDIT **/
-async function loadEpisodes() {
-    const list = await apiFetch(API);
-    const container = document.getElementById("episodeList");
-    container.innerHTML = "";
-    list.forEach(e => {
-        const row = document.createElement("div");
-        row.className = "row";
-        const dlCount = e.downloads.reduce((acc, h) => acc + h.links.length, 0);
-        row.innerHTML = `
-            <span>${e.anime}</span>
-            <span class="badge">S${e.season}</span>
-            <span class="badge">E${e.episode}</span>
-            <span style="color:#888">${e.title || '---'}</span>
-            <span>${e.servers.length} Srv</span>
-            <span>${dlCount} DL</span>
-            <span class="actions">
-                <button onclick="editEpisode('${e.id}')">✏️</button>
-                <button onclick="removeEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
-            </span>`;
-        container.appendChild(row);
-    });
 }
 
-window.editEpisode = async (id) => {
-    editId = id;
-    const e = await apiFetch(`${API}/${id}`);
-    document.getElementById("animeName").value = e.anime;
-    document.getElementById("seasonNo").value = e.season;
-    document.getElementById("episodeNo").value = e.episode;
-    document.getElementById("episodeTitle").value = e.title;
-    document.getElementById("description").value = e.description;
-    document.getElementById("server1").value = e.servers[0] || "";
-    document.getElementById("server2").value = e.servers[1] || "";
-    document.getElementById("server3").value = e.servers[2] || "";
-    document.getElementById("isOngoing").checked = e.ongoing;
-    document.getElementById("isFeatured").checked = e.featured;
+/* ------------------------------------------------
+CREATE HOST BLOCK
+------------------------------------------------ */
 
-    document.querySelector(".download-section").innerHTML = "";
-    if (e.downloads.length) e.downloads.forEach(d => createHostBlock(d.host, d.links));
-    else createHostBlock();
+function createHostBlock(host="",links=[]){
 
-    document.getElementById("episodeModal").style.display = "flex";
-};
+const div=document.createElement("div")
 
-window.removeEpisode = async (id) => {
-    if (confirm("Confirm delete?")) {
-        await apiFetch(`${API}/${id}`, { method: "DELETE" });
-        loadEpisodes();
-    }
-};
+div.className="download-host"
 
-// Modal Fix
-document.getElementById("openAddEpisode").onclick = () => {
-    editId = null;
-    document.querySelectorAll(".form-grid input, textarea").forEach(i => i.value = "");
-    document.querySelector(".download-section").innerHTML = "";
-    createHostBlock();
-    document.getElementById("episodeModal").style.display = "flex";
-};
-document.getElementById("closeModal").onclick = () => document.getElementById("episodeModal").style.display = "none";
+div.style.background="#0e1424"
 
-loadEpisodes();
-  
+div.style.padding="10px"
+
+div.style.borderRadius="8px"
+
+div.style.marginTop="10px"
+
+let rows=""
+
+if(links.length){
+
+links.forEach(l=>{
+
+rows+=createQualityRow(l.quality,l.url)
+
+})
+
+}else{
+
+rows=createQualityRow()
+
+}
+
+div.innerHTML=`
+
+<div style="display:flex;gap:10px;margin-bottom:10px">
+
+<input class="host-name" value="${host}" placeholder="Host (Terabox)" style="flex:1">
+
+<button onclick="this.closest('.download-host').remove()" style="color:#ff4d4d;background:none;border:none">✕</button>
+
+</div>
+
+<div class="quality-container">
+
+${rows}
+
+</div>
+
+<button class="add-quality-btn">＋ Add Quality</button>
+
+`
+
+document.querySelector(".download-section").appendChild(div)
+
+}
+
+/* ------------------------------------------------
+QUALITY ROW
+------------------------------------------------ */
+
+function createQualityRow(q="720p",url=""){
+
+return`
+
+<div class="quality-row">
+
+<select>
+
+<option ${q=="480p"?"selected":""}>480p</option>
+
+<option ${q=="720p"?"selected":""}>720p</option>
+
+<option ${q=="1080p"?"selected":""}>1080p</option>
+
+<option ${q=="4K"?"selected":""}>4K</option>
+
+<option ${q=="ZIP"?"selected":""}>ZIP</option>
+
+</select>
+
+<input class="quality-link" value="${url}" placeholder="Download Link">
+
+<button onclick="this.parentElement.remove()">✕</button>
+
+</div>
+
+`
+
+}
+
+/* ------------------------------------------------
+ADD QUALITY BUTTON
+------------------------------------------------ */
+
+document.addEventListener("click",e=>{
+
+if(e.target.classList.contains("add-quality-btn")){
+
+const container=e.target.previousElementSibling
+
+container.insertAdjacentHTML("beforeend",createQualityRow())
+
+}
+
+})
+
+/* ------------------------------------------------
+SAVE EPISODE
+------------------------------------------------ */
+
+document.getElementById("saveEpisode").onclick=async()=>{
+
+const payload={
+
+anime:document.getElementById("animeName").value,
+
+season:document.getElementById("seasonNo").value || "1",
+
+episode:document.getElementById("episodeNo").value,
+
+title:document.getElementById("episodeTitle").value,
+
+description:document.getElementById("description").value,
+
+servers:[
+
+document.getElementById("server1").value,
+
+document.getElementById("server2").value,
+
+document.getElementById("server3").value
+
+].filter(s=>s),
+
+downloads:[],
+
+ongoing:document.getElementById("isOngoing").checked,
+
+featured:document.getElementById("isFeatured").checked
+
+}
+
+document.querySelectorAll(".download-host").forEach(block=>{
+
+const host=block.querySelector(".host-name").value
+
+const links=[]
+
+block.querySelectorAll(".quality-row").forEach(row=>{
+
+const quality=row.querySelector("select").value
+
+const url=row.querySelector(".quality-link").value
+
+if(url){
+
+links.push({quality,url})
+
+}
+
+})
+
+if(host && links.length){
+
+payload.downloads.push({host,links})
+
+}
+
+})
+
+const method=editId ? "PATCH":"POST"
+
+const url=editId ? `${API}/${editId}`:API
+
+await fetch(url,{
+
+method,
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify(payload)
+
+})
+
+location.reload()
+
+}
+
+/* ------------------------------------------------
+EDIT
+------------------------------------------------ */
+
+window.editEpisode=async(id)=>{
+
+editId=id
+
+const res=await fetch(`${API}/${id}`)
+
+const e=await res.json()
+
+document.getElementById("animeName").value=e.anime
+
+document.getElementById("seasonNo").value=e.season
+
+document.getElementById("episodeNo").value=e.episode
+
+document.getElementById("episodeTitle").value=e.title
+
+document.getElementById("description").value=e.description
+
+document.getElementById("server1").value=e.servers[0]||""
+
+document.getElementById("server2").value=e.servers[1]||""
+
+document.getElementById("server3").value=e.servers[2]||""
+
+document.getElementById("isOngoing").checked=e.ongoing
+
+document.getElementById("isFeatured").checked=e.featured
+
+document.querySelector(".download-section").innerHTML=""
+
+if(e.downloads.length){
+
+e.downloads.forEach(d=>{
+
+createHostBlock(d.host,d.links)
+
+})
+
+}else{
+
+createHostBlock()
+
+}
+
+modal.style.display="flex"
+
+}
+
+/* ------------------------------------------------
+DELETE
+------------------------------------------------ */
+
+window.deleteEpisode=async(id)=>{
+
+if(!confirm("Delete episode?")) return
+
+await fetch(`${API}/${id}`,{method:"DELETE"})
+
+loadEpisodes()
+
+}
+
+/* ------------------------------------------------
+MODAL
+------------------------------------------------ */
+
+document.getElementById("openAddEpisode").onclick=()=>{
+
+editId=null
+
+document.querySelectorAll(".form-grid input, textarea").forEach(i=>i.value="")
+
+document.querySelector(".download-section").innerHTML=""
+
+createHostBlock()
+
+modal.style.display="flex"
+
+}
+
+document.getElementById("closeModal").onclick=()=>{
+
+modal.style.display="none"
+
+}
+
+/* ------------------------------------------------
+INIT
+------------------------------------------------ */
+
+loadEpisodes()
+                
                                                             
 </script>
 
