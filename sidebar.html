@@ -224,9 +224,16 @@ let editId = null;
 
 const el = (id) => document.getElementById(id);
 
+/* ============================= */
+/* API FETCH */
+/* ============================= */
+
 async function apiFetch(url, options = {}) {
+
     const token = localStorage.getItem(TOKEN_KEY);
+
     try {
+
         const res = await fetch(url, {
             ...options,
             headers: {
@@ -235,113 +242,269 @@ async function apiFetch(url, options = {}) {
                 ...options.headers
             }
         });
-        if (res.status === 401) { location.href = "login.html"; return null; }
+
+        if (res.status === 401) {
+            location.href = "login.html";
+            return null;
+        }
+
         return await res.json();
-    } catch (e) { return null; }
+
+    } catch (err) {
+
+        console.error("Network error:", err);
+        return null;
+
+    }
+
 }
 
-async function loadItems() {
-    items = await apiFetch(API) || [];
-    render();
+/* ============================= */
+/* LOAD SIDEBAR ITEMS */
+/* ============================= */
+
+async function loadItems(){
+
+    const data = await apiFetch(API);
+
+    if(data){
+        items = data;
+        render();
+    }
+
 }
 
-function render() {
+/* ============================= */
+/* RENDER TABLE */
+/* ============================= */
+
+function render(){
+
     const list = el("list");
-    list.innerHTML = items.length === 0 ? `<div style="padding:20px;color:#555">No sidebar items found.</div>` : "";
 
-    items.forEach((i) => {
+    list.innerHTML = "";
+
+    if(items.length === 0){
+
+        list.innerHTML =
+        `<div style="padding:20px;color:#555">No sidebar items found.</div>`;
+
+        return;
+    }
+
+    items.forEach((i)=>{
+
         const row = document.createElement("div");
         row.className = "row";
-        
-        let hColor = i.highlight === "HOT" ? "background:#ff4c4c" : (i.highlight === "NEW" ? "background:#00ffb3;color:#000" : "background:#1a2035");
-        let highlightTag = i.highlight !== 'None' ? `<small style="font-size:9px;padding:2px 4px;border-radius:4px;margin-left:5px;${hColor}">${i.highlight}</small>` : '';
+
+        let badgeColor = "#1a2035";
+
+        if(i.highlight === "HOT") badgeColor = "#ff4c4c";
+        if(i.highlight === "NEW") badgeColor = "#00ffb3";
+
+        let highlightTag = "";
+
+        if(i.highlight !== "None"){
+
+            highlightTag = `
+            <small style="
+                font-size:9px;
+                padding:2px 4px;
+                border-radius:4px;
+                margin-left:5px;
+                background:${badgeColor};
+                color:#000
+            ">
+            ${i.highlight}
+            </small>
+            `;
+
+        }
 
         row.innerHTML = `
             <span>${i.priority}</span>
-            <span>${i.icon} ${i.title} ${highlightTag}</span>
-            <span style="color:#777;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i.url}</span>
-            <span><small class="badge">${i.device}</small></span>
-            <span style="color:${i.active ? '#00ffb3':'#ff4c4c'}">${i.active ? '● Active' : '○ Hidden'}</span>
+
+            <span>
+            ${i.icon || ""} ${i.title}
+            ${highlightTag}
+            </span>
+
+            <span style="
+                color:#777;
+                font-size:10px;
+                overflow:hidden;
+                text-overflow:ellipsis;
+                white-space:nowrap;
+            ">
+            ${i.url}
+            </span>
+
+            <span>
+            <small class="badge">${i.device}</small>
+            </span>
+
+            <span style="color:${i.active ? '#00ffb3':'#ff4c4c'}">
+            ${i.active ? '● Active' : '○ Hidden'}
+            </span>
+
             <span class="actions">
                 <button onclick="editItem('${i._id}')">✏️</button>
                 <button onclick="delItem('${i._id}')" style="color:#ff4c4c">🗑</button>
             </span>
         `;
+
         list.appendChild(row);
+
     });
+
 }
 
-async function saveItem() {
-    const btn = el("saveItemBtn"); // Added ID to your HTML button or changed here
+/* ============================= */
+/* SAVE ITEM */
+/* ============================= */
+
+async function saveItem(){
+
+    const btn = el("saveItemBtn");
+
     const payload = {
+
         _id: editId,
+
         title: el("title").value.trim(),
         icon: el("icon").value.trim(),
         url: el("url").value.trim(),
+
         device: el("device").value,
         visibility: el("visibility").value,
+
         highlight: el("highlight").value,
         badge: el("badgeText").value.trim(),
+
         priority: parseInt(el("priority").value) || 99,
+
         active: el("active").checked,
         newTab: el("newTab").checked
+
     };
 
-    if (!payload.title || !payload.url) return alert("Title and URL are required");
+    if(!payload.title || !payload.url){
+
+        alert("Title and URL required");
+        return;
+
+    }
 
     btn.disabled = true;
-    const res = await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
+
+    const res = await apiFetch(API,{
+        method:"POST",
+        body:JSON.stringify(payload)
     });
 
-    if (res?.success) {
+    btn.disabled = false;
+
+    if(res?.success){
+
         closeModal();
         loadItems();
-    } else {
-        alert("Failed to save item.");
+
+    }else{
+
+        alert("Save failed");
+
     }
-    btn.disabled = false;
+
 }
 
-function editItem(id) {
+/* ============================= */
+/* EDIT ITEM */
+/* ============================= */
+
+function editItem(id){
+
     const i = items.find(x => x._id === id);
-    if (!i) return;
+
+    if(!i) return;
+
     editId = i._id;
+
     el("title").value = i.title;
     el("icon").value = i.icon;
     el("url").value = i.url;
+
     el("device").value = i.device;
     el("visibility").value = i.visibility;
+
     el("highlight").value = i.highlight;
+
     el("badgeText").value = i.badge;
+
     el("priority").value = i.priority;
+
     el("active").checked = i.active;
     el("newTab").checked = i.newTab;
+
     el("modal").style.display = "flex";
+
 }
 
-async function delItem(id) {
-    if (!confirm("Delete this menu item?")) return;
-    const res = await apiFetch(`${API}/${id}`, { method: "DELETE" });
-    if (res?.success) loadItems();
+/* ============================= */
+/* DELETE ITEM */
+/* ============================= */
+
+async function delItem(id){
+
+    if(!confirm("Delete this sidebar item?")) return;
+
+    const res = await apiFetch(`${API}/${id}`,{
+        method:"DELETE"
+    });
+
+    if(res?.success){
+        loadItems();
+    }
+
 }
 
-window.openModal = () => {
+/* ============================= */
+/* MODAL OPEN */
+/* ============================= */
+
+function openModal(){
+
     editId = null;
-    document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
+
+    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
+
+    document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0);
+
     el("active").checked = true;
+
     el("modal").style.display = "flex";
-};
 
-window.closeModal = () => el("modal").style.display = "none";
+}
 
-document.addEventListener("DOMContentLoaded", loadItems);
-</script>
+/* ============================= */
+/* MODAL CLOSE */
+/* ============================= */
 
-<div class="modal-footer">
-<button id="saveItemBtn" onclick="saveItem()">💾 Save Item</button>
-</div>
+function closeModal(){
+
+    el("modal").style.display = "none";
+
+}
+
+/* ============================= */
+/* INIT */
+/* ============================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+    loadItems();
+
+});
+
   
 </script>
     
