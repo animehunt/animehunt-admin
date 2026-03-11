@@ -216,102 +216,150 @@ body{
 <script>
 
 /* ============================================================
-   ANIMEHUNT CMS - DASHBOARD LOGIC (FIXED)
+   ANIMEHUNT CMS DASHBOARD SCRIPT (TURSO READY)
    ============================================================ */
 
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev";
 const DASH_API = `${API_BASE}/api/admin/dashboard`;
 
-/** * 1. Main Data Loader 
- **/
+/* ==============================
+   1. Dashboard Loader
+   ============================== */
+
 async function loadDashboard() {
-    const animeCountEl = document.getElementById("animeCount");
-    // Show Loading state
-    animeCountEl.textContent = "...";
 
-    try {
-        const res = await fetch(DASH_API);
-        if (!res.ok) throw new Error("Fetch failed");
+  try {
 
-        const data = await res.json();
-
-        // --- ROW 1: CORE STATS ---
-        updateUI("animeCount", data.core.animeCount);
-        updateUI("episodeCount", data.core.episodeCount);
-        updateUI("categoryCount", data.core.categoryCount);
-        updateUI("bannerCount", data.core.bannerCount);
-        updateUI("downloadCount", data.core.downloadCount);
-        updateUI("serverCount", data.core.serverCount);
-
-        // --- ROW 2: GROWTH & ADS ---
-        updateUI("activeAds", data.growth.activeAds);
-        updateUI("todayRevenue", "₹" + data.growth.todayRevenue);
-        updateUI("adClicks", data.growth.adClicks);
-        updateUI("trendingAnime", data.growth.trendingAnime);
-        updateUI("ongoingAnime", data.growth.ongoingAnime);
-        updateUI("topRated", data.growth.topRated);
-
-        // --- ROW 3: SYSTEM HEALTH ---
-        updateUI("cmsStatus", data.system.cmsStatus);
-        updateUI("serverLoad", data.system.serverLoad);
-        updateUI("apiStatus", data.system.apiStatus);
-        updateUI("aiStatus", data.system.aiStatus);
-        updateUI("searchStatus", data.system.searchStatus);
-        updateUI("backupStatus", data.system.backupStatus);
-
-    } catch (err) {
-        console.error("Dashboard Sync Error:", err);
-        // Fallback UI if API fails
-        document.querySelectorAll('.stat-card span').forEach(el => el.textContent = "Err");
-    }
-}
-
-/** * 2. UI Helper 
- **/
-function updateUI(id, val) {
-    const el = document.getElementById(id);
-    if (el) {
-        el.textContent = val !== undefined ? val : "0";
-        // Simple animation effect
-        el.style.opacity = "0";
-        setTimeout(() => {
-            el.style.transition = "opacity 0.5s";
-            el.style.opacity = "1";
-        }, 50);
-    }
-}
-
-/** * 3. Quick Actions Listeners 
- **/
-function initQuickActions() {
-    const cards = document.querySelectorAll('.cms-content .stats-grid:last-child .stat-card');
-    
-    cards.forEach(card => {
-        card.style.cursor = "pointer";
-        card.onclick = () => {
-            const action = card.textContent.trim();
-            if (action.includes("Add Anime")) location.href = "anime.html?action=new";
-            if (action.includes("AI Scan")) {
-                card.querySelector('span').textContent = "Running...";
-                setTimeout(() => {
-                    alert("AI Deep Scan Complete!");
-                    card.querySelector('span').textContent = "Run";
-                }, 2000);
-            }
-            if (action.includes("Emergency Stop")) {
-                if(confirm("DANGER: Stop all services?")) alert("Services Halted.");
-            }
-        };
+    const res = await fetch(DASH_API, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
     });
+
+    if (!res.ok) throw new Error("API failed");
+
+    const data = await res.json();
+
+    /* CORE */
+    updateUI("animeCount", data.core.animeCount);
+    updateUI("episodeCount", data.core.episodeCount);
+    updateUI("categoryCount", data.core.categoryCount);
+    updateUI("bannerCount", data.core.bannerCount);
+    updateUI("downloadCount", data.core.downloadCount);
+    updateUI("serverCount", data.core.serverCount);
+
+    /* GROWTH */
+    updateUI("activeAds", data.growth.activeAds);
+    updateUI("todayRevenue", "₹" + data.growth.todayRevenue);
+    updateUI("adClicks", data.growth.adClicks);
+    updateUI("trendingAnime", data.growth.trendingAnime);
+    updateUI("ongoingAnime", data.growth.ongoingAnime);
+    updateUI("topRated", data.growth.topRated);
+
+    /* SYSTEM */
+    updateUI("cmsStatus", data.system.cmsStatus);
+    updateUI("serverLoad", data.system.serverLoad);
+    updateUI("apiStatus", data.system.apiStatus);
+    updateUI("aiStatus", data.system.aiStatus);
+    updateUI("searchStatus", data.system.searchStatus);
+    updateUI("backupStatus", data.system.backupStatus);
+
+  } catch (err) {
+
+    console.error("Dashboard Error:", err);
+
+    document.querySelectorAll(".stat-card span").forEach(el=>{
+      if(el.textContent==="0" || el.textContent===""){
+        el.textContent="Err";
+      }
+    });
+
+  }
+
 }
 
-// Start everything
-document.addEventListener("DOMContentLoaded", () => {
-    loadDashboard();
-    initQuickActions();
+/* ==============================
+   2. UI Update Helper
+   ============================== */
+
+function updateUI(id,val){
+
+  const el=document.getElementById(id);
+
+  if(!el) return;
+
+  el.style.opacity="0";
+
+  setTimeout(()=>{
+    el.textContent=val ?? "0";
+    el.style.transition="opacity .4s";
+    el.style.opacity="1";
+  },80);
+
+}
+
+/* ==============================
+   3. Quick Actions
+   ============================== */
+
+function initQuickActions(){
+
+  const cards=document.querySelectorAll(".cms-content .stats-grid:last-child .stat-card");
+
+  cards.forEach(card=>{
+
+    card.style.cursor="pointer";
+
+    card.onclick=()=>{
+
+      const txt=card.textContent;
+
+      if(txt.includes("Add Anime")){
+        location.href="anime.html?action=new";
+      }
+
+      if(txt.includes("AI Scan")){
+
+        const span=card.querySelector("span");
+        span.textContent="Running...";
+
+        setTimeout(()=>{
+          alert("AI Scan Complete");
+          span.textContent="Run";
+        },2000);
+
+      }
+
+      if(txt.includes("Emergency Stop")){
+
+        if(confirm("Stop all services?")){
+          alert("All services stopped");
+        }
+
+      }
+
+    }
+
+  });
+
+}
+
+/* ==============================
+   INIT
+   ============================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+  loadDashboard();
+
+  initQuickActions();
+
+  /* auto refresh every 30 sec */
+  setInterval(loadDashboard,30000);
+
 });
-  
-    
+
 </script>
 
 
