@@ -209,171 +209,168 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-/* ============================================================
-   ANIMEHUNT CMS - CATEGORY MANAGER (FIXED)
-   ============================================================ */
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"; // Update with your URL
-let editingId = null;
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
 
-/** 1. Load Categories **/
-async function loadCategories() {
-    const list = document.getElementById("list");
-    list.innerHTML = "<div style='padding:20px; color:#ffcc00'>Refreshing list...</div>";
+let editingId=null
 
-    try {
-        const res = await fetch(API);
-        const data = await res.json();
-        list.innerHTML = "";
+async function loadCategories(){
 
-        if (!data || data.length === 0) {
-            list.innerHTML = "<div style='padding:20px;color:#888'>No Categories found.</div>";
-            return;
-        }
+const list=document.getElementById("list")
 
-        data.forEach(cat => {
-            const row = document.createElement("div");
-            row.className = "row";
-            row.innerHTML = `
-                <span style="font-weight:600; color:#fff">${escapeHTML(cat.name)}</span>
-                <span style="color:#888; font-family:monospace">${escapeHTML(cat.slug)}</span>
-                <span class="badge" style="text-transform:uppercase">${cat.type}</span>
-                <span style="color:${cat.active ? '#4cff4c' : '#ff4c4c'}">
-                    ${cat.active ? '● Online' : '○ Offline'}
-                </span>
-                <span style="text-align:center">${cat.category_order || 0}</span>
-                <span style="text-align:center">P${cat.priority || 1}</span>
-                <span class="actions">
-                    <button onclick="editCategory('${cat.id}')">✏️</button>
-                    <button onclick="deleteCategory('${cat.id}')" style="color:#ff4d4d">🗑</button>
-                    ${cat.featured ? '⭐' : ''}
-                    ${cat.showHome ? '🏠' : ''}
-                </span>
-            `;
-            list.appendChild(row);
-        });
-    } catch (err) {
-        list.innerHTML = `<div style="color:red; padding:20px">Error: ${err.message}</div>`;
-    }
+const res=await fetch(API)
+
+const data=await res.json()
+
+list.innerHTML=""
+
+data.forEach(cat=>{
+
+list.innerHTML+=`
+
+<div class="row">
+
+<span style="font-weight:600">${cat.name}</span>
+
+<span style="color:#888">${cat.slug}</span>
+
+<span class="badge">${cat.type}</span>
+
+<span class="${cat.active?'active':'inactive'}">
+${cat.active?'● Online':'○ Offline'}
+</span>
+
+<span>${cat.category_order}</span>
+
+<span>P${cat.priority}</span>
+
+<span class="actions">
+
+<button onclick="editCategory('${cat.id}')">✏️</button>
+
+<button onclick="deleteCategory('${cat.id}')">🗑</button>
+
+${cat.featured?'⭐':''}
+${cat.showHome?'🏠':''}
+
+</span>
+
+</div>
+
+`
+
+})
+
 }
 
-/** 2. Save / Update Logic **/
-async function saveCategory() {
-    const saveBtn = document.querySelector(".modal-footer button");
-    
-    const payload = {
-        name: document.getElementById("name").value.trim(),
-        slug: document.getElementById("slug").value.trim(),
-        type: document.getElementById("type").value,
-        order: Number(document.getElementById("order").value || 0),
-        priority: Number(document.getElementById("priority").value || 1),
-        showHome: document.getElementById("showHome").checked,
-        isActive: document.getElementById("isActive").checked,
-        isFeatured: document.getElementById("isFeatured").checked,
-        aiTrending: document.getElementById("aiTrending").checked,
-        aiPopular: document.getElementById("aiPopular").checked,
-        aiAssign: document.getElementById("aiAssign").checked
-    };
+async function saveCategory(){
 
-    if (!payload.name || !payload.slug) return alert("Name and Slug are required!");
+const payload={
 
-    saveBtn.disabled = true;
-    saveBtn.innerText = "Saving...";
+name:name.value,
+slug:slug.value,
 
-    try {
-        const url = editingId ? `${API}/${editingId}` : API;
-        const method = editingId ? "PUT" : "POST";
+type:type.value,
+page:page.value,
 
-        const res = await fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+order:Number(order.value||0),
+priority:Number(priority.value||1),
 
-        if (res.ok) {
-            closeModal();
-            loadCategories();
-        } else {
-            const err = await res.json();
-            alert(err.error || "Save failed");
-        }
-    } catch (err) {
-        alert("Server Error");
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerText = "💾 Save";
-    }
+showHome:showHome.checked,
+isActive:isActive.checked,
+isFeatured:isFeatured.checked,
+
+aiTrending:aiTrending.checked,
+aiPopular:aiPopular.checked,
+aiAssign:aiAssign.checked
+
 }
 
-/** 3. Edit & Delete Functions **/
-window.editCategory = async (id) => {
-    editingId = id;
-    try {
-        const res = await fetch(`${API}/${id}`);
-        const cat = await res.json();
-        
-        // Fill Modal Fields
-        document.getElementById("name").value = cat.name;
-        document.getElementById("slug").value = cat.slug;
-        document.getElementById("type").value = cat.type;
-        document.getElementById("order").value = cat.category_order;
-        document.getElementById("priority").value = cat.priority;
-        document.getElementById("showHome").checked = !!cat.showHome;
-        document.getElementById("isActive").checked = !!cat.active;
-        document.getElementById("isFeatured").checked = !!cat.featured;
-        document.getElementById("aiTrending").checked = !!cat.aiTrending;
-        document.getElementById("aiPopular").checked = !!cat.aiPopular;
-        document.getElementById("aiAssign").checked = !!cat.aiAssign;
+let url=API
+let method="POST"
 
-        document.getElementById("modal").style.display = "flex";
-    } catch (e) { alert("Failed to fetch data"); }
-};
+if(editingId){
 
-window.deleteCategory = async (id) => {
-    if (!confirm("Delete this category?")) return;
-    await fetch(`${API}/${id}`, { method: "DELETE" });
-    loadCategories();
-};
+url=`${API}/${editingId}`
+method="PUT"
 
-/** 4. Modal Controls **/
-function openModal() {
-    editingId = null;
-    resetForm();
-    document.getElementById("modal").style.display = "flex";
 }
 
-function closeModal() {
-    document.getElementById("modal").style.display = "none";
+await fetch(url,{
+method,
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(payload)
+})
+
+closeModal()
+
+loadCategories()
+
 }
 
-function resetForm() {
-    document.querySelectorAll(".form-grid input").forEach(i => {
-        if(i.type === "checkbox") i.checked = false;
-        else i.value = "";
-    });
-    document.getElementById("isActive").checked = true; // Default Active
-    document.getElementById("priority").value = "1";
-    document.getElementById("type").value = "row";
+async function editCategory(id){
+
+editingId=id
+
+const res=await fetch(`${API}/${id}`)
+
+const cat=await res.json()
+
+name.value=cat.name
+slug.value=cat.slug
+type.value=cat.type
+
+order.value=cat.category_order
+priority.value=cat.priority
+
+showHome.checked=!!cat.showHome
+isActive.checked=!!cat.active
+isFeatured.checked=!!cat.featured
+
+aiTrending.checked=!!cat.aiTrending
+aiPopular.checked=!!cat.aiPopular
+aiAssign.checked=!!cat.aiAssign
+
+modal.style.display="flex"
+
 }
 
-function escapeHTML(str) {
-    if(!str) return "";
-    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function deleteCategory(id){
+
+if(!confirm("Delete category?"))return
+
+await fetch(`${API}/${id}`,{method:"DELETE"})
+
+loadCategories()
+
 }
 
-// Auto-Slug from Name
-document.getElementById("name").addEventListener("input", function(e) {
-    if(!editingId) {
-        document.getElementById("slug").value = e.target.value
-            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    }
-});
+function openModal(){
 
-// Initial load
-loadCategories();
-  
-</script>
+editingId=null
 
+modal.style.display="flex"
+
+}
+
+function closeModal(){
+
+modal.style.display="none"
+
+}
+
+name.oninput=e=>{
+
+slug.value=e.target.value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-+|-+$/g,"")
+
+}
+
+loadCategories()
+
+  </script>
 
 </body>
 </html>
