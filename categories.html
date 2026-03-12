@@ -209,7 +209,6 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
 
 let editingId=null
@@ -271,7 +270,8 @@ name:name.value,
 slug:slug.value,
 
 type:type.value,
-page:page.value,
+
+page:null,
 
 order:Number(order.value||0),
 priority:Number(priority.value||1),
@@ -337,7 +337,7 @@ modal.style.display="flex"
 
 async function deleteCategory(id){
 
-if(!confirm("Delete category?"))return
+if(!confirm("Delete category?")) return
 
 await fetch(`${API}/${id}`,{method:"DELETE"})
 
