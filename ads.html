@@ -367,36 +367,43 @@ Loading ads...
 
 <script>
 
-/* ========================= */
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
-
-/* ========================= */
 
 async function api(url,method="GET",body=null){
 
+try{
+
 const opt={
 method,
-headers:{
-"Content-Type":"application/json"
-}
+headers:{ "Content-Type":"application/json" }
 }
 
 if(body) opt.body=JSON.stringify(body)
 
 const res=await fetch(url,opt)
 
-return res.json()
+return await res.json()
+
+}catch(e){
+
+console.error(e)
+alert("API Error")
 
 }
 
-/* ========================= */
+}
+
+/* LOAD ADS */
 
 async function loadAds(){
 
 const list=document.getElementById("adsList")
 
+list.innerHTML="<tr><td colspan='4'>Loading...</td></tr>"
+
 const ads=await api(API)
+
+if(!ads) return
 
 list.innerHTML=""
 
@@ -420,7 +427,7 @@ list.appendChild(tr)
 
 }
 
-/* ========================= */
+/* SAVE */
 
 async function saveAd(){
 
@@ -444,29 +451,33 @@ loadAds()
 
 }
 
-/* ========================= */
+/* TOGGLE */
 
 async function toggleAd(id){
 
-await api(API+"/"+id+"/toggle","PATCH")
+await api(`${API}/${id}/toggle`,"PATCH")
 
 loadAds()
 
 }
 
-/* ========================= */
+/* DELETE */
 
 async function deleteAd(id){
 
-await api(API+"/"+id,"DELETE")
+if(!confirm("Delete ad?")) return
+
+await api(`${API}/${id}`,"DELETE")
 
 loadAds()
 
 }
 
-/* ========================= */
+/* BULK */
 
 async function bulkAddAds(){
+
+try{
 
 const data=JSON.parse(bulkData.value)
 
@@ -476,11 +487,20 @@ bulkData.value=""
 
 loadAds()
 
+}catch{
+
+alert("Invalid JSON")
+
+}
+
 }
 
 loadAds()
 
 </script>
+
+
+
 
 </body>
 </html>
