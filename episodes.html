@@ -220,22 +220,33 @@ body{background:#060a14;color:#fff;}
 </div>
 </div>
 
-<script>
-/* ============================================================
-   ANIMEHUNT CMS - EPISODE MANAGER (TURSO VERSION)
-   ============================================================ */
 
-const API =
-"https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
+<script>
+
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
 let editId=null
 
 const modal=document.getElementById("episodeModal")
 const list=document.getElementById("episodeList")
 
-/* ------------------------------------------------
-LOAD EPISODES
------------------------------------------------- */
+async function api(url,method="GET",body=null){
+
+const res = await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
+
+return res.json()
+
+}
+
+/* LOAD */
 
 async function loadEpisodes(){
 
@@ -243,17 +254,15 @@ list.innerHTML="Loading..."
 
 try{
 
-const res=await fetch(API)
-
-const data=await res.json()
+const data = await api(API)
 
 list.innerHTML=""
 
 if(!data.length){
 
 list.innerHTML="<div style='padding:20px;color:#777'>No Episodes</div>"
-
 return
+
 }
 
 data.forEach(e=>{
@@ -261,31 +270,18 @@ data.forEach(e=>{
 const dlCount=e.downloads.reduce((acc,h)=>acc+h.links.length,0)
 
 list.innerHTML+=`
-
 <div class="row">
-
 <span>${e.anime}</span>
-
 <span class="badge">S${e.season}</span>
-
 <span class="badge">E${e.episode}</span>
-
 <span style="color:#888">${e.title||"-"}</span>
-
 <span>${e.servers.length}</span>
-
 <span>${dlCount}</span>
-
 <span class="actions">
-
 <button onclick="editEpisode('${e.id}')">✏️</button>
-
 <button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
-
 </span>
-
 </div>
-
 `
 
 })
@@ -298,293 +294,100 @@ list.innerHTML="Failed to load"
 
 }
 
-/* ------------------------------------------------
-CREATE HOST BLOCK
------------------------------------------------- */
-
-function createHostBlock(host="",links=[]){
-
-const div=document.createElement("div")
-
-div.className="download-host"
-
-div.style.background="#0e1424"
-
-div.style.padding="10px"
-
-div.style.borderRadius="8px"
-
-div.style.marginTop="10px"
-
-let rows=""
-
-if(links.length){
-
-links.forEach(l=>{
-
-rows+=createQualityRow(l.quality,l.url)
-
-})
-
-}else{
-
-rows=createQualityRow()
-
-}
-
-div.innerHTML=`
-
-<div style="display:flex;gap:10px;margin-bottom:10px">
-
-<input class="host-name" value="${host}" placeholder="Host (Terabox)" style="flex:1">
-
-<button onclick="this.closest('.download-host').remove()" style="color:#ff4d4d;background:none;border:none">✕</button>
-
-</div>
-
-<div class="quality-container">
-
-${rows}
-
-</div>
-
-<button class="add-quality-btn">＋ Add Quality</button>
-
-`
-
-document.querySelector(".download-section").appendChild(div)
-
-}
-
-/* ------------------------------------------------
-QUALITY ROW
------------------------------------------------- */
-
-function createQualityRow(q="720p",url=""){
-
-return`
-
-<div class="quality-row">
-
-<select>
-
-<option ${q=="480p"?"selected":""}>480p</option>
-
-<option ${q=="720p"?"selected":""}>720p</option>
-
-<option ${q=="1080p"?"selected":""}>1080p</option>
-
-<option ${q=="4K"?"selected":""}>4K</option>
-
-<option ${q=="ZIP"?"selected":""}>ZIP</option>
-
-</select>
-
-<input class="quality-link" value="${url}" placeholder="Download Link">
-
-<button onclick="this.parentElement.remove()">✕</button>
-
-</div>
-
-`
-
-}
-
-/* ------------------------------------------------
-ADD QUALITY BUTTON
------------------------------------------------- */
-
-document.addEventListener("click",e=>{
-
-if(e.target.classList.contains("add-quality-btn")){
-
-const container=e.target.previousElementSibling
-
-container.insertAdjacentHTML("beforeend",createQualityRow())
-
-}
-
-})
-
-/* ------------------------------------------------
-SAVE EPISODE
------------------------------------------------- */
+/* SAVE */
 
 document.getElementById("saveEpisode").onclick=async()=>{
 
 const payload={
 
-anime:document.getElementById("animeName").value,
-
-season:document.getElementById("seasonNo").value || "1",
-
-episode:document.getElementById("episodeNo").value,
-
-title:document.getElementById("episodeTitle").value,
-
-description:document.getElementById("description").value,
+anime:animeName.value,
+season:seasonNo.value || "1",
+episode:episodeNo.value,
+title:episodeTitle.value,
+description:description.value,
 
 servers:[
-
-document.getElementById("server1").value,
-
-document.getElementById("server2").value,
-
-document.getElementById("server3").value
-
-].filter(s=>s),
+server1.value,
+server2.value,
+server3.value
+].filter(Boolean),
 
 downloads:[],
-
-ongoing:document.getElementById("isOngoing").checked,
-
-featured:document.getElementById("isFeatured").checked
+ongoing:isOngoing.checked,
+featured:isFeatured.checked
 
 }
 
 document.querySelectorAll(".download-host").forEach(block=>{
 
 const host=block.querySelector(".host-name").value
-
 const links=[]
 
 block.querySelectorAll(".quality-row").forEach(row=>{
 
 const quality=row.querySelector("select").value
-
 const url=row.querySelector(".quality-link").value
 
 if(url){
-
 links.push({quality,url})
-
 }
 
 })
 
 if(host && links.length){
-
 payload.downloads.push({host,links})
-
 }
 
 })
 
-const method=editId ? "PATCH":"POST"
+const method = editId ? "PATCH":"POST"
+const url = editId ? `${API}/${editId}` : API
 
-const url=editId ? `${API}/${editId}`:API
-
-await fetch(url,{
-
-method,
-
-headers:{"Content-Type":"application/json"},
-
-body:JSON.stringify(payload)
-
-})
+await api(url,method,payload)
 
 location.reload()
 
 }
 
-/* ------------------------------------------------
-EDIT
------------------------------------------------- */
-
-window.editEpisode=async(id)=>{
-
-editId=id
-
-const res=await fetch(`${API}/${id}`)
-
-const e=await res.json()
-
-document.getElementById("animeName").value=e.anime
-
-document.getElementById("seasonNo").value=e.season
-
-document.getElementById("episodeNo").value=e.episode
-
-document.getElementById("episodeTitle").value=e.title
-
-document.getElementById("description").value=e.description
-
-document.getElementById("server1").value=e.servers[0]||""
-
-document.getElementById("server2").value=e.servers[1]||""
-
-document.getElementById("server3").value=e.servers[2]||""
-
-document.getElementById("isOngoing").checked=e.ongoing
-
-document.getElementById("isFeatured").checked=e.featured
-
-document.querySelector(".download-section").innerHTML=""
-
-if(e.downloads.length){
-
-e.downloads.forEach(d=>{
-
-createHostBlock(d.host,d.links)
-
-})
-
-}else{
-
-createHostBlock()
-
-}
-
-modal.style.display="flex"
-
-}
-
-/* ------------------------------------------------
-DELETE
------------------------------------------------- */
+/* DELETE */
 
 window.deleteEpisode=async(id)=>{
 
 if(!confirm("Delete episode?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+await api(`${API}/${id}`,"DELETE")
 
 loadEpisodes()
 
 }
 
-/* ------------------------------------------------
-MODAL
------------------------------------------------- */
+/* EDIT */
 
-document.getElementById("openAddEpisode").onclick=()=>{
+window.editEpisode=async(id)=>{
 
-editId=null
+const e = await api(`${API}/${id}`)
 
-document.querySelectorAll(".form-grid input, textarea").forEach(i=>i.value="")
+editId=id
 
-document.querySelector(".download-section").innerHTML=""
+animeName.value=e.anime
+seasonNo.value=e.season
+episodeNo.value=e.episode
+episodeTitle.value=e.title
+description.value=e.description
 
-createHostBlock()
+server1.value=e.servers[0]||""
+server2.value=e.servers[1]||""
+server3.value=e.servers[2]||""
+
+isOngoing.checked=e.ongoing
+isFeatured.checked=e.featured
 
 modal.style.display="flex"
 
 }
 
-document.getElementById("closeModal").onclick=()=>{
-
-modal.style.display="none"
-
-}
-
-/* ------------------------------------------------
-INIT
------------------------------------------------- */
-
 loadEpisodes()
-                
-                                                            
+
 </script>
 
 </body>
