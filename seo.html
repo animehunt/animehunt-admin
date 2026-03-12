@@ -293,134 +293,179 @@
 
 </div>
 
-<script>
+    <script>
 
-    const API = "/api/admin/seo";
-const TOKEN_KEY = "AUTH_TOKEN";
-const saveBtn = document.getElementById("saveSEO");
+const API="/api/admin/seo"
+const TOKEN_KEY="AUTH_TOKEN"
 
-function el(id) { return document.getElementById(id); }
+const saveBtn=document.getElementById("saveSEO")
 
-/** Helper for API Fetch **/
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(TOKEN_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-
-        if (res.status === 401) {
-            alert("Session expired. Redirecting to login...");
-            localStorage.removeItem(TOKEN_KEY);
-            location.href = "login.html";
-            return null;
-        }
-        return await res.json();
-    } catch (err) {
-        console.error("Fetch error:", err);
-        return null;
-    }
+function el(id){
+return document.getElementById(id)
 }
 
-/** Load SEO Settings into UI **/
-async function loadSEO() {
-    const d = await apiFetch(API);
-    if (!d) return;
+/* ==========================
+API HELPER
+========================== */
 
-    // Mapping Data safely (using fallbacks for empty values)
-    if (d.global) {
-        el("siteTitle").value = d.global.title || "";
-        el("siteDesc").value = d.global.desc || "";
-        el("siteKeywords").value = d.global.keywords || "";
-        el("canonical").value = d.global.canonical || "";
-        el("indexing").value = d.global.indexing || "index";
-    }
+async function apiFetch(url,options={}){
 
-    if (d.home) {
-        el("homeTitle").value = d.home.title || "";
-        el("homeDesc").value = d.home.desc || "";
-        el("homeKeywords").value = d.home.keywords || "";
-        el("homeOG").value = d.home.og || "";
-    }
+const token=localStorage.getItem(TOKEN_KEY)
 
-    if (d.templates) {
-        el("animeTemplate").value = d.templates.anime || "";
-        el("categoryTemplate").value = d.templates.category || "";
-        el("episodeTemplate").value = d.templates.episode || "";
-        el("searchTemplate").value = d.templates.search || "";
-    }
+try{
 
-    if (d.social) {
-        el("ogTitle").value = d.social.ogTitle || "";
-        el("ogDesc").value = d.social.ogDesc || "";
-        el("twTitle").value = d.social.twTitle || "";
-        el("twDesc").value = d.social.twDesc || "";
-        el("twCard").value = d.social.twCard || "summary_large_image";
-    }
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":token?`Bearer ${token}`:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+
+alert("Session expired")
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+return null
+
 }
 
-/** Save SEO Settings **/
-async function saveSEO() {
-    saveBtn.disabled = true;
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = "Saving...";
+return await res.json()
 
-    const payload = {
-        global: {
-            title: el("siteTitle").value,
-            desc: el("siteDesc").value,
-            keywords: el("siteKeywords").value,
-            canonical: el("canonical").value,
-            indexing: el("indexing").value
-        },
-        home: {
-            title: el("homeTitle").value,
-            desc: el("homeDesc").value,
-            keywords: el("homeKeywords").value,
-            og: el("homeOG").value
-        },
-        templates: {
-            anime: el("animeTemplate").value,
-            category: el("categoryTemplate").value,
-            episode: el("episodeTemplate").value,
-            search: el("searchTemplate").value
-        },
-        social: {
-            ogTitle: el("ogTitle").value,
-            ogDesc: el("ogDesc").value,
-            twTitle: el("twTitle").value,
-            twDesc: el("twDesc").value,
-            twCard: el("twCard").value
-        }
-    };
+}catch(e){
 
-    const res = await apiFetch(API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+console.error(e)
+alert("Network error")
+return null
 
-    if (res && res.success) {
-        alert("SEO Settings Synced with Live Site! 🚀");
-    } else {
-        alert("Error: Settings could not be saved.");
-    }
-
-    saveBtn.disabled = false;
-    saveBtn.textContent = originalText;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadSEO();
-    saveBtn.addEventListener("click", saveSEO);
-});
-  
-          
-</script>
+}
+
+/* ==========================
+LOAD SEO
+========================== */
+
+async function loadSEO(){
+
+const d=await apiFetch(API)
+
+if(!d) return
+
+if(d.global){
+
+el("siteTitle").value=d.global.title||""
+el("siteDesc").value=d.global.desc||""
+el("siteKeywords").value=d.global.keywords||""
+el("canonical").value=d.global.canonical||""
+el("indexing").value=d.global.indexing||"index"
+
+}
+
+if(d.home){
+
+el("homeTitle").value=d.home.title||""
+el("homeDesc").value=d.home.desc||""
+el("homeKeywords").value=d.home.keywords||""
+el("homeOG").value=d.home.og||""
+
+}
+
+if(d.templates){
+
+el("animeTemplate").value=d.templates.anime||""
+el("categoryTemplate").value=d.templates.category||""
+el("episodeTemplate").value=d.templates.episode||""
+el("searchTemplate").value=d.templates.search||""
+
+}
+
+if(d.social){
+
+el("ogTitle").value=d.social.ogTitle||""
+el("ogDesc").value=d.social.ogDesc||""
+el("twTitle").value=d.social.twTitle||""
+el("twDesc").value=d.social.twDesc||""
+el("twCard").value=d.social.twCard||"summary_large_image"
+
+}
+
+}
+
+/* ==========================
+SAVE SEO
+========================== */
+
+async function saveSEO(){
+
+saveBtn.disabled=true
+saveBtn.innerText="Saving..."
+
+const payload={
+
+global:{
+title:el("siteTitle").value,
+desc:el("siteDesc").value,
+keywords:el("siteKeywords").value,
+canonical:el("canonical").value,
+indexing:el("indexing").value
+},
+
+home:{
+title:el("homeTitle").value,
+desc:el("homeDesc").value,
+keywords:el("homeKeywords").value,
+og:el("homeOG").value
+},
+
+templates:{
+anime:el("animeTemplate").value,
+category:el("categoryTemplate").value,
+episode:el("episodeTemplate").value,
+search:el("searchTemplate").value
+},
+
+social:{
+ogTitle:el("ogTitle").value,
+ogDesc:el("ogDesc").value,
+twTitle:el("twTitle").value,
+twDesc:el("twDesc").value,
+twCard:el("twCard").value
+}
+
+}
+
+const res=await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+if(res?.success){
+
+alert("SEO Saved Successfully 🚀")
+
+}else{
+
+alert("Failed to save SEO")
+
+}
+
+saveBtn.disabled=false
+saveBtn.innerText="💾 Save SEO"
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadSEO()
+
+saveBtn.addEventListener("click",saveSEO)
+
+})
+
+    </script>
 
 </body>
 </html>
