@@ -329,7 +329,15 @@ a{
 </div>
 
 <script>
-const API="/api/admin/performance"
+
+/* ============================================
+ANIMEHUNT PERFORMANCE CMS
+FULL FIXED VERSION
+============================================ */
+
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/performance"
+
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
 const TOGGLES=[
 "lazyLoad","smartPreload","assetMinify","imgOptimize",
@@ -339,27 +347,51 @@ const TOGGLES=[
 
 let saveTimer=null
 
+/* =========================
+LOAD SETTINGS
+========================= */
+
 async function loadPerformance(){
 
-const res=await fetch(API)
+try{
 
-const data=await res.json()
+const res = await fetch(API,{
+headers:{
+"Authorization":"Bearer "+TOKEN
+}
+})
+
+if(!res.ok){
+throw new Error("API Error")
+}
+
+const data = await res.json()
 
 TOGGLES.forEach(id=>{
 
 const el=document.getElementById(id)
 
-if(el) el.checked=!!data[id]
+if(el) el.checked = !!data[id]
 
 })
 
+console.log("Performance settings loaded")
+
+}catch(err){
+
+console.error("Performance load failed:",err)
+
 }
 
-function scheduleSave(e){
+}
 
-clearTimeout(saveTimer)
+/* =========================
+SAVE SETTINGS
+========================= */
 
-saveTimer=setTimeout(async()=>{
+async function savePerformance(){
+
+try{
 
 const payload={}
 
@@ -371,17 +403,54 @@ payload[id]=el.checked
 
 })
 
-await fetch(API,{
+const res = await fetch(API,{
+
 method:"POST",
+
 headers:{
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
 },
+
 body:JSON.stringify(payload)
+
 })
+
+if(!res.ok){
+
+throw new Error("Save failed")
+
+}
+
+console.log("Performance saved")
+
+}catch(err){
+
+console.error("Save error:",err)
+
+}
+
+}
+
+/* =========================
+AUTO SAVE (Debounce)
+========================= */
+
+function scheduleSave(){
+
+clearTimeout(saveTimer)
+
+saveTimer=setTimeout(()=>{
+
+savePerformance()
 
 },600)
 
 }
+
+/* =========================
+INIT
+========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -389,14 +458,18 @@ TOGGLES.forEach(id=>{
 
 const el=document.getElementById(id)
 
-if(el) el.addEventListener("change",scheduleSave)
+if(el){
+
+el.addEventListener("change",scheduleSave)
+
+}
 
 })
 
 loadPerformance()
 
 })
-  
+
 </script>
 
 
