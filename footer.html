@@ -196,44 +196,27 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 
 <script>
-/* ===============================================
-ANIMEHUNT FOOTER CMS FRONTEND
-=============================================== */
 
-const API="/api/admin/footer"
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 const status=document.getElementById("status")
 const debugBox=document.getElementById("debugBox")
 
-const fields=[
+async function api(url,method="GET",body=null){
 
-"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
 
-"about","privacy","disclaimer","dmca","telegram","linkBadges",
-
-"azOn","azAuto","azSticky","azCompact","azMode",
-
-"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
-
-"promoOn","promoText","promoLink","promoAutoHide"
-
-]
-
-function setStatus(msg,color="#4cff4c"){
-
-status.innerText=msg
-status.style.color=color
-
-setTimeout(()=>{
-
-status.innerText="Ready"
-status.style.color=""
-
-},2500)
+return res.json()
 
 }
-
-/* LOAD CONFIG */
 
 async function loadFooter(){
 
@@ -241,9 +224,7 @@ status.innerText="Loading..."
 
 try{
 
-const res=await fetch(API)
-
-const data=await res.json()
+const data = await api(API)
 
 fields.forEach(id=>{
 
@@ -252,28 +233,22 @@ const el=document.getElementById(id)
 if(!el) return
 
 if(el.type==="checkbox"){
-
 el.checked=!!data[id]
-
 }else{
-
 el.value=data[id] || ""
-
 }
 
 })
 
-setStatus("Synced")
+status.innerText="Synced"
 
-}catch(e){
+}catch{
 
-setStatus("API Error","red")
-
-}
+status.innerText="API Error"
 
 }
 
-/* SAVE */
+}
 
 async function save(){
 
@@ -283,8 +258,6 @@ fields.forEach(id=>{
 
 const el=document.getElementById(id)
 
-if(!el) return
-
 payload[id]=el.type==="checkbox"
 ? el.checked
 : el.value
@@ -293,108 +266,26 @@ payload[id]=el.type==="checkbox"
 
 status.innerText="Saving..."
 
-const res=await fetch(API,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(payload)
-})
+await api(API,"POST",payload)
 
-if(res.ok){
-
-setStatus("Saved")
-
-}else{
-
-setStatus("Save Failed","red")
+status.innerText="Saved"
 
 }
-
-}
-
-/* KILL */
 
 async function kill(){
 
-if(!confirm("Disable footer on live site?")) return
+if(!confirm("Disable footer?")) return
 
-await fetch(`${API}/kill`,{method:"POST"})
-
-setStatus("Footer Disabled","orange")
+await api(`${API}/kill`,"POST")
 
 loadFooter()
 
 }
 
-/* DEBUG */
+document.addEventListener("DOMContentLoaded",loadFooter)
 
-async function debug(){
-
-const res=await fetch(API)
-
-const data=await res.json()
-
-debugBox.style.display=
-debugBox.style.display==="none"
-? "block"
-: "none"
-
-debugBox.textContent=
-JSON.stringify(data,null,2)
-
-}
-
-/* EXPORT */
-
-function exportCfg(){
-
-const payload={}
-
-fields.forEach(id=>{
-
-const el=document.getElementById(id)
-
-payload[id]=
-el.type==="checkbox"
-? el.checked
-: el.value
-
-})
-
-const blob=new Blob(
-[JSON.stringify(payload,null,2)],
-{type:"application/json"}
-)
-
-const a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="footer-config.json"
-
-a.click()
-
-}
-
-/* RESET */
-
-function resetCfg(){
-
-document
-.querySelectorAll("input[type='checkbox']")
-.forEach(c=>c.checked=false)
-
-document.getElementById("footerOn").checked=true
-
-setStatus("Reset locally")
-
-}
-
-document.addEventListener(
-"DOMContentLoaded",
-loadFooter
-)
-        
 </script>
+
 
  
 </body>
