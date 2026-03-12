@@ -547,129 +547,257 @@ color:#ccc;
 <div class="toggle">Embed Lock<label class="switch"><input type="checkbox" id="embedLock"><span class="slider"></span></label></div>
 </div>
 
-<script>
-const API = "/api/admin/security";
-const STATS_API = "/api/admin/stats"; // Live Traffic ke liye
-const TOKEN_KEY = "AUTH_TOKEN";
 
-const el = (id) => document.getElementById(id);
+            <script>
 
-/** Helper for API Calls **/
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(TOKEN_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-        if (res.status === 401) { location.href = "login.html"; return null; }
-        return await res.json();
-    } catch (err) { return null; }
+const API="/api/admin/security"
+const STATS_API="/api/security/stats"
+
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
+
+const el=id=>document.getElementById(id)
+
+/* =========================
+   API HELPER
+========================= */
+
+async function api(url,method="GET",body=null){
+
+try{
+
+const res=await fetch(url,{
+
+method,
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+
+body:body?JSON.stringify(body):null
+
+})
+
+if(!res.ok){
+
+console.error("API ERROR",res.status)
+
+return null
+
 }
 
-/** Load Live Statistics (Traffic, Blocked IPs) **/
-async function loadStats() {
-    const s = await apiFetch(STATS_API);
-    if (!s) return;
-    el("ipCount").innerText = s.blockedIPs || 0;
-    el("liveUsers").innerText = s.liveUsers || 0;
-    el("reqPerSec").innerText = s.reqPerSec || 0;
-    el("blockedReq").innerText = s.blockedReq || 0;
+return await res.json()
+
+}catch(e){
+
+console.error(e)
+
+return null
+
 }
 
-/** Load Main Security Settings **/
-async function loadSecurity() {
-    const d = await apiFetch(API);
-    if (!d) return;
-
-    // Mapping Database Values to UI
-    el("ultraMode").checked = d.ultra;
-    el("firewallLevel").value = d.firewallLevel;
-    
-    // Core
-    if(d.core) {
-        el("botProt").checked = d.core.bot;
-        el("scraperShield").checked = d.core.scraper;
-        el("hotlinkBlock").checked = d.core.hotlink;
-        el("embedLock").checked = d.core.embed;
-    }
-    
-    // Admin & Geo
-    el("indiaOnly").checked = d.geo.indiaOnly;
-    el("blockForeign").checked = d.geo.blockForeign;
-    el("loginLimit").checked = d.admin.loginLimit;
-    el("deviceLock").checked = d.admin.deviceLock;
-
-    // AI
-    el("autoBan").checked = d.ai.autoBan;
-    el("banBrute").checked = d.ai.brute;
-    el("banBots").checked = d.ai.bot;
-
-    updateFirewallLabel();
-    updateThreatUI(d.ultra);
 }
 
-/** Auto-Sync Logic (Debounced) **/
-let saveTimer;
-function sync() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(async () => {
-        const payload = {
-            ultra: el("ultraMode").checked,
-            firewallLevel: parseInt(el("firewallLevel").value),
-            core: {
-                bot: el("botProt").checked,
-                scraper: el("scraperShield").checked,
-                hotlink: el("hotlinkBlock").checked,
-                embed: el("embedLock").checked
-            },
-            geo: {
-                indiaOnly: el("indiaOnly").checked,
-                blockForeign: el("blockForeign").checked
-            },
-            admin: {
-                loginLimit: el("loginLimit").checked,
-                deviceLock: el("deviceLock").checked
-            },
-            ai: {
-                autoBan: el("autoBan").checked,
-                brute: el("banBrute").checked,
-                bot: el("banBots").checked
-            }
-        };
+/* =========================
+   LOAD SECURITY SETTINGS
+========================= */
 
-        const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
-        if(res?.success) console.log("Security Shield Updated");
-    }, 800);
+async function loadSecurity(){
+
+const d=await api(API)
+
+if(!d) return
+
+el("ultraMode").checked=d.ultra
+
+el("firewallLevel").value=d.firewallLevel
+
+/* CORE */
+
+el("botProt").checked=d.core.bot
+el("scraperShield").checked=d.core.scraper
+el("hotlinkBlock").checked=d.core.hotlink
+el("embedLock").checked=d.core.embed
+
+/* GEO */
+
+el("indiaOnly").checked=d.geo.indiaOnly
+el("blockForeign").checked=d.geo.blockForeign
+
+/* ADMIN */
+
+el("loginLimit").checked=d.admin.loginLimit
+el("deviceLock").checked=d.admin.deviceLock
+
+/* AI */
+
+el("autoBan").checked=d.ai.autoBan
+el("banBrute").checked=d.ai.brute
+el("banBots").checked=d.ai.bot
+
+updateFirewallLabel()
+updateThreatUI()
+
 }
 
-function updateFirewallLabel() {
-    const levels = ["None", "Basic", "Standard", "Strong", "Aggressive", "Full Shield"];
-    el("fwLabel").innerText = `Level ${el("firewallLevel").value} – ${levels[el("firewallLevel").value]}`;
-    el("fwLive").innerText = el("firewallLevel").value;
+/* =========================
+   SAVE SETTINGS
+========================= */
+
+let saveTimer
+
+function saveSecurity(){
+
+clearTimeout(saveTimer)
+
+saveTimer=setTimeout(async()=>{
+
+const payload={
+
+ultra:el("ultraMode").checked,
+
+firewallLevel:Number(el("firewallLevel").value),
+
+core:{
+bot:el("botProt").checked,
+scraper:el("scraperShield").checked,
+hotlink:el("hotlinkBlock").checked,
+embed:el("embedLock").checked
+},
+
+geo:{
+indiaOnly:el("indiaOnly").checked,
+blockForeign:el("blockForeign").checked
+},
+
+admin:{
+loginLimit:el("loginLimit").checked,
+deviceLock:el("deviceLock").checked
+},
+
+ai:{
+autoBan:el("autoBan").checked,
+brute:el("banBrute").checked,
+bot:el("banBots").checked
 }
 
-function updateThreatUI(isUltra) {
-    const fill = el("threatFill");
-    fill.style.width = isUltra ? "5%" : "45%";
-    fill.style.background = isUltra ? "#00ffb3" : "#ffcc00";
-    el("protStatus").innerText = isUltra ? "Lockdown" : "Active";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadSecurity();
-    loadStats();
-    setInterval(loadStats, 10000); // Har 10 sec mein stats refresh
+await api(API,"POST",payload)
 
-    // Har input par listener lagana
-    document.querySelectorAll('input').forEach(i => i.addEventListener('change', sync));
-    el("firewallLevel").oninput = updateFirewallLabel;
-});
-</script>
+console.log("Security settings saved")
+
+},600)
+
+}
+
+/* =========================
+   LIVE STATS
+========================= */
+
+async function loadStats(){
+
+const s=await api(STATS_API)
+
+if(!s) return
+
+el("ipCount").innerText=s.blockedIPs
+el("liveUsers").innerText=s.liveUsers
+el("reqPerSec").innerText=s.reqPerSec
+el("blockedReq").innerText=s.blockedReq
+
+}
+
+/* =========================
+   FIREWALL LABEL
+========================= */
+
+function updateFirewallLabel(){
+
+const levels=[
+"None",
+"Basic",
+"Standard",
+"Strong",
+"Aggressive",
+"Full Shield"
+]
+
+const level=Number(el("firewallLevel").value)
+
+el("fwLabel").innerText="Level "+level+" – "+levels[level]
+
+el("fwLive").innerText=level
+
+}
+
+/* =========================
+   THREAT UI
+========================= */
+
+function updateThreatUI(){
+
+const ultra=el("ultraMode").checked
+
+const fill=el("threatFill")
+
+if(ultra){
+
+fill.style.width="5%"
+fill.style.background="#00ffb3"
+
+el("protStatus").innerText="Lockdown"
+
+}else{
+
+fill.style.width="45%"
+fill.style.background="#ffcc00"
+
+el("protStatus").innerText="Active"
+
+}
+
+}
+
+/* =========================
+   INIT
+========================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadSecurity()
+
+loadStats()
+
+setInterval(loadStats,10000)
+
+/* AUTO SAVE */
+
+document.querySelectorAll("input").forEach(i=>{
+
+i.addEventListener("change",()=>{
+
+saveSecurity()
+
+updateThreatUI()
+
+})
+
+})
+
+/* FIREWALL SLIDER */
+
+el("firewallLevel").addEventListener("input",()=>{
+
+updateFirewallLabel()
+
+saveSecurity()
+
+})
+
+})
+
+            </script>
   
 
 </body>
