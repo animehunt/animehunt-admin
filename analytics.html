@@ -381,7 +381,95 @@ document.addEventListener("DOMContentLoaded", loadAnalytics);
 
 // Auto Refresh every 2 minutes (Reduced from 5 to keep it "Real-time")
 setInterval(loadAnalytics, 120000);
-  
+  const ANALYTICS_API =
+"https://animehunt-backend.animehunt715.workers.dev/api/analytics/track"
+
+/* PAGE VIEW */
+
+function trackPage(){
+
+fetch(ANALYTICS_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type:"page",
+ref:location.pathname
+})
+})
+
+}
+
+trackPage()
+
+/* ANIME VIEW */
+
+function trackAnime(slug){
+
+fetch(ANALYTICS_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type:"anime",
+ref:slug
+})
+})
+
+}
+
+/* EPISODE VIEW */
+
+function trackEpisode(id){
+
+fetch(ANALYTICS_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type:"episode",
+ref:id
+})
+})
+
+}
+
+/* DOWNLOAD */
+
+function trackDownload(id){
+
+fetch(ANALYTICS_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type:"download",
+ref:id
+})
+})
+
+}
+
+/* SEARCH */
+
+function trackSearch(query){
+
+fetch(ANALYTICS_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type:"search",
+value:query
+})
+})
+
+}
 </script>
 
 
