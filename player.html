@@ -262,75 +262,125 @@ body{background:#060a14;color:#fff}
 </div>
 
 <script>
-const API="/api/admin/player"
+
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/player"
+
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
+
+/* API HELPER */
+
+async function api(url,method="GET",body=null){
+
+const res = await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body: body ? JSON.stringify(body) : null
+})
+
+if(!res.ok){
+
+console.error("API ERROR")
+
+throw new Error("API")
+
+}
+
+return res.json()
+
+}
+
+/* LOAD SETTINGS */
 
 async function loadPlayer(){
 
-const res=await fetch(API)
+try{
 
-const d=await res.json()
+const d = await api(API)
 
-document.getElementById("defaultServer").value=d.defaultServer
-document.getElementById("autoplay").value=d.autoplay
-document.getElementById("resume").value=d.resume
-document.getElementById("autoswitch").value=d.autoswitch
-document.getElementById("mode").value=d.mode
+document.getElementById("defaultServer").value = d.defaultServer
 
-document.getElementById("showServers").value=d.ui.servers
-document.getElementById("showDownload").value=d.ui.download
-document.getElementById("showSubscribe").value=d.ui.subscribe
-document.getElementById("showRelated").value=d.ui.related
+document.getElementById("autoplay").value = d.autoplay
+document.getElementById("resume").value = d.resume
+document.getElementById("autoswitch").value = d.autoswitch
 
-document.getElementById("secEmbed").value=d.security.embedOnly
-document.getElementById("secCloud").value=d.security.cloudflare
-document.getElementById("secSandbox").value=d.security.sandbox
-document.getElementById("secReferrer").value=d.security.referrer
+document.getElementById("mode").value = d.mode
+
+document.getElementById("showServers").value = d.ui.servers
+document.getElementById("showDownload").value = d.ui.download
+document.getElementById("showSubscribe").value = d.ui.subscribe
+document.getElementById("showRelated").value = d.ui.related
+
+document.getElementById("secEmbed").value = d.security.embedOnly
+document.getElementById("secCloud").value = d.security.cloudflare
+document.getElementById("secSandbox").value = d.security.sandbox
+document.getElementById("secReferrer").value = d.security.referrer
+
+}catch(e){
+
+console.error(e)
+
+alert("Failed to load player settings")
 
 }
 
-document.getElementById("savePlayer").onclick=async()=>{
+}
 
-const payload={
+/* SAVE SETTINGS */
 
-defaultServer:document.getElementById("defaultServer").value,
+document.getElementById("savePlayer").onclick = async ()=>{
 
-autoplay:document.getElementById("autoplay").value==="true",
-resume:document.getElementById("resume").value==="true",
-autoswitch:document.getElementById("autoswitch").value==="true",
+const payload = {
 
-mode:document.getElementById("mode").value,
+defaultServer: document.getElementById("defaultServer").value,
+
+autoplay: document.getElementById("autoplay").value === "true",
+resume: document.getElementById("resume").value === "true",
+autoswitch: document.getElementById("autoswitch").value === "true",
+
+mode: document.getElementById("mode").value,
 
 ui:{
-servers:document.getElementById("showServers").value==="true",
-download:document.getElementById("showDownload").value==="true",
-subscribe:document.getElementById("showSubscribe").value==="true",
-related:document.getElementById("showRelated").value==="true"
+
+servers: document.getElementById("showServers").value === "true",
+download: document.getElementById("showDownload").value === "true",
+subscribe: document.getElementById("showSubscribe").value === "true",
+related: document.getElementById("showRelated").value === "true"
+
 },
 
 security:{
-embedOnly:document.getElementById("secEmbed").value==="true",
-cloudflare:document.getElementById("secCloud").value==="true",
-sandbox:document.getElementById("secSandbox").value==="true",
-referrer:document.getElementById("secReferrer").value
-}
+
+embedOnly: document.getElementById("secEmbed").value === "true",
+cloudflare: document.getElementById("secCloud").value === "true",
+sandbox: document.getElementById("secSandbox").value === "true",
+referrer: document.getElementById("secReferrer").value
 
 }
 
-await fetch(API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(payload)
-})
+}
+
+try{
+
+await api(API,"POST",payload)
 
 alert("Player Settings Saved")
+
+}catch(e){
+
+console.error(e)
+
+alert("Save Failed")
+
+}
 
 }
 
 loadPlayer()
-</script>
 
+  </script>
 
 </body>
 </html>
