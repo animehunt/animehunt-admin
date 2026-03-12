@@ -208,143 +208,274 @@ body{background:#060a14;color:#fff}
   </div>
   <button class="add-btn" id="addServerBtn">➕ Add Server</button>
 </header>
-
 <script>
-const API = "/api/admin/servers";
-const TOKEN_KEY = "AUTH_TOKEN";
 
-let servers = [];
-let editId = null;
+const API="/api/admin/servers"
+const TOKEN_KEY="AUTH_TOKEN"
 
-const el = (id) => document.getElementById(id);
+let servers=[]
+let editId=null
 
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem(TOKEN_KEY);
-    try {
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
-        if (res.status === 401) { location.href = "login.html"; return null; }
-        return await res.json();
-    } catch (e) { return null; }
+const el=id=>document.getElementById(id)
+
+/* =======================
+API HELPER
+======================= */
+
+async function apiFetch(url,options={}){
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+try{
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":token?`Bearer ${token}`:"",
+...options.headers
+}
+})
+
+if(res.status===401){
+
+location.href="login.html"
+return null
+
 }
 
-async function loadServers(query = "") {
-    const url = query ? `${API}?q=${encodeURIComponent(query)}` : API;
-    const data = await apiFetch(url);
-    if (data) {
-        servers = data;
-        render();
-    }
+return await res.json()
+
+}catch{
+
+alert("Network error")
+return null
+
 }
 
-function render() {
-    const list = el("serverList");
-    list.innerHTML = "";
-    if (servers.length === 0) {
-        list.innerHTML = `<div style="padding:40px; text-align:center; color:#555;">No streaming sources found.</div>`;
-        return;
-    }
-
-    servers.forEach(s => {
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
-            <span><b>${s.name}</b></span>
-            <span>${s.anime}</span>
-            <span>S${s.season}</span>
-            <span>E${s.episode}</span>
-            <span style="color:#4da3ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.embed}">${s.embed}</span>
-            <span>#${s.priority}</span>
-            <span class="status ${s.active ? "active" : "inactive"}">${s.active ? "● Active" : "○ Off"}</span>
-            <div class="actions">
-                <button onclick="editServer('${s._id}')">✏️</button>
-                <button onclick="deleteServer('${s._id}')" style="color:#ff4c4c">🗑</button>
-            </div>
-        `;
-        list.appendChild(row);
-    });
 }
 
-/** Save Function **/
-async function saveServer() {
-    const btn = el("saveServer");
-    const payload = {
-        _id: editId,
-        name: el("serverName").value.trim(),
-        anime: el("animeName").value.trim(),
-        season: el("seasonNo").value || "1",
-        episode: el("episodeNo").value || "1",
-        embed: el("embedUrl").value.trim(),
-        priority: parseInt(el("priority").value) || 99,
-        active: el("active").checked
-    };
+/* =======================
+LOAD SERVERS
+======================= */
 
-    if (!payload.name || !payload.anime || !payload.embed) {
-        alert("Server Name, Anime, and Embed URL are mandatory.");
-        return;
-    }
+async function loadServers(query=""){
 
-    btn.disabled = true;
-    const res = await apiFetch(API, { method: "POST", body: JSON.stringify(payload) });
+const url=query?`${API}?q=${encodeURIComponent(query)}`:API
 
-    if (res?.success) {
-        el("serverModal").style.display = "none";
-        loadServers(el("searchInput").value); // Refresh with current search
-    } else {
-        alert("Sync Error: Could not save to database.");
-    }
-    btn.disabled = false;
+const data=await apiFetch(url)
+
+if(data){
+
+servers=data
+render()
+
 }
 
-/** Actions **/
-function editServer(id) {
-    const s = servers.find(x => x._id === id);
-    if (!s) return;
-    editId = s._id;
-    el("serverName").value = s.name;
-    el("animeName").value = s.anime;
-    el("seasonNo").value = s.season;
-    el("episodeNo").value = s.episode;
-    el("embedUrl").value = s.embed;
-    el("priority").value = s.priority;
-    el("active").checked = s.active;
-    el("modalTitle").innerText = "Edit Stream Source";
-    el("serverModal").style.display = "flex";
 }
 
-async function deleteServer(id) {
-    if (!confirm("Are you sure? Episodes using this server will stop working.")) return;
-    const res = await apiFetch(`${API}/${id}`, { method: "DELETE" });
-    if (res?.success) loadServers(el("searchInput").value);
+/* =======================
+RENDER TABLE
+======================= */
+
+function render(){
+
+const list=el("serverList")
+
+list.innerHTML=""
+
+if(!servers.length){
+
+list.innerHTML="<div style='padding:40px;text-align:center;color:#666'>No servers</div>"
+return
+
 }
 
-/** Search Debounce **/
-let timer;
-el("searchInput").oninput = (e) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => loadServers(e.target.value), 400);
-};
+servers.forEach(s=>{
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadServers();
-    el("saveServer").onclick = saveServer;
-    el("addServerBtn").onclick = () => {
-        editId = null;
-        el("modalTitle").innerText = "Add New Server";
-        el("serverModal").style.display = "flex";
-        document.querySelectorAll(".form-grid input").forEach(i => i.value = "");
-        el("active").checked = true;
-    };
-    el("closeModal").onclick = () => el("serverModal").style.display = "none";
-});
+const row=document.createElement("div")
+
+row.className="row"
+
+row.innerHTML=`
+
+<span><b>${s.name}</b></span>
+<span>${s.anime}</span>
+<span>S${s.season}</span>
+<span>E${s.episode}</span>
+
+<span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis" title="${s.embed}">
+${s.embed}
+</span>
+
+<span>#${s.priority}</span>
+
+<span class="status ${s.active?"active":"inactive"}">
+${s.active?"● Active":"○ Off"}
+</span>
+
+<div class="actions">
+<button onclick="editServer('${s._id}')">✏️</button>
+<button onclick="deleteServer('${s._id}')" style="color:#ff4c4c">🗑</button>
+</div>
+
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+/* =======================
+SAVE SERVER
+======================= */
+
+async function saveServer(){
+
+const payload={
+
+_id:editId,
+
+name:el("serverName").value.trim(),
+anime:el("animeName").value.trim(),
+
+season:el("seasonNo").value||"1",
+episode:el("episodeNo").value||"1",
+
+embed:el("embedUrl").value.trim(),
+
+priority:Number(el("priority").value||99),
+
+active:el("active").checked
+
+}
+
+if(!payload.name || !payload.anime || !payload.embed){
+
+alert("Server name, anime and embed required")
+return
+
+}
+
+const res=await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+if(res?.success){
+
+closeModal()
+loadServers(el("searchInput").value)
+
+}
+
+}
+
+/* =======================
+EDIT
+======================= */
+
+function editServer(id){
+
+const s=servers.find(x=>x._id===id)
+
+if(!s) return
+
+editId=id
+
+el("serverName").value=s.name
+el("animeName").value=s.anime
+el("seasonNo").value=s.season
+el("episodeNo").value=s.episode
+el("embedUrl").value=s.embed
+el("priority").value=s.priority
+el("active").checked=s.active
+
+el("modalTitle").innerText="Edit Server"
+
+el("serverModal").style.display="flex"
+
+}
+
+/* =======================
+DELETE
+======================= */
+
+async function deleteServer(id){
+
+if(!confirm("Delete server?")) return
+
+const res=await apiFetch(`${API}/${id}`,{method:"DELETE"})
+
+if(res?.success){
+
+loadServers(el("searchInput").value)
+
+}
+
+}
+
+/* =======================
+MODAL
+======================= */
+
+function closeModal(){
+
+el("serverModal").style.display="none"
+
+}
+
+function openModal(){
+
+editId=null
+
+document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
+
+el("active").checked=true
+
+el("modalTitle").innerText="Add Server"
+
+el("serverModal").style.display="flex"
+
+}
+
+/* =======================
+SEARCH
+======================= */
+
+let timer
+
+el("searchInput").oninput=e=>{
+
+clearTimeout(timer)
+
+timer=setTimeout(()=>{
+
+loadServers(e.target.value)
+
+},400)
+
+}
+
+/* =======================
+INIT
+======================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadServers()
+
+el("saveServer").onclick=saveServer
+
+el("addServerBtn").onclick=openModal
+
+el("closeModal").onclick=closeModal
+
+})
+
 </script>
-  
+
         
 </body>
 </html>
