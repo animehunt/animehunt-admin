@@ -446,7 +446,41 @@ height:120px;
   </div>
 </div>
 
+
+
+const res=await fetch(`${API}?${params}`)
+const data=await res.json()
+
+listBody.innerHTML=data.map(a=>`
+
+<div class="row">
+
+<img src="${a.poster||'https://via.placeholder.com/40x60'}">
+
+<div>${a.title}</div>
+
+<span>${a.type}</span>
+
+<span class="badge">${a.status}</span>
+
+<span>${a.categories||"-"}</span>
+
+<span>${a.isHome?'✅':'❌'}</span>
+
+<span>${a.isTrending?'🔥':'➖'}</span>
+
+<div class="actions">
+
+<button onclick="editAnime('${a.id}')">✏️</button>
+
+<button onclick="deleteAnime('${a.id}')">🗑</button>
+
+</div>
+
+</div>
+
 <script>
+
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 
 let editId=null
@@ -459,71 +493,89 @@ const statusFilter=document.getElementById("statusFilter")
 const homeFilter=document.getElementById("homeFilter")
 const searchAnime=document.getElementById("searchAnime")
 
-document.getElementById("openAddAnime").onclick=()=>{
-resetForm()
-modal.style.display="flex"
+const token=localStorage.getItem("AUTH_TOKEN")
+
+function authHeaders(){
+ return {
+  "Content-Type":"application/json",
+  "Authorization":"Bearer "+token
+ }
 }
 
+/* OPEN MODAL */
+
+document.getElementById("openAddAnime").onclick=()=>{
+ resetForm()
+ modal.style.display="flex"
+}
+
+/* CLOSE MODAL */
+
 document.getElementById("closeModal").onclick=()=>{
-modal.style.display="none"
+ modal.style.display="none"
 }
 
 /* AUTO SLUG */
 
 document.getElementById("title").addEventListener("input",e=>{
 
-if(!editId){
+ if(!editId){
 
-document.getElementById("slug").value=e.target.value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-.replace(/^-+|-+$/g,"")
+  document.getElementById("slug").value=e.target.value
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g,"-")
+  .replace(/^-+|-+$/g,"")
 
-}
+ }
 
 })
 
-/* SAVE */
+/* SAVE ANIME */
 
 document.getElementById("saveAnime").onclick=async()=>{
 
-const payload={
+ const payload={
 
-title:title.value,
-slug:slug.value,
-type:type.value,
-status:status.value,
-poster:poster.value,
-banner:banner.value,
-year:year.value,
-rating:rating.value,
-language:language.value,
-duration:duration.value,
+  title:title.value,
+  slug:slug.value,
+  type:type.value,
+  status:status.value,
 
-categories:Array.from(genres.selectedOptions).map(o=>o.value).join(","),
+  poster:poster.value,
+  banner:banner.value,
 
-tags:tags.value,
-description:description.value,
+  year:year.value,
+  rating:rating.value,
 
-isHome:isHome.checked,
-isTrending:isTrending.checked,
-isMostViewed:isMostViewed.checked,
-isBanner:isBanner.checked
+  language:language.value,
+  duration:duration.value,
 
-}
+  categories:Array.from(genres.selectedOptions)
+  .map(o=>o.value)
+  .join(","),
 
-const url=editId?`${API}/${editId}`:API
-const method=editId?"PATCH":"POST"
+  tags:tags.value,
+  description:description.value,
 
-await fetch(url,{
-method,
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify(payload)
-})
+  isHome:isHome.checked,
+  isTrending:isTrending.checked,
+  isMostViewed:isMostViewed.checked,
+  isBanner:isBanner.checked
 
-modal.style.display="none"
+ }
 
-loadAnime()
+ const url=editId?`${API}/${editId}`:API
+ const method=editId?"PATCH":"POST"
+
+ await fetch(url,{
+  method,
+  headers:authHeaders(),
+  body:JSON.stringify(payload)
+ })
+
+ modal.style.display="none"
+
+ loadAnime()
 
 }
 
@@ -531,19 +583,24 @@ loadAnime()
 
 async function loadAnime(){
 
-const params=new URLSearchParams({
+ const params=new URLSearchParams({
 
-type:typeFilter.value,
-status:statusFilter.value,
-home:homeFilter.value,
-q:searchAnime.value
+  type:typeFilter.value,
+  status:statusFilter.value,
+  home:homeFilter.value,
+  q:searchAnime.value
 
-})
+ })
 
-const res=await fetch(`${API}?${params}`)
-const data=await res.json()
+ const res=await fetch(`${API}?${params}`,{
+  headers:{
+   "Authorization":"Bearer "+token
+  }
+ })
 
-listBody.innerHTML=data.map(a=>`
+ const data=await res.json()
+
+ listBody.innerHTML=data.map(a=>`
 
 <div class="row">
 
@@ -579,34 +636,39 @@ listBody.innerHTML=data.map(a=>`
 
 window.editAnime=async(id)=>{
 
-const res=await fetch(`${API}/${id}`)
-const a=await res.json()
+ const res=await fetch(`${API}/${id}`,{
+  headers:{
+   "Authorization":"Bearer "+token
+  }
+ })
 
-editId=id
+ const a=await res.json()
 
-title.value=a.title
-slug.value=a.slug
-type.value=a.type
-status.value=a.status
+ editId=id
 
-poster.value=a.poster||""
-banner.value=a.banner||""
+ title.value=a.title
+ slug.value=a.slug
+ type.value=a.type
+ status.value=a.status
 
-year.value=a.year||""
-rating.value=a.rating||""
+ poster.value=a.poster||""
+ banner.value=a.banner||""
 
-language.value=a.language||""
-duration.value=a.duration||""
+ year.value=a.year||""
+ rating.value=a.rating||""
 
-tags.value=a.tags||""
-description.value=a.description||""
+ language.value=a.language||""
+ duration.value=a.duration||""
 
-isHome.checked=a.isHome
-isTrending.checked=a.isTrending
-isMostViewed.checked=a.isMostViewed
-isBanner.checked=a.isBanner
+ tags.value=a.tags||""
+ description.value=a.description||""
 
-modal.style.display="flex"
+ isHome.checked=a.isHome
+ isTrending.checked=a.isTrending
+ isMostViewed.checked=a.isMostViewed
+ isBanner.checked=a.isBanner
+
+ modal.style.display="flex"
 
 }
 
@@ -614,25 +676,30 @@ modal.style.display="flex"
 
 window.deleteAnime=async(id)=>{
 
-if(!confirm("Delete anime?")) return
+ if(!confirm("Delete anime?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+ await fetch(`${API}/${id}`,{
+  method:"DELETE",
+  headers:{
+   "Authorization":"Bearer "+token
+  }
+ })
 
-loadAnime()
+ loadAnime()
 
 }
 
-/* RESET */
+/* RESET FORM */
 
 function resetForm(){
 
-editId=null
+ editId=null
 
-document.querySelectorAll(".form-grid input,textarea")
-.forEach(i=>i.value="")
+ document.querySelectorAll(".form-grid input, .form-grid textarea")
+ .forEach(i=>i.value="")
 
-document.querySelectorAll(".form-grid input[type='checkbox']")
-.forEach(i=>i.checked=false)
+ document.querySelectorAll(".form-grid input[type='checkbox']")
+ .forEach(i=>i.checked=false)
 
 }
 
@@ -643,7 +710,10 @@ document.querySelectorAll(".form-grid input[type='checkbox']")
 
 searchAnime.addEventListener("input",loadAnime)
 
+/* INITIAL LOAD */
+
 loadAnime()
+
 </script>
 
 
