@@ -360,19 +360,17 @@ a{ text-decoration:none; color:inherit }
 </div>
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
+const API="/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
 
 let editId=null
 let existingImage=""
 
-/* AUTH TOKEN */
-
 const token=localStorage.getItem("AUTH_TOKEN")
 
 function authHeaders(){
-return {
+return{
 "Authorization":"Bearer "+token
 }
 }
@@ -380,8 +378,6 @@ return {
 /* LOAD BANNERS */
 
 async function loadBanners(){
-
-bannerList.innerHTML="Loading..."
 
 const res=await fetch(API,{
 headers:authHeaders()
@@ -394,11 +390,8 @@ bannerList.innerHTML=data.map(b=>`
 <div class="row">
 
 <div style="display:flex;gap:10px">
-
 <img src="${b.image}" style="width:50px;height:30px;object-fit:cover">
-
-<span>${escapeHTML(b.title)}</span>
-
+<span>${b.title}</span>
 </div>
 
 <span class="badge">${b.page}</span>
@@ -454,8 +447,9 @@ banActive.checked=false
 banRotate.checked=false
 
 previewImg.style.display="none"
+previewError.style.display="none"
 
-document.getElementById("bannerModal").style.display="flex"
+bannerModal.style.display="flex"
 
 }
 
@@ -463,7 +457,7 @@ document.getElementById("bannerModal").style.display="flex"
 
 function closeModal(){
 
-document.getElementById("bannerModal").style.display="none"
+bannerModal.style.display="none"
 
 }
 
@@ -486,7 +480,7 @@ banRotate.checked=b.autoRotate
 previewImg.src=b.image
 previewImg.style.display="block"
 
-document.getElementById("bannerModal").style.display="flex"
+bannerModal.style.display="flex"
 
 }
 
@@ -503,7 +497,6 @@ form.append("title",banTitle.value)
 form.append("page",banPage.value)
 form.append("category",banCategory.value)
 form.append("position",banPosition.value)
-
 form.append("order",banOrder.value)
 
 form.append("active",banActive.checked?1:0)
@@ -543,33 +536,20 @@ loadBanners()
 
 }
 
-/* STATUS TOGGLE */
+/* STATUS */
 
 async function toggleStatus(id,active){
 
 await fetch(`${API}/${id}/status`,{
-
 method:"PATCH",
-
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token
 },
-
 body:JSON.stringify({active})
-
 })
 
-}
-
-/* SAFE HTML */
-
-function escapeHTML(str){
-
-return str
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
+loadBanners()
 
 }
 
@@ -580,19 +560,18 @@ banImageFile.onchange=function(){
 const reader=new FileReader()
 
 reader.onload=e=>{
-
 previewImg.src=e.target.result
 previewImg.style.display="block"
-
 }
 
 reader.readAsDataURL(this.files[0])
 
 }
 
-/* INITIAL LOAD */
-
 loadBanners()
+
+
+
 
 </script>
 
