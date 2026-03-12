@@ -215,23 +215,22 @@ body{background:#060a14;color:#fff}
 </div>
   <!-- ============================= -->
 
-
 <script>
-  
+
 const AI_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ai"
 const TOKEN_KEY="AUTH_TOKEN"
 
 const pauseBtn=document.querySelector(".pause-btn")
 
 function formatKey(text){
-
 return text
 .toLowerCase()
 .replace(/[^a-z0-9\s]/g,"")
 .trim()
 .replace(/\s+/g,"_")
-
 }
+
+/* API CALL */
 
 async function apiFetch(url,options={}){
 
@@ -247,11 +246,9 @@ headers:{
 })
 
 if(res.status===401){
-window.location.href="login.html"
+location.href="login.html"
 return
 }
-
-if(!res.ok) throw new Error("API failed")
 
 return res.json()
 
@@ -260,8 +257,6 @@ return res.json()
 /* LOAD AI STATE */
 
 async function loadAI(){
-
-try{
 
 const data=await apiFetch(AI_API)
 
@@ -277,7 +272,9 @@ const engineData=data.engines[engine]||{}
 
 card.querySelectorAll(".ai-item").forEach(item=>{
 
-const setting=formatKey(item.innerText)
+const setting=formatKey(
+item.childNodes[0].textContent
+)
 
 const checkbox=item.querySelector("input")
 
@@ -293,13 +290,8 @@ item.style.opacity=data.paused?0.5:1
 })
 
 }
-catch(err){
-console.error("AI load error",err)
-}
 
-}
-
-/* HANDLE TOGGLE */
+/* TOGGLE */
 
 async function handleToggle(e){
 
@@ -308,11 +300,12 @@ const item=checkbox.closest(".ai-item")
 const card=checkbox.closest(".ai-card")
 
 const engine=formatKey(card.querySelector("h3").innerText)
-const setting=formatKey(item.innerText)
+
+const setting=formatKey(
+item.childNodes[0].textContent
+)
 
 const value=checkbox.checked
-
-try{
 
 await apiFetch(AI_API,{
 method:"PATCH",
@@ -324,22 +317,10 @@ value
 })
 
 }
-catch(err){
 
-checkbox.checked=!value
-alert("Update failed")
-
-}
-
-}
-
-/* GLOBAL PAUSE */
+/* PAUSE ALL */
 
 async function togglePause(){
-
-pauseBtn.disabled=true
-
-try{
 
 await apiFetch(`${AI_API}/pause`,{
 method:"PATCH"
@@ -348,27 +329,16 @@ method:"PATCH"
 loadAI()
 
 }
-catch(err){
-alert("Toggle failed")
-}
-
-pauseBtn.disabled=false
-
-}
 
 function updatePauseUI(paused){
 
 if(paused){
-
 pauseBtn.innerText="▶ Resume All AI Systems"
 pauseBtn.style.background="#1abc9c"
-
 }
 else{
-
 pauseBtn.innerText="⏸ Pause All AI Systems"
 pauseBtn.style.background="#ffcc00"
-
 }
 
 }
@@ -383,6 +353,7 @@ document.querySelectorAll(".ai-item input")
 pauseBtn.onclick=togglePause
 
 })
+
 </script>
 
  
