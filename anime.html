@@ -481,7 +481,7 @@ listBody.innerHTML=data.map(a=>`
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
+const API="/api/admin/anime"
 
 let editId=null
 
@@ -496,111 +496,110 @@ const searchAnime=document.getElementById("searchAnime")
 const token=localStorage.getItem("AUTH_TOKEN")
 
 function authHeaders(){
- return {
-  "Content-Type":"application/json",
-  "Authorization":"Bearer "+token
- }
+return{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+}
 }
 
 /* OPEN MODAL */
 
 document.getElementById("openAddAnime").onclick=()=>{
- resetForm()
- modal.style.display="flex"
+resetForm()
+modal.style.display="flex"
 }
 
-/* CLOSE MODAL */
+/* CLOSE */
 
 document.getElementById("closeModal").onclick=()=>{
- modal.style.display="none"
+modal.style.display="none"
 }
 
 /* AUTO SLUG */
 
-document.getElementById("title").addEventListener("input",e=>{
+title.addEventListener("input",e=>{
 
- if(!editId){
+if(!editId){
 
-  document.getElementById("slug").value=e.target.value
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g,"-")
-  .replace(/^-+|-+$/g,"")
-
- }
-
-})
-
-/* SAVE ANIME */
-
-document.getElementById("saveAnime").onclick=async()=>{
-
- const payload={
-
-  title:title.value,
-  slug:slug.value,
-  type:type.value,
-  status:status.value,
-
-  poster:poster.value,
-  banner:banner.value,
-
-  year:year.value,
-  rating:rating.value,
-
-  language:language.value,
-  duration:duration.value,
-
-  categories:Array.from(genres.selectedOptions)
-  .map(o=>o.value)
-  .join(","),
-
-  tags:tags.value,
-  description:description.value,
-
-  isHome:isHome.checked,
-  isTrending:isTrending.checked,
-  isMostViewed:isMostViewed.checked,
-  isBanner:isBanner.checked
-
- }
-
- const url=editId?`${API}/${editId}`:API
- const method=editId?"PATCH":"POST"
-
- await fetch(url,{
-  method,
-  headers:authHeaders(),
-  body:JSON.stringify(payload)
- })
-
- modal.style.display="none"
-
- loadAnime()
+slug.value=e.target.value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-+|-+$/g,"")
 
 }
 
-/* LOAD LIST */
+})
+
+/* SAVE */
+
+saveAnime.onclick=async()=>{
+
+const payload={
+
+title:title.value,
+slug:slug.value,
+
+type:type.value,
+status:status.value,
+
+poster:poster.value,
+banner:banner.value,
+
+year:year.value,
+rating:rating.value,
+
+language:language.value,
+duration:duration.value,
+
+categories:Array.from(genres.selectedOptions)
+.map(o=>o.value)
+.join(","),
+
+tags:tags.value,
+description:description.value,
+
+isHome:isHome.checked,
+isTrending:isTrending.checked,
+isMostViewed:isMostViewed.checked,
+isBanner:isBanner.checked
+
+}
+
+const url=editId?`${API}/${editId}`:API
+const method=editId?"PATCH":"POST"
+
+await fetch(url,{
+method,
+headers:authHeaders(),
+body:JSON.stringify(payload)
+})
+
+modal.style.display="none"
+
+loadAnime()
+
+}
+
+/* LOAD */
 
 async function loadAnime(){
 
- const params=new URLSearchParams({
+const params=new URLSearchParams({
 
-  type:typeFilter.value,
-  status:statusFilter.value,
-  home:homeFilter.value,
-  q:searchAnime.value
+type:typeFilter.value,
+status:statusFilter.value,
+home:homeFilter.value,
+q:searchAnime.value
 
- })
+})
 
- const res=await fetch(`${API}?${params}`,{
-  headers:{
-   "Authorization":"Bearer "+token
-  }
- })
+const res=await fetch(`${API}?${params}`,{
+headers:{Authorization:"Bearer "+token}
+})
 
- const data=await res.json()
+const data=await res.json()
 
- listBody.innerHTML=data.map(a=>`
+listBody.innerHTML=data.map(a=>`
 
 <div class="row">
 
@@ -621,7 +620,6 @@ async function loadAnime(){
 <div class="actions">
 
 <button onclick="editAnime('${a.id}')">✏️</button>
-
 <button onclick="deleteAnime('${a.id}')">🗑</button>
 
 </div>
@@ -636,39 +634,42 @@ async function loadAnime(){
 
 window.editAnime=async(id)=>{
 
- const res=await fetch(`${API}/${id}`,{
-  headers:{
-   "Authorization":"Bearer "+token
-  }
- })
+const res=await fetch(`${API}/${id}`,{
+headers:{Authorization:"Bearer "+token}
+})
 
- const a=await res.json()
+const a=await res.json()
 
- editId=id
+editId=id
 
- title.value=a.title
- slug.value=a.slug
- type.value=a.type
- status.value=a.status
+title.value=a.title
+slug.value=a.slug
 
- poster.value=a.poster||""
- banner.value=a.banner||""
+type.value=a.type
+status.value=a.status
 
- year.value=a.year||""
- rating.value=a.rating||""
+poster.value=a.poster||""
+banner.value=a.banner||""
 
- language.value=a.language||""
- duration.value=a.duration||""
+year.value=a.year||""
+rating.value=a.rating||""
 
- tags.value=a.tags||""
- description.value=a.description||""
+language.value=a.language||""
+duration.value=a.duration||""
 
- isHome.checked=a.isHome
- isTrending.checked=a.isTrending
- isMostViewed.checked=a.isMostViewed
- isBanner.checked=a.isBanner
+tags.value=a.tags||""
+description.value=a.description||""
 
- modal.style.display="flex"
+isHome.checked=a.isHome
+isTrending.checked=a.isTrending
+isMostViewed.checked=a.isMostViewed
+isBanner.checked=a.isBanner
+
+Array.from(genres.options).forEach(o=>{
+o.selected=a.categories?.split(",").includes(o.value)
+})
+
+modal.style.display="flex"
 
 }
 
@@ -676,45 +677,56 @@ window.editAnime=async(id)=>{
 
 window.deleteAnime=async(id)=>{
 
- if(!confirm("Delete anime?")) return
+if(!confirm("Delete anime?")) return
 
- await fetch(`${API}/${id}`,{
-  method:"DELETE",
-  headers:{
-   "Authorization":"Bearer "+token
-  }
- })
+await fetch(`${API}/${id}`,{
+method:"DELETE",
+headers:{Authorization:"Bearer "+token}
+})
 
- loadAnime()
+loadAnime()
 
 }
 
-/* RESET FORM */
+/* RESET */
 
 function resetForm(){
 
- editId=null
+editId=null
 
- document.querySelectorAll(".form-grid input, .form-grid textarea")
- .forEach(i=>i.value="")
+document.querySelectorAll(".form-grid input,.form-grid textarea")
+.forEach(i=>i.value="")
 
- document.querySelectorAll(".form-grid input[type='checkbox']")
- .forEach(i=>i.checked=false)
+document.querySelectorAll(".form-grid input[type='checkbox']")
+.forEach(i=>i.checked=false)
+
+Array.from(genres.options).forEach(o=>o.selected=false)
 
 }
 
-/* FILTER EVENTS */
+/* FILTER */
 
-[typeFilter,statusFilter,homeFilter,searchAnime]
+[typeFilter,statusFilter,homeFilter]
 .forEach(el=>el.addEventListener("change",loadAnime))
 
-searchAnime.addEventListener("input",loadAnime)
+searchAnime.addEventListener("input",()=>{
 
-/* INITIAL LOAD */
+clearTimeout(window.searchTimer)
+
+window.searchTimer=setTimeout(loadAnime,400)
+
+})
+
+/* INIT */
 
 loadAnime()
 
 </script>
+
+ 
+ 
+
+
 
 
 </body>
