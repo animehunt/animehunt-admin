@@ -153,166 +153,118 @@
 </div>
 
 <script>
-const API="/api/admin/homepage"
+
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/homepage"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 let editId=null
 
 const rowList=document.getElementById("rowList")
 const modal=document.getElementById("rowModal")
 
-async function loadRows(){
+async function api(url,method="GET",body=null){
 
-const res=await fetch(API)
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
 
-const rows=await res.json()
-
-rowList.innerHTML=""
-
-if(!rows.length){
-
-rowList.innerHTML="<div style='padding:20px;color:#666'>No Rows</div>"
-return
+return res.json()
 
 }
+
+async function loadRows(){
+
+const rows = await api(API)
+
+rowList.innerHTML=""
 
 rows.forEach(r=>{
 
 rowList.innerHTML+=`
-
 <div class="row">
-
 <span>${r.title}</span>
-
 <span class="badge">${r.type}</span>
-
 <span>${r.source || "Latest"}</span>
-
 <span>${r.layout}</span>
-
 <span>#${r.order}</span>
-
 <span class="status ${r.active?"active":"inactive"}">
 ${r.active?"● Active":"○ Hidden"}
 </span>
-
 <span class="actions">
-
 <button onclick="editRow('${r.id}')">✏️</button>
-
 <button onclick="deleteRow('${r.id}')" style="color:#ff4c4c">🗑</button>
-
 </span>
-
 </div>
-
 `
 
 })
 
 }
 
-/* SAVE */
-
 document.getElementById("saveRow").onclick=async()=>{
 
 const payload={
 
-title:document.getElementById("rowTitle").value,
-
-type:document.getElementById("rowType").value,
-
-source:document.getElementById("rowSource").value,
-
-layout:document.getElementById("rowLayout").value,
-
-limit:Number(document.getElementById("rowLimit").value)||10,
-
-order:Number(document.getElementById("rowOrder").value)||0,
-
-active:document.getElementById("rowActive").checked,
-
-autoUpdate:document.getElementById("rowAuto").checked
+title:rowTitle.value,
+type:rowType.value,
+source:rowSource.value,
+layout:rowLayout.value,
+limit:Number(rowLimit.value)||10,
+order:Number(rowOrder.value)||0,
+active:rowActive.checked,
+autoUpdate:rowAuto.checked
 
 }
 
 const method=editId?"PATCH":"POST"
-
 const url=editId?`${API}/${editId}`:API
 
-await fetch(url,{
-
-method,
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(payload)
-
-})
+await api(url,method,payload)
 
 modal.style.display="none"
 
 loadRows()
 
 }
-
-/* EDIT */
-
-window.editRow=async(id)=>{
-
-const res=await fetch(`${API}/${id}`)
-
-const r=await res.json()
-
-editId=id
-
-document.getElementById("rowTitle").value=r.title
-document.getElementById("rowType").value=r.type
-document.getElementById("rowSource").value=r.source
-document.getElementById("rowLayout").value=r.layout
-document.getElementById("rowLimit").value=r.limit
-document.getElementById("rowOrder").value=r.order
-
-document.getElementById("rowActive").checked=r.active
-document.getElementById("rowAuto").checked=r.autoUpdate
-
-modal.style.display="flex"
-
-}
-
-/* DELETE */
 
 window.deleteRow=async(id)=>{
 
-if(!confirm("Delete this row?")) return
+if(!confirm("Delete row?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+await api(`${API}/${id}`,"DELETE")
 
 loadRows()
 
 }
 
-/* ADD BUTTON */
+window.editRow=async(id)=>{
 
-document.getElementById("addRowBtn").onclick=()=>{
+const r = await api(`${API}/${id}`)
 
-editId=null
+editId=id
 
-document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
+rowTitle.value=r.title
+rowType.value=r.type
+rowSource.value=r.source
+rowLayout.value=r.layout
+rowLimit.value=r.limit
+rowOrder.value=r.order
 
-document.getElementById("rowActive").checked=true
+rowActive.checked=r.active
+rowAuto.checked=r.autoUpdate
 
 modal.style.display="flex"
 
 }
 
-document.getElementById("closeModal").onclick=()=>{
-
-modal.style.display="none"
-
-}
-
 loadRows()
-        
-  
-    </script>
+
+</script>
 
 </body>
 </html>
