@@ -367,11 +367,25 @@ const bannerList=document.getElementById("bannerList")
 let editId=null
 let existingImage=""
 
+/* AUTH TOKEN */
+
+const token=localStorage.getItem("AUTH_TOKEN")
+
+function authHeaders(){
+return {
+"Authorization":"Bearer "+token
+}
+}
+
+/* LOAD BANNERS */
+
 async function loadBanners(){
 
 bannerList.innerHTML="Loading..."
 
-const res=await fetch(API)
+const res=await fetch(API,{
+headers:authHeaders()
+})
 
 const data=await res.json()
 
@@ -423,20 +437,37 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
+/* OPEN MODAL */
+
 function openModal(){
 
 editId=null
 existingImage=""
 
+banTitle.value=""
+banOrder.value=""
+banCategory.value=""
+banPosition.value="hero"
+banPage.value="home"
+
+banActive.checked=false
+banRotate.checked=false
+
+previewImg.style.display="none"
+
 document.getElementById("bannerModal").style.display="flex"
 
 }
+
+/* CLOSE MODAL */
 
 function closeModal(){
 
 document.getElementById("bannerModal").style.display="none"
 
 }
+
+/* EDIT */
 
 window.editBanner=(b)=>{
 
@@ -455,9 +486,11 @@ banRotate.checked=b.autoRotate
 previewImg.src=b.image
 previewImg.style.display="block"
 
-openModal()
+document.getElementById("bannerModal").style.display="flex"
 
 }
+
+/* SAVE */
 
 async function saveBanner(){
 
@@ -485,6 +518,7 @@ form.append("existingImage",existingImage)
 
 await fetch(API,{
 method:"POST",
+headers:authHeaders(),
 body:form
 })
 
@@ -494,15 +528,22 @@ loadBanners()
 
 }
 
+/* DELETE */
+
 async function deleteBanner(id){
 
 if(!confirm("Delete banner?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+await fetch(`${API}/${id}`,{
+method:"DELETE",
+headers:authHeaders()
+})
 
 loadBanners()
 
 }
+
+/* STATUS TOGGLE */
 
 async function toggleStatus(id,active){
 
@@ -511,7 +552,8 @@ await fetch(`${API}/${id}/status`,{
 method:"PATCH",
 
 headers:{
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
 },
 
 body:JSON.stringify({active})
@@ -519,6 +561,8 @@ body:JSON.stringify({active})
 })
 
 }
+
+/* SAFE HTML */
 
 function escapeHTML(str){
 
@@ -529,21 +573,27 @@ return str
 
 }
 
+/* IMAGE PREVIEW */
+
 banImageFile.onchange=function(){
 
 const reader=new FileReader()
 
 reader.onload=e=>{
+
 previewImg.src=e.target.result
 previewImg.style.display="block"
+
 }
 
 reader.readAsDataURL(this.files[0])
 
 }
 
+/* INITIAL LOAD */
+
 loadBanners()
-  
+
 </script>
 
 </body>
