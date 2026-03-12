@@ -208,18 +208,35 @@ body{background:#060a14;color:#fff}
 
 
 
+
+
 <script>
+
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 let editingId=null
+
+async function api(url,method="GET",body=null){
+
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
+
+return res.json()
+
+}
 
 async function loadCategories(){
 
 const list=document.getElementById("list")
 
-const res=await fetch(API)
-
-const data=await res.json()
+const data=await api(API)
 
 list.innerHTML=""
 
@@ -236,7 +253,9 @@ list.innerHTML+=`
 <span class="badge">${cat.type}</span>
 
 <span class="${cat.active?'active':'inactive'}">
+
 ${cat.active?'● Online':'○ Offline'}
+
 </span>
 
 <span>${cat.category_order}</span>
@@ -248,9 +267,6 @@ ${cat.active?'● Online':'○ Offline'}
 <button onclick="editCategory('${cat.id}')">✏️</button>
 
 <button onclick="deleteCategory('${cat.id}')">🗑</button>
-
-${cat.featured?'⭐':''}
-${cat.showHome?'🏠':''}
 
 </span>
 
@@ -268,10 +284,7 @@ const payload={
 
 name:name.value,
 slug:slug.value,
-
 type:type.value,
-
-page:null,
 
 order:Number(order.value||0),
 priority:Number(priority.value||1),
@@ -286,21 +299,10 @@ aiAssign:aiAssign.checked
 
 }
 
-let url=API
-let method="POST"
+const url=editingId?`${API}/${editingId}`:API
+const method=editingId?"PUT":"POST"
 
-if(editingId){
-
-url=`${API}/${editingId}`
-method="PUT"
-
-}
-
-await fetch(url,{
-method,
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify(payload)
-})
+await api(url,method,payload)
 
 closeModal()
 
@@ -308,69 +310,19 @@ loadCategories()
 
 }
 
-async function editCategory(id){
-
-editingId=id
-
-const res=await fetch(`${API}/${id}`)
-
-const cat=await res.json()
-
-name.value=cat.name
-slug.value=cat.slug
-type.value=cat.type
-
-order.value=cat.category_order
-priority.value=cat.priority
-
-showHome.checked=!!cat.showHome
-isActive.checked=!!cat.active
-isFeatured.checked=!!cat.featured
-
-aiTrending.checked=!!cat.aiTrending
-aiPopular.checked=!!cat.aiPopular
-aiAssign.checked=!!cat.aiAssign
-
-modal.style.display="flex"
-
-}
-
 async function deleteCategory(id){
 
 if(!confirm("Delete category?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+await api(`${API}/${id}`,"DELETE")
 
 loadCategories()
 
 }
 
-function openModal(){
-
-editingId=null
-
-modal.style.display="flex"
-
-}
-
-function closeModal(){
-
-modal.style.display="none"
-
-}
-
-name.oninput=e=>{
-
-slug.value=e.target.value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-.replace(/^-+|-+$/g,"")
-
-}
-
 loadCategories()
 
-  </script>
+</script>
 
 </body>
 </html>
