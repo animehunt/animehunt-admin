@@ -364,6 +364,7 @@ Loading ads...
 </main>
 
 </div>
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
@@ -380,6 +381,11 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(!res.ok){
+alert("API Error")
+throw new Error("API")
+}
+
 return res.json()
 
 }
@@ -391,6 +397,8 @@ async function loadAds(){
 const list=document.getElementById("adsList")
 
 list.innerHTML="<tr><td colspan='4'>Loading...</td></tr>"
+
+try{
 
 const ads=await api(API)
 
@@ -405,16 +413,33 @@ list.innerHTML+=`
 <tr>
 <td>${ad.name}</td>
 <td>${ad.page}</td>
-<td class="status ${status}">${ad.status||"OFF"}</td>
-<td>
-<button onclick="toggleAd('${ad.id}')">Toggle</button>
-<button onclick="deleteAd('${ad.id}')">Delete</button>
+<td class="status ${status}">
+${ad.status||"OFF"}
 </td>
+
+<td>
+
+<button onclick="toggleAd('${ad.id}')">
+Toggle
+</button>
+
+<button onclick="deleteAd('${ad.id}')">
+Delete
+</button>
+
+</td>
+
 </tr>
 
 `
 
 })
+
+}catch{
+
+list.innerHTML="<tr><td colspan='4'>Failed</td></tr>"
+
+}
 
 }
 
@@ -427,11 +452,15 @@ const payload={
 name:adName.value,
 type:adType.value,
 adCode:adCode.value,
+
 page:adPage.value,
 position:adPos.value,
+
 priority:Number(adPriority.value||5),
+
 animeSlug:adAnime.value,
 episodeNumber:adEpisode.value,
+
 country:adCountry.value
 
 }
@@ -456,7 +485,7 @@ loadAds()
 
 async function deleteAd(id){
 
-if(!confirm("Delete ad?")) return
+if(!confirm("Delete Ad?")) return
 
 await api(`${API}/${id}`,"DELETE")
 
