@@ -234,14 +234,43 @@ body{background:#060a14;color:#fff}
 </section>
 </main>
 </div>
+
 <script>
-   const API="/api/admin/search"
+
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/search"
+
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
+
+async function api(url,method="GET",body=null){
+
+const res = await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body ? JSON.stringify(body) : null
+})
+
+if(!res.ok){
+
+console.error("API Error")
+
+throw new Error("API")
+
+}
+
+return res.json()
+
+}
+
+/* LOAD SETTINGS */
 
 async function loadSearch(){
 
-const res=await fetch(API)
+try{
 
-const d=await res.json()
+const d = await api(API)
 
 const set=(id,val)=>{
 const el=document.getElementById(id)
@@ -277,7 +306,17 @@ set("track",d.safety.track)
 set("seo",d.safety.seo)
 set("cache",d.safety.cache)
 
+}catch(e){
+
+console.error(e)
+
+alert("Failed to load search settings")
+
 }
+
+}
+
+/* SAVE SETTINGS */
 
 async function saveSearch(){
 
@@ -324,21 +363,25 @@ cache:Number(cache.value)
 
 }
 
-await fetch(API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(payload)
-})
+try{
+
+await api(API,"POST",payload)
 
 alert("Search settings saved")
+
+}catch(e){
+
+console.error(e)
+
+alert("Save failed")
+
+}
 
 }
 
 document.addEventListener("DOMContentLoaded",loadSearch)
-</script>
 
+</script>
         
 </body>
 </html>
