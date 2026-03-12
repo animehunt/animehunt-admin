@@ -215,299 +215,279 @@ body{background:#060a14;color:#fff}
 </div>
 </div>
 </div>
-<script>
-const API = "/api/admin/sidebar";
-const TOKEN_KEY = "AUTH_TOKEN";
 
-let items = [];
-let editId = null;
+    <script>
 
-const el = (id) => document.getElementById(id);
+const API="/api/admin/sidebar"
+const TOKEN_KEY="AUTH_TOKEN"
 
-/* ============================= */
-/* API FETCH */
-/* ============================= */
+let items=[]
+let editId=null
 
-async function apiFetch(url, options = {}) {
+const el=id=>document.getElementById(id)
 
-    const token = localStorage.getItem(TOKEN_KEY);
+/* =========================
+API HELPER
+========================= */
 
-    try {
+async function apiFetch(url,options={}){
 
-        const res = await fetch(url, {
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": token ? `Bearer ${token}` : "",
-                ...options.headers
-            }
-        });
+const token=localStorage.getItem(TOKEN_KEY)
 
-        if (res.status === 401) {
-            location.href = "login.html";
-            return null;
-        }
+try{
 
-        return await res.json();
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":token?`Bearer ${token}`:"",
+...options.headers
+}
+})
 
-    } catch (err) {
+if(res.status===401){
 
-        console.error("Network error:", err);
-        return null;
-
-    }
+location.href="login.html"
+return null
 
 }
 
-/* ============================= */
-/* LOAD SIDEBAR ITEMS */
-/* ============================= */
+return await res.json()
+
+}catch{
+
+alert("Network error")
+return null
+
+}
+
+}
+
+/* =========================
+LOAD ITEMS
+========================= */
 
 async function loadItems(){
 
-    const data = await apiFetch(API);
+const data=await apiFetch(API)
 
-    if(data){
-        items = data;
-        render();
-    }
+if(data){
+
+items=data
+render()
 
 }
 
-/* ============================= */
-/* RENDER TABLE */
-/* ============================= */
+}
+
+/* =========================
+RENDER
+========================= */
 
 function render(){
 
-    const list = el("list");
+const list=el("list")
 
-    list.innerHTML = "";
+list.innerHTML=""
 
-    if(items.length === 0){
+if(!items.length){
 
-        list.innerHTML =
-        `<div style="padding:20px;color:#555">No sidebar items found.</div>`;
-
-        return;
-    }
-
-    items.forEach((i)=>{
-
-        const row = document.createElement("div");
-        row.className = "row";
-
-        let badgeColor = "#1a2035";
-
-        if(i.highlight === "HOT") badgeColor = "#ff4c4c";
-        if(i.highlight === "NEW") badgeColor = "#00ffb3";
-
-        let highlightTag = "";
-
-        if(i.highlight !== "None"){
-
-            highlightTag = `
-            <small style="
-                font-size:9px;
-                padding:2px 4px;
-                border-radius:4px;
-                margin-left:5px;
-                background:${badgeColor};
-                color:#000
-            ">
-            ${i.highlight}
-            </small>
-            `;
-
-        }
-
-        row.innerHTML = `
-            <span>${i.priority}</span>
-
-            <span>
-            ${i.icon || ""} ${i.title}
-            ${highlightTag}
-            </span>
-
-            <span style="
-                color:#777;
-                font-size:10px;
-                overflow:hidden;
-                text-overflow:ellipsis;
-                white-space:nowrap;
-            ">
-            ${i.url}
-            </span>
-
-            <span>
-            <small class="badge">${i.device}</small>
-            </span>
-
-            <span style="color:${i.active ? '#00ffb3':'#ff4c4c'}">
-            ${i.active ? '● Active' : '○ Hidden'}
-            </span>
-
-            <span class="actions">
-                <button onclick="editItem('${i._id}')">✏️</button>
-                <button onclick="delItem('${i._id}')" style="color:#ff4c4c">🗑</button>
-            </span>
-        `;
-
-        list.appendChild(row);
-
-    });
+list.innerHTML="<div style='padding:20px;color:#666'>No sidebar items</div>"
+return
 
 }
 
-/* ============================= */
-/* SAVE ITEM */
-/* ============================= */
+items.forEach(i=>{
+
+const row=document.createElement("div")
+
+row.className="row"
+
+let badgeColor="#1a2035"
+
+if(i.highlight==="HOT") badgeColor="#ff4c4c"
+if(i.highlight==="NEW") badgeColor="#00ffb3"
+
+let highlightTag=""
+
+if(i.highlight!=="None"){
+
+highlightTag=`
+<small style="
+font-size:9px;
+padding:2px 4px;
+border-radius:4px;
+margin-left:5px;
+background:${badgeColor};
+color:#000
+">${i.highlight}</small>
+`
+
+}
+
+row.innerHTML=`
+
+<span>${i.priority}</span>
+
+<span>
+${i.icon||""} ${i.title}
+${highlightTag}
+</span>
+
+<span style="color:#777;font-size:10px;overflow:hidden;text-overflow:ellipsis">
+${i.url}
+</span>
+
+<span><small class="badge">${i.device}</small></span>
+
+<span style="color:${i.active?'#00ffb3':'#ff4c4c'}">
+${i.active?'● Active':'○ Hidden'}
+</span>
+
+<span class="actions">
+<button onclick="editItem('${i._id}')">✏️</button>
+<button onclick="delItem('${i._id}')" style="color:#ff4c4c">🗑</button>
+</span>
+
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+/* =========================
+SAVE
+========================= */
 
 async function saveItem(){
 
-    const btn = el("saveItemBtn");
+const payload={
 
-    const payload = {
+_id:editId,
 
-        _id: editId,
+title:el("title").value.trim(),
+icon:el("icon").value.trim(),
+url:el("url").value.trim(),
 
-        title: el("title").value.trim(),
-        icon: el("icon").value.trim(),
-        url: el("url").value.trim(),
+device:el("device").value,
+visibility:el("visibility").value,
 
-        device: el("device").value,
-        visibility: el("visibility").value,
+highlight:el("highlight").value,
+badge:el("badgeText").value.trim(),
 
-        highlight: el("highlight").value,
-        badge: el("badgeText").value.trim(),
+priority:Number(el("priority").value || 99),
 
-        priority: parseInt(el("priority").value) || 99,
-
-        active: el("active").checked,
-        newTab: el("newTab").checked
-
-    };
-
-    if(!payload.title || !payload.url){
-
-        alert("Title and URL required");
-        return;
-
-    }
-
-    btn.disabled = true;
-
-    const res = await apiFetch(API,{
-        method:"POST",
-        body:JSON.stringify(payload)
-    });
-
-    btn.disabled = false;
-
-    if(res?.success){
-
-        closeModal();
-        loadItems();
-
-    }else{
-
-        alert("Save failed");
-
-    }
+active:el("active").checked,
+newTab:el("newTab").checked
 
 }
 
-/* ============================= */
-/* EDIT ITEM */
-/* ============================= */
+if(!payload.title || !payload.url){
+
+alert("Title and URL required")
+return
+
+}
+
+const res=await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+if(res?.success){
+
+closeModal()
+loadItems()
+
+}
+
+}
+
+/* =========================
+EDIT
+========================= */
 
 function editItem(id){
 
-    const i = items.find(x => x._id === id);
+const i=items.find(x=>x._id===id)
 
-    if(!i) return;
+if(!i) return
 
-    editId = i._id;
+editId=id
 
-    el("title").value = i.title;
-    el("icon").value = i.icon;
-    el("url").value = i.url;
+el("title").value=i.title
+el("icon").value=i.icon
+el("url").value=i.url
 
-    el("device").value = i.device;
-    el("visibility").value = i.visibility;
+el("device").value=i.device
+el("visibility").value=i.visibility
 
-    el("highlight").value = i.highlight;
+el("highlight").value=i.highlight
+el("badgeText").value=i.badge
 
-    el("badgeText").value = i.badge;
+el("priority").value=i.priority
 
-    el("priority").value = i.priority;
+el("active").checked=i.active
+el("newTab").checked=i.newTab
 
-    el("active").checked = i.active;
-    el("newTab").checked = i.newTab;
-
-    el("modal").style.display = "flex";
+el("modal").style.display="flex"
 
 }
 
-/* ============================= */
-/* DELETE ITEM */
-/* ============================= */
+/* =========================
+DELETE
+========================= */
 
 async function delItem(id){
 
-    if(!confirm("Delete this sidebar item?")) return;
+if(!confirm("Delete sidebar item?")) return
 
-    const res = await apiFetch(`${API}/${id}`,{
-        method:"DELETE"
-    });
+const res=await apiFetch(`${API}/${id}`,{method:"DELETE"})
 
-    if(res?.success){
-        loadItems();
-    }
+if(res?.success){
+
+loadItems()
 
 }
 
-/* ============================= */
-/* MODAL OPEN */
-/* ============================= */
+}
+
+/* =========================
+MODAL
+========================= */
 
 function openModal(){
 
-    editId = null;
+editId=null
 
-    document.querySelectorAll(".form-grid input").forEach(i=>i.value="");
+document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
+document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
 
-    document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0);
+el("active").checked=true
 
-    el("active").checked = true;
-
-    el("modal").style.display = "flex";
+el("modal").style.display="flex"
 
 }
-
-/* ============================= */
-/* MODAL CLOSE */
-/* ============================= */
 
 function closeModal(){
 
-    el("modal").style.display = "none";
+el("modal").style.display="none"
 
 }
 
-/* ============================= */
-/* INIT */
-/* ============================= */
+/* =========================
+INIT
+========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-    loadItems();
+loadItems()
 
-});
+})
 
-  
-</script>
-    
+  </script>
   
 </body>
 </html>
