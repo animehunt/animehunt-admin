@@ -364,32 +364,23 @@ Loading ads...
 </main>
 
 </div>
-
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 async function api(url,method="GET",body=null){
 
-try{
-
-const opt={
+const res=await fetch(url,{
 method,
-headers:{ "Content-Type":"application/json" }
-}
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
 
-if(body) opt.body=JSON.stringify(body)
-
-const res=await fetch(url,opt)
-
-return await res.json()
-
-}catch(e){
-
-console.error(e)
-alert("API Error")
-
-}
+return res.json()
 
 }
 
@@ -403,25 +394,25 @@ list.innerHTML="<tr><td colspan='4'>Loading...</td></tr>"
 
 const ads=await api(API)
 
-if(!ads) return
-
 list.innerHTML=""
 
 ads.forEach(ad=>{
 
-const tr=document.createElement("tr")
+const status=(ad.status||"OFF").toLowerCase()
 
-tr.innerHTML=`
+list.innerHTML+=`
+
+<tr>
 <td>${ad.name}</td>
 <td>${ad.page}</td>
-<td class="status ${ad.status.toLowerCase()}">${ad.status}</td>
+<td class="status ${status}">${ad.status||"OFF"}</td>
 <td>
 <button onclick="toggleAd('${ad.id}')">Toggle</button>
 <button onclick="deleteAd('${ad.id}')">Delete</button>
 </td>
-`
+</tr>
 
-list.appendChild(tr)
+`
 
 })
 
@@ -498,7 +489,6 @@ alert("Invalid JSON")
 loadAds()
 
 </script>
-
 
 
 
