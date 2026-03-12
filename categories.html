@@ -208,11 +208,10 @@ body{background:#060a14;color:#fff}
 
 
 
-
-
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
+
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 let editingId=null
@@ -228,13 +227,22 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(!res.ok){
+alert("API Error")
+throw new Error()
+}
+
 return res.json()
 
 }
 
+/* LOAD */
+
 async function loadCategories(){
 
 const list=document.getElementById("list")
+
+list.innerHTML="Loading..."
 
 const data=await api(API)
 
@@ -246,16 +254,20 @@ list.innerHTML+=`
 
 <div class="row">
 
-<span style="font-weight:600">${cat.name}</span>
+<span style="font-weight:600">
+${cat.name}
+</span>
 
-<span style="color:#888">${cat.slug}</span>
+<span style="color:#888">
+${cat.slug}
+</span>
 
-<span class="badge">${cat.type}</span>
+<span class="badge">
+${cat.type}
+</span>
 
 <span class="${cat.active?'active':'inactive'}">
-
 ${cat.active?'● Online':'○ Offline'}
-
 </span>
 
 <span>${cat.category_order}</span>
@@ -264,9 +276,13 @@ ${cat.active?'● Online':'○ Offline'}
 
 <span class="actions">
 
-<button onclick="editCategory('${cat.id}')">✏️</button>
+<button onclick="editCategory('${cat.id}')">
+✏️
+</button>
 
-<button onclick="deleteCategory('${cat.id}')">🗑</button>
+<button onclick="deleteCategory('${cat.id}')">
+🗑
+</button>
 
 </span>
 
@@ -278,19 +294,24 @@ ${cat.active?'● Online':'○ Offline'}
 
 }
 
+/* SAVE */
+
 async function saveCategory(){
 
 const payload={
 
 name:name.value,
 slug:slug.value,
+
 type:type.value,
 
 order:Number(order.value||0),
+
 priority:Number(priority.value||1),
 
 showHome:showHome.checked,
 isActive:isActive.checked,
+
 isFeatured:isFeatured.checked,
 
 aiTrending:aiTrending.checked,
@@ -299,8 +320,13 @@ aiAssign:aiAssign.checked
 
 }
 
-const url=editingId?`${API}/${editingId}`:API
-const method=editingId?"PUT":"POST"
+const url=editingId
+? `${API}/${editingId}`
+: API
+
+const method=editingId
+? "PUT"
+: "POST"
 
 await api(url,method,payload)
 
@@ -310,9 +336,11 @@ loadCategories()
 
 }
 
+/* DELETE */
+
 async function deleteCategory(id){
 
-if(!confirm("Delete category?")) return
+if(!confirm("Delete Category?")) return
 
 await api(`${API}/${id}`,"DELETE")
 
@@ -323,6 +351,9 @@ loadCategories()
 loadCategories()
 
 </script>
+
+
+
 
 </body>
 </html>
