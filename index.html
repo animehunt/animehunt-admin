@@ -214,152 +214,177 @@ body{
 </div>
   
 <script>
+const API_BASE="https://animehunt-backend.animehunt715.workers.dev"
+const DASH_API=`${API_BASE}/api/admin/dashboard`
 
-/* ============================================================
-   ANIMEHUNT CMS DASHBOARD SCRIPT (TURSO READY)
-   ============================================================ */
+const token=localStorage.getItem("AUTH_TOKEN")
 
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev";
-const DASH_API = `${API_BASE}/api/admin/dashboard`;
+function authHeaders(){
+return{
+"Content-Type":"application/json",
+"Authorization":token ? "Bearer "+token : ""
+}
+}
 
-/* ==============================
-   1. Dashboard Loader
-   ============================== */
+/* LOAD DASHBOARD */
 
-async function loadDashboard() {
+async function loadDashboard(){
 
-  try {
+try{
 
-    const res = await fetch(DASH_API, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+const res=await fetch(DASH_API,{
+headers:authHeaders()
+})
 
-    if (!res.ok) throw new Error("API failed");
+if(!res.ok) throw new Error("API Error")
 
-    const data = await res.json();
+const data=await res.json()
 
-    /* CORE */
-    updateUI("animeCount", data.core.animeCount);
-    updateUI("episodeCount", data.core.episodeCount);
-    updateUI("categoryCount", data.core.categoryCount);
-    updateUI("bannerCount", data.core.bannerCount);
-    updateUI("downloadCount", data.core.downloadCount);
-    updateUI("serverCount", data.core.serverCount);
+/* CORE */
 
-    /* GROWTH */
-    updateUI("activeAds", data.growth.activeAds);
-    updateUI("todayRevenue", "₹" + data.growth.todayRevenue);
-    updateUI("adClicks", data.growth.adClicks);
-    updateUI("trendingAnime", data.growth.trendingAnime);
-    updateUI("ongoingAnime", data.growth.ongoingAnime);
-    updateUI("topRated", data.growth.topRated);
+updateUI("animeCount",data.core.animeCount)
+updateUI("episodeCount",data.core.episodeCount)
+updateUI("categoryCount",data.core.categoryCount)
+updateUI("bannerCount",data.core.bannerCount)
+updateUI("downloadCount",data.core.downloadCount)
+updateUI("serverCount",data.core.serverCount)
 
-    /* SYSTEM */
-    updateUI("cmsStatus", data.system.cmsStatus);
-    updateUI("serverLoad", data.system.serverLoad);
-    updateUI("apiStatus", data.system.apiStatus);
-    updateUI("aiStatus", data.system.aiStatus);
-    updateUI("searchStatus", data.system.searchStatus);
-    updateUI("backupStatus", data.system.backupStatus);
+/* GROWTH */
 
-  } catch (err) {
+updateUI("activeAds",data.growth.activeAds)
+updateUI("todayRevenue","₹"+data.growth.todayRevenue)
+updateUI("adClicks",data.growth.adClicks)
+updateUI("trendingAnime",data.growth.trendingAnime)
+updateUI("ongoingAnime",data.growth.ongoingAnime)
+updateUI("topRated",data.growth.topRated)
 
-    console.error("Dashboard Error:", err);
+/* SYSTEM */
 
-    document.querySelectorAll(".stat-card span").forEach(el=>{
-      if(el.textContent==="0" || el.textContent===""){
-        el.textContent="Err";
-      }
-    });
+updateUI("cmsStatus",data.system.cmsStatus)
+updateUI("serverLoad",data.system.serverLoad)
+updateUI("apiStatus",data.system.apiStatus)
+updateUI("aiStatus",data.system.aiStatus)
+updateUI("searchStatus",data.system.searchStatus)
+updateUI("backupStatus",data.system.backupStatus)
 
-  }
+}
+catch(err){
+
+console.error("Dashboard Error:",err)
+
+document.querySelectorAll(".stat-card span")
+.forEach(el=>{
+
+if(el.textContent==="0"||el.textContent===""){
+el.textContent="ERR"
+}
+
+})
 
 }
 
-/* ==============================
-   2. UI Update Helper
-   ============================== */
+}
+
+/* UI UPDATE */
 
 function updateUI(id,val){
 
-  const el=document.getElementById(id);
+const el=document.getElementById(id)
 
-  if(!el) return;
+if(!el) return
 
-  el.style.opacity="0";
+el.style.opacity="0"
 
-  setTimeout(()=>{
-    el.textContent=val ?? "0";
-    el.style.transition="opacity .4s";
-    el.style.opacity="1";
-  },80);
+setTimeout(()=>{
+
+el.textContent=val ?? "0"
+
+el.style.transition="opacity .3s"
+el.style.opacity="1"
+
+},60)
 
 }
 
-/* ==============================
-   3. Quick Actions
-   ============================== */
+/* QUICK ACTIONS */
 
 function initQuickActions(){
 
-  const cards=document.querySelectorAll(".cms-content .stats-grid:last-child .stat-card");
+const cards=document.querySelectorAll(
+".cms-content .stats-grid:last-child .stat-card"
+)
 
-  cards.forEach(card=>{
+cards.forEach(card=>{
 
-    card.style.cursor="pointer";
+card.style.cursor="pointer"
 
-    card.onclick=()=>{
+card.onclick=()=>{
 
-      const txt=card.textContent;
+const txt=card.textContent
 
-      if(txt.includes("Add Anime")){
-        location.href="anime.html?action=new";
-      }
+if(txt.includes("Add Anime"))
+location.href="anime.html?action=new"
 
-      if(txt.includes("AI Scan")){
+if(txt.includes("Manage Ads"))
+location.href="ads.html"
 
-        const span=card.querySelector("span");
-        span.textContent="Running...";
+if(txt.includes("Upload Banner"))
+location.href="banners.html"
 
-        setTimeout(()=>{
-          alert("AI Scan Complete");
-          span.textContent="Run";
-        },2000);
+if(txt.includes("Sync Content"))
+loadDashboard()
 
-      }
+if(txt.includes("AI Scan")){
 
-      if(txt.includes("Emergency Stop")){
+const span=card.querySelector("span")
 
-        if(confirm("Stop all services?")){
-          alert("All services stopped");
-        }
+span.textContent="Running..."
 
-      }
+setTimeout(()=>{
 
-    }
+alert("AI Scan Complete")
+span.textContent="Run"
 
-  });
+},2000)
 
 }
 
-/* ==============================
-   INIT
-   ============================== */
+if(txt.includes("Emergency Stop")){
+
+if(confirm("Stop all services?")){
+
+fetch(`${API_BASE}/api/admin/system/kill`,{
+method:"POST",
+headers:authHeaders()
+})
+
+alert("Emergency Stop Activated")
+
+}
+
+}
+
+}
+
+})
+
+}
+
+/* INIT */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-  loadDashboard();
+loadDashboard()
 
-  initQuickActions();
+initQuickActions()
 
-  /* auto refresh every 30 sec */
-  setInterval(loadDashboard,30000);
+/* AUTO REFRESH */
 
-});
+setInterval(loadDashboard,30000)
 
+})
+
+    
 </script>
 
 
