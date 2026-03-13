@@ -333,7 +333,7 @@ a{ text-decoration:none; color:inherit }
 
 <input id="banTitle" placeholder="Banner Title">
 
-<input type="file" id="banImageFile" accept="image/*">
+<input id="banImage" placeholder="Image URL (ImageKit)"> accept="image/*">
 
 <input id="banOrder" placeholder="Order">
 
@@ -360,22 +360,23 @@ a{ text-decoration:none; color:inherit }
 </div>
 <script>
 
+
 const API="/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
 
 let editId=null
-let existingImage=""
 
 const token=localStorage.getItem("AUTH_TOKEN")
 
 function authHeaders(){
 return{
+"Content-Type":"application/json",
 "Authorization":"Bearer "+token
 }
 }
 
-/* LOAD BANNERS */
+/* LOAD */
 
 async function loadBanners(){
 
@@ -390,7 +391,7 @@ bannerList.innerHTML=data.map(b=>`
 <div class="row">
 
 <div style="display:flex;gap:10px">
-<img src="${b.image}" style="width:50px;height:30px;object-fit:cover">
+<img src="${b.image}" style="width:60px;height:35px;object-fit:cover">
 <span>${b.title}</span>
 </div>
 
@@ -435,25 +436,22 @@ onchange="toggleStatus('${b.id}',this.checked)">
 function openModal(){
 
 editId=null
-existingImage=""
 
 banTitle.value=""
 banOrder.value=""
 banCategory.value=""
 banPosition.value="hero"
 banPage.value="home"
+banImage.value=""
 
 banActive.checked=false
 banRotate.checked=false
-
-previewImg.style.display="none"
-previewError.style.display="none"
 
 bannerModal.style.display="flex"
 
 }
 
-/* CLOSE MODAL */
+/* CLOSE */
 
 function closeModal(){
 
@@ -466,19 +464,16 @@ bannerModal.style.display="none"
 window.editBanner=(b)=>{
 
 editId=b.id
-existingImage=b.image
 
 banTitle.value=b.title
 banPage.value=b.page
 banCategory.value=b.category||""
 banPosition.value=b.position
 banOrder.value=b.banner_order
+banImage.value=b.image
 
 banActive.checked=b.active
 banRotate.checked=b.autoRotate
-
-previewImg.src=b.image
-previewImg.style.display="block"
 
 bannerModal.style.display="flex"
 
@@ -488,32 +483,40 @@ bannerModal.style.display="flex"
 
 async function saveBanner(){
 
-const form=new FormData()
+const payload={
 
-if(editId)
-form.append("id",editId)
+id:editId,
 
-form.append("title",banTitle.value)
-form.append("page",banPage.value)
-form.append("category",banCategory.value)
-form.append("position",banPosition.value)
-form.append("order",banOrder.value)
+title:banTitle.value,
 
-form.append("active",banActive.checked?1:0)
-form.append("autoRotate",banRotate.checked?1:0)
+page:banPage.value,
 
-const file=banImageFile.files[0]
+category:banCategory.value,
 
-if(file)
-form.append("image",file)
-else
-form.append("existingImage",existingImage)
+position:banPosition.value,
 
-await fetch(API,{
+order:parseInt(banOrder.value)||0,
+
+image:banImage.value,
+
+active:banActive.checked,
+
+autoRotate:banRotate.checked
+
+}
+
+const res=await fetch(API,{
 method:"POST",
 headers:authHeaders(),
-body:form
+body:JSON.stringify(payload)
 })
+
+const data=await res.json()
+
+if(!data.success){
+alert("Save failed")
+return
+}
 
 closeModal()
 
@@ -528,8 +531,11 @@ async function deleteBanner(id){
 if(!confirm("Delete banner?")) return
 
 await fetch(`${API}/${id}`,{
+
 method:"DELETE",
+
 headers:authHeaders()
+
 })
 
 loadBanners()
@@ -541,37 +547,20 @@ loadBanners()
 async function toggleStatus(id,active){
 
 await fetch(`${API}/${id}/status`,{
+
 method:"PATCH",
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
+
+headers:authHeaders(),
+
 body:JSON.stringify({active})
+
 })
 
 loadBanners()
 
 }
 
-/* IMAGE PREVIEW */
-
-banImageFile.onchange=function(){
-
-const reader=new FileReader()
-
-reader.onload=e=>{
-previewImg.src=e.target.result
-previewImg.style.display="block"
-}
-
-reader.readAsDataURL(this.files[0])
-
-}
-
 loadBanners()
-
-
-
 
 </script>
 
