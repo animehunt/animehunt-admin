@@ -333,6 +333,8 @@ a{ text-decoration:none; color:inherit }
 
 <input id="banTitle" placeholder="Banner Title">
 
+<input type="file" id="banImageFile" accept="image/*">
+
 <input id="banImage" placeholder="Image URL (ImageKit)"> accept="image/*">
 
 <input id="banOrder" placeholder="Order">
@@ -360,7 +362,6 @@ a{ text-decoration:none; color:inherit }
 </div>
 <script>
 
-
 const API="/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
@@ -376,7 +377,9 @@ return{
 }
 }
 
-/* LOAD */
+/* ======================
+LOAD BANNERS
+====================== */
 
 async function loadBanners(){
 
@@ -431,7 +434,9 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
-/* OPEN MODAL */
+/* ======================
+OPEN MODAL
+====================== */
 
 function openModal(){
 
@@ -447,11 +452,15 @@ banImage.value=""
 banActive.checked=false
 banRotate.checked=false
 
+previewImg.style.display="none"
+
 bannerModal.style.display="flex"
 
 }
 
-/* CLOSE */
+/* ======================
+CLOSE MODAL
+====================== */
 
 function closeModal(){
 
@@ -459,7 +468,9 @@ bannerModal.style.display="none"
 
 }
 
-/* EDIT */
+/* ======================
+EDIT BANNER
+====================== */
 
 window.editBanner=(b)=>{
 
@@ -475,13 +486,80 @@ banImage.value=b.image
 banActive.checked=b.active
 banRotate.checked=b.autoRotate
 
+previewImg.src=b.image
+previewImg.style.display="block"
+
 bannerModal.style.display="flex"
 
 }
 
-/* SAVE */
+/* ======================
+IMAGE PREVIEW
+====================== */
+
+banImageFile.onchange=function(){
+
+const file=this.files[0]
+
+if(!file) return
+
+const reader=new FileReader()
+
+reader.onload=e=>{
+
+previewImg.src=e.target.result
+previewImg.style.display="block"
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+/* URL PREVIEW */
+
+banImage.oninput=function(){
+
+if(!banImage.value) return
+
+previewImg.src=banImage.value
+previewImg.style.display="block"
+
+}
+
+/* ======================
+SAVE BANNER
+====================== */
 
 async function saveBanner(){
+
+let imageURL=banImage.value
+
+if(banImageFile.files[0]){
+
+const file=banImageFile.files[0]
+
+const reader=new FileReader()
+
+reader.onload=async function(e){
+
+imageURL=e.target.result
+
+await sendBanner(imageURL)
+
+}
+
+reader.readAsDataURL(file)
+
+}else{
+
+await sendBanner(imageURL)
+
+}
+
+}
+
+async function sendBanner(imageURL){
 
 const payload={
 
@@ -497,7 +575,7 @@ position:banPosition.value,
 
 order:parseInt(banOrder.value)||0,
 
-image:banImage.value,
+image:imageURL,
 
 active:banActive.checked,
 
@@ -514,8 +592,10 @@ body:JSON.stringify(payload)
 const data=await res.json()
 
 if(!data.success){
-alert("Save failed")
+
+alert("Banner save failed")
 return
+
 }
 
 closeModal()
@@ -524,7 +604,9 @@ loadBanners()
 
 }
 
-/* DELETE */
+/* ======================
+DELETE BANNER
+====================== */
 
 async function deleteBanner(id){
 
@@ -542,7 +624,9 @@ loadBanners()
 
 }
 
-/* STATUS */
+/* ======================
+TOGGLE STATUS
+====================== */
 
 async function toggleStatus(id,active){
 
@@ -559,6 +643,10 @@ body:JSON.stringify({active})
 loadBanners()
 
 }
+
+/* ======================
+INITIAL LOAD
+====================== */
 
 loadBanners()
 
