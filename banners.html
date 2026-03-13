@@ -469,7 +469,9 @@ previewImg.src=banImage.value
 previewImg.style.display="block"
 })
 }
-
+previewImg.onerror=()=>{
+previewImg.style.display="none"
+}
 
 /* ======================
 LOAD BANNERS
@@ -718,6 +720,8 @@ body:JSON.stringify({active})
 
 })
 
+loadBanners()
+
 }
 
 
@@ -725,7 +729,9 @@ body:JSON.stringify({active})
 INIT
 ====================== */
 
+if(saveBtn){
 saveBtn.addEventListener("click",saveBanner)
+}
 
 loadBanners()
 
