@@ -335,7 +335,30 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 <div class="modal-footer">
-<button onclick="saveBanner()">💾 Save</button>
+<button id="saveBannerBtn">💾 Save</button>
+</div>
+
+</div>
+</div>
+
+
+
+
+
+
+
+</label>
+
+</span>
+
+<div class="actions">
+
+<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+
+<button onclick="deleteBanner('${b.id}')">🗑</button>
+
+</div>
+
 </div>
 
 
@@ -385,6 +408,8 @@ return new Promise(resolve=>{
 
 reader.onload=async e=>{
 
+try{
+
 const res=await fetch(uploadAPI,{
 
 method:"POST",
@@ -408,11 +433,19 @@ const data=await res.json()
 if(!data.success){
 
 alert("Upload failed")
-return resolve(null)
+resolve(null)
+return
 
 }
 
 resolve(data.url)
+
+}catch(err){
+
+alert("Upload error")
+resolve(null)
+
+}
 
 }
 
@@ -424,10 +457,10 @@ reader.readAsDataURL(file)
 
 
 /* ======================
-IMAGE FILE UPLOAD
+IMAGE FILE SELECT
 ====================== */
 
-banImageFile.onchange=async()=>{
+banImageFile.addEventListener("change",async()=>{
 
 const file=banImageFile.files[0]
 
@@ -444,7 +477,7 @@ previewImg.style.display="block"
 
 }
 
-}
+})
 
 
 /* ======================
@@ -466,6 +499,8 @@ LOAD BANNERS
 ====================== */
 
 async function loadBanners(){
+
+try{
 
 const res=await fetch(API,{
 
@@ -524,6 +559,12 @@ onchange="toggleStatus('${b.id}',this.checked)">
 </div>
 
 `).join("")
+
+}catch(e){
+
+console.error("Load banners error",e)
+
+}
 
 }
 
@@ -596,6 +637,8 @@ SAVE BANNER
 
 async function saveBanner(){
 
+console.log("SAVE CLICKED")
+
 const payload={
 
 id:editId,
@@ -618,6 +661,8 @@ autoRotate:banRotate.checked
 
 }
 
+try{
+
 const res=await fetch(API,{
 
 method:"POST",
@@ -625,7 +670,6 @@ method:"POST",
 headers:{
 
 "Content-Type":"application/json",
-
 "Authorization":"Bearer "+token
 
 },
@@ -646,6 +690,12 @@ return
 closeModal()
 
 loadBanners()
+
+}catch(err){
+
+alert("Save error")
+
+}
 
 }
 
@@ -686,7 +736,6 @@ method:"PATCH",
 headers:{
 
 "Content-Type":"application/json",
-
 "Authorization":"Bearer "+token
 
 },
@@ -702,9 +751,11 @@ body:JSON.stringify({active})
 INIT
 ====================== */
 
+document
+.getElementById("saveBannerBtn")
+.addEventListener("click",saveBanner)
+
 loadBanners()
-
-
 
 </script>
 
