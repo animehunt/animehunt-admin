@@ -362,22 +362,9 @@ a{ text-decoration:none; color:inherit }
 
 
 
-
-<div class="actions">
-
-<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
-
-<button onclick="deleteBanner('${b.id}')">🗑</button>
-
-</div>
-
-</div>
-
-
-
 <script>
 
-const API="/api/admin/banners"
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
 const bannerModal=document.getElementById("bannerModal")
@@ -405,11 +392,14 @@ return{
 }
 }
 
-/* LOAD */
+/* =========================
+LOAD BANNERS
+========================= */
 
 async function loadBanners(){
 
 const res=await fetch(API,{headers:authHeaders()})
+
 const data=await res.json()
 
 bannerList.innerHTML=data.map(b=>`
@@ -446,7 +436,9 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
-/* OPEN MODAL */
+/* =========================
+OPEN MODAL
+========================= */
 
 function openModal(){
 
@@ -468,13 +460,17 @@ bannerModal.style.display="flex"
 
 }
 
-/* CLOSE */
+/* =========================
+CLOSE MODAL
+========================= */
 
 function closeModal(){
 bannerModal.style.display="none"
 }
 
-/* EDIT */
+/* =========================
+EDIT BANNER
+========================= */
 
 window.editBanner=(b)=>{
 
@@ -497,18 +493,22 @@ bannerModal.style.display="flex"
 
 }
 
-/* URL PREVIEW */
+/* =========================
+IMAGE PREVIEW
+========================= */
 
-banImage.oninput=function(){
+banImage.addEventListener("input",()=>{
 
 if(!banImage.value) return
 
 previewImg.src=banImage.value
 previewImg.style.display="block"
 
-}
+})
 
-/* SAVE */
+/* =========================
+SAVE BANNER
+========================= */
 
 async function saveBanner(){
 
@@ -543,8 +543,10 @@ body:JSON.stringify(payload)
 const data=await res.json()
 
 if(!data.success){
+
 alert("Banner save failed")
 return
+
 }
 
 closeModal()
@@ -552,7 +554,9 @@ loadBanners()
 
 }
 
-/* DELETE */
+/* =========================
+DELETE BANNER
+========================= */
 
 async function deleteBanner(id){
 
@@ -567,7 +571,9 @@ loadBanners()
 
 }
 
-/* STATUS */
+/* =========================
+TOGGLE STATUS
+========================= */
 
 async function toggleStatus(id,active){
 
@@ -580,6 +586,10 @@ body:JSON.stringify({active})
 loadBanners()
 
 }
+
+/* =========================
+INIT
+========================= */
 
 loadBanners()
 
