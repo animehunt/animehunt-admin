@@ -360,11 +360,29 @@ a{ text-decoration:none; color:inherit }
 
   </div>
 </div>
+
+
+
+
 <script>
 
 const API="/api/admin/banners"
 
 const bannerList=document.getElementById("bannerList")
+const bannerModal=document.getElementById("bannerModal")
+
+const banTitle=document.getElementById("banTitle")
+const banPage=document.getElementById("banPage")
+const banCategory=document.getElementById("banCategory")
+const banPosition=document.getElementById("banPosition")
+const banOrder=document.getElementById("banOrder")
+const banImage=document.getElementById("banImage")
+const banImageFile=document.getElementById("banImageFile")
+
+const banActive=document.getElementById("banActive")
+const banRotate=document.getElementById("banRotate")
+
+const previewImg=document.getElementById("previewImg")
 
 let editId=null
 
@@ -463,13 +481,11 @@ CLOSE MODAL
 ====================== */
 
 function closeModal(){
-
 bannerModal.style.display="none"
-
 }
 
 /* ======================
-EDIT BANNER
+EDIT
 ====================== */
 
 window.editBanner=(b)=>{
@@ -494,7 +510,7 @@ bannerModal.style.display="flex"
 }
 
 /* ======================
-IMAGE PREVIEW
+IMAGE PREVIEW FILE
 ====================== */
 
 banImageFile.onchange=function(){
@@ -516,7 +532,9 @@ reader.readAsDataURL(file)
 
 }
 
-/* URL PREVIEW */
+/* ======================
+IMAGE PREVIEW URL
+====================== */
 
 banImage.oninput=function(){
 
@@ -528,7 +546,7 @@ previewImg.style.display="block"
 }
 
 /* ======================
-SAVE BANNER
+SAVE
 ====================== */
 
 async function saveBanner(){
@@ -599,13 +617,12 @@ return
 }
 
 closeModal()
-
 loadBanners()
 
 }
 
 /* ======================
-DELETE BANNER
+DELETE
 ====================== */
 
 async function deleteBanner(id){
@@ -615,7 +632,6 @@ if(!confirm("Delete banner?")) return
 await fetch(`${API}/${id}`,{
 
 method:"DELETE",
-
 headers:authHeaders()
 
 })
@@ -625,7 +641,7 @@ loadBanners()
 }
 
 /* ======================
-TOGGLE STATUS
+STATUS
 ====================== */
 
 async function toggleStatus(id,active){
@@ -633,9 +649,7 @@ async function toggleStatus(id,active){
 await fetch(`${API}/${id}/status`,{
 
 method:"PATCH",
-
 headers:authHeaders(),
-
 body:JSON.stringify({active})
 
 })
@@ -645,40 +659,11 @@ loadBanners()
 }
 
 /* ======================
-INITIAL LOAD
+INIT
 ====================== */
 
 loadBanners()
-  banImageFile.onchange=function(){
 
-const file=this.files[0]
-
-if(!file) return
-
-const reader=new FileReader()
-
-reader.onload=e=>{
-
-previewImg.src=e.target.result
-previewImg.style.display="block"
-
-}
-
-reader.readAsDataURL(file)
-
-}
-
-banImage.oninput=function(){
-
-if(!banImage.value) return
-
-previewImg.src=banImage.value
-previewImg.style.display="block"
-
-}
-  loadBanners()
-
-  }
 </script>
 
 </body>
