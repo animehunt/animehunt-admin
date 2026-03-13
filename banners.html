@@ -342,27 +342,6 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 
-
-
-
-
-
-</label>
-
-</span>
-
-<div class="actions">
-
-<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
-
-<button onclick="deleteBanner('${b.id}')">🗑</button>
-
-</div>
-
-</div>
-
-
-
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
@@ -384,6 +363,8 @@ const banRotate=document.getElementById("banRotate")
 
 const previewImg=document.getElementById("previewImg")
 
+const saveBtn=document.getElementById("saveBannerBtn")
+
 const token=localStorage.getItem("AUTH_TOKEN")
 
 let editId=null
@@ -395,11 +376,11 @@ UPLOAD IMAGE
 
 async function uploadImage(file){
 
-if(file.size > 2*1024*1024){
+if(!file) return null
 
+if(file.size > 2*1024*1024){
 alert("Image must be under 2MB")
 return null
-
 }
 
 const reader=new FileReader()
@@ -420,10 +401,8 @@ headers:{
 },
 
 body:JSON.stringify({
-
 file:e.target.result,
 fileName:file.name
-
 })
 
 })
@@ -431,11 +410,9 @@ fileName:file.name
 const data=await res.json()
 
 if(!data.success){
-
 alert("Upload failed")
 resolve(null)
 return
-
 }
 
 resolve(data.url)
@@ -457,7 +434,7 @@ reader.readAsDataURL(file)
 
 
 /* ======================
-IMAGE FILE SELECT
+FILE SELECT
 ====================== */
 
 banImageFile.addEventListener("change",async()=>{
@@ -503,11 +480,9 @@ async function loadBanners(){
 try{
 
 const res=await fetch(API,{
-
 headers:{
-"Authorization":"Bearer "+token
+Authorization:"Bearer "+token
 }
-
 })
 
 const data=await res.json()
@@ -537,9 +512,7 @@ bannerList.innerHTML=data.map(b=>`
 <label class="switch">
 
 <input type="checkbox"
-
 ${b.active?"checked":""}
-
 onchange="toggleStatus('${b.id}',this.checked)">
 
 <span class="slider"></span>
@@ -560,9 +533,9 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 `).join("")
 
-}catch(e){
+}catch(err){
 
-console.error("Load banners error",e)
+console.error("Load banners error",err)
 
 }
 
@@ -637,7 +610,15 @@ SAVE BANNER
 
 async function saveBanner(){
 
-console.log("SAVE CLICKED")
+if(!banTitle.value){
+alert("Enter banner title")
+return
+}
+
+if(!banImage.value){
+alert("Upload banner image")
+return
+}
 
 const payload={
 
@@ -651,7 +632,7 @@ category:banCategory.value,
 
 position:banPosition.value,
 
-order:parseInt(banOrder.value)||0,
+banner_order:parseInt(banOrder.value)||0,
 
 image:banImage.value,
 
@@ -668,10 +649,8 @@ const res=await fetch(API,{
 method:"POST",
 
 headers:{
-
 "Content-Type":"application/json",
-"Authorization":"Bearer "+token
-
+Authorization:"Bearer "+token
 },
 
 body:JSON.stringify(payload)
@@ -681,14 +660,11 @@ body:JSON.stringify(payload)
 const data=await res.json()
 
 if(!data.success){
-
 alert("Banner save failed")
 return
-
 }
 
 closeModal()
-
 loadBanners()
 
 }catch(err){
@@ -713,7 +689,7 @@ await fetch(`${API}/${id}`,{
 method:"DELETE",
 
 headers:{
-"Authorization":"Bearer "+token
+Authorization:"Bearer "+token
 }
 
 })
@@ -734,10 +710,8 @@ await fetch(`${API}/${id}/status`,{
 method:"PATCH",
 
 headers:{
-
 "Content-Type":"application/json",
-"Authorization":"Bearer "+token
-
+Authorization:"Bearer "+token
 },
 
 body:JSON.stringify({active})
@@ -751,13 +725,16 @@ body:JSON.stringify({active})
 INIT
 ====================== */
 
-document
-.getElementById("saveBannerBtn")
-.addEventListener("click",saveBanner)
+saveBtn.addEventListener("click",saveBanner)
 
 loadBanners()
 
 </script>
+
+
+
+
+
 
 </body>
 </html>
