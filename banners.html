@@ -365,6 +365,7 @@ a{ text-decoration:none; color:inherit }
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
+const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
 const bannerList=document.getElementById("bannerList")
 const bannerModal=document.getElementById("bannerModal")
@@ -375,30 +376,110 @@ const banCategory=document.getElementById("banCategory")
 const banPosition=document.getElementById("banPosition")
 const banOrder=document.getElementById("banOrder")
 const banImage=document.getElementById("banImage")
+const banImageFile=document.getElementById("banImageFile")
 
 const banActive=document.getElementById("banActive")
 const banRotate=document.getElementById("banRotate")
 
 const previewImg=document.getElementById("previewImg")
 
-let editId=null
-
 const token=localStorage.getItem("AUTH_TOKEN")
 
-function authHeaders(){
-return{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-}
+let editId=null
+
+/* ======================
+UPLOAD IMAGE
+====================== */
+
+async function uploadImage(file){
+
+if(file.size>2*1024*1024){
+alert("Image must be under 2MB")
+return null
 }
 
-/* =========================
+const reader=new FileReader()
+
+return new Promise(resolve=>{
+
+reader.onload=async e=>{
+
+const res=await fetch(uploadAPI,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+body:JSON.stringify({
+file:e.target.result,
+fileName:file.name
+})
+})
+
+const data=await res.json()
+
+if(!data.success){
+alert("Upload failed")
+return resolve(null)
+}
+
+resolve(data.url)
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
+
+/* ======================
+IMAGE FILE UPLOAD
+====================== */
+
+banImageFile.onchange=async()=>{
+
+const file=banImageFile.files[0]
+
+if(!file)return
+
+const url=await uploadImage(file)
+
+if(url){
+
+banImage.value=url
+
+previewImg.src=url
+previewImg.style.display="block"
+
+}
+
+}
+
+/* ======================
+URL PREVIEW
+====================== */
+
+banImage.addEventListener("input",()=>{
+
+if(!banImage.value)return
+
+previewImg.src=banImage.value
+previewImg.style.display="block"
+
+})
+
+/* ======================
 LOAD BANNERS
-========================= */
+====================== */
 
 async function loadBanners(){
 
-const res=await fetch(API,{headers:authHeaders()})
+const res=await fetch(API,{
+headers:{
+"Authorization":"Bearer "+token
+}
+})
 
 const data=await res.json()
 
@@ -412,22 +493,33 @@ bannerList.innerHTML=data.map(b=>`
 </div>
 
 <span class="badge">${b.page}</span>
+
 <span>${b.category||"-"}</span>
+
 <span>${b.position}</span>
+
 <span>${b.banner_order}</span>
 
 <span>
+
 <label class="switch">
+
 <input type="checkbox"
 ${b.active?"checked":""}
 onchange="toggleStatus('${b.id}',this.checked)">
+
 <span class="slider"></span>
+
 </label>
+
 </span>
 
 <div class="actions">
+
 <button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+
 <button onclick="deleteBanner('${b.id}')">🗑</button>
+
 </div>
 
 </div>
@@ -436,19 +528,19 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
-/* =========================
+/* ======================
 OPEN MODAL
-========================= */
+====================== */
 
 function openModal(){
 
 editId=null
 
 banTitle.value=""
-banOrder.value=""
+banPage.value="home"
 banCategory.value=""
 banPosition.value="hero"
-banPage.value="home"
+banOrder.value=""
 banImage.value=""
 
 banActive.checked=false
@@ -460,17 +552,17 @@ bannerModal.style.display="flex"
 
 }
 
-/* =========================
+/* ======================
 CLOSE MODAL
-========================= */
+====================== */
 
 function closeModal(){
 bannerModal.style.display="none"
 }
 
-/* =========================
+/* ======================
 EDIT BANNER
-========================= */
+====================== */
 
 window.editBanner=(b)=>{
 
@@ -493,22 +585,9 @@ bannerModal.style.display="flex"
 
 }
 
-/* =========================
-IMAGE PREVIEW
-========================= */
-
-banImage.addEventListener("input",()=>{
-
-if(!banImage.value) return
-
-previewImg.src=banImage.value
-previewImg.style.display="block"
-
-})
-
-/* =========================
+/* ======================
 SAVE BANNER
-========================= */
+====================== */
 
 async function saveBanner(){
 
@@ -536,17 +615,18 @@ autoRotate:banRotate.checked
 
 const res=await fetch(API,{
 method:"POST",
-headers:authHeaders(),
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
 body:JSON.stringify(payload)
 })
 
 const data=await res.json()
 
 if(!data.success){
-
 alert("Banner save failed")
 return
-
 }
 
 closeModal()
@@ -554,44 +634,48 @@ loadBanners()
 
 }
 
-/* =========================
-DELETE BANNER
-========================= */
+/* ======================
+DELETE
+====================== */
 
 async function deleteBanner(id){
 
-if(!confirm("Delete banner?")) return
+if(!confirm("Delete banner?"))return
 
 await fetch(`${API}/${id}`,{
 method:"DELETE",
-headers:authHeaders()
+headers:{
+"Authorization":"Bearer "+token
+}
 })
 
 loadBanners()
 
 }
 
-/* =========================
-TOGGLE STATUS
-========================= */
+/* ======================
+STATUS
+====================== */
 
 async function toggleStatus(id,active){
 
 await fetch(`${API}/${id}/status`,{
 method:"PATCH",
-headers:authHeaders(),
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
 body:JSON.stringify({active})
 })
 
-loadBanners()
-
 }
 
-/* =========================
+/* ======================
 INIT
-========================= */
+====================== */
 
 loadBanners()
+
 
 </script>
 
