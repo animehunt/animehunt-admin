@@ -649,7 +649,36 @@ INITIAL LOAD
 ====================== */
 
 loadBanners()
+  banImageFile.onchange=function(){
 
+const file=this.files[0]
+
+if(!file) return
+
+const reader=new FileReader()
+
+reader.onload=e=>{
+
+previewImg.src=e.target.result
+previewImg.style.display="block"
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+banImage.oninput=function(){
+
+if(!banImage.value) return
+
+previewImg.src=banImage.value
+previewImg.style.display="block"
+
+}
+  loadBanners()
+
+  }
 </script>
 
 </body>
