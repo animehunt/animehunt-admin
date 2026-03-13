@@ -461,14 +461,14 @@ previewImg.style.display="block"
 URL PREVIEW
 ====================== */
 
+if(banImage){
 banImage.addEventListener("input",()=>{
-
 if(!banImage.value) return
 
 previewImg.src=banImage.value
 previewImg.style.display="block"
-
 })
+}
 
 
 /* ======================
