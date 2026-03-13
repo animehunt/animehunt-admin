@@ -481,41 +481,124 @@ listBody.innerHTML=data.map(a=>`
 
 <script>
 
-const API="/api/admin/anime"
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
+
+const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
 let editId=null
 
 const modal=document.getElementById("animeModal")
 const listBody=document.getElementById("animeList")
 
-const typeFilter=document.getElementById("typeFilter")
-const statusFilter=document.getElementById("statusFilter")
-const homeFilter=document.getElementById("homeFilter")
-const searchAnime=document.getElementById("searchAnime")
-
 const token=localStorage.getItem("AUTH_TOKEN")
 
-function authHeaders(){
-return{
+/* ======================
+UPLOAD IMAGE
+====================== */
+
+async function uploadImage(file){
+
+if(file.size > 2*1024*1024){
+alert("Image must be under 2MB")
+return null
+}
+
+const reader=new FileReader()
+
+return new Promise(resolve=>{
+
+reader.onload=async e=>{
+
+const res=await fetch(uploadAPI,{
+method:"POST",
+headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token
-}
+},
+body:JSON.stringify({
+file:e.target.result,
+fileName:file.name
+})
+})
+
+const data=await res.json()
+
+if(!data.success){
+alert("Upload failed")
+return resolve(null)
 }
 
-/* OPEN MODAL */
+resolve(data.url)
 
-document.getElementById("openAddAnime").onclick=()=>{
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
+
+/* ======================
+POSTER UPLOAD
+====================== */
+
+posterFile.onchange=async()=>{
+
+const file=posterFile.files[0]
+
+if(!file)return
+
+const url=await uploadImage(file)
+
+if(url){
+poster.value=url
+}
+
+}
+
+/* ======================
+BANNER UPLOAD
+====================== */
+
+bannerFile.onchange=async()=>{
+
+const file=bannerFile.files[0]
+
+if(!file)return
+
+const url=await uploadImage(file)
+
+if(url){
+banner.value=url
+}
+
+}
+
+/* ======================
+OPEN MODAL
+====================== */
+
+openAddAnime.onclick=()=>{
+
 resetForm()
+
 modal.style.display="flex"
+
 }
 
-/* CLOSE */
+/* ======================
+CLOSE MODAL
+====================== */
 
-document.getElementById("closeModal").onclick=()=>{
+closeModal.onclick=()=>{
+
 modal.style.display="none"
+
 }
 
-/* AUTO SLUG */
+/* ======================
+AUTO SLUG
+====================== */
 
 title.addEventListener("input",e=>{
 
@@ -530,7 +613,9 @@ slug.value=e.target.value
 
 })
 
-/* SAVE */
+/* ======================
+SAVE ANIME
+====================== */
 
 saveAnime.onclick=async()=>{
 
@@ -570,7 +655,10 @@ const method=editId?"PATCH":"POST"
 
 await fetch(url,{
 method,
-headers:authHeaders(),
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
 body:JSON.stringify(payload)
 })
 
@@ -580,7 +668,9 @@ loadAnime()
 
 }
 
-/* LOAD */
+/* ======================
+LOAD ANIME
+====================== */
 
 async function loadAnime(){
 
@@ -594,7 +684,9 @@ q:searchAnime.value
 })
 
 const res=await fetch(`${API}?${params}`,{
-headers:{Authorization:"Bearer "+token}
+headers:{
+"Authorization":"Bearer "+token
+}
 })
 
 const data=await res.json()
@@ -620,6 +712,7 @@ listBody.innerHTML=data.map(a=>`
 <div class="actions">
 
 <button onclick="editAnime('${a.id}')">✏️</button>
+
 <button onclick="deleteAnime('${a.id}')">🗑</button>
 
 </div>
@@ -630,12 +723,16 @@ listBody.innerHTML=data.map(a=>`
 
 }
 
-/* EDIT */
+/* ======================
+EDIT ANIME
+====================== */
 
 window.editAnime=async(id)=>{
 
 const res=await fetch(`${API}/${id}`,{
-headers:{Authorization:"Bearer "+token}
+headers:{
+"Authorization":"Bearer "+token
+}
 })
 
 const a=await res.json()
@@ -673,22 +770,28 @@ modal.style.display="flex"
 
 }
 
-/* DELETE */
+/* ======================
+DELETE ANIME
+====================== */
 
 window.deleteAnime=async(id)=>{
 
-if(!confirm("Delete anime?")) return
+if(!confirm("Delete anime?"))return
 
 await fetch(`${API}/${id}`,{
 method:"DELETE",
-headers:{Authorization:"Bearer "+token}
+headers:{
+"Authorization":"Bearer "+token
+}
 })
 
 loadAnime()
 
 }
 
-/* RESET */
+/* ======================
+RESET FORM
+====================== */
 
 function resetForm(){
 
@@ -704,7 +807,9 @@ Array.from(genres.options).forEach(o=>o.selected=false)
 
 }
 
-/* FILTER */
+/* ======================
+FILTERS
+====================== */
 
 [typeFilter,statusFilter,homeFilter]
 .forEach(el=>el.addEventListener("change",loadAnime))
@@ -717,9 +822,14 @@ window.searchTimer=setTimeout(loadAnime,400)
 
 })
 
-/* INIT */
+/* ======================
+INIT
+====================== */
 
 loadAnime()
+
+
+
 
 </script>
 
