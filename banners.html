@@ -469,10 +469,11 @@ previewImg.src=banImage.value
 previewImg.style.display="block"
 })
 }
+if(previewImg){
 previewImg.onerror=()=>{
 previewImg.style.display="none"
 }
-
+}
 /* ======================
 LOAD BANNERS
 ====================== */
