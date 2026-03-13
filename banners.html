@@ -364,6 +364,19 @@ a{ text-decoration:none; color:inherit }
 
 
 
+
+<div class="actions">
+
+<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+
+<button onclick="deleteBanner('${b.id}')">🗑</button>
+
+</div>
+
+</div>
+
+
+
 <script>
 
 const API="/api/admin/banners"
@@ -377,7 +390,6 @@ const banCategory=document.getElementById("banCategory")
 const banPosition=document.getElementById("banPosition")
 const banOrder=document.getElementById("banOrder")
 const banImage=document.getElementById("banImage")
-const banImageFile=document.getElementById("banImageFile")
 
 const banActive=document.getElementById("banActive")
 const banRotate=document.getElementById("banRotate")
@@ -395,16 +407,11 @@ return{
 }
 }
 
-/* ======================
-LOAD BANNERS
-====================== */
+/* LOAD */
 
 async function loadBanners(){
 
-const res=await fetch(API,{
-headers:authHeaders()
-})
-
+const res=await fetch(API,{headers:authHeaders()})
 const data=await res.json()
 
 bannerList.innerHTML=data.map(b=>`
@@ -417,33 +424,22 @@ bannerList.innerHTML=data.map(b=>`
 </div>
 
 <span class="badge">${b.page}</span>
-
 <span>${b.category||"-"}</span>
-
 <span>${b.position}</span>
-
 <span>${b.banner_order}</span>
 
 <span>
-
 <label class="switch">
-
 <input type="checkbox"
 ${b.active?"checked":""}
 onchange="toggleStatus('${b.id}',this.checked)">
-
 <span class="slider"></span>
-
 </label>
-
 </span>
 
 <div class="actions">
-
 <button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
-
 <button onclick="deleteBanner('${b.id}')">🗑</button>
-
 </div>
 
 </div>
@@ -452,9 +448,7 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
-/* ======================
-OPEN MODAL
-====================== */
+/* OPEN MODAL */
 
 function openModal(){
 
@@ -476,17 +470,13 @@ bannerModal.style.display="flex"
 
 }
 
-/* ======================
-CLOSE MODAL
-====================== */
+/* CLOSE */
 
 function closeModal(){
 bannerModal.style.display="none"
 }
 
-/* ======================
-EDIT
-====================== */
+/* EDIT */
 
 window.editBanner=(b)=>{
 
@@ -509,32 +499,7 @@ bannerModal.style.display="flex"
 
 }
 
-/* ======================
-IMAGE PREVIEW FILE
-====================== */
-
-banImageFile.onchange=function(){
-
-const file=this.files[0]
-
-if(!file) return
-
-const reader=new FileReader()
-
-reader.onload=e=>{
-
-previewImg.src=e.target.result
-previewImg.style.display="block"
-
-}
-
-reader.readAsDataURL(file)
-
-}
-
-/* ======================
-IMAGE PREVIEW URL
-====================== */
+/* URL PREVIEW */
 
 banImage.oninput=function(){
 
@@ -545,39 +510,9 @@ previewImg.style.display="block"
 
 }
 
-/* ======================
-SAVE
-====================== */
+/* SAVE */
 
 async function saveBanner(){
-
-let imageURL=banImage.value
-
-if(banImageFile.files[0]){
-
-const file=banImageFile.files[0]
-
-const reader=new FileReader()
-
-reader.onload=async function(e){
-
-imageURL=e.target.result
-
-await sendBanner(imageURL)
-
-}
-
-reader.readAsDataURL(file)
-
-}else{
-
-await sendBanner(imageURL)
-
-}
-
-}
-
-async function sendBanner(imageURL){
 
 const payload={
 
@@ -593,7 +528,7 @@ position:banPosition.value,
 
 order:parseInt(banOrder.value)||0,
 
-image:imageURL,
+image:banImage.value,
 
 active:banActive.checked,
 
@@ -610,10 +545,8 @@ body:JSON.stringify(payload)
 const data=await res.json()
 
 if(!data.success){
-
 alert("Banner save failed")
 return
-
 }
 
 closeModal()
@@ -621,46 +554,34 @@ loadBanners()
 
 }
 
-/* ======================
-DELETE
-====================== */
+/* DELETE */
 
 async function deleteBanner(id){
 
 if(!confirm("Delete banner?")) return
 
 await fetch(`${API}/${id}`,{
-
 method:"DELETE",
 headers:authHeaders()
-
 })
 
 loadBanners()
 
 }
 
-/* ======================
-STATUS
-====================== */
+/* STATUS */
 
 async function toggleStatus(id,active){
 
 await fetch(`${API}/${id}/status`,{
-
 method:"PATCH",
 headers:authHeaders(),
 body:JSON.stringify({active})
-
 })
 
 loadBanners()
 
 }
-
-/* ======================
-INIT
-====================== */
 
 loadBanners()
 
