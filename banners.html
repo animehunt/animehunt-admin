@@ -388,15 +388,18 @@ const token=localStorage.getItem("AUTH_TOKEN")
 
 let editId=null
 
+
 /* ======================
 UPLOAD IMAGE
 ====================== */
 
 async function uploadImage(file){
 
-if(file.size>2*1024*1024){
+if(file.size > 2*1024*1024){
+
 alert("Image must be under 2MB")
 return null
+
 }
 
 const reader=new FileReader()
@@ -406,22 +409,30 @@ return new Promise(resolve=>{
 reader.onload=async e=>{
 
 const res=await fetch(uploadAPI,{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token
 },
+
 body:JSON.stringify({
+
 file:e.target.result,
 fileName:file.name
+
 })
+
 })
 
 const data=await res.json()
 
 if(!data.success){
+
 alert("Upload failed")
 return resolve(null)
+
 }
 
 resolve(data.url)
@@ -434,6 +445,7 @@ reader.readAsDataURL(file)
 
 }
 
+
 /* ======================
 IMAGE FILE UPLOAD
 ====================== */
@@ -442,7 +454,7 @@ banImageFile.onchange=async()=>{
 
 const file=banImageFile.files[0]
 
-if(!file)return
+if(!file) return
 
 const url=await uploadImage(file)
 
@@ -457,18 +469,20 @@ previewImg.style.display="block"
 
 }
 
+
 /* ======================
 URL PREVIEW
 ====================== */
 
 banImage.addEventListener("input",()=>{
 
-if(!banImage.value)return
+if(!banImage.value) return
 
 previewImg.src=banImage.value
 previewImg.style.display="block"
 
 })
+
 
 /* ======================
 LOAD BANNERS
@@ -477,9 +491,11 @@ LOAD BANNERS
 async function loadBanners(){
 
 const res=await fetch(API,{
+
 headers:{
 "Authorization":"Bearer "+token
 }
+
 })
 
 const data=await res.json()
@@ -489,8 +505,11 @@ bannerList.innerHTML=data.map(b=>`
 <div class="row">
 
 <div style="display:flex;gap:10px">
+
 <img src="${b.image}" style="width:60px;height:35px;object-fit:cover">
+
 <span>${b.title}</span>
+
 </div>
 
 <span class="badge">${b.page}</span>
@@ -506,7 +525,9 @@ bannerList.innerHTML=data.map(b=>`
 <label class="switch">
 
 <input type="checkbox"
+
 ${b.active?"checked":""}
+
 onchange="toggleStatus('${b.id}',this.checked)">
 
 <span class="slider"></span>
@@ -528,6 +549,7 @@ onchange="toggleStatus('${b.id}',this.checked)">
 `).join("")
 
 }
+
 
 /* ======================
 OPEN MODAL
@@ -553,13 +575,17 @@ bannerModal.style.display="flex"
 
 }
 
+
 /* ======================
 CLOSE MODAL
 ====================== */
 
 function closeModal(){
+
 bannerModal.style.display="none"
+
 }
+
 
 /* ======================
 EDIT BANNER
@@ -585,6 +611,7 @@ previewImg.style.display="block"
 bannerModal.style.display="flex"
 
 }
+
 
 /* ======================
 SAVE BANNER
@@ -615,25 +642,36 @@ autoRotate:banRotate.checked
 }
 
 const res=await fetch(API,{
+
 method:"POST",
+
 headers:{
+
 "Content-Type":"application/json",
+
 "Authorization":"Bearer "+token
+
 },
+
 body:JSON.stringify(payload)
+
 })
 
 const data=await res.json()
 
 if(!data.success){
+
 alert("Banner save failed")
 return
+
 }
 
 closeModal()
+
 loadBanners()
 
 }
+
 
 /* ======================
 DELETE
@@ -641,18 +679,22 @@ DELETE
 
 async function deleteBanner(id){
 
-if(!confirm("Delete banner?"))return
+if(!confirm("Delete banner?")) return
 
 await fetch(`${API}/${id}`,{
+
 method:"DELETE",
+
 headers:{
 "Authorization":"Bearer "+token
 }
+
 })
 
 loadBanners()
 
 }
+
 
 /* ======================
 STATUS
@@ -661,21 +703,30 @@ STATUS
 async function toggleStatus(id,active){
 
 await fetch(`${API}/${id}/status`,{
+
 method:"PATCH",
+
 headers:{
+
 "Content-Type":"application/json",
+
 "Authorization":"Bearer "+token
+
 },
+
 body:JSON.stringify({active})
+
 })
 
 }
+
 
 /* ======================
 INIT
 ====================== */
 
 loadBanners()
+
 
 
 </script>
