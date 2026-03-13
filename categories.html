@@ -211,10 +211,31 @@ body{background:#060a14;color:#fff}
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
-
+const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
+  
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 let editingId=null
+
+const modal=document.getElementById("modal")
+
+const name=document.getElementById("name")
+const slug=document.getElementById("slug")
+const type=document.getElementById("type")
+const order=document.getElementById("order")
+const priority=document.getElementById("priority")
+
+const showHome=document.getElementById("showHome")
+const isActive=document.getElementById("isActive")
+const isFeatured=document.getElementById("isFeatured")
+
+const aiTrending=document.getElementById("aiTrending")
+const aiPopular=document.getElementById("aiPopular")
+const aiAssign=document.getElementById("aiAssign")
+
+/* =========================
+API HELPER
+========================= */
 
 async function api(url,method="GET",body=null){
 
@@ -236,7 +257,9 @@ return res.json()
 
 }
 
-/* LOAD */
+/* =========================
+LOAD CATEGORIES
+========================= */
 
 async function loadCategories(){
 
@@ -294,7 +317,50 @@ ${cat.active?'● Online':'○ Offline'}
 
 }
 
-/* SAVE */
+/* =========================
+OPEN MODAL
+========================= */
+
+function openModal(){
+
+editingId=null
+
+resetForm()
+
+modal.style.display="flex"
+
+}
+
+/* =========================
+CLOSE MODAL
+========================= */
+
+function closeModal(){
+
+modal.style.display="none"
+
+}
+
+/* =========================
+AUTO SLUG
+========================= */
+
+name.addEventListener("input",()=>{
+
+if(!editingId){
+
+slug.value=name.value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-+|-+$/g,"")
+
+}
+
+})
+
+/* =========================
+SAVE CATEGORY
+========================= */
 
 async function saveCategory(){
 
@@ -336,7 +402,40 @@ loadCategories()
 
 }
 
-/* DELETE */
+/* =========================
+EDIT CATEGORY
+========================= */
+
+window.editCategory=async(id)=>{
+
+const cat=await api(`${API}/${id}`)
+
+editingId=id
+
+name.value=cat.name
+slug.value=cat.slug
+
+type.value=cat.type
+
+order.value=cat.category_order
+priority.value=cat.priority
+
+showHome.checked=cat.showHome
+isActive.checked=cat.active
+
+isFeatured.checked=cat.featured
+
+aiTrending.checked=cat.aiTrending
+aiPopular.checked=cat.aiPopular
+aiAssign.checked=cat.aiAssign
+
+modal.style.display="flex"
+
+}
+
+/* =========================
+DELETE CATEGORY
+========================= */
 
 async function deleteCategory(id){
 
@@ -348,7 +447,38 @@ loadCategories()
 
 }
 
+/* =========================
+RESET FORM
+========================= */
+
+function resetForm(){
+
+name.value=""
+slug.value=""
+
+type.value="row"
+
+order.value=""
+priority.value="1"
+
+showHome.checked=false
+isActive.checked=true
+
+isFeatured.checked=false
+
+aiTrending.checked=false
+aiPopular.checked=false
+aiAssign.checked=false
+
+}
+
+/* =========================
+INIT
+========================= */
+
 loadCategories()
+
+
 
 </script>
 
