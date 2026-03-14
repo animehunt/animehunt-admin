@@ -207,17 +207,20 @@ body{background:#060a14;color:#fff}
 </div>
 
 
-
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
-const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
-  
+
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
+
+if(!TOKEN){
+location.href="login.html"
+}
 
 let editingId=null
 
 const modal=document.getElementById("modal")
+const list=document.getElementById("list")
 
 const name=document.getElementById("name")
 const slug=document.getElementById("slug")
@@ -233,9 +236,7 @@ const aiTrending=document.getElementById("aiTrending")
 const aiPopular=document.getElementById("aiPopular")
 const aiAssign=document.getElementById("aiAssign")
 
-/* =========================
-API HELPER
-========================= */
+/* API */
 
 async function api(url,method="GET",body=null){
 
@@ -257,13 +258,9 @@ return res.json()
 
 }
 
-/* =========================
-LOAD CATEGORIES
-========================= */
+/* LOAD */
 
 async function loadCategories(){
-
-const list=document.getElementById("list")
 
 list.innerHTML="Loading..."
 
@@ -271,23 +268,22 @@ const data=await api(API)
 
 list.innerHTML=""
 
+if(!data.length){
+list.innerHTML="<div style='padding:20px;color:#777'>No Categories</div>"
+return
+}
+
 data.forEach(cat=>{
 
 list.innerHTML+=`
 
 <div class="row">
 
-<span style="font-weight:600">
-${cat.name}
-</span>
+<span style="font-weight:600">${cat.name}</span>
 
-<span style="color:#888">
-${cat.slug}
-</span>
+<span style="color:#888">${cat.slug}</span>
 
-<span class="badge">
-${cat.type}
-</span>
+<span class="badge">${cat.type}</span>
 
 <span class="${cat.active?'active':'inactive'}">
 ${cat.active?'● Online':'○ Offline'}
@@ -299,13 +295,9 @@ ${cat.active?'● Online':'○ Offline'}
 
 <span class="actions">
 
-<button onclick="editCategory('${cat.id}')">
-✏️
-</button>
+<button onclick="editCategory('${cat.id}')">✏️</button>
 
-<button onclick="deleteCategory('${cat.id}')">
-🗑
-</button>
+<button onclick="deleteCategory('${cat.id}')">🗑</button>
 
 </span>
 
@@ -317,23 +309,16 @@ ${cat.active?'● Online':'○ Offline'}
 
 }
 
-/* =========================
-OPEN MODAL
-========================= */
+/* MODAL */
 
 function openModal(){
 
 editingId=null
-
 resetForm()
 
 modal.style.display="flex"
 
 }
-
-/* =========================
-CLOSE MODAL
-========================= */
 
 function closeModal(){
 
@@ -341,9 +326,7 @@ modal.style.display="none"
 
 }
 
-/* =========================
-AUTO SLUG
-========================= */
+/* AUTO SLUG */
 
 name.addEventListener("input",()=>{
 
@@ -358,9 +341,7 @@ slug.value=name.value
 
 })
 
-/* =========================
-SAVE CATEGORY
-========================= */
+/* SAVE */
 
 async function saveCategory(){
 
@@ -386,13 +367,8 @@ aiAssign:aiAssign.checked
 
 }
 
-const url=editingId
-? `${API}/${editingId}`
-: API
-
-const method=editingId
-? "PUT"
-: "POST"
+const url=editingId?`${API}/${editingId}`:API
+const method=editingId?"PUT":"POST"
 
 await api(url,method,payload)
 
@@ -402,9 +378,7 @@ loadCategories()
 
 }
 
-/* =========================
-EDIT CATEGORY
-========================= */
+/* EDIT */
 
 window.editCategory=async(id)=>{
 
@@ -433,9 +407,7 @@ modal.style.display="flex"
 
 }
 
-/* =========================
-DELETE CATEGORY
-========================= */
+/* DELETE */
 
 async function deleteCategory(id){
 
@@ -447,9 +419,7 @@ loadCategories()
 
 }
 
-/* =========================
-RESET FORM
-========================= */
+/* RESET */
 
 function resetForm(){
 
@@ -472,15 +442,15 @@ aiAssign.checked=false
 
 }
 
-/* =========================
-INIT
-========================= */
+/* INIT */
 
 loadCategories()
 
-
-
 </script>
+
+
+
+
 
 
 
