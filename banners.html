@@ -342,10 +342,25 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 
+
+
+
+ 
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
+
+const token=localStorage.getItem("AUTH_TOKEN")
+
+if(!token){
+location.href="login.html"
+}
+
+/* ======================
+ELEMENTS
+====================== */
 
 const bannerList=document.getElementById("bannerList")
 const bannerModal=document.getElementById("bannerModal")
@@ -362,13 +377,28 @@ const banActive=document.getElementById("banActive")
 const banRotate=document.getElementById("banRotate")
 
 const previewImg=document.getElementById("previewImg")
-
 const saveBtn=document.getElementById("saveBannerBtn")
-
-const token=localStorage.getItem("AUTH_TOKEN")
 
 let editId=null
 
+/* ======================
+API HELPER
+====================== */
+
+async function api(url,method="GET",body=null){
+
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+body:body?JSON.stringify(body):null
+})
+
+return res.json()
+
+}
 
 /* ======================
 UPLOAD IMAGE
@@ -391,23 +421,10 @@ reader.onload=async e=>{
 
 try{
 
-const res=await fetch(uploadAPI,{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-
-body:JSON.stringify({
+const data=await api(uploadAPI,"POST",{
 file:e.target.result,
 fileName:file.name
 })
-
-})
-
-const data=await res.json()
 
 if(!data.success){
 alert("Upload failed")
@@ -417,7 +434,7 @@ return
 
 resolve(data.url)
 
-}catch(err){
+}catch{
 
 alert("Upload error")
 resolve(null)
@@ -432,7 +449,6 @@ reader.readAsDataURL(file)
 
 }
 
-
 /* ======================
 FILE SELECT
 ====================== */
@@ -440,8 +456,6 @@ FILE SELECT
 banImageFile.addEventListener("change",async()=>{
 
 const file=banImageFile.files[0]
-
-if(!file) return
 
 const url=await uploadImage(file)
 
@@ -456,39 +470,39 @@ previewImg.style.display="block"
 
 })
 
-
 /* ======================
 URL PREVIEW
 ====================== */
 
-if(banImage){
 banImage.addEventListener("input",()=>{
-if(!banImage.value) return
+
+if(!banImage.value){
+
+previewImg.style.display="none"
+return
+
+}
 
 previewImg.src=banImage.value
 previewImg.style.display="block"
+
 })
-}
-if(previewImg){
+
 previewImg.onerror=()=>{
+
 previewImg.style.display="none"
+
 }
-}
+
 /* ======================
 LOAD BANNERS
 ====================== */
 
 async function loadBanners(){
 
-try{
+const data=await api(API)
 
-const res=await fetch(API,{
-headers:{
-Authorization:"Bearer "+token
-}
-})
-
-const data=await res.json()
+if(!data) return
 
 bannerList.innerHTML=data.map(b=>`
 
@@ -536,14 +550,7 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 `).join("")
 
-}catch(err){
-
-console.error("Load banners error",err)
-
 }
-
-}
-
 
 /* ======================
 OPEN MODAL
@@ -569,7 +576,6 @@ bannerModal.style.display="flex"
 
 }
 
-
 /* ======================
 CLOSE MODAL
 ====================== */
@@ -580,9 +586,8 @@ bannerModal.style.display="none"
 
 }
 
-
 /* ======================
-EDIT BANNER
+EDIT
 ====================== */
 
 window.editBanner=(b)=>{
@@ -606,9 +611,8 @@ bannerModal.style.display="flex"
 
 }
 
-
 /* ======================
-SAVE BANNER
+SAVE
 ====================== */
 
 async function saveBanner(){
@@ -645,39 +649,18 @@ autoRotate:banRotate.checked
 
 }
 
-try{
+const res=await api(API,"POST",payload)
 
-const res=await fetch(API,{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-
-body:JSON.stringify(payload)
-
-})
-
-const data=await res.json()
-
-if(!data.success){
+if(!res.success){
 alert("Banner save failed")
 return
 }
 
 closeModal()
+
 loadBanners()
 
-}catch(err){
-
-alert("Save error")
-
 }
-
-}
-
 
 /* ======================
 DELETE
@@ -687,20 +670,11 @@ async function deleteBanner(id){
 
 if(!confirm("Delete banner?")) return
 
-await fetch(`${API}/${id}`,{
-
-method:"DELETE",
-
-headers:{
-Authorization:"Bearer "+token
-}
-
-})
+await api(`${API}/${id}`,"DELETE")
 
 loadBanners()
 
 }
-
 
 /* ======================
 STATUS
@@ -708,37 +682,21 @@ STATUS
 
 async function toggleStatus(id,active){
 
-await fetch(`${API}/${id}/status`,{
-
-method:"PATCH",
-
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-
-body:JSON.stringify({active})
-
-})
+await api(`${API}/${id}/status`,"PATCH",{active})
 
 loadBanners()
 
 }
-
 
 /* ======================
 INIT
 ====================== */
 
-if(saveBtn){
-saveBtn.addEventListener("click",saveBanner)
-}
+saveBtn.onclick=saveBanner
 
 loadBanners()
 
 </script>
-
-
 
 
 
