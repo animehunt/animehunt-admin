@@ -221,15 +221,31 @@ body{background:#060a14;color:#fff;}
 </div>
 
 
+
+
+
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
+
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
+
+if(!TOKEN){
+location.href="login.html"
+}
 
 let editId=null
 
 const modal=document.getElementById("episodeModal")
 const list=document.getElementById("episodeList")
+
+const openBtn=document.getElementById("openAddEpisode")
+const closeBtn=document.getElementById("closeModal")
+
+/* ======================
+API WRAPPER
+====================== */
 
 async function api(url,method="GET",body=null){
 
@@ -242,11 +258,61 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(!res.ok){
+throw new Error("API Error")
+}
+
 return res.json()
 
 }
 
-/* LOAD */
+/* ======================
+MODAL OPEN
+====================== */
+
+openBtn.onclick=()=>{
+
+editId=null
+
+resetForm()
+
+modal.style.display="flex"
+
+}
+
+/* ======================
+MODAL CLOSE
+====================== */
+
+closeBtn.onclick=()=>{
+
+modal.style.display="none"
+
+}
+
+/* ======================
+ADD DOWNLOAD QUALITY
+====================== */
+
+document.addEventListener("click",e=>{
+
+if(e.target.classList.contains("add-quality")){
+
+const row=e.target.closest(".quality-row")
+
+const clone=row.cloneNode(true)
+
+clone.querySelector(".quality-link").value=""
+
+row.parentNode.appendChild(clone)
+
+}
+
+})
+
+/* ======================
+LOAD EPISODES
+====================== */
 
 async function loadEpisodes(){
 
@@ -267,43 +333,66 @@ return
 
 data.forEach(e=>{
 
-const dlCount=e.downloads.reduce((acc,h)=>acc+h.links.length,0)
+const dlCount = e.downloads
+? e.downloads.reduce((acc,h)=>acc+h.links.length,0)
+:0
 
 list.innerHTML+=`
+
 <div class="row">
-<span>${e.anime}</span>
+
+<span>${e.anime || "-"}</span>
+
 <span class="badge">S${e.season}</span>
+
 <span class="badge">E${e.episode}</span>
+
 <span style="color:#888">${e.title||"-"}</span>
-<span>${e.servers.length}</span>
+
+<span>${e.servers?.length || 0}</span>
+
 <span>${dlCount}</span>
+
 <span class="actions">
+
 <button onclick="editEpisode('${e.id}')">✏️</button>
+
 <button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
+
 </span>
+
 </div>
+
 `
 
 })
 
 }catch(e){
 
-list.innerHTML="Failed to load"
+list.innerHTML="<div style='padding:20px;color:red'>Failed to load episodes</div>"
 
 }
 
 }
 
-/* SAVE */
+/* ======================
+SAVE EPISODE
+====================== */
 
 document.getElementById("saveEpisode").onclick=async()=>{
+
+try{
 
 const payload={
 
 anime:animeName.value,
+
 season:seasonNo.value || "1",
+
 episode:episodeNo.value,
+
 title:episodeTitle.value,
+
 description:description.value,
 
 servers:[
@@ -313,14 +402,19 @@ server3.value
 ].filter(Boolean),
 
 downloads:[],
+
 ongoing:isOngoing.checked,
+
 featured:isFeatured.checked
 
 }
 
+/* DOWNLOADS */
+
 document.querySelectorAll(".download-host").forEach(block=>{
 
-const host=block.querySelector(".host-name").value
+const host = block.querySelector(".host-name").value
+
 const links=[]
 
 block.querySelectorAll(".quality-row").forEach(row=>{
@@ -341,50 +435,106 @@ payload.downloads.push({host,links})
 })
 
 const method = editId ? "PATCH":"POST"
+
 const url = editId ? `${API}/${editId}` : API
 
 await api(url,method,payload)
 
-location.reload()
+modal.style.display="none"
+
+loadEpisodes()
+
+}catch(e){
+
+alert("Failed to save episode")
 
 }
 
-/* DELETE */
+}
+
+/* ======================
+DELETE
+====================== */
 
 window.deleteEpisode=async(id)=>{
 
 if(!confirm("Delete episode?")) return
 
+try{
+
 await api(`${API}/${id}`,"DELETE")
 
 loadEpisodes()
 
+}catch{
+
+alert("Delete failed")
+
 }
 
-/* EDIT */
+}
+
+/* ======================
+EDIT
+====================== */
 
 window.editEpisode=async(id)=>{
+
+try{
 
 const e = await api(`${API}/${id}`)
 
 editId=id
 
-animeName.value=e.anime
-seasonNo.value=e.season
-episodeNo.value=e.episode
-episodeTitle.value=e.title
-description.value=e.description
+animeName.value=e.anime || ""
+seasonNo.value=e.season || ""
+episodeNo.value=e.episode || ""
+episodeTitle.value=e.title || ""
+description.value=e.description || ""
 
-server1.value=e.servers[0]||""
-server2.value=e.servers[1]||""
-server3.value=e.servers[2]||""
+server1.value=e.servers?.[0] || ""
+server2.value=e.servers?.[1] || ""
+server3.value=e.servers?.[2] || ""
 
 isOngoing.checked=e.ongoing
 isFeatured.checked=e.featured
 
 modal.style.display="flex"
 
+}catch{
+
+alert("Failed to load episode")
+
 }
+
+}
+
+/* ======================
+RESET FORM
+====================== */
+
+function resetForm(){
+
+animeName.value=""
+seasonNo.value=""
+episodeNo.value=""
+episodeTitle.value=""
+description.value=""
+
+server1.value=""
+server2.value=""
+server3.value=""
+
+isOngoing.checked=false
+isFeatured.checked=false
+
+document.querySelectorAll(".quality-link").forEach(i=>i.value="")
+
+}
+
+/* ======================
+INIT
+====================== */
 
 loadEpisodes()
 
