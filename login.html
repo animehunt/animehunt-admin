@@ -176,82 +176,129 @@
     
 
     <script>
-        const API_URL = "https://animehunt-backend.animehunt715.workers.dev/api/admin/login";
-        const REDIRECT_URL = "dashboard.html"; // Aapka jo bhi main dashboard page ho
-        const TOKEN_KEY = "AUTH_TOKEN";
 
-        // Pre-check: Agar token pehle se hai toh direct bhej do
-        if (localStorage.getItem(TOKEN_KEY)) {
-            window.location.href = REDIRECT_URL;
-        }
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api";
+const LOGIN_API = API_BASE + "/admin/login";
+const VERIFY_API = API_BASE + "/admin/verify";
 
-        async function handleLogin() {
-            const userEl = document.getElementById('username');
-            const passEl = document.getElementById('password');
-            const btn = document.getElementById('loginBtn');
-            const status = document.getElementById('statusBox');
+const REDIRECT_URL = "dashboard.html";
+const TOKEN_KEY = "AUTH_TOKEN";
 
-            const username = userEl.value.trim();
-            const password = passEl.value.trim();
+init();
 
-            if (!username || !password) {
-                showError("Missing credentials!");
-                return;
+async function init() {
+
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    if (!token) return;
+
+    try {
+
+        const res = await fetch(VERIFY_API, {
+            headers: {
+                "Authorization": "Bearer " + token
             }
-
-            // Set Loading State
-            btn.disabled = true;
-            btn.innerHTML = `<span class="loader"></span> Verifying...`;
-            status.style.display = "none";
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    // SUCCESS
-                    localStorage.setItem(TOKEN_KEY, data.token);
-                    btn.innerHTML = "Access Granted! Redirecting...";
-                    btn.style.background = "#00ffb3";
-                    
-                    setTimeout(() => {
-                        window.location.href = REDIRECT_URL;
-                    }, 800);
-                } else {
-                    // AUTH FAILED
-                    showError(data.error || "Invalid moderator credentials");
-                    resetButton();
-                }
-            } catch (err) {
-                // NETWORK/SERVER ERROR
-                showError("Backend connection failed!");
-                resetButton();
-                console.error("Login Error:", err);
-            }
-        }
-
-        function showError(msg) {
-            const status = document.getElementById('statusBox');
-            status.innerText = msg;
-            status.className = "status-msg status-error";
-            status.style.display = "block";
-        }
-
-        function resetButton() {
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = false;
-            btn.innerHTML = "Unlock CMS";
-        }
-
-        // Enter key se login allow karein
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
         });
+
+        const data = await res.json();
+
+        if (data.valid) {
+            window.location.href = REDIRECT_URL;
+        } else {
+            localStorage.removeItem(TOKEN_KEY);
+        }
+
+    } catch(e){
+        console.log("Token verification failed");
+    }
+}
+
+async function handleLogin(){
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    const btn = document.getElementById("loginBtn");
+    const status = document.getElementById("statusBox");
+
+    if(!username || !password){
+        showError("Missing credentials");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="loader"></span> Verifying...`;
+
+    try{
+
+        const res = await fetch(LOGIN_API,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        const data = await res.json();
+
+        if(res.ok && data.success){
+
+            localStorage.setItem(TOKEN_KEY, data.token);
+
+            btn.innerHTML = "Access Granted";
+
+            setTimeout(()=>{
+                window.location.href = REDIRECT_URL;
+            },700);
+
+        }else{
+
+            showError(data.error || "Invalid credentials");
+            resetButton();
+
+        }
+
+    }catch(e){
+
+        showError("Backend unreachable");
+        resetButton();
+
+    }
+
+}
+
+function showError(msg){
+
+    const status = document.getElementById("statusBox");
+
+    status.innerText = msg;
+
+    status.className = "status-msg status-error";
+
+    status.style.display = "block";
+
+}
+
+function resetButton(){
+
+    const btn = document.getElementById("loginBtn");
+
+    btn.disabled = false;
+
+    btn.innerHTML = "Unlock CMS";
+
+}
+
+document.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter") handleLogin();
+
+});
+
     </script>
+
 </body>
 </html>
