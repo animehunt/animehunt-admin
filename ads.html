@@ -370,6 +370,18 @@ Loading ads...
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
+/* =========================
+AUTH CHECK
+========================= */
+
+if(!TOKEN){
+location.href="login.html"
+}
+
+/* =========================
+API HELPER
+========================= */
+
 async function api(url,method="GET",body=null){
 
 const res=await fetch(url,{
@@ -382,15 +394,20 @@ body:body?JSON.stringify(body):null
 })
 
 if(!res.ok){
+
 alert("API Error")
+
 throw new Error("API")
+
 }
 
 return res.json()
 
 }
 
-/* LOAD ADS */
+/* =========================
+LOAD ADS
+========================= */
 
 async function loadAds(){
 
@@ -404,6 +421,13 @@ const ads=await api(API)
 
 list.innerHTML=""
 
+if(!ads.length){
+
+list.innerHTML="<tr><td colspan='4'>No ads</td></tr>"
+return
+
+}
+
 ads.forEach(ad=>{
 
 const status=(ad.status||"OFF").toLowerCase()
@@ -411,8 +435,11 @@ const status=(ad.status||"OFF").toLowerCase()
 list.innerHTML+=`
 
 <tr>
+
 <td>${ad.name}</td>
+
 <td>${ad.page}</td>
+
 <td class="status ${status}">
 ${ad.status||"OFF"}
 </td>
@@ -437,73 +464,131 @@ Delete
 
 }catch{
 
-list.innerHTML="<tr><td colspan='4'>Failed</td></tr>"
+list.innerHTML="<tr><td colspan='4'>Failed to load ads</td></tr>"
 
 }
 
 }
 
-/* SAVE */
+/* =========================
+SAVE AD
+========================= */
 
 async function saveAd(){
 
 const payload={
 
-name:adName.value,
-type:adType.value,
-adCode:adCode.value,
+name:document.getElementById("adName").value,
+type:document.getElementById("adType").value,
+adCode:document.getElementById("adCode").value,
 
-page:adPage.value,
-position:adPos.value,
+page:document.getElementById("adPage").value,
+position:document.getElementById("adPos").value,
 
-priority:Number(adPriority.value||5),
+priority:Number(document.getElementById("adPriority").value||5),
 
-animeSlug:adAnime.value,
-episodeNumber:adEpisode.value,
+animeSlug:document.getElementById("adAnime").value,
+episodeNumber:document.getElementById("adEpisode").value,
 
-country:adCountry.value
+country:document.getElementById("adCountry").value,
+
+device:document.getElementById("adDevice").value
 
 }
+
+if(!payload.name){
+
+alert("Ad name required")
+return
+
+}
+
+try{
 
 await api(API,"POST",payload)
 
+clearForm()
+
 loadAds()
+
+}catch(e){
+
+console.error(e)
 
 }
 
-/* TOGGLE */
+}
+
+/* =========================
+CLEAR FORM
+========================= */
+
+function clearForm(){
+
+adName.value=""
+adCode.value=""
+adPriority.value=""
+adAnime.value=""
+adEpisode.value=""
+adCountry.value=""
+
+}
+
+/* =========================
+TOGGLE STATUS
+========================= */
 
 async function toggleAd(id){
+
+try{
 
 await api(`${API}/${id}/toggle`,"PATCH")
 
 loadAds()
 
+}catch(e){
+
+console.error(e)
+
 }
 
-/* DELETE */
+}
+
+/* =========================
+DELETE AD
+========================= */
 
 async function deleteAd(id){
 
 if(!confirm("Delete Ad?")) return
 
+try{
+
 await api(`${API}/${id}`,"DELETE")
 
 loadAds()
 
+}catch(e){
+
+console.error(e)
+
 }
 
-/* BULK */
+}
+
+/* =========================
+BULK ADD ADS
+========================= */
 
 async function bulkAddAds(){
 
 try{
 
-const data=JSON.parse(bulkData.value)
+const data=JSON.parse(document.getElementById("bulkData").value)
 
 await api(API+"/bulk","POST",data)
 
-bulkData.value=""
+document.getElementById("bulkData").value=""
 
 loadAds()
 
@@ -515,10 +600,13 @@ alert("Invalid JSON")
 
 }
 
+/* =========================
+INIT
+========================= */
+
 loadAds()
 
 </script>
-
 
 
 </body>
