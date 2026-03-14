@@ -169,30 +169,56 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 </div>
 
 
+<script>
 
-  <script>
-    const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
+
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
+
+if(!TOKEN){
+location.href="login.html"
+}
 
 const downloadList=document.getElementById("downloadList")
 const modal=document.getElementById("downloadModal")
-const saveBtn=document.getElementById("saveDownload")
 const section=document.querySelector(".download-section")
+
+/* ======================
+API WRAPPER
+====================== */
+
+async function api(url,method="GET",body=null){
+
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
+
+return res.json()
+
+}
+
+/* ======================
+LOAD DOWNLOADS
+====================== */
 
 async function loadDownloads(){
 
 downloadList.innerHTML="Loading..."
 
-const res=await fetch(API)
-
-const data=await res.json()
+const data=await api(API)
 
 downloadList.innerHTML=""
 
-if(data.length===0){
+if(!data.length){
 
 downloadList.innerHTML="<div style='padding:20px;color:#777'>No downloads</div>"
-
 return
+
 }
 
 data.forEach(d=>{
@@ -225,7 +251,9 @@ downloadList.innerHTML+=`
 
 }
 
-/* HOST BLOCK */
+/* ======================
+HOST BLOCK
+====================== */
 
 function addHostBlock(){
 
@@ -249,7 +277,9 @@ addQualityRow(div.querySelector("button"))
 
 }
 
-/* QUALITY ROW */
+/* ======================
+QUALITY ROW
+====================== */
 
 function addQualityRow(btn){
 
@@ -262,11 +292,13 @@ row.className="quality-row"
 row.innerHTML=`
 
 <select class="q-val">
+
 <option>480p</option>
 <option>720p</option>
 <option>1080p</option>
 <option>4K</option>
 <option>ZIP</option>
+
 </select>
 
 <input class="quality-link" placeholder="Download Link">
@@ -279,9 +311,11 @@ container.appendChild(row)
 
 }
 
-/* SAVE */
+/* ======================
+SAVE DOWNLOAD
+====================== */
 
-saveBtn.onclick=async()=>{
+document.getElementById("saveDownload").onclick=async()=>{
 
 const anime=document.getElementById("anime").value
 const season=document.getElementById("season").value || "1"
@@ -290,7 +324,6 @@ const episode=document.getElementById("episode").value
 if(!anime || !episode){
 
 alert("Anime and Episode required")
-
 return
 
 }
@@ -326,20 +359,11 @@ link
 if(payload.length===0){
 
 alert("Add at least one link")
-
 return
 
 }
 
-await fetch(`${API}/bulk`,{
-
-method:"POST",
-
-headers:{'Content-Type':'application/json'},
-
-body:JSON.stringify(payload)
-
-})
+await api(`${API}/bulk`,"POST",payload)
 
 closeModal()
 
@@ -347,19 +371,23 @@ loadDownloads()
 
 }
 
-/* DELETE */
+/* ======================
+DELETE
+====================== */
 
 async function deleteLink(id){
 
 if(!confirm("Delete link?")) return
 
-await fetch(`${API}/${id}`,{method:"DELETE"})
+await api(`${API}/${id}`,"DELETE")
 
 loadDownloads()
 
 }
 
-/* MODAL */
+/* ======================
+MODAL
+====================== */
 
 document.getElementById("openModal").onclick=()=>{
 
@@ -379,8 +407,11 @@ modal.style.display="none"
 
 }
 
+/* INIT */
+
 loadDownloads()
- </script>
+
+</script>
 
     
 </body>
