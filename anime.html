@@ -541,6 +541,18 @@ ${a.isHidden?'👁':'🚫'}
 `).join("")
 
 }
+  async function toggleHide(id){
+
+await fetch(`${HIDE_API}/${id}`,{
+method:"PATCH",
+headers:{
+Authorization:"Bearer "+token
+}
+})
+
+loadAnime()
+
+  }
 
 </script>
 
