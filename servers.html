@@ -208,23 +208,37 @@ body{background:#060a14;color:#fff}
   </div>
   <button class="add-btn" id="addServerBtn">➕ Add Server</button>
 </header>
+
+
+
+
+
 <script>
 
-const API="/api/admin/servers"
+const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api/admin/servers"
+
 const TOKEN_KEY="AUTH_TOKEN"
 
 let servers=[]
 let editId=null
 
-const el=id=>document.getElementById(id)
+const $=id=>document.getElementById(id)
 
-/* =======================
-API HELPER
-======================= */
-
-async function apiFetch(url,options={}){
+/* =========================
+AUTH CHECK
+========================= */
 
 const token=localStorage.getItem(TOKEN_KEY)
+
+if(!token){
+location.href="login.html"
+}
+
+/* =========================
+API FETCH
+========================= */
+
+async function apiFetch(url,options={}){
 
 try{
 
@@ -232,66 +246,75 @@ const res=await fetch(url,{
 ...options,
 headers:{
 "Content-Type":"application/json",
-"Authorization":token?`Bearer ${token}`:"",
+"Authorization":"Bearer "+token,
 ...options.headers
 }
 })
 
 if(res.status===401){
 
+localStorage.removeItem(TOKEN_KEY)
 location.href="login.html"
-return null
+return
 
 }
 
 return await res.json()
 
-}catch{
+}catch(err){
 
-alert("Network error")
-return null
-
-}
+alert("Server connection failed")
+console.error(err)
 
 }
 
-/* =======================
+}
+
+/* =========================
 LOAD SERVERS
-======================= */
+========================= */
 
 async function loadServers(query=""){
 
-const url=query?`${API}?q=${encodeURIComponent(query)}`:API
+let url=API_BASE
+
+if(query){
+
+url+=`?q=${encodeURIComponent(query)}`
+
+}
 
 const data=await apiFetch(url)
 
-if(data){
+if(!data) return
 
 servers=data
-render()
+
+renderServers()
 
 }
 
-}
-
-/* =======================
+/* =========================
 RENDER TABLE
-======================= */
+========================= */
 
-function render(){
+function renderServers(){
 
-const list=el("serverList")
+const list=$("serverList")
 
 list.innerHTML=""
 
 if(!servers.length){
 
-list.innerHTML="<div style='padding:40px;text-align:center;color:#666'>No servers</div>"
+list.innerHTML=`<div style="padding:40px;text-align:center;color:#777">
+No servers found
+</div>`
+
 return
 
 }
 
-servers.forEach(s=>{
+servers.forEach(server=>{
 
 const row=document.createElement("div")
 
@@ -299,24 +322,30 @@ row.className="row"
 
 row.innerHTML=`
 
-<span><b>${s.name}</b></span>
-<span>${s.anime}</span>
-<span>S${s.season}</span>
-<span>E${s.episode}</span>
+<span><b>${server.name}</b></span>
 
-<span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis" title="${s.embed}">
-${s.embed}
+<span>${server.anime}</span>
+
+<span>S${server.season}</span>
+
+<span>E${server.episode}</span>
+
+<span style="color:#4da3ff;overflow:hidden;text-overflow:ellipsis" title="${server.embed}">
+${server.embed}
 </span>
 
-<span>#${s.priority}</span>
+<span>#${server.priority}</span>
 
-<span class="status ${s.active?"active":"inactive"}">
-${s.active?"● Active":"○ Off"}
+<span class="status ${server.active?"active":"inactive"}">
+${server.active?"● Active":"○ Off"}
 </span>
 
 <div class="actions">
-<button onclick="editServer('${s._id}')">✏️</button>
-<button onclick="deleteServer('${s._id}')" style="color:#ff4c4c">🗑</button>
+
+<button onclick="editServer('${server.id}')">✏️</button>
+
+<button onclick="deleteServer('${server.id}')" style="color:#ff4c4c">🗑</button>
+
 </div>
 
 `
@@ -327,155 +356,172 @@ list.appendChild(row)
 
 }
 
-/* =======================
+/* =========================
+OPEN MODAL
+========================= */
+
+function openModal(){
+
+editId=null
+
+document.querySelectorAll(".form-grid input").forEach(i=>{
+
+i.value=""
+
+})
+
+$("active").checked=true
+
+$("modalTitle").innerText="Add Server"
+
+$("serverModal").style.display="flex"
+
+}
+
+/* =========================
+CLOSE MODAL
+========================= */
+
+function closeModal(){
+
+$("serverModal").style.display="none"
+
+}
+
+/* =========================
 SAVE SERVER
-======================= */
+========================= */
 
 async function saveServer(){
 
 const payload={
 
-_id:editId,
+id:editId,
 
-name:el("serverName").value.trim(),
-anime:el("animeName").value.trim(),
+name:$("serverName").value.trim(),
 
-season:el("seasonNo").value||"1",
-episode:el("episodeNo").value||"1",
+anime:$("animeName").value.trim(),
 
-embed:el("embedUrl").value.trim(),
+season:$("seasonNo").value || "1",
 
-priority:Number(el("priority").value||99),
+episode:$("episodeNo").value || "1",
 
-active:el("active").checked
+embed:$("embedUrl").value.trim(),
+
+priority:Number($("priority").value||99),
+
+active:$("active").checked
 
 }
 
 if(!payload.name || !payload.anime || !payload.embed){
 
 alert("Server name, anime and embed required")
+
 return
 
 }
 
-const res=await apiFetch(API,{
+const res=await apiFetch(API_BASE,{
+
 method:"POST",
+
 body:JSON.stringify(payload)
+
 })
 
 if(res?.success){
 
 closeModal()
-loadServers(el("searchInput").value)
+
+loadServers($("searchInput").value)
 
 }
 
 }
 
-/* =======================
-EDIT
-======================= */
+/* =========================
+EDIT SERVER
+========================= */
 
 function editServer(id){
 
-const s=servers.find(x=>x._id===id)
+const s=servers.find(x=>x.id==id)
 
 if(!s) return
 
 editId=id
 
-el("serverName").value=s.name
-el("animeName").value=s.anime
-el("seasonNo").value=s.season
-el("episodeNo").value=s.episode
-el("embedUrl").value=s.embed
-el("priority").value=s.priority
-el("active").checked=s.active
+$("serverName").value=s.name
+$("animeName").value=s.anime
+$("seasonNo").value=s.season
+$("episodeNo").value=s.episode
+$("embedUrl").value=s.embed
+$("priority").value=s.priority
 
-el("modalTitle").innerText="Edit Server"
+$("active").checked=s.active
 
-el("serverModal").style.display="flex"
+$("modalTitle").innerText="Edit Server"
+
+$("serverModal").style.display="flex"
 
 }
 
-/* =======================
-DELETE
-======================= */
+/* =========================
+DELETE SERVER
+========================= */
 
 async function deleteServer(id){
 
-if(!confirm("Delete server?")) return
+if(!confirm("Delete this server?")) return
 
-const res=await apiFetch(`${API}/${id}`,{method:"DELETE"})
+const res=await apiFetch(`${API_BASE}/${id}`,{
+method:"DELETE"
+})
 
 if(res?.success){
 
-loadServers(el("searchInput").value)
+loadServers($("searchInput").value)
 
 }
 
 }
 
-/* =======================
-MODAL
-======================= */
-
-function closeModal(){
-
-el("serverModal").style.display="none"
-
-}
-
-function openModal(){
-
-editId=null
-
-document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
-
-el("active").checked=true
-
-el("modalTitle").innerText="Add Server"
-
-el("serverModal").style.display="flex"
-
-}
-
-/* =======================
+/* =========================
 SEARCH
-======================= */
+========================= */
 
-let timer
+let searchTimer
 
-el("searchInput").oninput=e=>{
+$("searchInput").addEventListener("input",e=>{
 
-clearTimeout(timer)
+clearTimeout(searchTimer)
 
-timer=setTimeout(()=>{
+searchTimer=setTimeout(()=>{
 
 loadServers(e.target.value)
 
 },400)
 
-}
+})
 
-/* =======================
+/* =========================
 INIT
-======================= */
+========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
 loadServers()
 
-el("saveServer").onclick=saveServer
+$("addServerBtn").onclick=openModal
 
-el("addServerBtn").onclick=openModal
+$("closeModal").onclick=closeModal
 
-el("closeModal").onclick=closeModal
+$("saveServer").onclick=saveServer
 
 })
 
 </script>
-
         
 </body>
 </html>
