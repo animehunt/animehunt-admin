@@ -550,15 +550,19 @@ color:#ccc;
 
             <script>
 
+
+/* =========================
+SECURITY CMS SCRIPT
+========================= */
+
 const API="/api/admin/security"
 const STATS_API="/api/security/stats"
-
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 const el=id=>document.getElementById(id)
 
 /* =========================
-   API HELPER
+API HELPER
 ========================= */
 
 async function api(url,method="GET",body=null){
@@ -578,10 +582,17 @@ body:body?JSON.stringify(body):null
 
 })
 
+if(res.status===401){
+
+alert("Session expired")
+location.href="login.html"
+return null
+
+}
+
 if(!res.ok){
 
 console.error("API ERROR",res.status)
-
 return null
 
 }
@@ -591,7 +602,6 @@ return await res.json()
 }catch(e){
 
 console.error(e)
-
 return null
 
 }
@@ -599,7 +609,7 @@ return null
 }
 
 /* =========================
-   LOAD SECURITY SETTINGS
+LOAD SECURITY SETTINGS
 ========================= */
 
 async function loadSecurity(){
@@ -608,32 +618,38 @@ const d=await api(API)
 
 if(!d) return
 
+/* ULTRA */
+
+if(el("ultraMode"))
 el("ultraMode").checked=d.ultra
 
+/* FIREWALL */
+
+if(el("firewallLevel"))
 el("firewallLevel").value=d.firewallLevel
 
 /* CORE */
 
-el("botProt").checked=d.core.bot
-el("scraperShield").checked=d.core.scraper
-el("hotlinkBlock").checked=d.core.hotlink
-el("embedLock").checked=d.core.embed
+if(el("botProt")) el("botProt").checked=d.core.bot
+if(el("scraperShield")) el("scraperShield").checked=d.core.scraper
+if(el("hotlinkBlock")) el("hotlinkBlock").checked=d.core.hotlink
+if(el("embedLock")) el("embedLock").checked=d.core.embed
 
 /* GEO */
 
-el("indiaOnly").checked=d.geo.indiaOnly
-el("blockForeign").checked=d.geo.blockForeign
+if(el("indiaOnly")) el("indiaOnly").checked=d.geo.indiaOnly
+if(el("blockForeign")) el("blockForeign").checked=d.geo.blockForeign
 
 /* ADMIN */
 
-el("loginLimit").checked=d.admin.loginLimit
-el("deviceLock").checked=d.admin.deviceLock
+if(el("loginLimit")) el("loginLimit").checked=d.admin.loginLimit
+if(el("deviceLock")) el("deviceLock").checked=d.admin.deviceLock
 
 /* AI */
 
-el("autoBan").checked=d.ai.autoBan
-el("banBrute").checked=d.ai.brute
-el("banBots").checked=d.ai.bot
+if(el("autoBan")) el("autoBan").checked=d.ai.autoBan
+if(el("banBrute")) el("banBrute").checked=d.ai.brute
+if(el("banBots")) el("banBots").checked=d.ai.bot
 
 updateFirewallLabel()
 updateThreatUI()
@@ -641,7 +657,7 @@ updateThreatUI()
 }
 
 /* =========================
-   SAVE SETTINGS
+SAVE SETTINGS
 ========================= */
 
 let saveTimer
@@ -654,31 +670,31 @@ saveTimer=setTimeout(async()=>{
 
 const payload={
 
-ultra:el("ultraMode").checked,
+ultra:el("ultraMode")?.checked || false,
 
-firewallLevel:Number(el("firewallLevel").value),
+firewallLevel:Number(el("firewallLevel")?.value || 3),
 
 core:{
-bot:el("botProt").checked,
-scraper:el("scraperShield").checked,
-hotlink:el("hotlinkBlock").checked,
-embed:el("embedLock").checked
+bot:el("botProt")?.checked || false,
+scraper:el("scraperShield")?.checked || false,
+hotlink:el("hotlinkBlock")?.checked || false,
+embed:el("embedLock")?.checked || false
 },
 
 geo:{
-indiaOnly:el("indiaOnly").checked,
-blockForeign:el("blockForeign").checked
+indiaOnly:el("indiaOnly")?.checked || false,
+blockForeign:el("blockForeign")?.checked || false
 },
 
 admin:{
-loginLimit:el("loginLimit").checked,
-deviceLock:el("deviceLock").checked
+loginLimit:el("loginLimit")?.checked || false,
+deviceLock:el("deviceLock")?.checked || false
 },
 
 ai:{
-autoBan:el("autoBan").checked,
-brute:el("banBrute").checked,
-bot:el("banBots").checked
+autoBan:el("autoBan")?.checked || false,
+brute:el("banBrute")?.checked || false,
+bot:el("banBots")?.checked || false
 }
 
 }
@@ -687,12 +703,12 @@ await api(API,"POST",payload)
 
 console.log("Security settings saved")
 
-},600)
+},500)
 
 }
 
 /* =========================
-   LIVE STATS
+LIVE STATS
 ========================= */
 
 async function loadStats(){
@@ -701,20 +717,27 @@ const s=await api(STATS_API)
 
 if(!s) return
 
+if(el("ipCount"))
 el("ipCount").innerText=s.blockedIPs
+
+if(el("liveUsers"))
 el("liveUsers").innerText=s.liveUsers
+
+if(el("reqPerSec"))
 el("reqPerSec").innerText=s.reqPerSec
+
+if(el("blockedReq"))
 el("blockedReq").innerText=s.blockedReq
 
 }
 
 /* =========================
-   FIREWALL LABEL
+FIREWALL LABEL
 ========================= */
 
 function updateFirewallLabel(){
 
-const levels=[
+const labels=[
 "None",
 "Basic",
 "Standard",
@@ -723,29 +746,34 @@ const levels=[
 "Full Shield"
 ]
 
-const level=Number(el("firewallLevel").value)
+const level=Number(el("firewallLevel")?.value || 3)
 
-el("fwLabel").innerText="Level "+level+" – "+levels[level]
+if(el("fwLabel"))
+el("fwLabel").innerText="Level "+level+" – "+labels[level]
 
+if(el("fwLive"))
 el("fwLive").innerText=level
 
 }
 
 /* =========================
-   THREAT UI
+THREAT UI
 ========================= */
 
 function updateThreatUI(){
 
-const ultra=el("ultraMode").checked
+const ultra=el("ultraMode")?.checked
 
 const fill=el("threatFill")
 
+if(!fill) return
+
 if(ultra){
 
-fill.style.width="5%"
+fill.style.width="10%"
 fill.style.background="#00ffb3"
 
+if(el("protStatus"))
 el("protStatus").innerText="Lockdown"
 
 }else{
@@ -753,6 +781,7 @@ el("protStatus").innerText="Lockdown"
 fill.style.width="45%"
 fill.style.background="#ffcc00"
 
+if(el("protStatus"))
 el("protStatus").innerText="Active"
 
 }
@@ -760,7 +789,7 @@ el("protStatus").innerText="Active"
 }
 
 /* =========================
-   INIT
+INIT
 ========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -785,17 +814,22 @@ updateThreatUI()
 
 })
 
-/* FIREWALL SLIDER */
+/* FIREWALL */
+
+if(el("firewallLevel")){
 
 el("firewallLevel").addEventListener("input",()=>{
 
 updateFirewallLabel()
-
 saveSecurity()
 
 })
 
+}
+
 })
+
+
 
             </script>
   
