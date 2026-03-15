@@ -226,8 +226,11 @@ body{background:#060a14;color:#fff;}
 
 
 <script>
+/* ================================
+   CONFIG
+================================ */
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
@@ -235,19 +238,27 @@ if(!TOKEN){
 location.href="login.html"
 }
 
-let editId=null
+/* ================================
+ELEMENTS
+================================ */
 
-const modal=document.getElementById("episodeModal")
-const list=document.getElementById("episodeList")
+const modal = document.getElementById("episodeModal")
+const list = document.getElementById("episodeList")
 
-const openBtn=document.getElementById("openAddEpisode")
-const closeBtn=document.getElementById("closeModal")
+const openBtn = document.getElementById("openAddEpisode")
+const closeBtn = document.getElementById("closeModal")
 
-/* ======================
+const saveBtn = document.getElementById("saveEpisode")
+
+let editId = null
+
+/* ================================
 API WRAPPER
-====================== */
+================================ */
 
 async function api(url,method="GET",body=null){
+
+try{
 
 const res = await fetch(url,{
 method,
@@ -255,54 +266,83 @@ headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+TOKEN
 },
-body:body?JSON.stringify(body):null
+body: body ? JSON.stringify(body) : null
 })
+
+if(res.status === 401){
+location.href="login.html"
+return
+}
 
 if(!res.ok){
 throw new Error("API Error")
 }
 
-return res.json()
+return await res.json()
+
+}catch(e){
+
+console.error(e)
+alert("Server error")
 
 }
 
-/* ======================
-MODAL OPEN
-====================== */
+}
 
-openBtn.onclick=()=>{
+/* ================================
+MODAL
+================================ */
 
-editId=null
+function openModal(){
+
+editId = null
 
 resetForm()
 
-modal.style.display="flex"
+modal.style.display = "flex"
 
 }
 
-/* ======================
-MODAL CLOSE
-====================== */
+function closeModal(){
 
-closeBtn.onclick=()=>{
-
-modal.style.display="none"
+modal.style.display = "none"
 
 }
 
-/* ======================
-ADD DOWNLOAD QUALITY
-====================== */
+/* BUTTONS */
+
+openBtn.onclick = openModal
+closeBtn.onclick = closeModal
+
+/* ESC CLOSE */
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="Escape") closeModal()
+
+})
+
+/* CLICK OUTSIDE CLOSE */
+
+modal.addEventListener("click",e=>{
+
+if(e.target===modal) closeModal()
+
+})
+
+/* ================================
+DOWNLOAD ROW ADD
+================================ */
 
 document.addEventListener("click",e=>{
 
 if(e.target.classList.contains("add-quality")){
 
-const row=e.target.closest(".quality-row")
+const row = e.target.closest(".quality-row")
 
-const clone=row.cloneNode(true)
+const clone = row.cloneNode(true)
 
-clone.querySelector(".quality-link").value=""
+clone.querySelector(".quality-link").value = ""
 
 row.parentNode.appendChild(clone)
 
@@ -310,26 +350,26 @@ row.parentNode.appendChild(clone)
 
 })
 
-/* ======================
+/* ================================
 LOAD EPISODES
-====================== */
+================================ */
 
 async function loadEpisodes(){
 
-list.innerHTML="Loading..."
+list.innerHTML = "<div style='padding:20px'>Loading...</div>"
 
 try{
 
 const data = await api(API)
 
-list.innerHTML=""
+if(!data || !data.length){
 
-if(!data.length){
-
-list.innerHTML="<div style='padding:20px;color:#777'>No Episodes</div>"
+list.innerHTML = "<div style='padding:20px;color:#777'>No Episodes</div>"
 return
 
 }
+
+list.innerHTML = ""
 
 data.forEach(e=>{
 
@@ -337,9 +377,11 @@ const dlCount = e.downloads
 ? e.downloads.reduce((acc,h)=>acc+h.links.length,0)
 :0
 
-list.innerHTML+=`
+const row = document.createElement("div")
 
-<div class="row">
+row.className = "row"
+
+row.innerHTML = `
 
 <span>${e.anime || "-"}</span>
 
@@ -347,7 +389,7 @@ list.innerHTML+=`
 
 <span class="badge">E${e.episode}</span>
 
-<span style="color:#888">${e.title||"-"}</span>
+<span style="color:#aaa">${e.title||"-"}</span>
 
 <span>${e.servers?.length || 0}</span>
 
@@ -361,51 +403,51 @@ list.innerHTML+=`
 
 </span>
 
-</div>
-
 `
+
+list.appendChild(row)
 
 })
 
 }catch(e){
 
-list.innerHTML="<div style='padding:20px;color:red'>Failed to load episodes</div>"
+list.innerHTML = "<div style='padding:20px;color:red'>Failed to load</div>"
 
 }
 
 }
 
-/* ======================
+/* ================================
 SAVE EPISODE
-====================== */
+================================ */
 
-document.getElementById("saveEpisode").onclick=async()=>{
+saveBtn.onclick = async ()=>{
 
 try{
 
-const payload={
+const payload = {
 
-anime:animeName.value,
+anime: animeName.value,
 
-season:seasonNo.value || "1",
+season: seasonNo.value || "1",
 
-episode:episodeNo.value,
+episode: episodeNo.value,
 
-title:episodeTitle.value,
+title: episodeTitle.value,
 
-description:description.value,
+description: description.value,
 
-servers:[
+servers: [
 server1.value,
 server2.value,
 server3.value
 ].filter(Boolean),
 
-downloads:[],
+downloads: [],
 
-ongoing:isOngoing.checked,
+ongoing: isOngoing.checked,
 
-featured:isFeatured.checked
+featured: isFeatured.checked
 
 }
 
@@ -415,21 +457,25 @@ document.querySelectorAll(".download-host").forEach(block=>{
 
 const host = block.querySelector(".host-name").value
 
-const links=[]
+const links = []
 
 block.querySelectorAll(".quality-row").forEach(row=>{
 
-const quality=row.querySelector("select").value
-const url=row.querySelector(".quality-link").value
+const quality = row.querySelector("select").value
+const url = row.querySelector(".quality-link").value
 
 if(url){
+
 links.push({quality,url})
+
 }
 
 })
 
 if(host && links.length){
+
 payload.downloads.push({host,links})
+
 }
 
 })
@@ -440,7 +486,7 @@ const url = editId ? `${API}/${editId}` : API
 
 await api(url,method,payload)
 
-modal.style.display="none"
+closeModal()
 
 loadEpisodes()
 
@@ -452,11 +498,11 @@ alert("Failed to save episode")
 
 }
 
-/* ======================
+/* ================================
 DELETE
-====================== */
+================================ */
 
-window.deleteEpisode=async(id)=>{
+window.deleteEpisode = async (id)=>{
 
 if(!confirm("Delete episode?")) return
 
@@ -474,32 +520,32 @@ alert("Delete failed")
 
 }
 
-/* ======================
+/* ================================
 EDIT
-====================== */
+================================ */
 
-window.editEpisode=async(id)=>{
+window.editEpisode = async (id)=>{
 
 try{
 
 const e = await api(`${API}/${id}`)
 
-editId=id
+editId = id
 
-animeName.value=e.anime || ""
-seasonNo.value=e.season || ""
-episodeNo.value=e.episode || ""
-episodeTitle.value=e.title || ""
-description.value=e.description || ""
+animeName.value = e.anime || ""
+seasonNo.value = e.season || ""
+episodeNo.value = e.episode || ""
+episodeTitle.value = e.title || ""
+description.value = e.description || ""
 
-server1.value=e.servers?.[0] || ""
-server2.value=e.servers?.[1] || ""
-server3.value=e.servers?.[2] || ""
+server1.value = e.servers?.[0] || ""
+server2.value = e.servers?.[1] || ""
+server3.value = e.servers?.[2] || ""
 
-isOngoing.checked=e.ongoing
-isFeatured.checked=e.featured
+isOngoing.checked = e.ongoing
+isFeatured.checked = e.featured
 
-modal.style.display="flex"
+modal.style.display = "flex"
 
 }catch{
 
@@ -509,9 +555,9 @@ alert("Failed to load episode")
 
 }
 
-/* ======================
+/* ================================
 RESET FORM
-====================== */
+================================ */
 
 function resetForm(){
 
@@ -528,15 +574,18 @@ server3.value=""
 isOngoing.checked=false
 isFeatured.checked=false
 
-document.querySelectorAll(".quality-link").forEach(i=>i.value="")
+document.querySelectorAll(".quality-link")
+.forEach(i=>i.value="")
 
 }
 
-/* ======================
+/* ================================
 INIT
-====================== */
+================================ */
 
 loadEpisodes()
+
+
 
 </script>
 
