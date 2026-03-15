@@ -256,7 +256,7 @@ return await res.json()
 
 }catch{
 
-alert("Network error")
+alert("Network Error")
 return null
 
 }
@@ -264,24 +264,23 @@ return null
 }
 
 /* =========================
-LOAD ITEMS
+LOAD SIDEBAR ITEMS
 ========================= */
 
 async function loadItems(){
 
 const data=await apiFetch(API)
 
-if(data){
+if(!data) return
 
 items=data
+
 render()
 
 }
 
-}
-
 /* =========================
-RENDER
+RENDER TABLE
 ========================= */
 
 function render(){
@@ -297,7 +296,9 @@ return
 
 }
 
-items.forEach(i=>{
+items
+.sort((a,b)=>a.priority-b.priority)
+.forEach(i=>{
 
 const row=document.createElement("div")
 
@@ -307,6 +308,7 @@ let badgeColor="#1a2035"
 
 if(i.highlight==="HOT") badgeColor="#ff4c4c"
 if(i.highlight==="NEW") badgeColor="#00ffb3"
+if(i.highlight==="UPDATE") badgeColor="#ffc107"
 
 let highlightTag=""
 
@@ -345,8 +347,8 @@ ${i.active?'● Active':'○ Hidden'}
 </span>
 
 <span class="actions">
-<button onclick="editItem('${i._id}')">✏️</button>
-<button onclick="delItem('${i._id}')" style="color:#ff4c4c">🗑</button>
+<button onclick="editItem('${i.id}')">✏️</button>
+<button onclick="delItem('${i.id}')" style="color:#ff4c4c">🗑</button>
 </span>
 
 `
@@ -358,7 +360,7 @@ list.appendChild(row)
 }
 
 /* =========================
-SAVE
+SAVE ITEM
 ========================= */
 
 async function saveItem(){
@@ -377,7 +379,7 @@ visibility:el("visibility").value,
 highlight:el("highlight").value,
 badge:el("badgeText").value.trim(),
 
-priority:Number(el("priority").value || 99),
+priority:Number(el("priority").value||99),
 
 active:el("active").checked,
 newTab:el("newTab").checked
@@ -406,45 +408,47 @@ loadItems()
 }
 
 /* =========================
-EDIT
+EDIT ITEM
 ========================= */
 
 function editItem(id){
 
-const i=items.find(x=>x._id===id)
+const i=items.find(x=>x.id===id)
 
 if(!i) return
 
 editId=id
 
-el("title").value=i.title
-el("icon").value=i.icon
-el("url").value=i.url
+el("title").value=i.title||""
+el("icon").value=i.icon||""
+el("url").value=i.url||""
 
-el("device").value=i.device
-el("visibility").value=i.visibility
+el("device").value=i.device||"All"
+el("visibility").value=i.visibility||"All"
 
-el("highlight").value=i.highlight
-el("badgeText").value=i.badge
+el("highlight").value=i.highlight||"None"
+el("badgeText").value=i.badge||""
 
-el("priority").value=i.priority
+el("priority").value=i.priority||99
 
-el("active").checked=i.active
-el("newTab").checked=i.newTab
+el("active").checked=!!i.active
+el("newTab").checked=!!i.newTab
 
 el("modal").style.display="flex"
 
 }
 
 /* =========================
-DELETE
+DELETE ITEM
 ========================= */
 
 async function delItem(id){
 
 if(!confirm("Delete sidebar item?")) return
 
-const res=await apiFetch(`${API}/${id}`,{method:"DELETE"})
+const res=await apiFetch(`${API}/${id}`,{
+method:"DELETE"
+})
 
 if(res?.success){
 
@@ -455,21 +459,34 @@ loadItems()
 }
 
 /* =========================
-MODAL
+OPEN MODAL
 ========================= */
 
 function openModal(){
 
 editId=null
 
-document.querySelectorAll(".form-grid input").forEach(i=>i.value="")
-document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
+el("title").value=""
+el("icon").value=""
+el("url").value=""
+el("priority").value=""
+
+el("device").value="All"
+el("visibility").value="All"
+
+el("highlight").value="None"
+el("badgeText").value=""
 
 el("active").checked=true
+el("newTab").checked=false
 
 el("modal").style.display="flex"
 
 }
+
+/* =========================
+CLOSE MODAL
+========================= */
 
 function closeModal(){
 
@@ -487,7 +504,9 @@ loadItems()
 
 })
 
-  </script>
+    </script>
+
+
   
 </body>
 </html>
