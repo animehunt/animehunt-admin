@@ -237,11 +237,26 @@ body{background:#060a14;color:#fff}
 
 <script>
 
+
+/* =====================================
+ANIMEHUNT SEARCH CMS FULL SCRIPT
+===================================== */
+
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/search"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
+if(!TOKEN){
+location.href="login.html"
+}
+
+/* ==============================
+API HELPER
+============================== */
+
 async function api(url,method="GET",body=null){
+
+try{
 
 const res = await fetch(url,{
 method,
@@ -252,126 +267,170 @@ headers:{
 body:body ? JSON.stringify(body) : null
 })
 
+if(res.status===401){
+location.href="login.html"
+return null
+}
+
 if(!res.ok){
+throw new Error("API Error")
+}
 
-console.error("API Error")
+return await res.json()
 
-throw new Error("API")
+}catch(e){
+
+console.error("API ERROR:",e)
+alert("Network/API error")
+
+return null
 
 }
 
-return res.json()
+}
+
+/* ==============================
+UTILS
+============================== */
+
+function setValue(id,val){
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(el.tagName==="SELECT" || el.tagName==="INPUT")
+el.value=String(val)
 
 }
 
-/* LOAD SETTINGS */
+function bool(v){
+return v==="true" || v===true
+}
+
+/* ==============================
+LOAD SETTINGS
+============================== */
 
 async function loadSearch(){
 
-try{
-
 const d = await api(API)
 
-const set=(id,val)=>{
-const el=document.getElementById(id)
-if(el) el.value=String(val)
+if(!d) return
+
+/* BASIC */
+
+setValue("enableSearch",d.enableSearch)
+setValue("liveSearch",d.liveSearch)
+
+setValue("searchMode",d.mode)
+setValue("debounce",d.debounce)
+
+/* RANKING */
+
+setValue("ranking",d.ranking.mode)
+setValue("boost",d.ranking.boost)
+setValue("boostWeight",d.ranking.weight)
+
+/* SOURCES */
+
+setValue("sAnime",d.sources.anime)
+setValue("sEpisode",d.sources.episode)
+setValue("sCategory",d.sources.category)
+setValue("sPages",d.sources.pages)
+
+/* SMART */
+
+setValue("typo",d.smart.typo)
+setValue("alias",d.smart.alias)
+setValue("language",d.smart.language)
+
+/* UI */
+
+setValue("maxResults",d.ui.max)
+setValue("thumb",d.ui.thumb)
+setValue("group",d.ui.group)
+setValue("highlight",d.ui.highlight)
+
+/* SAFETY */
+
+setValue("safe",d.safety.safe)
+setValue("track",d.safety.track)
+setValue("seo",d.safety.seo)
+setValue("cache",d.safety.cache)
+
+console.log("Search settings loaded")
+
 }
 
-set("enableSearch",d.enableSearch)
-set("liveSearch",d.liveSearch)
+/* ==============================
+BUILD PAYLOAD
+============================== */
 
-set("searchMode",d.mode)
-set("debounce",d.debounce)
+function buildPayload(){
 
-set("ranking",d.ranking.mode)
-set("boost",d.ranking.boost)
-set("boostWeight",d.ranking.weight)
+return {
 
-set("sAnime",d.sources.anime)
-set("sEpisode",d.sources.episode)
-set("sCategory",d.sources.category)
-set("sPages",d.sources.pages)
+enableSearch: bool(enableSearch.value),
+liveSearch: bool(liveSearch.value),
 
-set("typo",d.smart.typo)
-set("alias",d.smart.alias)
-set("language",d.smart.language)
-
-set("maxResults",d.ui.max)
-set("thumb",d.ui.thumb)
-set("group",d.ui.group)
-set("highlight",d.ui.highlight)
-
-set("safe",d.safety.safe)
-set("track",d.safety.track)
-set("seo",d.safety.seo)
-set("cache",d.safety.cache)
-
-}catch(e){
-
-console.error(e)
-
-alert("Failed to load search settings")
-
-}
-
-}
-
-/* SAVE SETTINGS */
-
-async function saveSearch(){
-
-const payload={
-
-enableSearch:enableSearch.value==="true",
-liveSearch:liveSearch.value==="true",
-
-mode:searchMode.value,
-debounce:Number(debounce.value),
+mode: searchMode.value,
+debounce: Number(debounce.value || 300),
 
 ranking:{
-mode:ranking.value,
-boost:boost.value==="true",
-weight:Number(boostWeight.value)
+mode: ranking.value,
+boost: bool(boost.value),
+weight: Number(boostWeight.value || 5)
 },
 
 sources:{
-anime:sAnime.value==="true",
-episode:sEpisode.value==="true",
-category:sCategory.value==="true",
-pages:sPages.value==="true"
+anime: bool(sAnime.value),
+episode: bool(sEpisode.value),
+category: bool(sCategory.value),
+pages: bool(sPages.value)
 },
 
 smart:{
-typo:typo.value==="true",
-alias:alias.value==="true",
-language:language.value
+typo: bool(typo.value),
+alias: bool(alias.value),
+language: language.value
 },
 
 ui:{
-max:Number(maxResults.value),
-thumb:thumb.value==="true",
-group:group.value==="true",
-highlight:highlight.value==="true"
+max: Number(maxResults.value || 8),
+thumb: bool(thumb.value),
+group: bool(group.value),
+highlight: bool(highlight.value)
 },
 
 safety:{
-safe:safe.value,
-track:track.value==="true",
-seo:seo.value==="true",
-cache:Number(cache.value)
+safe: safe.value,
+track: bool(track.value),
+seo: bool(seo.value),
+cache: Number(cache.value || 60)
 }
 
 }
 
-try{
+}
 
-await api(API,"POST",payload)
+/* ==============================
+SAVE SETTINGS
+============================== */
 
-alert("Search settings saved")
+async function saveSearch(){
 
-}catch(e){
+const payload = buildPayload()
 
-console.error(e)
+const res = await api(API,"POST",payload)
+
+if(!res) return
+
+if(res.success){
+
+alert("Search settings saved successfully")
+
+}else{
 
 alert("Save failed")
 
@@ -379,8 +438,30 @@ alert("Save failed")
 
 }
 
-document.addEventListener("DOMContentLoaded",loadSearch)
+/* ==============================
+AUTO VALIDATION
+============================== */
 
+document.querySelectorAll("input[type=number]")
+.forEach(i=>{
+
+i.addEventListener("input",()=>{
+
+if(i.value<0) i.value=0
+
+})
+
+})
+
+/* ==============================
+INIT
+============================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadSearch()
+
+})
 </script>
         
 </body>
