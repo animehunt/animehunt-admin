@@ -349,6 +349,10 @@ a{ text-decoration:none; color:inherit }
 
 <script>
 
+/* =========================================================
+ANIMEHUNT BANNER CMS SCRIPT
+========================================================= */
+
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
 const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
@@ -358,9 +362,9 @@ if(!token){
 location.href="login.html"
 }
 
-/* ======================
+/* =========================================================
 ELEMENTS
-====================== */
+========================================================= */
 
 const bannerList=document.getElementById("bannerList")
 const bannerModal=document.getElementById("bannerModal")
@@ -381,11 +385,13 @@ const saveBtn=document.getElementById("saveBannerBtn")
 
 let editId=null
 
-/* ======================
+/* =========================================================
 API HELPER
-====================== */
+========================================================= */
 
 async function api(url,method="GET",body=null){
+
+try{
 
 const res=await fetch(url,{
 method,
@@ -396,13 +402,25 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
-return res.json()
+if(res.status===401){
+location.href="login.html"
+return
+}
+
+return await res.json()
+
+}catch(e){
+
+console.error("API ERROR",e)
+alert("Server error")
 
 }
 
-/* ======================
+}
+
+/* =========================================================
 UPLOAD IMAGE
-====================== */
+========================================================= */
 
 async function uploadImage(file){
 
@@ -419,14 +437,16 @@ return new Promise(resolve=>{
 
 reader.onload=async e=>{
 
+const base64=e.target.result
+
 try{
 
 const data=await api(uploadAPI,"POST",{
-file:e.target.result,
+file:base64,
 fileName:file.name
 })
 
-if(!data.success){
+if(!data || !data.success){
 alert("Upload failed")
 resolve(null)
 return
@@ -449,15 +469,21 @@ reader.readAsDataURL(file)
 
 }
 
-/* ======================
+/* =========================================================
 FILE SELECT
-====================== */
+========================================================= */
 
 banImageFile.addEventListener("change",async()=>{
 
 const file=banImageFile.files[0]
 
+if(!file) return
+
+saveBtn.innerText="Uploading..."
+
 const url=await uploadImage(file)
+
+saveBtn.innerText="💾 Save"
 
 if(url){
 
@@ -470,9 +496,9 @@ previewImg.style.display="block"
 
 })
 
-/* ======================
+/* =========================================================
 URL PREVIEW
-====================== */
+========================================================= */
 
 banImage.addEventListener("input",()=>{
 
@@ -494,9 +520,9 @@ previewImg.style.display="none"
 
 }
 
-/* ======================
+/* =========================================================
 LOAD BANNERS
-====================== */
+========================================================= */
 
 async function loadBanners(){
 
@@ -510,7 +536,7 @@ bannerList.innerHTML=data.map(b=>`
 
 <div style="display:flex;gap:10px">
 
-<img src="${b.image}" style="width:60px;height:35px;object-fit:cover">
+<img src="${b.image}" style="width:60px;height:35px;object-fit:cover;border-radius:4px">
 
 <span>${b.title}</span>
 
@@ -552,9 +578,9 @@ onchange="toggleStatus('${b.id}',this.checked)">
 
 }
 
-/* ======================
+/* =========================================================
 OPEN MODAL
-====================== */
+========================================================= */
 
 function openModal(){
 
@@ -567,7 +593,7 @@ banPosition.value="hero"
 banOrder.value=""
 banImage.value=""
 
-banActive.checked=false
+banActive.checked=true
 banRotate.checked=false
 
 previewImg.style.display="none"
@@ -576,9 +602,9 @@ bannerModal.style.display="flex"
 
 }
 
-/* ======================
+/* =========================================================
 CLOSE MODAL
-====================== */
+========================================================= */
 
 function closeModal(){
 
@@ -586,9 +612,9 @@ bannerModal.style.display="none"
 
 }
 
-/* ======================
+/* =========================================================
 EDIT
-====================== */
+========================================================= */
 
 window.editBanner=(b)=>{
 
@@ -602,7 +628,7 @@ banOrder.value=b.banner_order
 banImage.value=b.image
 
 banActive.checked=b.active
-banRotate.checked=b.autoRotate
+banRotate.checked=b.auto_rotate
 
 previewImg.src=b.image
 previewImg.style.display="block"
@@ -611,9 +637,9 @@ bannerModal.style.display="flex"
 
 }
 
-/* ======================
+/* =========================================================
 SAVE
-====================== */
+========================================================= */
 
 async function saveBanner(){
 
@@ -626,6 +652,8 @@ if(!banImage.value){
 alert("Upload banner image")
 return
 }
+
+saveBtn.innerText="Saving..."
 
 const payload={
 
@@ -651,7 +679,9 @@ autoRotate:banRotate.checked
 
 const res=await api(API,"POST",payload)
 
-if(!res.success){
+saveBtn.innerText="💾 Save"
+
+if(!res || !res.success){
 alert("Banner save failed")
 return
 }
@@ -662,9 +692,9 @@ loadBanners()
 
 }
 
-/* ======================
+/* =========================================================
 DELETE
-====================== */
+========================================================= */
 
 async function deleteBanner(id){
 
@@ -676,25 +706,28 @@ loadBanners()
 
 }
 
-/* ======================
+/* =========================================================
 STATUS
-====================== */
+========================================================= */
 
 async function toggleStatus(id,active){
 
 await api(`${API}/${id}/status`,"PATCH",{active})
 
-loadBanners()
-
 }
 
-/* ======================
+/* =========================================================
 INIT
-====================== */
+========================================================= */
 
 saveBtn.onclick=saveBanner
 
 loadBanners()
+
+
+
+
+
 
 </script>
 
