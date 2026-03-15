@@ -225,8 +225,12 @@ select,input{
 
 </main>
 </div>
-<script>
-  const API="/api/admin/system"
+  
+  <script>
+
+const API="/api/admin/system"
+const TOKEN_KEY="AUTH_TOKEN"
+
 const statusEl=document.getElementById("statusText")
 
 const FIELD_IDS=[
@@ -240,9 +244,13 @@ const FIELD_IDS=[
 "antiInspect","iframe","rateLimit","rightClick"
 ]
 
+/* =========================
+API HELPER
+========================= */
+
 async function apiFetch(url,options={}){
 
-const token=localStorage.getItem("AUTH_TOKEN")
+const token=localStorage.getItem(TOKEN_KEY)
 
 try{
 
@@ -263,7 +271,7 @@ return null
 
 return await res.json()
 
-}catch{
+}catch(e){
 
 showStatus("Network Error",true)
 return null
@@ -271,6 +279,10 @@ return null
 }
 
 }
+
+/* =========================
+STATUS MESSAGE
+========================= */
 
 function showStatus(msg,error=false){
 
@@ -286,9 +298,13 @@ statusEl.style.color="#4cff4c"
 
 }
 
-/* LOAD CONFIG */
+/* =========================
+LOAD CONFIG
+========================= */
 
 async function loadSystem(){
+
+showStatus("Loading...")
 
 const data=await apiFetch(API)
 
@@ -307,9 +323,13 @@ el.value=data[id]||""
 
 })
 
+showStatus("System Synced")
+
 }
 
-/* SAVE CONFIG */
+/* =========================
+SAVE CONFIG
+========================= */
 
 async function saveAll(){
 
@@ -324,9 +344,13 @@ if(!el) return
 if(id==="maxResult")
 payload[id]=parseInt(el.value)||8
 else
-payload[id]=el.type==="checkbox"?el.checked:el.value
+payload[id]=el.type==="checkbox"
+? el.checked
+: el.value
 
 })
+
+showStatus("Saving...")
 
 const res=await apiFetch(API,{
 method:"POST",
@@ -340,7 +364,9 @@ showStatus("Update Failed",true)
 
 }
 
-/* EXPORT CONFIG */
+/* =========================
+EXPORT CONFIG
+========================= */
 
 function exportConfig(){
 
@@ -350,11 +376,18 @@ FIELD_IDS.forEach(id=>{
 
 const el=document.getElementById(id)
 
-payload[id]=el.type==="checkbox"?el.checked:el.value
+if(!el) return
+
+payload[id]=el.type==="checkbox"
+? el.checked
+: el.value
 
 })
 
-const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"})
+const blob=new Blob(
+[JSON.stringify(payload,null,2)],
+{type:"application/json"}
+)
 
 const url=URL.createObjectURL(blob)
 
@@ -365,9 +398,82 @@ a.download="animehunt-config.json"
 
 a.click()
 
+showStatus("Config Exported")
+
 }
 
-/* KILL SWITCH */
+/* =========================
+IMPORT CONFIG
+========================= */
+
+function importConfig(){
+
+const input=document.createElement("input")
+input.type="file"
+input.accept="application/json"
+
+input.onchange=e=>{
+
+const file=e.target.files[0]
+
+const reader=new FileReader()
+
+reader.onload=ev=>{
+
+try{
+
+const data=JSON.parse(ev.target.result)
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(el.type==="checkbox")
+el.checked=!!data[id]
+else
+el.value=data[id]||""
+
+})
+
+showStatus("Config Imported")
+
+}catch{
+
+showStatus("Invalid Config File",true)
+
+}
+
+}
+
+reader.readAsText(file)
+
+}
+
+input.click()
+
+}
+
+/* =========================
+RESET CONFIG
+========================= */
+
+async function resetAll(){
+
+if(!confirm("Reset system config?")) return
+
+await apiFetch(API+"/reset",{method:"POST"})
+
+loadSystem()
+
+showStatus("System Reset")
+
+}
+
+/* =========================
+KILL SWITCH
+========================= */
 
 async function kill(){
 
@@ -385,20 +491,61 @@ loadSystem()
 
 }
 
-/* CLEAR CACHE */
+/* =========================
+CLEAR CACHE
+========================= */
 
-function clearCache(){
+async function clearCache(){
 
 showStatus("Purging cache...")
 
-setTimeout(()=>{
-showStatus("Cache cleared")
-},1200)
+try{
+
+await fetch("/api/admin/cache/purge",{method:"POST"})
+
+showStatus("Cache Cleared")
+
+}catch{
+
+showStatus("Cache purge failed",true)
 
 }
 
+}
+
+/* =========================
+AUTO SAVE (OPTIONAL)
+========================= */
+
+let autoSaveTimer
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+el.addEventListener("change",()=>{
+
+clearTimeout(autoSaveTimer)
+
+autoSaveTimer=setTimeout(()=>{
+saveAll()
+},1200)
+
+})
+
+})
+
+/* =========================
+INIT
+========================= */
+
 document.addEventListener("DOMContentLoaded",loadSystem)
-</script>
+
+  </script>
+
+
 
 
 </body>
