@@ -151,6 +151,7 @@
 
   </div>
 </div>
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/homepage"
@@ -177,9 +178,15 @@ const rowOrder=document.getElementById("rowOrder")
 const rowActive=document.getElementById("rowActive")
 const rowAuto=document.getElementById("rowAuto")
 
-/* API */
+const saveBtn=document.getElementById("saveRow")
+
+/* =========================
+API WRAPPER
+========================= */
 
 async function api(url,method="GET",body=null){
+
+try{
 
 const res=await fetch(url,{
 method,
@@ -190,24 +197,43 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
-return res.json()
+if(res.status===401){
+
+location.href="login.html"
+return
 
 }
 
-/* LOAD */
+return await res.json()
+
+}catch(err){
+
+console.error("API Error:",err)
+
+alert("Server error")
+
+}
+
+}
+
+/* =========================
+LOAD HOMEPAGE ROWS
+========================= */
 
 async function loadRows(){
 
+rowList.innerHTML="Loading..."
+
 const rows=await api(API)
 
-rowList.innerHTML=""
-
-if(!rows.length){
+if(!rows || !rows.length){
 
 rowList.innerHTML="<div style='padding:20px;color:#777'>No Rows</div>"
 return
 
 }
+
+rowList.innerHTML=""
 
 rows.forEach(r=>{
 
@@ -245,23 +271,35 @@ ${r.active?"● Active":"○ Hidden"}
 
 }
 
-/* SAVE */
+/* =========================
+SAVE ROW
+========================= */
 
-document.getElementById("saveRow").onclick=async()=>{
+saveBtn.onclick=async()=>{
+
+if(!rowTitle.value){
+
+alert("Row title required")
+return
+
+}
 
 const payload={
 
-title:rowTitle.value,
+title:rowTitle.value.trim(),
+
 type:rowType.value,
 
-source:rowSource.value,
+source:rowSource.value.trim(),
 
 layout:rowLayout.value,
 
 limit:Number(rowLimit.value)||10,
+
 order:Number(rowOrder.value)||0,
 
 active:rowActive.checked,
+
 autoUpdate:rowAuto.checked
 
 }
@@ -271,36 +309,42 @@ const url=editId?`${API}/${editId}`:API
 
 await api(url,method,payload)
 
-modal.style.display="none"
+closeModal()
 
 loadRows()
 
 }
 
-/* EDIT */
+/* =========================
+EDIT ROW
+========================= */
 
 window.editRow=async(id)=>{
 
 const r=await api(`${API}/${id}`)
 
+if(!r) return
+
 editId=id
 
-rowTitle.value=r.title
-rowType.value=r.type
-rowSource.value=r.source
-rowLayout.value=r.layout
+rowTitle.value=r.title || ""
+rowType.value=r.type || "auto"
+rowSource.value=r.source || ""
+rowLayout.value=r.layout || "scroll"
 
-rowLimit.value=r.limit
-rowOrder.value=r.row_order
+rowLimit.value=r.row_limit || 10
+rowOrder.value=r.row_order || 0
 
-rowActive.checked=r.active
-rowAuto.checked=r.autoUpdate
+rowActive.checked=!!r.active
+rowAuto.checked=!!r.autoUpdate
 
 modal.style.display="flex"
 
 }
 
-/* DELETE */
+/* =========================
+DELETE ROW
+========================= */
 
 window.deleteRow=async(id)=>{
 
@@ -312,34 +356,68 @@ loadRows()
 
 }
 
-/* MODAL */
+/* =========================
+OPEN MODAL
+========================= */
 
 document.getElementById("addRowBtn").onclick=()=>{
 
 editId=null
+
+resetForm()
+
+modal.style.display="flex"
+
+}
+
+/* =========================
+CLOSE MODAL
+========================= */
+
+document.getElementById("closeModal").onclick=closeModal
+
+function closeModal(){
+
+modal.style.display="none"
+
+}
+
+/* =========================
+RESET FORM
+========================= */
+
+function resetForm(){
 
 rowTitle.value=""
 rowSource.value=""
 rowLimit.value=""
 rowOrder.value=""
 
+rowType.value="auto"
+rowLayout.value="scroll"
+
 rowActive.checked=true
 rowAuto.checked=false
 
-modal.style.display="flex"
-
 }
 
-document.getElementById("closeModal").onclick=()=>{
-modal.style.display="none"
-}
+/* =========================
+AUTO REFRESH
+========================= */
 
-/* INIT */
+setInterval(loadRows,60000)
+
+/* =========================
+INIT
+========================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
 
 loadRows()
 
-</script>
+})
 
+</script>
 
 
 </body>
