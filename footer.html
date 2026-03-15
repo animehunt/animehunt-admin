@@ -200,8 +200,53 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
+if(!TOKEN){
+location.href="login.html"
+}
+
 const status=document.getElementById("status")
 const debugBox=document.getElementById("debugBox")
+
+/* =========================
+ALL FIELD IDS
+========================= */
+
+const fields=[
+
+"footerOn",
+"footerLazy",
+"footerBlur",
+"footerLock",
+"footerTheme",
+
+"about",
+"privacy",
+"disclaimer",
+"dmca",
+"telegram",
+"linkBadges",
+
+"azOn",
+"azAuto",
+"azSticky",
+"azCompact",
+"azMode",
+
+"mobileNav",
+"mobileFloat",
+"mobileBlur",
+"mobileHideScroll",
+
+"promoOn",
+"promoText",
+"promoLink",
+"promoAutoHide"
+
+]
+
+/* =========================
+API WRAPPER
+========================= */
 
 async function api(url,method="GET",body=null){
 
@@ -214,9 +259,17 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(!res.ok){
+throw new Error("API Error")
+}
+
 return res.json()
 
 }
+
+/* =========================
+LOAD FOOTER CONFIG
+========================= */
 
 async function loadFooter(){
 
@@ -242,13 +295,17 @@ el.value=data[id] || ""
 
 status.innerText="Synced"
 
-}catch{
+}catch(e){
 
 status.innerText="API Error"
 
 }
 
 }
+
+/* =========================
+SAVE FOOTER
+========================= */
 
 async function save(){
 
@@ -258,7 +315,9 @@ fields.forEach(id=>{
 
 const el=document.getElementById(id)
 
-payload[id]=el.type==="checkbox"
+if(!el) return
+
+payload[id] = el.type==="checkbox"
 ? el.checked
 : el.value
 
@@ -266,26 +325,122 @@ payload[id]=el.type==="checkbox"
 
 status.innerText="Saving..."
 
+try{
+
 await api(API,"POST",payload)
 
 status.innerText="Saved"
 
+}catch{
+
+status.innerText="Save Failed"
+
 }
 
-async function kill(){
+}
 
-if(!confirm("Disable footer?")) return
+/* =========================
+EXPORT CONFIG
+========================= */
 
-await api(`${API}/kill`,"POST")
+async function exportCfg(){
+
+const data = await api(API)
+
+const blob=new Blob([JSON.stringify(data,null,2)],{
+type:"application/json"
+})
+
+const url=URL.createObjectURL(blob)
+
+const a=document.createElement("a")
+
+a.href=url
+a.download="footer-config.json"
+
+a.click()
+
+}
+
+/* =========================
+IMPORT CONFIG
+========================= */
+
+function importCfg(){
+
+const input=document.createElement("input")
+
+input.type="file"
+
+input.onchange=async()=>{
+
+const file=input.files[0]
+
+if(!file) return
+
+const text=await file.text()
+
+const json=JSON.parse(text)
+
+await api(API,"POST",json)
 
 loadFooter()
 
 }
 
+input.click()
+
+}
+
+/* =========================
+RESET CONFIG
+========================= */
+
+async function resetCfg(){
+
+if(!confirm("Reset footer settings?")) return
+
+await api(API+"/reset","POST")
+
+loadFooter()
+
+}
+
+/* =========================
+KILL FOOTER
+========================= */
+
+async function kill(){
+
+if(!confirm("Disable footer system?")) return
+
+await api(API+"/kill","POST")
+
+loadFooter()
+
+}
+
+/* =========================
+DEBUG JSON
+========================= */
+
+async function debug(){
+
+const data=await api(API)
+
+debugBox.style.display="block"
+
+debugBox.textContent=JSON.stringify(data,null,2)
+
+}
+
+/* =========================
+INIT
+========================= */
+
 document.addEventListener("DOMContentLoaded",loadFooter)
 
 </script>
-
 
  
 </body>
