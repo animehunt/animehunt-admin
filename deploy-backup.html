@@ -222,11 +222,21 @@ body{
 </div>
 
 <script>
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"
+/* =====================================
+   ANIMEHUNT CMS – DEPLOY ENGINE
+===================================== */
+
+const API_BASE =
+"https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"
+
+const TOKEN_KEY="AUTH_TOKEN"
+
+/* ELEMENTS */
 
 const deployBtn=document.getElementById("deploySite")
 const freezeBtn=document.getElementById("freezeSite")
 const unfreezeBtn=document.getElementById("unfreezeSite")
+
 const createBackupBtn=document.getElementById("createBackup")
 const createVersionBtn=document.getElementById("createVersion")
 
@@ -237,15 +247,125 @@ const versionList=document.getElementById("versionList")
 const backupList=document.getElementById("backupList")
 const restoreList=document.getElementById("restoreList")
 
+/* =====================================
+AUTH CHECK
+===================================== */
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+if(!token){
+location.href="login.html"
+}
+
+/* =====================================
+API HELPER
+===================================== */
+
+async function api(path,method="GET",body=null){
+
+try{
+
+const res=await fetch(API_BASE+path,{
+
+method,
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
+
+body:body?JSON.stringify(body):null
+
+})
+
+if(res.status===401){
+location.href="login.html"
+return
+}
+
+if(!res.ok){
+throw new Error("API Error")
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error("API ERROR:",err)
+
+alert("Server Error")
+
+}
+
+}
+
+/* =====================================
+LOADING STATE
+===================================== */
+
+function setLoading(btn,text){
+
+btn.dataset.oldText=btn.innerText
+
+btn.innerText=text
+
+btn.disabled=true
+
+}
+
+function clearLoading(btn){
+
+btn.innerText=btn.dataset.oldText
+
+btn.disabled=false
+
+}
+
+/* =====================================
+LOAD DATA
+===================================== */
+
 async function loadData(){
 
-const res=await fetch(API)
+versionList.innerHTML="Loading..."
+backupList.innerHTML="Loading..."
+restoreList.innerHTML="Loading..."
 
-const data=await res.json()
+try{
+
+const data=await api("")
+
+if(!data) return
 
 updateUI(data.state)
 
-versionList.innerHTML=data.versions.map(v=>`
+renderVersions(data.versions)
+renderBackups(data.backups)
+
+}catch(e){
+
+console.error(e)
+
+}
+
+}
+
+/* =====================================
+RENDER VERSION LIST
+===================================== */
+
+function renderVersions(list){
+
+if(!list.length){
+
+versionList.innerHTML=
+"<div class='list-item'>No versions</div>"
+
+return
+
+}
+
+versionList.innerHTML=list.map(v=>`
 
 <div class="list-item">
 
@@ -259,23 +379,46 @@ ${new Date(v.date).toLocaleString()}
 
 `).join("")
 
-backupList.innerHTML=data.backups.map(b=>`
+}
+
+/* =====================================
+RENDER BACKUPS
+===================================== */
+
+function renderBackups(list){
+
+if(!list.length){
+
+backupList.innerHTML=
+"<div class='list-item'>No backups</div>"
+
+restoreList.innerHTML=""
+return
+
+}
+
+/* BACKUP LIST */
+
+backupList.innerHTML=list.map(b=>`
 
 <div class="list-item">
-
 ${b.name}
-
 </div>
 
 `).join("")
 
-restoreList.innerHTML=data.backups.map(b=>`
+/* RESTORE LIST */
 
-<div class="list-item" style="display:flex;justify-content:space-between">
+restoreList.innerHTML=list.map(b=>`
+
+<div class="list-item"
+style="display:flex;justify-content:space-between">
 
 <span>${b.name}</span>
 
-<button onclick="restore('${b.id}')">Restore</button>
+<button onclick="restoreBackup('${b.id}')">
+Restore
+</button>
 
 </div>
 
@@ -283,7 +426,13 @@ restoreList.innerHTML=data.backups.map(b=>`
 
 }
 
+/* =====================================
+UPDATE STATE UI
+===================================== */
+
 function updateUI(state){
+
+if(!state) return
 
 if(state.frozen){
 
@@ -307,49 +456,140 @@ emergencyShutdownBtn.innerText="Emergency Shutdown"
 
 }
 
-async function apiAction(path,method="POST",body=null){
+/* =====================================
+DEPLOY SITE
+===================================== */
 
-await fetch(API+path,{
-method,
-headers:{'Content-Type':'application/json'},
-body:body?JSON.stringify(body):null
+deployBtn.onclick=async()=>{
+
+setLoading(deployBtn,"Deploying...")
+
+await api("/deploy","POST")
+
+clearLoading(deployBtn)
+
+loadData()
+
+}
+
+/* =====================================
+CREATE BACKUP
+===================================== */
+
+createBackupBtn.onclick=async()=>{
+
+setLoading(createBackupBtn,"Creating Backup...")
+
+await api("/backup","POST")
+
+clearLoading(createBackupBtn)
+
+loadData()
+
+}
+
+/* =====================================
+CREATE VERSION
+===================================== */
+
+createVersionBtn.onclick=async()=>{
+
+setLoading(createVersionBtn,"Creating Version...")
+
+await api("/version","POST")
+
+clearLoading(createVersionBtn)
+
+loadData()
+
+}
+
+/* =====================================
+FREEZE / UNFREEZE
+===================================== */
+
+freezeBtn.onclick=async()=>{
+
+await api("/state","PATCH",{
+type:"freeze",
+value:true
 })
 
 loadData()
 
 }
 
-deployBtn.onclick=()=>apiAction("/deploy")
+unfreezeBtn.onclick=async()=>{
 
-createBackupBtn.onclick=()=>apiAction("/backup")
+await api("/state","PATCH",{
+type:"freeze",
+value:false
+})
 
-createVersionBtn.onclick=()=>apiAction("/version")
-
-freezeBtn.onclick=()=>apiAction("/state","PATCH",{type:"freeze",value:true})
-
-unfreezeBtn.onclick=()=>apiAction("/state","PATCH",{type:"freeze",value:false})
-
-emergencyShutdownBtn.onclick=()=>{
-
-if(confirm("Shutdown site?"))
-
-apiAction("/state","PATCH",{type:"emergency",value:true})
+loadData()
 
 }
 
-emergencyRecoverBtn.onclick=()=>apiAction("/state","PATCH",{type:"emergency",value:false})
+/* =====================================
+EMERGENCY SHUTDOWN
+===================================== */
 
-function restore(id){
+emergencyShutdownBtn.onclick=async()=>{
 
-if(confirm("Restore this backup?")){
+if(!confirm("Shutdown entire site?")) return
 
-apiAction("/restore","POST",{id})
+await api("/state","PATCH",{
+type:"emergency",
+value:true
+})
+
+loadData()
 
 }
 
+/* =====================================
+EMERGENCY RECOVER
+===================================== */
+
+emergencyRecoverBtn.onclick=async()=>{
+
+await api("/state","PATCH",{
+type:"emergency",
+value:false
+})
+
+loadData()
+
 }
+
+/* =====================================
+RESTORE BACKUP
+===================================== */
+
+window.restoreBackup=async(id)=>{
+
+if(!confirm("Restore this backup?\nAll current data will be replaced.")){
+return
+}
+
+await api("/restore","POST",{id})
+
+alert("Restore completed")
+
+loadData()
+
+}
+
+/* =====================================
+AUTO REFRESH
+===================================== */
+
+setInterval(loadData,30000)
+
+/* INIT */
 
 document.addEventListener("DOMContentLoaded",loadData)
+
 
 </script>
 
