@@ -214,129 +214,167 @@ body{
 </div>
   
 <script>
-const API_BASE="https://animehunt-backend.animehunt715.workers.dev"
-const DASH_API=`${API_BASE}/api/admin/dashboard`
 
-const token=localStorage.getItem("AUTH_TOKEN")
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api"
+
+const DASH_API = API_BASE + "/admin/dashboard"
+const VERIFY_API = API_BASE + "/admin/verify"
+const KILL_API = API_BASE + "/admin/system/kill"
+
+const TOKEN_KEY = "AUTH_TOKEN"
+const LOGIN_PAGE = "login.html"
+
+let token = localStorage.getItem(TOKEN_KEY)
 
 function authHeaders(){
-return{
+
+return {
 "Content-Type":"application/json",
-"Authorization":token ? "Bearer "+token : ""
-}
+"Authorization": token ? "Bearer " + token : ""
 }
 
-/* LOAD DASHBOARD */
+}
+
+async function verifyLogin(){
+
+if(!token){
+
+window.location.href = LOGIN_PAGE
+return
+
+}
+
+try{
+
+const res = await fetch(VERIFY_API,{
+headers:{
+"Authorization":"Bearer "+token
+}
+})
+
+const data = await res.json()
+
+if(!data.valid){
+
+localStorage.removeItem(TOKEN_KEY)
+window.location.href = LOGIN_PAGE
+
+}
+
+}catch(e){
+
+window.location.href = LOGIN_PAGE
+
+}
+
+}
 
 async function loadDashboard(){
 
 try{
 
-const res=await fetch(DASH_API,{
+const res = await fetch(DASH_API,{
 headers:authHeaders()
 })
 
-if(!res.ok) throw new Error("API Error")
+if(res.status === 401){
 
-const data=await res.json()
-
-/* CORE */
-
-updateUI("animeCount",data.core.animeCount)
-updateUI("episodeCount",data.core.episodeCount)
-updateUI("categoryCount",data.core.categoryCount)
-updateUI("bannerCount",data.core.bannerCount)
-updateUI("downloadCount",data.core.downloadCount)
-updateUI("serverCount",data.core.serverCount)
-
-/* GROWTH */
-
-updateUI("activeAds",data.growth.activeAds)
-updateUI("todayRevenue","₹"+data.growth.todayRevenue)
-updateUI("adClicks",data.growth.adClicks)
-updateUI("trendingAnime",data.growth.trendingAnime)
-updateUI("ongoingAnime",data.growth.ongoingAnime)
-updateUI("topRated",data.growth.topRated)
-
-/* SYSTEM */
-
-updateUI("cmsStatus",data.system.cmsStatus)
-updateUI("serverLoad",data.system.serverLoad)
-updateUI("apiStatus",data.system.apiStatus)
-updateUI("aiStatus",data.system.aiStatus)
-updateUI("searchStatus",data.system.searchStatus)
-updateUI("backupStatus",data.system.backupStatus)
+localStorage.removeItem(TOKEN_KEY)
+window.location.href = LOGIN_PAGE
+return
 
 }
-catch(err){
+
+if(!res.ok) throw new Error("API Error")
+
+const data = await res.json()
+
+updateUI("animeCount",data.core?.animeCount)
+updateUI("episodeCount",data.core?.episodeCount)
+updateUI("categoryCount",data.core?.categoryCount)
+updateUI("bannerCount",data.core?.bannerCount)
+updateUI("downloadCount",data.core?.downloadCount)
+updateUI("serverCount",data.core?.serverCount)
+
+updateUI("activeAds",data.growth?.activeAds)
+updateUI("todayRevenue","₹"+(data.growth?.todayRevenue || 0))
+updateUI("adClicks",data.growth?.adClicks)
+updateUI("trendingAnime",data.growth?.trendingAnime)
+updateUI("ongoingAnime",data.growth?.ongoingAnime)
+updateUI("topRated",data.growth?.topRated)
+
+updateUI("cmsStatus",data.system?.cmsStatus)
+updateUI("serverLoad",data.system?.serverLoad)
+updateUI("apiStatus",data.system?.apiStatus)
+updateUI("aiStatus",data.system?.aiStatus)
+updateUI("searchStatus",data.system?.searchStatus)
+updateUI("backupStatus",data.system?.backupStatus)
+
+}catch(err){
 
 console.error("Dashboard Error:",err)
 
-document.querySelectorAll(".stat-card span")
-.forEach(el=>{
-
-if(el.textContent==="0"||el.textContent===""){
+document.querySelectorAll(".stat-card span").forEach(el=>{
+if(el.textContent==="0" || el.textContent===""){
 el.textContent="ERR"
 }
-
 })
 
 }
 
 }
 
-/* UI UPDATE */
-
 function updateUI(id,val){
 
-const el=document.getElementById(id)
+const el = document.getElementById(id)
 
 if(!el) return
 
-el.style.opacity="0"
+el.style.opacity = "0"
 
 setTimeout(()=>{
 
-el.textContent=val ?? "0"
-
-el.style.transition="opacity .3s"
-el.style.opacity="1"
+el.textContent = val ?? "0"
+el.style.transition = "opacity .3s"
+el.style.opacity = "1"
 
 },60)
 
 }
 
-/* QUICK ACTIONS */
-
 function initQuickActions(){
 
-const cards=document.querySelectorAll(
+const cards = document.querySelectorAll(
 ".cms-content .stats-grid:last-child .stat-card"
 )
 
 cards.forEach(card=>{
 
-card.style.cursor="pointer"
+card.style.cursor = "pointer"
 
-card.onclick=()=>{
+card.onclick = ()=>{
 
-const txt=card.textContent
+const txt = card.textContent
 
-if(txt.includes("Add Anime"))
+if(txt.includes("Add Anime")){
 location.href="anime.html?action=new"
+}
 
-if(txt.includes("Manage Ads"))
+if(txt.includes("Manage Ads")){
 location.href="ads.html"
+}
 
-if(txt.includes("Upload Banner"))
+if(txt.includes("Upload Banner")){
 location.href="banners.html"
+}
 
-if(txt.includes("Sync Content"))
+if(txt.includes("Sync Content")){
 loadDashboard()
+}
 
 if(txt.includes("AI Scan")){
 
-const span=card.querySelector("span")
+const span = card.querySelector("span")
 
 span.textContent="Running..."
 
@@ -353,7 +391,7 @@ if(txt.includes("Emergency Stop")){
 
 if(confirm("Stop all services?")){
 
-fetch(`${API_BASE}/api/admin/system/kill`,{
+fetch(KILL_API,{
 method:"POST",
 headers:authHeaders()
 })
@@ -370,21 +408,38 @@ alert("Emergency Stop Activated")
 
 }
 
-/* INIT */
+function startAutoRefresh(){
 
-document.addEventListener("DOMContentLoaded",()=>{
+setInterval(()=>{
 
 loadDashboard()
 
+},30000)
+
+}
+
+function logout(){
+
+localStorage.removeItem(TOKEN_KEY)
+window.location.href = LOGIN_PAGE
+
+}
+
+document.addEventListener("DOMContentLoaded",async()=>{
+
+await verifyLogin()
+
+await loadDashboard()
+
 initQuickActions()
 
-/* AUTO REFRESH */
-
-setInterval(loadDashboard,30000)
+startAutoRefresh()
 
 })
 
-    
 </script>
+
+
+
 
 
