@@ -294,23 +294,34 @@
 </div>
 
     <script>
-
-const API="/api/admin/seo"
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/seo"
 const TOKEN_KEY="AUTH_TOKEN"
 
 const saveBtn=document.getElementById("saveSEO")
+
+/* ==========================
+AUTH CHECK
+========================== */
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+if(!token){
+location.href="login.html"
+}
+
+/* ==========================
+ELEMENT HELPER
+========================== */
 
 function el(id){
 return document.getElementById(id)
 }
 
 /* ==========================
-API HELPER
+API WRAPPER
 ========================== */
 
 async function apiFetch(url,options={}){
-
-const token=localStorage.getItem(TOKEN_KEY)
 
 try{
 
@@ -318,7 +329,7 @@ const res=await fetch(url,{
 ...options,
 headers:{
 "Content-Type":"application/json",
-"Authorization":token?`Bearer ${token}`:"",
+"Authorization":"Bearer "+token,
 ...options.headers
 }
 })
@@ -332,12 +343,19 @@ return null
 
 }
 
+if(!res.ok){
+
+throw new Error("API Error")
+
+}
+
 return await res.json()
 
 }catch(e){
 
-console.error(e)
+console.error("API ERROR:",e)
 alert("Network error")
+
 return null
 
 }
@@ -345,7 +363,7 @@ return null
 }
 
 /* ==========================
-LOAD SEO
+LOAD SEO SETTINGS
 ========================== */
 
 async function loadSEO(){
@@ -354,48 +372,76 @@ const d=await apiFetch(API)
 
 if(!d) return
 
+/* GLOBAL */
+
 if(d.global){
 
-el("siteTitle").value=d.global.title||""
-el("siteDesc").value=d.global.desc||""
-el("siteKeywords").value=d.global.keywords||""
-el("canonical").value=d.global.canonical||""
-el("indexing").value=d.global.indexing||"index"
+el("siteTitle").value=d.global.title || ""
+el("siteDesc").value=d.global.desc || ""
+el("siteKeywords").value=d.global.keywords || ""
+el("canonical").value=d.global.canonical || ""
+el("indexing").value=d.global.indexing || "index"
 
 }
+
+/* HOMEPAGE */
 
 if(d.home){
 
-el("homeTitle").value=d.home.title||""
-el("homeDesc").value=d.home.desc||""
-el("homeKeywords").value=d.home.keywords||""
-el("homeOG").value=d.home.og||""
+el("homeTitle").value=d.home.title || ""
+el("homeDesc").value=d.home.desc || ""
+el("homeKeywords").value=d.home.keywords || ""
+el("homeOG").value=d.home.og || ""
 
 }
+
+/* TEMPLATES */
 
 if(d.templates){
 
-el("animeTemplate").value=d.templates.anime||""
-el("categoryTemplate").value=d.templates.category||""
-el("episodeTemplate").value=d.templates.episode||""
-el("searchTemplate").value=d.templates.search||""
+el("animeTemplate").value=d.templates.anime || ""
+el("categoryTemplate").value=d.templates.category || ""
+el("episodeTemplate").value=d.templates.episode || ""
+el("searchTemplate").value=d.templates.search || ""
 
 }
 
+/* SOCIAL */
+
 if(d.social){
 
-el("ogTitle").value=d.social.ogTitle||""
-el("ogDesc").value=d.social.ogDesc||""
-el("twTitle").value=d.social.twTitle||""
-el("twDesc").value=d.social.twDesc||""
-el("twCard").value=d.social.twCard||"summary_large_image"
+el("ogTitle").value=d.social.ogTitle || ""
+el("ogDesc").value=d.social.ogDesc || ""
+el("twTitle").value=d.social.twTitle || ""
+el("twDesc").value=d.social.twDesc || ""
+el("twCard").value=d.social.twCard || "summary_large_image"
 
 }
 
 }
 
 /* ==========================
-SAVE SEO
+VALIDATION
+========================== */
+
+function validateSEO(data){
+
+if(!data.global.title){
+alert("Site title required")
+return false
+}
+
+if(!data.global.canonical.startsWith("http")){
+alert("Canonical must be full URL")
+return false
+}
+
+return true
+
+}
+
+/* ==========================
+SAVE SEO SETTINGS
 ========================== */
 
 async function saveSEO(){
@@ -406,34 +452,42 @@ saveBtn.innerText="Saving..."
 const payload={
 
 global:{
-title:el("siteTitle").value,
-desc:el("siteDesc").value,
-keywords:el("siteKeywords").value,
-canonical:el("canonical").value,
+title:el("siteTitle").value.trim(),
+desc:el("siteDesc").value.trim(),
+keywords:el("siteKeywords").value.trim(),
+canonical:el("canonical").value.trim(),
 indexing:el("indexing").value
 },
 
 home:{
-title:el("homeTitle").value,
-desc:el("homeDesc").value,
-keywords:el("homeKeywords").value,
-og:el("homeOG").value
+title:el("homeTitle").value.trim(),
+desc:el("homeDesc").value.trim(),
+keywords:el("homeKeywords").value.trim(),
+og:el("homeOG").value.trim()
 },
 
 templates:{
-anime:el("animeTemplate").value,
-category:el("categoryTemplate").value,
-episode:el("episodeTemplate").value,
-search:el("searchTemplate").value
+anime:el("animeTemplate").value.trim(),
+category:el("categoryTemplate").value.trim(),
+episode:el("episodeTemplate").value.trim(),
+search:el("searchTemplate").value.trim()
 },
 
 social:{
-ogTitle:el("ogTitle").value,
-ogDesc:el("ogDesc").value,
-twTitle:el("twTitle").value,
-twDesc:el("twDesc").value,
+ogTitle:el("ogTitle").value.trim(),
+ogDesc:el("ogDesc").value.trim(),
+twTitle:el("twTitle").value.trim(),
+twDesc:el("twDesc").value.trim(),
 twCard:el("twCard").value
 }
+
+}
+
+if(!validateSEO(payload)){
+
+saveBtn.disabled=false
+saveBtn.innerText="💾 Save SEO"
+return
 
 }
 
@@ -444,18 +498,43 @@ body:JSON.stringify(payload)
 
 if(res?.success){
 
-alert("SEO Saved Successfully 🚀")
+saveBtn.innerText="Saved ✓"
+
+setTimeout(()=>{
+
+saveBtn.innerText="💾 Save SEO"
+
+},1500)
 
 }else{
 
 alert("Failed to save SEO")
+saveBtn.innerText="💾 Save SEO"
 
 }
 
 saveBtn.disabled=false
-saveBtn.innerText="💾 Save SEO"
 
 }
+
+/* ==========================
+AUTO SAVE SHORTCUT
+========================== */
+
+document.addEventListener("keydown",(e)=>{
+
+if(e.ctrlKey && e.key==="s"){
+
+e.preventDefault()
+saveSEO()
+
+}
+
+})
+
+/* ==========================
+INIT
+========================== */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -464,6 +543,8 @@ loadSEO()
 saveBtn.addEventListener("click",saveSEO)
 
 })
+
+
 
     </script>
 
