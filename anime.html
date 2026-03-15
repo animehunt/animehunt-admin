@@ -481,10 +481,7 @@ listBody.innerHTML=data.map(a=>`
 
 <script>
 
-
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
-
 const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
 
 const token=localStorage.getItem("AUTH_TOKEN")
@@ -518,11 +515,11 @@ animeList.innerHTML=data.map(a=>`
 
 <span class="badge">${a.status}</span>
 
-<span>${a.categories||"-"}</span>
+<span>${a.genres||"-"}</span>
 
-<span>${a.isHome?'✅':'❌'}</span>
+<span>${a.is_home?'✅':'❌'}</span>
 
-<span>${a.isTrending?'🔥':'➖'}</span>
+<span>${a.is_trending?'🔥':'➖'}</span>
 
 <div class="actions">
 
@@ -531,7 +528,7 @@ animeList.innerHTML=data.map(a=>`
 <button onclick="deleteAnime('${a.id}')">🗑</button>
 
 <button onclick="toggleHide('${a.id}')">
-${a.isHidden?'👁':'🚫'}
+${a.is_hidden?'👁':'🚫'}
 </button>
 
 </div>
@@ -541,18 +538,100 @@ ${a.isHidden?'👁':'🚫'}
 `).join("")
 
 }
-  async function toggleHide(id){
 
-await fetch(`${HIDE_API}/${id}`,{
-method:"PATCH",
-headers:{
-Authorization:"Bearer "+token
+/* SAVE ANIME */
+
+async function saveAnime(){
+
+const genres=[...document.getElementById("genres").selectedOptions]
+.map(o=>o.value).join(",")
+
+const payload={
+
+title:title.value,
+slug:slug.value,
+type:type.value,
+status:status.value,
+
+poster:poster.value,
+banner:banner.value,
+
+year:year.value,
+rating:rating.value,
+
+language:language.value,
+duration:duration.value,
+
+genres,
+tags:tags.value,
+description:description.value,
+
+isHome:isHome.checked,
+isTrending:isTrending.checked,
+isMostViewed:isMostViewed.checked,
+isBanner:isBanner.checked
+
 }
+
+await fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify(payload)
+})
+
+animeModal.style.display="none"
+
+loadAnime()
+
+}
+
+/* DELETE */
+
+async function deleteAnime(id){
+
+if(!confirm("Delete Anime?")) return
+
+await fetch(`${API}/${id}`,{
+method:"DELETE",
+headers:{Authorization:"Bearer "+token}
 })
 
 loadAnime()
 
-  }
+}
+
+/* HIDE */
+
+async function toggleHide(id){
+
+await fetch(`${HIDE_API}/${id}`,{
+method:"PATCH",
+headers:{Authorization:"Bearer "+token}
+})
+
+loadAnime()
+
+}
+
+saveAnime.onclick=saveAnime
+
+openAddAnime.onclick=()=>animeModal.style.display="flex"
+
+closeModal.onclick=()=>animeModal.style.display="none"
+
+typeFilter.onchange=loadAnime
+statusFilter.onchange=loadAnime
+homeFilter.onchange=loadAnime
+searchAnime.oninput=loadAnime
+
+loadAnime()
+
+
+
+
 
 </script>
 
