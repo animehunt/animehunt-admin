@@ -367,20 +367,16 @@ Loading ads...
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
+const API=`${API_BASE}/admin/ads`
 
-/* =========================
-AUTH CHECK
-========================= */
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
 location.href="login.html"
 }
 
-/* =========================
-API HELPER
-========================= */
+/* API CALL */
 
 async function api(url,method="GET",body=null){
 
@@ -395,19 +391,17 @@ body:body?JSON.stringify(body):null
 
 if(!res.ok){
 
-alert("API Error")
+if(res.status===401){
+location.href="login.html"
+}
 
-throw new Error("API")
-
+throw new Error("API error")
 }
 
 return res.json()
-
 }
 
-/* =========================
-LOAD ADS
-========================= */
+/* LOAD ADS */
 
 async function loadAds(){
 
@@ -423,7 +417,7 @@ list.innerHTML=""
 
 if(!ads.length){
 
-list.innerHTML="<tr><td colspan='4'>No ads</td></tr>"
+list.innerHTML="<tr><td colspan='4'>No ads found</td></tr>"
 return
 
 }
@@ -433,7 +427,6 @@ ads.forEach(ad=>{
 const status=(ad.status||"OFF").toLowerCase()
 
 list.innerHTML+=`
-
 <tr>
 
 <td>${ad.name}</td>
@@ -441,13 +434,13 @@ list.innerHTML+=`
 <td>${ad.page}</td>
 
 <td class="status ${status}">
-${ad.status||"OFF"}
+${ad.status}
 </td>
 
 <td>
 
 <button onclick="toggleAd('${ad.id}')">
-Toggle
+${ad.status==="ON"?"Disable":"Enable"}
 </button>
 
 <button onclick="deleteAd('${ad.id}')">
@@ -457,12 +450,11 @@ Delete
 </td>
 
 </tr>
-
 `
 
 })
 
-}catch{
+}catch(e){
 
 list.innerHTML="<tr><td colspan='4'>Failed to load ads</td></tr>"
 
@@ -470,29 +462,26 @@ list.innerHTML="<tr><td colspan='4'>Failed to load ads</td></tr>"
 
 }
 
-/* =========================
-SAVE AD
-========================= */
+/* SAVE AD */
 
 async function saveAd(){
 
 const payload={
 
-name:document.getElementById("adName").value,
-type:document.getElementById("adType").value,
-adCode:document.getElementById("adCode").value,
+name:adName.value,
+type:adType.value,
+adCode:adCode.value,
 
-page:document.getElementById("adPage").value,
-position:document.getElementById("adPos").value,
+page:adPage.value,
+position:adPos.value,
 
-priority:Number(document.getElementById("adPriority").value||5),
+priority:Number(adPriority.value||5),
 
-animeSlug:document.getElementById("adAnime").value,
-episodeNumber:document.getElementById("adEpisode").value,
+animeSlug:adAnime.value,
+episodeNumber:adEpisode.value,
 
-country:document.getElementById("adCountry").value,
-
-device:document.getElementById("adDevice").value
+country:adCountry.value,
+device:adDevice.value
 
 }
 
@@ -511,17 +500,17 @@ clearForm()
 
 loadAds()
 
+alert("Ad saved")
+
 }catch(e){
 
-console.error(e)
+alert("Save failed")
 
 }
 
 }
 
-/* =========================
-CLEAR FORM
-========================= */
+/* CLEAR */
 
 function clearForm(){
 
@@ -534,61 +523,39 @@ adCountry.value=""
 
 }
 
-/* =========================
-TOGGLE STATUS
-========================= */
+/* TOGGLE */
 
 async function toggleAd(id){
-
-try{
 
 await api(`${API}/${id}/toggle`,"PATCH")
 
 loadAds()
 
-}catch(e){
-
-console.error(e)
-
 }
 
-}
-
-/* =========================
-DELETE AD
-========================= */
+/* DELETE */
 
 async function deleteAd(id){
 
-if(!confirm("Delete Ad?")) return
-
-try{
+if(!confirm("Delete ad?")) return
 
 await api(`${API}/${id}`,"DELETE")
 
 loadAds()
 
-}catch(e){
-
-console.error(e)
-
 }
 
-}
-
-/* =========================
-BULK ADD ADS
-========================= */
+/* BULK */
 
 async function bulkAddAds(){
 
 try{
 
-const data=JSON.parse(document.getElementById("bulkData").value)
+const json=JSON.parse(bulkData.value)
 
-await api(API+"/bulk","POST",data)
+await api(API+"/bulk","POST",json)
 
-document.getElementById("bulkData").value=""
+bulkData.value=""
 
 loadAds()
 
@@ -600,11 +567,12 @@ alert("Invalid JSON")
 
 }
 
-/* =========================
-INIT
-========================= */
-
 loadAds()
+
+
+
+
+
 
 </script>
 
