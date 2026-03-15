@@ -211,12 +211,9 @@ body{background:#060a14;color:#fff}
 
 
 
-
-
 <script>
 
 const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api/admin/servers"
-
 const TOKEN_KEY="AUTH_TOKEN"
 
 let servers=[]
@@ -231,11 +228,51 @@ AUTH CHECK
 const token=localStorage.getItem(TOKEN_KEY)
 
 if(!token){
+
 location.href="login.html"
+
 }
 
 /* =========================
-API FETCH
+STATUS MESSAGE
+========================= */
+
+function showStatus(msg,color="#4cff4c"){
+
+let el=document.getElementById("statusBox")
+
+if(!el){
+
+el=document.createElement("div")
+
+el.id="statusBox"
+
+el.style.position="fixed"
+el.style.bottom="20px"
+el.style.right="20px"
+el.style.background="#0e1424"
+el.style.padding="10px 14px"
+el.style.borderRadius="8px"
+el.style.fontSize="12px"
+el.style.border="1px solid #1a2035"
+
+document.body.appendChild(el)
+
+}
+
+el.style.color=color
+el.innerText=msg
+
+setTimeout(()=>{
+
+el.innerText=""
+
+},3000)
+
+}
+
+/* =========================
+API HELPER
 ========================= */
 
 async function apiFetch(url,options={}){
@@ -243,12 +280,15 @@ async function apiFetch(url,options={}){
 try{
 
 const res=await fetch(url,{
+
 ...options,
+
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token,
 ...options.headers
 }
+
 })
 
 if(res.status===401){
@@ -259,12 +299,19 @@ return
 
 }
 
+if(!res.ok){
+
+throw new Error("API ERROR")
+
+}
+
 return await res.json()
 
 }catch(err){
 
-alert("Server connection failed")
 console.error(err)
+
+showStatus("Server connection failed","#ff4c4c")
 
 }
 
@@ -275,6 +322,8 @@ LOAD SERVERS
 ========================= */
 
 async function loadServers(query=""){
+
+$("serverList").innerHTML="<div style='padding:30px;color:#777'>Loading...</div>"
 
 let url=API_BASE
 
@@ -306,10 +355,7 @@ list.innerHTML=""
 
 if(!servers.length){
 
-list.innerHTML=`<div style="padding:40px;text-align:center;color:#777">
-No servers found
-</div>`
-
+list.innerHTML="<div style='padding:40px;text-align:center;color:#777'>No servers found</div>"
 return
 
 }
@@ -364,11 +410,12 @@ function openModal(){
 
 editId=null
 
-document.querySelectorAll(".form-grid input").forEach(i=>{
-
-i.value=""
-
-})
+$("serverName").value=""
+$("animeName").value=""
+$("seasonNo").value=""
+$("episodeNo").value=""
+$("embedUrl").value=""
+$("priority").value=""
 
 $("active").checked=true
 
@@ -416,11 +463,12 @@ active:$("active").checked
 
 if(!payload.name || !payload.anime || !payload.embed){
 
-alert("Server name, anime and embed required")
-
+showStatus("Server name, anime and embed required","#ff4c4c")
 return
 
 }
+
+showStatus("Saving...")
 
 const res=await apiFetch(API_BASE,{
 
@@ -432,9 +480,11 @@ body:JSON.stringify(payload)
 
 if(res?.success){
 
+showStatus("Server saved")
+
 closeModal()
 
-loadServers($("searchInput").value)
+loadServers($("searchInput")?.value || "")
 
 }
 
@@ -475,25 +525,29 @@ async function deleteServer(id){
 
 if(!confirm("Delete this server?")) return
 
+showStatus("Deleting...")
+
 const res=await apiFetch(`${API_BASE}/${id}`,{
 method:"DELETE"
 })
 
 if(res?.success){
 
-loadServers($("searchInput").value)
+showStatus("Server deleted")
+
+loadServers($("searchInput")?.value || "")
 
 }
 
 }
 
 /* =========================
-SEARCH
+SEARCH SYSTEM
 ========================= */
 
 let searchTimer
 
-$("searchInput").addEventListener("input",e=>{
+$("searchInput")?.addEventListener("input",e=>{
 
 clearTimeout(searchTimer)
 
@@ -502,6 +556,20 @@ searchTimer=setTimeout(()=>{
 loadServers(e.target.value)
 
 },400)
+
+})
+
+/* =========================
+MODAL CLOSE OUTSIDE
+========================= */
+
+window.addEventListener("click",e=>{
+
+if(e.target.id==="serverModal"){
+
+closeModal()
+
+}
 
 })
 
@@ -522,6 +590,13 @@ $("saveServer").onclick=saveServer
 })
 
 </script>
+
+
+
+
+
+
+
         
 </body>
 </html>
