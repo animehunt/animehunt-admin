@@ -274,148 +274,261 @@
   </main>
 
 </div>
-<script>
+
+    /* ============================================================
+ANIMEHUNT CMS - COMPLETE ANALYTICS SYSTEM
+============================================================ */
+
+const API_BASE =
+"https://animehunt-backend.animehunt715.workers.dev/api"
+
+const ADMIN_ANALYTICS =
+API_BASE + "/admin/analytics"
+
+const TRACK_API =
+API_BASE + "/analytics/track"
+
+const TOKEN_KEY = "AUTH_TOKEN"
+
+const rangeSelect = document.getElementById("range")
+
 /* ============================================================
-   ANIMEHUNT CMS - ANALYTICS ENGINE (100% COMPLETE)
-   ============================================================ */
+AUTH CHECK
+============================================================ */
 
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/analytics"; // Update this URL
-const rangeSelect = document.getElementById("range");
-
-/**
- * Renders data with a visual progress bar
- */
-function fillList(el, list, keyName, valName) {
-    if (!el) return;
-    el.innerHTML = "";
-    
-    if (!list || list.length === 0) {
-        el.innerHTML = `<li style="color:#666; text-align:center; padding:20px; font-size:11px;">No data available</li>`;
-        return;
-    }
-
-    // Calculate Max for percentage
-    const maxVal = Math.max(...list.map(i => i[valName] || 0));
-
-    list.forEach(item => {
-        const val = item[valName] || 0;
-        const key = item[keyName] || "Unknown";
-        const percent = maxVal > 0 ? (val / maxVal) * 100 : 0;
-
-        const li = document.createElement("li");
-        li.style.cssText = `
-            position: relative;
-            z-index: 1;
-            padding: 10px;
-            margin-bottom: 4px;
-            border-bottom: 1px solid #1a2035;
-            display: flex;
-            justify-content: space-between;
-            overflow: hidden;
-        `;
-
-        li.innerHTML = `
-            <div style="position:absolute; left:0; top:0; height:100%; width:${percent}%; background:rgba(255,204,0,0.08); z-index:-1; transition: width 0.5s ease;"></div>
-            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${key}</span>
-            <b style="color:#ffcc00">${val}</b>
-        `;
-        el.appendChild(li);
-    });
+function getToken(){
+return localStorage.getItem(TOKEN_KEY)
 }
 
-/**
- * Main Data Loader
- */
-async function loadAnalytics() {
-    const range = rangeSelect?.value || "7";
-    const token = localStorage.getItem("AUTH_TOKEN");
-
-    // UI Feedback
-    document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "0.3");
-
-    try {
-        const res = await fetch(`${API_BASE}?range=${range}`, {
-            headers: { 
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (res.status === 401) {
-            window.location.href = "login.html";
-            return;
-        }
-
-        const data = await res.json();
-        if (!data.stats) throw new Error("Invalid data format");
-
-        // 1. Update Top Stats
-        document.getElementById("visitors").innerText = data.stats.visitors.toLocaleString();
-        document.getElementById("views").innerText = data.stats.pageViews.toLocaleString();
-        document.getElementById("animeViews").innerText = data.stats.animeViews.toLocaleString();
-        document.getElementById("episodeViews").innerText = data.stats.episodeViews.toLocaleString();
-        document.getElementById("downloads").innerText = data.stats.downloads.toLocaleString();
-        document.getElementById("searches").innerText = data.stats.searches.toLocaleString();
-
-        // 2. Update Lists (Mapping keys exactly as Backend returns them)
-        fillList(document.getElementById("topAnime"), data.topAnime, 'slug', 'v');
-        fillList(document.getElementById("topEpisodes"), data.topEpisodes, 'id', 'v');
-        fillList(document.getElementById("topSearches"), data.topSearches, 'q', 'c');
-        fillList(document.getElementById("topCategories"), data.topCategories, 'cat', 'v');
-        fillList(document.getElementById("topBanners"), data.topBanners, 'ban', 'c');
-        fillList(document.getElementById("topServers"), data.topServers, 'srv', 'v');
-
-    } catch (err) {
-        console.error("Analytics Error:", err);
-    } finally {
-        document.querySelectorAll('.stat-card p').forEach(p => p.style.opacity = "1");
-    }
+if(!getToken()){
+location.href="login.html"
 }
 
-// Initializing
-if (rangeSelect) {
-    rangeSelect.addEventListener("change", loadAnalytics);
+/* ============================================================
+SAFE FETCH
+============================================================ */
+
+async function api(url,options={}){
+
+try{
+
+const res = await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + getToken(),
+...(options.headers||{})
+}
+})
+
+if(res.status===401){
+location.href="login.html"
+return
 }
 
-document.addEventListener("DOMContentLoaded", loadAnalytics);
+if(!res.ok){
+throw new Error("API Error")
+}
 
-// Auto Refresh every 2 minutes (Reduced from 5 to keep it "Real-time")
-setInterval(loadAnalytics, 120000);
-  const ANALYTICS_API =
-"https://animehunt-backend.animehunt715.workers.dev/api/analytics/track"
+return await res.json()
+
+}catch(err){
+
+console.error("API Error:",err)
+return null
+
+}
+
+}
+
+/* ============================================================
+LIST RENDER
+============================================================ */
+
+function fillList(el,list,keyName,valName){
+
+if(!el) return
+
+el.innerHTML=""
+
+if(!list || list.length===0){
+
+el.innerHTML =
+`<li style="color:#666;text-align:center;padding:20px;font-size:11px">
+No data available
+
+</li>`return
+
+}
+
+const maxVal = Math.max(...list.map(i=>i[valName]||0))
+
+list.forEach(item=>{
+
+const key = item[keyName] || "Unknown"
+const val = item[valName] || 0
+
+const percent =
+maxVal>0 ? (val/maxVal)*100 : 0
+
+const li = document.createElement("li")
+
+li.style.cssText="position:relative; padding:10px; margin-bottom:4px; border-bottom:1px solid #1a2035; display:flex; justify-content:space-between; overflow:hidden;"
+
+li.innerHTML=`
+
+<div style="
+position:absolute;
+left:0;
+top:0;
+height:100%;
+width:${percent}%;
+background:rgba(255,204,0,0.08);
+z-index:-1;
+transition:width .5s
+"></div><span style="
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+max-width:80%
+">${key}</span>
+
+<b style="color:#ffcc00">${val}</b>
+`
+
+el.appendChild(li)
+
+})
+
+}
+
+/* ============================================================
+LOAD ANALYTICS
+============================================================ */
+
+async function loadAnalytics(){
+
+const range = rangeSelect?.value || "7"
+
+document.querySelectorAll(".stat-card p")
+.forEach(el=>el.style.opacity="0.4")
+
+const data = await api(
+"${ADMIN_ANALYTICS}?range=${range}"
+)
+
+if(!data){
+return
+}
+
+/* STATS */
+
+setText("visitors",data.stats.visitors)
+setText("views",data.stats.pageViews)
+setText("animeViews",data.stats.animeViews)
+setText("episodeViews",data.stats.episodeViews)
+setText("downloads",data.stats.downloads)
+setText("searches",data.stats.searches)
+
+/* LISTS */
+
+fillList(
+document.getElementById("topAnime"),
+data.topAnime,
+"slug",
+"v"
+)
+
+fillList(
+document.getElementById("topEpisodes"),
+data.topEpisodes,
+"id",
+"v"
+)
+
+fillList(
+document.getElementById("topSearches"),
+data.topSearches,
+"q",
+"c"
+)
+
+fillList(
+document.getElementById("topCategories"),
+data.topCategories,
+"cat",
+"v"
+)
+
+fillList(
+document.getElementById("topBanners"),
+data.topBanners,
+"ban",
+"c"
+)
+
+fillList(
+document.getElementById("topServers"),
+data.topServers,
+"srv",
+"v"
+)
+
+document.querySelectorAll(".stat-card p")
+.forEach(el=>el.style.opacity="1")
+
+}
+
+/* ============================================================
+SET TEXT SAFE
+============================================================ */
+
+function setText(id,val){
+
+const el = document.getElementById(id)
+
+if(!el) return
+
+el.textContent =
+Number(val||0).toLocaleString()
+
+}
+
+/* ============================================================
+TRACKING FUNCTIONS
+============================================================ */
+
+function trackEvent(type,data={}){
+
+fetch(TRACK_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+type,
+...data
+})
+})
+
+}
 
 /* PAGE VIEW */
 
 function trackPage(){
 
-fetch(ANALYTICS_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:"page",
+trackEvent("page",{
 ref:location.pathname
-})
 })
 
 }
-
-trackPage()
 
 /* ANIME VIEW */
 
 function trackAnime(slug){
 
-fetch(ANALYTICS_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:"anime",
+trackEvent("anime",{
 ref:slug
-})
 })
 
 }
@@ -424,15 +537,8 @@ ref:slug
 
 function trackEpisode(id){
 
-fetch(ANALYTICS_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:"episode",
+trackEvent("episode",{
 ref:id
-})
 })
 
 }
@@ -441,15 +547,8 @@ ref:id
 
 function trackDownload(id){
 
-fetch(ANALYTICS_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:"download",
+trackEvent("download",{
 ref:id
-})
 })
 
 }
@@ -458,19 +557,64 @@ ref:id
 
 function trackSearch(query){
 
-fetch(ANALYTICS_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type:"search",
+trackEvent("search",{
 value:query
-})
 })
 
 }
-</script>
+
+/* BANNER */
+
+function trackBanner(id){
+
+trackEvent("banner",{
+ref:id
+})
+
+}
+
+/* SERVER */
+
+function trackServer(server){
+
+trackEvent("server",{
+ref:server
+})
+
+}
+
+/* CATEGORY */
+
+function trackCategory(cat){
+
+trackEvent("category",{
+ref:cat
+})
+
+}
+
+/* ============================================================
+INIT
+============================================================ */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+trackPage()
+
+loadAnalytics()
+
+})
+
+if(rangeSelect){
+rangeSelect.addEventListener(
+"change",
+loadAnalytics
+)
+}
+
+/* AUTO REFRESH */
+
+setInterval(loadAnalytics,120000)
 
 
 </body>
