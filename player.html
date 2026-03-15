@@ -263,124 +263,251 @@ body{background:#060a14;color:#fff}
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/player"
+/* =====================================
+PLAYER CMS SCRIPT
+AnimeHunt
+===================================== */
+
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/player"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
-/* API HELPER */
+if(!TOKEN){
+location.href="login.html"
+}
+
+/* =====================================
+DOM HELPERS
+===================================== */
+
+const el = id => document.getElementById(id)
+
+const saveBtn = el("savePlayer")
+
+/* =====================================
+API HELPER
+===================================== */
 
 async function api(url,method="GET",body=null){
 
+try{
+
 const res = await fetch(url,{
+
 method,
+
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+TOKEN
 },
-body: body ? JSON.stringify(body) : null
+
+body:body?JSON.stringify(body):null
+
 })
+
+if(res.status===401){
+
+alert("Session expired")
+
+localStorage.removeItem("AUTH_TOKEN")
+
+location.href="login.html"
+
+return null
+
+}
 
 if(!res.ok){
 
-console.error("API ERROR")
+console.error("API Error",res.status)
 
 throw new Error("API")
 
 }
 
-return res.json()
+return await res.json()
+
+}catch(e){
+
+console.error("API FAIL",e)
+
+alert("Network error")
+
+return null
 
 }
 
-/* LOAD SETTINGS */
+}
+
+/* =====================================
+LOAD SETTINGS
+===================================== */
 
 async function loadPlayer(){
 
-try{
+saveBtn.innerText="Loading..."
 
 const d = await api(API)
 
-document.getElementById("defaultServer").value = d.defaultServer
+if(!d){
 
-document.getElementById("autoplay").value = d.autoplay
-document.getElementById("resume").value = d.resume
-document.getElementById("autoswitch").value = d.autoswitch
+saveBtn.innerText="💾 Save Player"
 
-document.getElementById("mode").value = d.mode
-
-document.getElementById("showServers").value = d.ui.servers
-document.getElementById("showDownload").value = d.ui.download
-document.getElementById("showSubscribe").value = d.ui.subscribe
-document.getElementById("showRelated").value = d.ui.related
-
-document.getElementById("secEmbed").value = d.security.embedOnly
-document.getElementById("secCloud").value = d.security.cloudflare
-document.getElementById("secSandbox").value = d.security.sandbox
-document.getElementById("secReferrer").value = d.security.referrer
-
-}catch(e){
-
-console.error(e)
-
-alert("Failed to load player settings")
+return
 
 }
 
+/* PLAYER CONFIG */
+
+el("defaultServer").value = d.defaultServer || "Server 1"
+
+el("autoplay").value = String(d.autoplay)
+el("resume").value = String(d.resume)
+el("autoswitch").value = String(d.autoswitch)
+
+el("mode").value = d.mode || "responsive"
+
+/* UI */
+
+el("showServers").value = String(d.ui.servers)
+el("showDownload").value = String(d.ui.download)
+el("showSubscribe").value = String(d.ui.subscribe)
+el("showRelated").value = String(d.ui.related)
+
+/* SECURITY */
+
+el("secEmbed").value = String(d.security.embedOnly)
+el("secCloud").value = String(d.security.cloudflare)
+el("secSandbox").value = String(d.security.sandbox)
+
+el("secReferrer").value = d.security.referrer || "strict"
+
+saveBtn.innerText="💾 Save Player"
+
 }
 
-/* SAVE SETTINGS */
+/* =====================================
+SAVE SETTINGS
+===================================== */
 
-document.getElementById("savePlayer").onclick = async ()=>{
+async function savePlayer(){
 
-const payload = {
+saveBtn.disabled=true
+saveBtn.innerText="Saving..."
 
-defaultServer: document.getElementById("defaultServer").value,
+const payload={
 
-autoplay: document.getElementById("autoplay").value === "true",
-resume: document.getElementById("resume").value === "true",
-autoswitch: document.getElementById("autoswitch").value === "true",
+defaultServer:el("defaultServer").value,
 
-mode: document.getElementById("mode").value,
+autoplay:el("autoplay").value==="true",
+resume:el("resume").value==="true",
+autoswitch:el("autoswitch").value==="true",
+
+mode:el("mode").value,
 
 ui:{
-
-servers: document.getElementById("showServers").value === "true",
-download: document.getElementById("showDownload").value === "true",
-subscribe: document.getElementById("showSubscribe").value === "true",
-related: document.getElementById("showRelated").value === "true"
-
+servers:el("showServers").value==="true",
+download:el("showDownload").value==="true",
+subscribe:el("showSubscribe").value==="true",
+related:el("showRelated").value==="true"
 },
 
 security:{
+embedOnly:el("secEmbed").value==="true",
+cloudflare:el("secCloud").value==="true",
+sandbox:el("secSandbox").value==="true",
+referrer:el("secReferrer").value
+}
 
-embedOnly: document.getElementById("secEmbed").value === "true",
-cloudflare: document.getElementById("secCloud").value === "true",
-sandbox: document.getElementById("secSandbox").value === "true",
-referrer: document.getElementById("secReferrer").value
+}
+
+const res = await api(API,"POST",payload)
+
+if(res?.success){
+
+alert("Player settings saved 🚀")
+
+}else{
+
+alert("Failed to save player settings")
+
+}
+
+saveBtn.disabled=false
+saveBtn.innerText="💾 Save Player"
+
+}
+
+/* =====================================
+LIVE PREVIEW (OPTIONAL)
+===================================== */
+
+function previewIframe(){
+
+const sandbox = el("secSandbox").value==="true"
+
+const referrer = el("secReferrer").value
+
+const iframe = document.querySelector("iframe")
+
+if(!iframe) return
+
+iframe.referrerPolicy = referrer
+
+if(sandbox){
+
+iframe.setAttribute(
+"sandbox",
+"allow-scripts allow-same-origin allow-presentation"
+)
+
+}else{
+
+iframe.removeAttribute("sandbox")
 
 }
 
 }
 
-try{
+/* =====================================
+AUTO SWITCH SERVER TEST
+===================================== */
 
-await api(API,"POST",payload)
+function testServers(){
 
-alert("Player Settings Saved")
+const iframe=document.querySelector("iframe")
 
-}catch(e){
+if(!iframe) return
 
-console.error(e)
+iframe.onerror=()=>{
 
-alert("Save Failed")
+console.log("Server failed → switching")
 
 }
 
 }
+
+/* =====================================
+INIT
+===================================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
 
 loadPlayer()
 
-  </script>
+saveBtn.addEventListener("click",savePlayer)
+
+/* security preview */
+
+document.querySelectorAll("select").forEach(s=>{
+
+s.addEventListener("change",previewIframe)
+
+})
+
+})
+
+</script>
 
 </body>
 </html>
