@@ -332,20 +332,93 @@ a{
 
 /* ============================================
 ANIMEHUNT PERFORMANCE CMS
-FULL FIXED VERSION
+FULL FINAL VERSION
 ============================================ */
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/performance"
 
-const TOKEN = localStorage.getItem("AUTH_TOKEN")
+const TOKEN_KEY="AUTH_TOKEN"
 
 const TOGGLES=[
-"lazyLoad","smartPreload","assetMinify","imgOptimize",
-"jsOptimize","cssOptimize","smartCache","mobilePriority",
-"cdnMode","adaptiveLoad","preconnect","bandwidth"
+
+"lazyLoad",
+"smartPreload",
+"assetMinify",
+"imgOptimize",
+
+"jsOptimize",
+"cssOptimize",
+
+"smartCache",
+"mobilePriority",
+
+"cdnMode",
+"adaptiveLoad",
+
+"preconnect",
+"bandwidth"
+
 ]
 
 let saveTimer=null
+
+
+/* =========================
+AUTH TOKEN
+========================= */
+
+function getToken(){
+
+return localStorage.getItem(TOKEN_KEY) || ""
+
+}
+
+
+/* =========================
+API FETCH WRAPPER
+========================= */
+
+async function apiFetch(url,options={}){
+
+try{
+
+const res=await fetch(url,{
+
+...options,
+
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+getToken(),
+...(options.headers||{})
+}
+
+})
+
+if(res.status===401){
+
+location.href="login.html"
+return null
+
+}
+
+if(!res.ok){
+
+throw new Error("API error")
+
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error("API ERROR:",err)
+
+return null
+
+}
+
+}
+
 
 /* =========================
 LOAD SETTINGS
@@ -353,37 +426,24 @@ LOAD SETTINGS
 
 async function loadPerformance(){
 
-try{
+const data=await apiFetch(API)
 
-const res = await fetch(API,{
-headers:{
-"Authorization":"Bearer "+TOKEN
-}
-})
-
-if(!res.ok){
-throw new Error("API Error")
-}
-
-const data = await res.json()
+if(!data) return
 
 TOGGLES.forEach(id=>{
 
 const el=document.getElementById(id)
 
-if(el) el.checked = !!data[id]
+if(!el) return
+
+el.checked = !!data[id]
 
 })
 
 console.log("Performance settings loaded")
 
-}catch(err){
-
-console.error("Performance load failed:",err)
-
 }
 
-}
 
 /* =========================
 SAVE SETTINGS
@@ -391,49 +451,41 @@ SAVE SETTINGS
 
 async function savePerformance(){
 
-try{
-
 const payload={}
 
 TOGGLES.forEach(id=>{
 
 const el=document.getElementById(id)
 
+if(!el) return
+
 payload[id]=el.checked
 
 })
 
-const res = await fetch(API,{
+const res=await apiFetch(API,{
 
 method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
 
 body:JSON.stringify(payload)
 
 })
 
-if(!res.ok){
-
-throw new Error("Save failed")
-
-}
+if(res?.success){
 
 console.log("Performance saved")
 
-}catch(err){
+}else{
 
-console.error("Save error:",err)
+console.warn("Performance save failed")
+
+}
 
 }
 
-}
 
 /* =========================
-AUTO SAVE (Debounce)
+AUTO SAVE (DEBOUNCE)
 ========================= */
 
 function scheduleSave(){
@@ -447,6 +499,7 @@ savePerformance()
 },600)
 
 }
+
 
 /* =========================
 INIT
@@ -470,8 +523,15 @@ loadPerformance()
 
 })
 
-</script>
 
+/* =========================
+MANUAL SAVE (optional)
+========================= */
+
+window.savePerformanceSettings=savePerformance
+
+
+</script>
 
 </body>
 </html>
