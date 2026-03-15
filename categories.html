@@ -207,6 +207,8 @@ body{background:#060a14;color:#fff}
 </div>
 
 
+
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
@@ -217,6 +219,10 @@ if(!TOKEN){
 location.href="login.html"
 }
 
+/* ================================
+GLOBAL STATE
+================================ */
+
 let editingId=null
 
 const modal=document.getElementById("modal")
@@ -225,6 +231,7 @@ const list=document.getElementById("list")
 const name=document.getElementById("name")
 const slug=document.getElementById("slug")
 const type=document.getElementById("type")
+
 const order=document.getElementById("order")
 const priority=document.getElementById("priority")
 
@@ -236,9 +243,13 @@ const aiTrending=document.getElementById("aiTrending")
 const aiPopular=document.getElementById("aiPopular")
 const aiAssign=document.getElementById("aiAssign")
 
-/* API */
+/* ================================
+API HELPER
+================================ */
 
 async function api(url,method="GET",body=null){
+
+try{
 
 const res=await fetch(url,{
 method,
@@ -249,35 +260,54 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(res.status===401){
+location.href="login.html"
+return
+}
+
 if(!res.ok){
-alert("API Error")
-throw new Error()
+throw new Error("API error")
 }
 
-return res.json()
+return await res.json()
+
+}catch(e){
+
+console.error(e)
+alert("Server error")
 
 }
 
-/* LOAD */
+}
+
+/* ================================
+LOAD CATEGORIES
+================================ */
 
 async function loadCategories(){
 
-list.innerHTML="Loading..."
+list.innerHTML="<div style='padding:20px;color:#888'>Loading...</div>"
+
+try{
 
 const data=await api(API)
 
 list.innerHTML=""
 
-if(!data.length){
+if(!data || !data.length){
+
 list.innerHTML="<div style='padding:20px;color:#777'>No Categories</div>"
 return
+
 }
 
 data.forEach(cat=>{
 
-list.innerHTML+=`
+const row=document.createElement("div")
 
-<div class="row">
+row.className="row"
+
+row.innerHTML=`
 
 <span style="font-weight:600">${cat.name}</span>
 
@@ -301,19 +331,28 @@ ${cat.active?'● Online':'○ Offline'}
 
 </span>
 
-</div>
-
 `
+
+list.appendChild(row)
 
 })
 
+}catch(e){
+
+list.innerHTML="<div style='padding:20px;color:red'>Failed to load</div>"
+
 }
 
-/* MODAL */
+}
+
+/* ================================
+MODAL CONTROL
+================================ */
 
 function openModal(){
 
 editingId=null
+
 resetForm()
 
 modal.style.display="flex"
@@ -326,29 +365,57 @@ modal.style.display="none"
 
 }
 
-/* AUTO SLUG */
+/* CLOSE CLICK OUTSIDE */
+
+modal.addEventListener("click",e=>{
+
+if(e.target===modal){
+
+closeModal()
+
+}
+
+})
+
+/* ================================
+AUTO SLUG
+================================ */
 
 name.addEventListener("input",()=>{
 
-if(!editingId){
+if(editingId) return
 
 slug.value=name.value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 .replace(/^-+|-+$/g,"")
 
-}
-
 })
 
-/* SAVE */
+/* ================================
+SAVE CATEGORY
+================================ */
 
 async function saveCategory(){
 
+if(!name.value.trim()){
+
+alert("Category name required")
+return
+
+}
+
+if(!slug.value.trim()){
+
+alert("Slug required")
+return
+
+}
+
 const payload={
 
-name:name.value,
-slug:slug.value,
+name:name.value.trim(),
+slug:slug.value.trim(),
 
 type:type.value,
 
@@ -367,6 +434,8 @@ aiAssign:aiAssign.checked
 
 }
 
+try{
+
 const url=editingId?`${API}/${editingId}`:API
 const method=editingId?"PUT":"POST"
 
@@ -376,11 +445,21 @@ closeModal()
 
 loadCategories()
 
+}catch(e){
+
+alert("Save failed")
+
 }
 
-/* EDIT */
+}
+
+/* ================================
+EDIT
+================================ */
 
 window.editCategory=async(id)=>{
+
+try{
 
 const cat=await api(`${API}/${id}`)
 
@@ -394,32 +473,50 @@ type.value=cat.type
 order.value=cat.category_order
 priority.value=cat.priority
 
-showHome.checked=cat.showHome
+showHome.checked=cat.show_home
 isActive.checked=cat.active
 
 isFeatured.checked=cat.featured
 
-aiTrending.checked=cat.aiTrending
-aiPopular.checked=cat.aiPopular
-aiAssign.checked=cat.aiAssign
+aiTrending.checked=cat.ai_trending
+aiPopular.checked=cat.ai_popular
+aiAssign.checked=cat.ai_assign
 
 modal.style.display="flex"
 
+}catch(e){
+
+alert("Failed to load category")
+
 }
 
-/* DELETE */
+}
 
-async function deleteCategory(id){
+/* ================================
+DELETE
+================================ */
+
+window.deleteCategory=async(id)=>{
 
 if(!confirm("Delete Category?")) return
+
+try{
 
 await api(`${API}/${id}`,"DELETE")
 
 loadCategories()
 
+}catch{
+
+alert("Delete failed")
+
 }
 
-/* RESET */
+}
+
+/* ================================
+RESET FORM
+================================ */
 
 function resetForm(){
 
@@ -442,9 +539,15 @@ aiAssign.checked=false
 
 }
 
-/* INIT */
+/* ================================
+INIT
+================================ */
+
+document.addEventListener("DOMContentLoaded",()=>{
 
 loadCategories()
+
+})
 
 </script>
 
