@@ -170,7 +170,6 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 
 
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
 
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
@@ -179,9 +178,17 @@ if(!TOKEN){
 location.href="login.html"
 }
 
+/* ======================
+ELEMENTS
+====================== */
+
 const downloadList=document.getElementById("downloadList")
 const modal=document.getElementById("downloadModal")
 const section=document.querySelector(".download-section")
+
+const openBtn=document.getElementById("openModal")
+const closeBtn=document.getElementById("closeModal")
+const saveBtn=document.getElementById("saveDownload")
 
 /* ======================
 API WRAPPER
@@ -198,6 +205,11 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
+if(!res.ok){
+alert("API Error")
+throw new Error("API")
+}
+
 return res.json()
 
 }
@@ -209,6 +221,8 @@ LOAD DOWNLOADS
 async function loadDownloads(){
 
 downloadList.innerHTML="Loading..."
+
+try{
 
 const data=await api(API)
 
@@ -240,7 +254,9 @@ downloadList.innerHTML+=`
 <span style="overflow:hidden;text-overflow:ellipsis">${d.link}</span>
 
 <div class="actions">
+
 <button onclick="deleteLink('${d.id}')">🗑</button>
+
 </div>
 
 </div>
@@ -249,10 +265,16 @@ downloadList.innerHTML+=`
 
 })
 
+}catch{
+
+downloadList.innerHTML="<div style='padding:20px;color:red'>Failed to load downloads</div>"
+
+}
+
 }
 
 /* ======================
-HOST BLOCK
+ADD HOST BLOCK
 ====================== */
 
 function addHostBlock(){
@@ -263,7 +285,7 @@ div.className="download-host-card"
 
 div.innerHTML=`
 
-<input class="host-name" placeholder="Host Name">
+<input class="host-name" placeholder="Host Name (Upload4ever)">
 
 <div class="quality-container"></div>
 
@@ -278,7 +300,7 @@ addQualityRow(div.querySelector("button"))
 }
 
 /* ======================
-QUALITY ROW
+ADD QUALITY ROW
 ====================== */
 
 function addQualityRow(btn){
@@ -315,7 +337,7 @@ container.appendChild(row)
 SAVE DOWNLOAD
 ====================== */
 
-document.getElementById("saveDownload").onclick=async()=>{
+saveBtn.onclick=async()=>{
 
 const anime=document.getElementById("anime").value
 const season=document.getElementById("season").value || "1"
@@ -363,11 +385,19 @@ return
 
 }
 
+try{
+
 await api(`${API}/bulk`,"POST",payload)
 
 closeModal()
 
 loadDownloads()
+
+}catch{
+
+alert("Failed to save")
+
+}
 
 }
 
@@ -375,31 +405,41 @@ loadDownloads()
 DELETE
 ====================== */
 
-async function deleteLink(id){
+window.deleteLink=async(id)=>{
 
 if(!confirm("Delete link?")) return
+
+try{
 
 await api(`${API}/${id}`,"DELETE")
 
 loadDownloads()
 
+}catch{
+
+alert("Delete failed")
+
+}
+
 }
 
 /* ======================
-MODAL
+MODAL OPEN
 ====================== */
 
-document.getElementById("openModal").onclick=()=>{
+openBtn.onclick=()=>{
 
-section.innerHTML=""
-
-addHostBlock()
+resetModal()
 
 modal.style.display="flex"
 
 }
 
-document.getElementById("closeModal").onclick=closeModal
+/* ======================
+MODAL CLOSE
+====================== */
+
+closeBtn.onclick=closeModal
 
 function closeModal(){
 
@@ -407,9 +447,33 @@ modal.style.display="none"
 
 }
 
-/* INIT */
+/* ======================
+RESET MODAL
+====================== */
+
+function resetModal(){
+
+document.getElementById("anime").value=""
+document.getElementById("season").value=""
+document.getElementById("episode").value=""
+
+section.innerHTML=""
+
+addHostBlock()
+
+}
+
+/* ======================
+INIT
+====================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
 
 loadDownloads()
+
+})
+
+
 
 </script>
 
