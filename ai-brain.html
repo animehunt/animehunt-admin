@@ -217,50 +217,131 @@ body{background:#060a14;color:#fff}
 
 <script>
 
-const AI_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ai"
+const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
+const AI_API=`${API_BASE}/admin/ai`
+
 const TOKEN_KEY="AUTH_TOKEN"
 
 const pauseBtn=document.querySelector(".pause-btn")
 
+let aiCache=null
+let loading=false
+
+
+/* ================================
+FORMAT ENGINE / SETTING KEYS
+================================ */
+
 function formatKey(text){
+
 return text
 .toLowerCase()
 .replace(/[^a-z0-9\s]/g,"")
 .trim()
 .replace(/\s+/g,"_")
+
 }
 
-/* API CALL */
+
+/* ================================
+AUTH TOKEN
+================================ */
+
+function getToken(){
+
+return localStorage.getItem(TOKEN_KEY)
+
+}
+
+
+/* ================================
+API CALL
+================================ */
 
 async function apiFetch(url,options={}){
 
-const token=localStorage.getItem(TOKEN_KEY)
+const token=getToken()
+
+if(!token){
+
+location.href="login.html"
+return
+
+}
+
+try{
 
 const res=await fetch(url,{
 ...options,
 headers:{
 "Content-Type":"application/json",
-"Authorization":token?`Bearer ${token}`:"",
+"Authorization":"Bearer "+token,
 ...(options.headers||{})
 }
 })
 
 if(res.status===401){
+
+localStorage.removeItem(TOKEN_KEY)
+
 location.href="login.html"
+
 return
-}
-
-return res.json()
 
 }
 
-/* LOAD AI STATE */
+if(!res.ok){
+
+throw new Error("API error")
+
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error("AI API Error:",err)
+
+alert("AI system connection error")
+
+}
+
+}
+
+
+/* ================================
+LOADING UI
+================================ */
+
+function setLoading(state){
+
+loading=state
+
+document.querySelectorAll(".ai-item input")
+.forEach(i=>i.disabled=state)
+
+pauseBtn.disabled=state
+
+}
+
+
+/* ================================
+LOAD AI STATE
+================================ */
 
 async function loadAI(){
 
+if(loading) return
+
+setLoading(true)
+
 const data=await apiFetch(AI_API)
 
+setLoading(false)
+
 if(!data) return
+
+aiCache=data
 
 updatePauseUI(data.paused)
 
@@ -291,9 +372,14 @@ item.style.opacity=data.paused?0.5:1
 
 }
 
-/* TOGGLE */
+
+/* ================================
+HANDLE TOGGLE
+================================ */
 
 async function handleToggle(e){
+
+if(loading) return
 
 const checkbox=e.target
 const item=checkbox.closest(".ai-item")
@@ -307,6 +393,8 @@ item.childNodes[0].textContent
 
 const value=checkbox.checked
 
+try{
+
 await apiFetch(AI_API,{
 method:"PATCH",
 body:JSON.stringify({
@@ -316,43 +404,100 @@ value
 })
 })
 
+}catch(err){
+
+checkbox.checked=!value
+
 }
 
-/* PAUSE ALL */
+}
+
+
+/* ================================
+PAUSE / RESUME ALL AI
+================================ */
 
 async function togglePause(){
+
+setLoading(true)
 
 await apiFetch(`${AI_API}/pause`,{
 method:"PATCH"
 })
 
-loadAI()
+await loadAI()
+
+setLoading(false)
 
 }
+
+
+/* ================================
+UPDATE PAUSE BUTTON
+================================ */
 
 function updatePauseUI(paused){
 
 if(paused){
+
 pauseBtn.innerText="▶ Resume All AI Systems"
+
 pauseBtn.style.background="#1abc9c"
+
 }
 else{
+
 pauseBtn.innerText="⏸ Pause All AI Systems"
+
 pauseBtn.style.background="#ffcc00"
+
 }
 
 }
+
+
+/* ================================
+AUTO REFRESH
+================================ */
+
+function startAutoRefresh(){
+
+setInterval(()=>{
+
+if(!loading){
+
+loadAI()
+
+}
+
+},30000)
+
+}
+
+
+/* ================================
+INIT
+================================ */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
 loadAI()
 
-document.querySelectorAll(".ai-item input")
-.forEach(input=>input.addEventListener("change",handleToggle))
+document
+.querySelectorAll(".ai-item input")
+.forEach(input=>{
+
+input.addEventListener("change",handleToggle)
+
+})
 
 pauseBtn.onclick=togglePause
 
+startAutoRefresh()
+
 })
+
+
 
 </script>
 
