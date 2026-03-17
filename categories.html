@@ -210,28 +210,19 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
 
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
-
-if(!TOKEN){
-location.href="login.html"
-}
-
-/* ================================
-GLOBAL STATE
-================================ */
+if(!TOKEN) location.href="login.html"
 
 let editingId=null
 
-const modal=document.getElementById("modal")
 const list=document.getElementById("list")
+const modal=document.getElementById("modal")
 
 const name=document.getElementById("name")
 const slug=document.getElementById("slug")
 const type=document.getElementById("type")
-
 const order=document.getElementById("order")
 const priority=document.getElementById("priority")
 
@@ -243,13 +234,8 @@ const aiTrending=document.getElementById("aiTrending")
 const aiPopular=document.getElementById("aiPopular")
 const aiAssign=document.getElementById("aiAssign")
 
-/* ================================
-API HELPER
-================================ */
-
+/* API */
 async function api(url,method="GET",body=null){
-
-try{
 
 const res=await fetch(url,{
 method,
@@ -260,59 +246,23 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
-if(res.status===401){
-location.href="login.html"
-return
+return res.json()
 }
 
-if(!res.ok){
-throw new Error("API error")
-}
-
-return await res.json()
-
-}catch(e){
-
-console.error(e)
-alert("Server error")
-
-}
-
-}
-
-/* ================================
-LOAD CATEGORIES
-================================ */
-
+/* LOAD */
 async function loadCategories(){
-
-list.innerHTML="<div style='padding:20px;color:#888'>Loading...</div>"
-
-try{
 
 const data=await api(API)
 
 list.innerHTML=""
 
-if(!data || !data.length){
-
-list.innerHTML="<div style='padding:20px;color:#777'>No Categories</div>"
-return
-
-}
-
 data.forEach(cat=>{
 
-const row=document.createElement("div")
+list.innerHTML+=`
+<div class="row">
 
-row.className="row"
-
-row.innerHTML=`
-
-<span style="font-weight:600">${cat.name}</span>
-
-<span style="color:#888">${cat.slug}</span>
-
+<span>${cat.name}</span>
+<span>${cat.slug}</span>
 <span class="badge">${cat.type}</span>
 
 <span class="${cat.active?'active':'inactive'}">
@@ -320,112 +270,33 @@ ${cat.active?'● Online':'○ Offline'}
 </span>
 
 <span>${cat.category_order}</span>
-
 <span>P${cat.priority}</span>
 
 <span class="actions">
-
 <button onclick="editCategory('${cat.id}')">✏️</button>
-
 <button onclick="deleteCategory('${cat.id}')">🗑</button>
-
 </span>
 
+</div>
 `
-
-list.appendChild(row)
-
 })
 
-}catch(e){
-
-list.innerHTML="<div style='padding:20px;color:red'>Failed to load</div>"
-
 }
 
-}
-
-/* ================================
-MODAL CONTROL
-================================ */
-
-function openModal(){
-
-editingId=null
-
-resetForm()
-
-modal.style.display="flex"
-
-}
-
-function closeModal(){
-
-modal.style.display="none"
-
-}
-
-/* CLOSE CLICK OUTSIDE */
-
-modal.addEventListener("click",e=>{
-
-if(e.target===modal){
-
-closeModal()
-
-}
-
-})
-
-/* ================================
-AUTO SLUG
-================================ */
-
-name.addEventListener("input",()=>{
-
-if(editingId) return
-
-slug.value=name.value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-.replace(/^-+|-+$/g,"")
-
-})
-
-/* ================================
-SAVE CATEGORY
-================================ */
-
+/* SAVE */
 async function saveCategory(){
-
-if(!name.value.trim()){
-
-alert("Category name required")
-return
-
-}
-
-if(!slug.value.trim()){
-
-alert("Slug required")
-return
-
-}
 
 const payload={
 
-name:name.value.trim(),
-slug:slug.value.trim(),
-
+name:name.value,
+slug:slug.value,
 type:type.value,
 
 order:Number(order.value||0),
-
 priority:Number(priority.value||1),
 
 showHome:showHome.checked,
 isActive:isActive.checked,
-
 isFeatured:isFeatured.checked,
 
 aiTrending:aiTrending.checked,
@@ -434,32 +305,18 @@ aiAssign:aiAssign.checked
 
 }
 
-try{
-
 const url=editingId?`${API}/${editingId}`:API
 const method=editingId?"PUT":"POST"
 
 await api(url,method,payload)
 
 closeModal()
-
 loadCategories()
 
-}catch(e){
-
-alert("Save failed")
-
 }
 
-}
-
-/* ================================
-EDIT
-================================ */
-
+/* EDIT */
 window.editCategory=async(id)=>{
-
-try{
 
 const cat=await api(`${API}/${id}`)
 
@@ -467,7 +324,6 @@ editingId=id
 
 name.value=cat.name
 slug.value=cat.slug
-
 type.value=cat.type
 
 order.value=cat.category_order
@@ -475,7 +331,6 @@ priority.value=cat.priority
 
 showHome.checked=cat.show_home
 isActive.checked=cat.active
-
 isFeatured.checked=cat.featured
 
 aiTrending.checked=cat.ai_trending
@@ -484,70 +339,50 @@ aiAssign.checked=cat.ai_assign
 
 modal.style.display="flex"
 
-}catch(e){
-
-alert("Failed to load category")
-
 }
 
-}
+/* DELETE */
+async function deleteCategory(id){
 
-/* ================================
-DELETE
-================================ */
-
-window.deleteCategory=async(id)=>{
-
-if(!confirm("Delete Category?")) return
-
-try{
+if(!confirm("Delete?")) return
 
 await api(`${API}/${id}`,"DELETE")
-
 loadCategories()
 
-}catch{
-
-alert("Delete failed")
-
 }
 
-}
+/* MODAL */
+function openModal(){
 
-/* ================================
-RESET FORM
-================================ */
-
-function resetForm(){
+editingId=null
 
 name.value=""
 slug.value=""
-
-type.value="row"
-
 order.value=""
-priority.value="1"
 
-showHome.checked=false
-isActive.checked=true
-
-isFeatured.checked=false
-
-aiTrending.checked=false
-aiPopular.checked=false
-aiAssign.checked=false
+modal.style.display="flex"
 
 }
 
-/* ================================
-INIT
-================================ */
+function closeModal(){
+modal.style.display="none"
+}
 
-document.addEventListener("DOMContentLoaded",()=>{
+/* AUTO SLUG */
+name.oninput=()=>{
 
+if(editingId) return
+
+slug.value=name.value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+
+}
+
+/* INIT */
 loadCategories()
 
-})
+
 
 </script>
 
