@@ -428,8 +428,7 @@ let data
 try{
   data=JSON.parse(text)
 }catch{
-  console.error("INVALID JSON:",text)
-  alert("Server returned invalid response")
+  alert("Server invalid response")
   return null
 }
 
@@ -447,7 +446,6 @@ return data
 
 }catch(e){
 
-console.error(e)
 alert("Backend unreachable")
 
 }
@@ -461,7 +459,7 @@ async function uploadImage(file){
 if(!file) return null
 
 if(file.size > 2*1024*1024){
-alert("Image must be under 2MB")
+alert("Max 2MB image allowed")
 return null
 }
 
@@ -471,10 +469,8 @@ return new Promise(resolve=>{
 
 reader.onload=async e=>{
 
-// ✅ IMPORTANT FIX
+// ✅ FIXED BASE64
 const base64=e.target.result.split(",")[1]
-
-try{
 
 const data=await api(uploadAPI,"POST",{
 file:base64,
@@ -488,13 +484,6 @@ return
 }
 
 resolve(data.url)
-
-}catch{
-
-alert("Upload error")
-resolve(null)
-
-}
 
 }
 
@@ -530,7 +519,6 @@ let editId=null
 banImageFile.addEventListener("change",async()=>{
 
 const file=banImageFile.files[0]
-
 if(!file) return
 
 saveBtn.innerText="Uploading..."
@@ -552,7 +540,6 @@ previewImg.style.display="block"
 async function loadBanners(){
 
 const data=await api(API)
-
 if(!data) return
 
 bannerList.innerHTML=data.map(b=>`
@@ -593,12 +580,12 @@ onchange="toggleStatus('${b.id}',this.checked)">
 async function saveBanner(){
 
 if(!banTitle.value){
-alert("Enter banner title")
+alert("Enter title")
 return
 }
 
 if(!banImage.value){
-alert("Upload banner image")
+alert("Upload image")
 return
 }
 
@@ -621,7 +608,7 @@ const res=await api(API,"POST",payload)
 saveBtn.innerText="💾 Save"
 
 if(!res || !res.success){
-alert(res?.error || "Banner save failed")
+alert("Save failed")
 return
 }
 
