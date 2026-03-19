@@ -447,9 +447,6 @@ height:120px;
 </div>
 
 
-
-<!-- ====== KEEP YOUR EXISTING HTML/CSS ABOVE ====== -->
-
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
@@ -459,15 +456,47 @@ const UPLOAD_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/u
 const token=localStorage.getItem("AUTH_TOKEN")
 if(!token) location.href="login.html"
 
-/* =========================
-DOM SHORTCUT
-========================= */
 const $=id=>document.getElementById(id)
+
+let editId=null
+let searchTimer=null
+
+/* =========================
+API HELPER
+========================= */
+async function api(url,options={}){
+
+try{
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token,
+...options.headers
+}
+})
+
+if(res.status===401){
+location.href="login.html"
+return null
+}
+
+return await res.json()
+
+}catch(err){
+
+console.error(err)
+alert("API Error")
+
+}
+
+}
 
 /* =========================
 UPLOAD IMAGE
 ========================= */
-async function uploadImageFile(file){
+async function uploadImage(file){
 
 if(!file) return null
 
@@ -477,33 +506,15 @@ return new Promise(resolve=>{
 
 reader.onload=async e=>{
 
-try{
-
-const res=await fetch(UPLOAD_API,{
+const res=await api(UPLOAD_API,{
 method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
 body:JSON.stringify({
 file:e.target.result,
 fileName:file.name
 })
 })
 
-const data=await res.json()
-
-if(data.success){
-resolve(data.url)
-}else{
-alert("Upload failed")
-resolve(null)
-}
-
-}catch(err){
-console.error(err)
-resolve(null)
-}
+resolve(res?.url || null)
 
 }
 
@@ -517,13 +528,19 @@ reader.readAsDataURL(file)
 AUTO UPLOAD
 ========================= */
 $("posterFile").onchange=async ()=>{
-const url=await uploadImageFile($("posterFile").files[0])
+
+const url=await uploadImage($("posterFile").files[0])
+
 if(url) $("poster").value=url
+
 }
 
 $("bannerFile").onchange=async ()=>{
-const url=await uploadImageFile($("bannerFile").files[0])
+
+const url=await uploadImage($("bannerFile").files[0])
+
 if(url) $("banner").value=url
+
 }
 
 /* =========================
@@ -532,17 +549,17 @@ LOAD ANIME
 async function loadAnime(){
 
 const params=new URLSearchParams({
+
 type:$("typeFilter").value,
 status:$("statusFilter").value,
 home:$("homeFilter").value,
 q:$("searchAnime").value
+
 })
 
-const res=await fetch(`${API}?${params}`,{
-headers:{Authorization:"Bearer "+token}
-})
+const data=await api(`${API}?${params}`)
 
-const data=await res.json()
+if(!data) return
 
 $("animeList").innerHTML=data.map(a=>`
 
@@ -579,7 +596,7 @@ ${a.is_hidden ? '👁' : '🚫'}
 }
 
 /* =========================
-SAVE ANIME
+SAVE (CREATE + UPDATE)
 ========================= */
 async function saveAnime(){
 
@@ -587,6 +604,8 @@ const genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
 
 const payload={
+
+id:editId,
 
 title:$("title").value,
 slug:$("slug").value,
@@ -613,17 +632,62 @@ isBanner:$("isBanner").checked
 
 }
 
-await fetch(API,{
+await api(API,{
 method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
 body:JSON.stringify(payload)
 })
 
-$("animeModal").style.display="none"
+closeModal()
 loadAnime()
+
+}
+
+/* =========================
+EDIT
+========================= */
+async function editAnime(id){
+
+const data=await api(`${API}?id=${id}`)
+
+const a=data[0]
+
+editId=id
+
+$("title").value=a.title
+$("slug").value=a.slug
+$("type").value=a.type
+$("status").value=a.status
+
+$("poster").value=a.poster
+$("banner").value=a.banner
+
+$("year").value=a.year
+$("rating").value=a.rating
+
+$("language").value=a.language
+$("duration").value=a.duration
+
+$("tags").value=a.tags
+$("description").value=a.description
+
+$("isHome").checked=!!a.is_home
+$("isTrending").checked=!!a.is_trending
+$("isMostViewed").checked=!!a.is_most_viewed
+$("isBanner").checked=!!a.is_banner
+
+/* GENRES SELECT FIX */
+if(a.genres){
+
+const arr=a.genres.split(",")
+
+[...$("genres").options].forEach(opt=>{
+opt.selected = arr.includes(opt.value)
+})
+
+}
+
+$("modalTitle").innerText="Edit Anime"
+$("animeModal").style.display="flex"
 
 }
 
@@ -634,60 +698,97 @@ async function deleteAnime(id){
 
 if(!confirm("Delete Anime?")) return
 
-await fetch(`${API}/${id}`,{
-method:"DELETE",
-headers:{Authorization:"Bearer "+token}
-})
+await api(`${API}/${id}`,{method:"DELETE"})
 
 loadAnime()
 
 }
 
 /* =========================
-HIDE
+HIDE / UNHIDE
 ========================= */
 async function toggleHide(id){
 
-await fetch(`${HIDE_API}/${id}`,{
-method:"PATCH",
-headers:{Authorization:"Bearer "+token}
-})
+await api(`${HIDE_API}/${id}`,{method:"PATCH"})
 
 loadAnime()
 
 }
 
 /* =========================
-AUTO SLUG
+SLUG AUTO
 ========================= */
 $("title").oninput=()=>{
+
 $("slug").value=$("title").value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 .replace(/^-+|-+$/g,"")
+
 }
 
 /* =========================
-UI
+MODAL CONTROL
 ========================= */
-$("saveAnime").onclick=saveAnime
+function openModal(){
 
-$("openAddAnime").onclick=()=>{
+editId=null
+
+document.querySelectorAll(".form-grid input, textarea")
+.forEach(i=>i.value="")
+
+document.querySelectorAll(".form-grid select")
+.forEach(s=>s.selectedIndex=0)
+
+$("isHome").checked=false
+$("isTrending").checked=false
+$("isMostViewed").checked=false
+$("isBanner").checked=false
+
+$("modalTitle").innerText="Add Anime"
+
 $("animeModal").style.display="flex"
+
 }
 
-$("closeModal").onclick=()=>{
+function closeModal(){
 $("animeModal").style.display="none"
+}
+
+/* =========================
+FILTERS (DEBOUNCE)
+========================= */
+$("searchAnime").oninput=(e)=>{
+
+clearTimeout(searchTimer)
+
+searchTimer=setTimeout(()=>{
+
+loadAnime()
+
+},400)
+
 }
 
 $("typeFilter").onchange=loadAnime
 $("statusFilter").onchange=loadAnime
 $("homeFilter").onchange=loadAnime
-$("searchAnime").oninput=loadAnime
+
+/* =========================
+INIT
+========================= */
+document.addEventListener("DOMContentLoaded",()=>{
+
+$("openAddAnime").onclick=openModal
+$("closeModal").onclick=closeModal
+$("saveAnime").onclick=saveAnime
 
 loadAnime()
 
+})
+
 </script>
+
 
 
 
