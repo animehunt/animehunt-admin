@@ -483,10 +483,82 @@ listBody.innerHTML=data.map(a=>`
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
+const UPLOAD_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
 const token=localStorage.getItem("AUTH_TOKEN")
 
 if(!token) location.href="login.html"
+
+/* =========================
+UPLOAD IMAGE
+========================= */
+
+async function uploadImageFile(file){
+
+if(!file) return null
+
+const reader=new FileReader()
+
+return new Promise(resolve=>{
+
+reader.onload=async e=>{
+
+try{
+
+const res=await fetch(UPLOAD_API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
+body:JSON.stringify({
+file:e.target.result,
+fileName:file.name
+})
+})
+
+const data=await res.json()
+
+if(data.success){
+resolve(data.url)
+}else{
+alert("Upload failed")
+resolve(null)
+}
+
+}catch(err){
+console.error(err)
+alert("Upload error")
+resolve(null)
+}
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
+
+/* =========================
+AUTO UPLOAD HANDLERS
+========================= */
+
+posterFile.onchange=async ()=>{
+const file=posterFile.files[0]
+const url=await uploadImageFile(file)
+if(url) poster.value=url
+}
+
+bannerFile.onchange=async ()=>{
+const file=bannerFile.files[0]
+const url=await uploadImageFile(file)
+if(url) banner.value=url
+}
+
+/* =========================
+LOAD ANIME
+========================= */
 
 async function loadAnime(){
 
@@ -507,7 +579,7 @@ animeList.innerHTML=data.map(a=>`
 
 <div class="row">
 
-<img src="${a.poster||'https://via.placeholder.com/40x60'}">
+<img src="${a.poster || 'https://via.placeholder.com/40x60'}">
 
 <div>${a.title}</div>
 
@@ -515,11 +587,11 @@ animeList.innerHTML=data.map(a=>`
 
 <span class="badge">${a.status}</span>
 
-<span>${a.genres||"-"}</span>
+<span>${a.genres || "-"}</span>
 
-<span>${a.is_home?'✅':'❌'}</span>
+<span>${a.is_home ? '✅' : '❌'}</span>
 
-<span>${a.is_trending?'🔥':'➖'}</span>
+<span>${a.is_trending ? '🔥' : '➖'}</span>
 
 <div class="actions">
 
@@ -528,7 +600,7 @@ animeList.innerHTML=data.map(a=>`
 <button onclick="deleteAnime('${a.id}')">🗑</button>
 
 <button onclick="toggleHide('${a.id}')">
-${a.is_hidden?'👁':'🚫'}
+${a.is_hidden ? '👁' : '🚫'}
 </button>
 
 </div>
@@ -539,7 +611,9 @@ ${a.is_hidden?'👁':'🚫'}
 
 }
 
-/* SAVE ANIME */
+/* =========================
+SAVE ANIME
+========================= */
 
 async function saveAnime(){
 
@@ -583,12 +657,13 @@ body:JSON.stringify(payload)
 })
 
 animeModal.style.display="none"
-
 loadAnime()
 
 }
 
-/* DELETE */
+/* =========================
+DELETE
+========================= */
 
 async function deleteAnime(id){
 
@@ -603,7 +678,9 @@ loadAnime()
 
 }
 
-/* HIDE */
+/* =========================
+HIDE / UNHIDE
+========================= */
 
 async function toggleHide(id){
 
@@ -616,25 +693,40 @@ loadAnime()
 
 }
 
-saveAnime.onclick=saveAnime
+/* =========================
+AUTO SLUG
+========================= */
 
-openAddAnime.onclick=()=>animeModal.style.display="flex"
+title.oninput=()=>{
+slug.value=title.value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-+|-+$/g,"")
+}
 
-closeModal.onclick=()=>animeModal.style.display="none"
+/* =========================
+UI EVENTS
+========================= */
+
+document.getElementById("saveAnime").onclick=saveAnime
+
+openAddAnime.onclick=()=>{
+animeModal.style.display="flex"
+}
+
+closeModal.onclick=()=>{
+animeModal.style.display="none"
+}
 
 typeFilter.onchange=loadAnime
 statusFilter.onchange=loadAnime
 homeFilter.onchange=loadAnime
 searchAnime.oninput=loadAnime
 
+/* INIT */
 loadAnime()
 
-
-
-
-
 </script>
-
  
  
 
