@@ -448,37 +448,6 @@ height:120px;
 
 
 
-const res=await fetch(`${API}?${params}`)
-const data=await res.json()
-
-listBody.innerHTML=data.map(a=>`
-
-<div class="row">
-
-<img src="${a.poster||'https://via.placeholder.com/40x60'}">
-
-<div>${a.title}</div>
-
-<span>${a.type}</span>
-
-<span class="badge">${a.status}</span>
-
-<span>${a.categories||"-"}</span>
-
-<span>${a.isHome?'✅':'❌'}</span>
-
-<span>${a.isTrending?'🔥':'➖'}</span>
-
-<div class="actions">
-
-<button onclick="editAnime('${a.id}')">✏️</button>
-
-<button onclick="deleteAnime('${a.id}')">🗑</button>
-
-</div>
-
-</div>
-
 <!-- ====== KEEP YOUR EXISTING HTML/CSS ABOVE ====== -->
 
 <script>
