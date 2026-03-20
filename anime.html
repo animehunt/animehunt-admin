@@ -448,6 +448,10 @@ height:120px;
 
 <script>
 
+/* =========================
+GLOBAL CONFIG
+========================= */
+
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
 
@@ -459,30 +463,29 @@ let editId=null
 const $=id=>document.getElementById(id)
 
 /* =========================
-SAFE INIT (FIX MAIN BUG)
+GLOBAL ERROR DEBUG
 ========================= */
 
-document.addEventListener("DOMContentLoaded",()=>{
-
-init()
-
-})
-
-function init(){
+window.onerror = (e)=>{
+console.error("JS ERROR:",e)
+}
 
 /* =========================
-AUTO SLUG
+INIT (ULTRA SAFE)
 ========================= */
 
-$("title").addEventListener("input",()=>{
-$("slug").value = $("title").value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-})
+window.onload = ()=>{
 
-/* =========================
-EVENTS (NOW WORKING)
-========================= */
+console.log("INIT START")
+
+/* ELEMENT CHECK */
+
+if(!$("openAddAnime")){
+alert("❌ Button ID wrong (openAddAnime not found)")
+return
+}
+
+/* EVENTS */
 
 $("openAddAnime").onclick=openModal
 $("closeModal").onclick=closeModal
@@ -498,8 +501,17 @@ clearTimeout(timer)
 timer=setTimeout(loadAnime,400)
 })
 
-/* INIT LOAD */
+/* AUTO SLUG */
+
+$("title").addEventListener("input",()=>{
+$("slug").value = $("title").value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+})
+
 loadAnime()
+
+console.log("INIT DONE")
 
 }
 
@@ -528,7 +540,7 @@ return
 return await res.json()
 
 }catch(e){
-alert("API Error")
+alert("API ERROR")
 console.error(e)
 }
 
@@ -539,6 +551,8 @@ LOAD ANIME
 ========================= */
 
 async function loadAnime(){
+
+console.log("Loading anime...")
 
 const params=new URLSearchParams({
 type:$("typeFilter").value,
@@ -609,6 +623,8 @@ SAVE ANIME
 
 async function saveAnime(){
 
+console.log("Saving anime...")
+
 let genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
 
@@ -675,6 +691,8 @@ EDIT
 
 async function editAnime(id){
 
+console.log("Editing:",id)
+
 const a = await api(`${API}/${id}`)
 if(!a) return
 
@@ -724,7 +742,6 @@ async function deleteAnime(id){
 if(!confirm("Delete anime?")) return
 
 await api(`${API}/${id}`,{method:"DELETE"})
-
 loadAnime()
 
 }
@@ -736,7 +753,6 @@ HIDE
 async function toggleHide(id){
 
 await api(`${HIDE_API}/${id}`,{method:"PATCH"})
-
 loadAnime()
 
 }
@@ -746,6 +762,8 @@ MODAL
 ========================= */
 
 function openModal(){
+
+console.log("OPEN MODAL")
 
 editId=null
 
@@ -768,8 +786,7 @@ $("animeModal").style.display="none"
 
 }
 
-</script>
-
+  </script>
 
 
 </body>
