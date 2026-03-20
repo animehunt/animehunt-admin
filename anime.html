@@ -448,23 +448,37 @@ height:120px;
 
 <script>
 
-document.addEventListener("DOMContentLoaded",()=>{
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
-const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
-  
-const token=localStorage.getItem("AUTH_TOKEN")
 
+const token=localStorage.getItem("AUTH_TOKEN")
 if(!token) location.href="login.html"
+
+let editId=null
+
+const $=id=>document.getElementById(id)
+
+/* =========================
+AUTO SLUG
+========================= */
+
+$("title").addEventListener("input",()=>{
+$("slug").value = $("title").value
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+})
+
+/* =========================
+LOAD ANIME
+========================= */
 
 async function loadAnime(){
 
 const params=new URLSearchParams({
-type:typeFilter.value,
-status:statusFilter.value,
-home:homeFilter.value,
-q:searchAnime.value
+type:$("typeFilter").value,
+status:$("statusFilter").value,
+home:$("homeFilter").value,
+q:$("searchAnime").value
 })
 
 const res=await fetch(`${API}?${params}`,{
@@ -473,7 +487,7 @@ headers:{Authorization:"Bearer "+token}
 
 const data=await res.json()
 
-animeList.innerHTML=data.map(a=>`
+$("animeList").innerHTML=data.map(a=>`
 
 <div class="row">
 
@@ -494,9 +508,7 @@ animeList.innerHTML=data.map(a=>`
 <div class="actions">
 
 <button onclick="editAnime('${a.id}')">✏️</button>
-
 <button onclick="deleteAnime('${a.id}')">🗑</button>
-
 <button onclick="toggleHide('${a.id}')">
 ${a.is_hidden?'👁':'🚫'}
 </button>
@@ -509,38 +521,75 @@ ${a.is_hidden?'👁':'🚫'}
 
 }
 
-/* SAVE ANIME */
+/* =========================
+OPEN MODAL
+========================= */
+
+function openModal(){
+
+editId=null
+
+document.querySelectorAll(".form-grid input, textarea").forEach(i=>i.value="")
+document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
+
+$("isHome").checked=false
+$("isTrending").checked=false
+$("isMostViewed").checked=false
+$("isBanner").checked=false
+
+$("animeModal").style.display="flex"
+
+}
+
+/* =========================
+CLOSE MODAL
+========================= */
+
+function closeModal(){
+$("animeModal").style.display="none"
+}
+
+/* =========================
+SAVE ANIME
+========================= */
 
 async function saveAnime(){
 
-const genres=[...document.getElementById("genres").selectedOptions]
+const genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
 
 const payload={
 
-title:title.value,
-slug:slug.value,
-type:type.value,
-status:status.value,
+id:editId,
 
-poster:poster.value,
-banner:banner.value,
+title:$("title").value,
+slug:$("slug").value,
+type:$("type").value,
+status:$("status").value,
 
-year:year.value,
-rating:rating.value,
+poster:$("poster").value,
+banner:$("banner").value,
 
-language:language.value,
-duration:duration.value,
+year:$("year").value,
+rating:$("rating").value,
+
+language:$("language").value,
+duration:$("duration").value,
 
 genres,
-tags:tags.value,
-description:description.value,
+tags:$("tags").value,
+description:$("description").value,
 
-isHome:isHome.checked,
-isTrending:isTrending.checked,
-isMostViewed:isMostViewed.checked,
-isBanner:isBanner.checked
+isHome:$("isHome").checked,
+isTrending:$("isTrending").checked,
+isMostViewed:$("isMostViewed").checked,
+isBanner:$("isBanner").checked
 
+}
+
+if(!payload.title){
+alert("Title required")
+return
 }
 
 await fetch(API,{
@@ -552,13 +601,61 @@ Authorization:"Bearer "+token
 body:JSON.stringify(payload)
 })
 
-animeModal.style.display="none"
-
+closeModal()
 loadAnime()
 
 }
 
-/* DELETE */
+/* =========================
+EDIT
+========================= */
+
+async function editAnime(id){
+
+const res=await fetch(`${API}/${id}`,{
+headers:{Authorization:"Bearer "+token}
+})
+
+const a=await res.json()
+
+editId=id
+
+$("title").value=a.title
+$("slug").value=a.slug
+$("type").value=a.type
+$("status").value=a.status
+
+$("poster").value=a.poster
+$("banner").value=a.banner
+
+$("year").value=a.year
+$("rating").value=a.rating
+
+$("language").value=a.language
+$("duration").value=a.duration
+
+$("tags").value=a.tags
+$("description").value=a.description
+
+$("isHome").checked=a.is_home
+$("isTrending").checked=a.is_trending
+$("isMostViewed").checked=a.is_most_viewed
+$("isBanner").checked=a.is_banner
+
+if(a.genres){
+const arr=a.genres.split(",")
+[...$("genres").options].forEach(o=>{
+o.selected=arr.includes(o.value)
+})
+}
+
+$("animeModal").style.display="flex"
+
+}
+
+/* =========================
+DELETE
+========================= */
 
 async function deleteAnime(id){
 
@@ -573,7 +670,9 @@ loadAnime()
 
 }
 
-/* HIDE */
+/* =========================
+HIDE
+========================= */
 
 async function toggleHide(id){
 
@@ -586,18 +685,26 @@ loadAnime()
 
 }
 
-saveAnime.onclick=saveAnime
+/* =========================
+EVENTS FIX
+========================= */
 
-openAddAnime.onclick=()=>animeModal.style.display="flex"
+document.addEventListener("DOMContentLoaded",()=>{
 
-closeModal.onclick=()=>animeModal.style.display="none"
+$("openAddAnime").addEventListener("click",openModal)
+$("closeModal").addEventListener("click",closeModal)
+$("saveAnime").addEventListener("click",saveAnime)
 
-typeFilter.onchange=loadAnime
-statusFilter.onchange=loadAnime
-homeFilter.onchange=loadAnime
-searchAnime.oninput=loadAnime
+$("typeFilter").addEventListener("change",loadAnime)
+$("statusFilter").addEventListener("change",loadAnime)
+$("homeFilter").addEventListener("change",loadAnime)
+
+$("searchAnime").addEventListener("input",loadAnime)
 
 loadAnime()
+
+})
+
 </script>
 
 
