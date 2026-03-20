@@ -527,17 +527,6 @@ reader.readAsDataURL(file)
 
 }
 
-/* AUTO UPLOAD */
-$("posterFile").onchange=async()=>{
-const url=await uploadImage($("posterFile").files[0])
-if(url) $("poster").value=url
-}
-
-$("bannerFile").onchange=async()=>{
-const url=await uploadImage($("bannerFile").files[0])
-if(url) $("banner").value=url
-}
-
 /* =========================
 LOAD ANIME
 ========================= */
@@ -589,7 +578,7 @@ ${a.is_hidden ? '👁' : '🚫'}
 }
 
 /* =========================
-SAVE (CREATE + UPDATE)
+SAVE
 ========================= */
 async function saveAnime(){
 
@@ -669,8 +658,8 @@ $("isTrending").checked=!!a.is_trending
 $("isMostViewed").checked=!!a.is_most_viewed
 $("isBanner").checked=!!a.is_banner
 
-// GENRES SELECT
-const genres=a.genres?.split(",") || []
+// genres
+const genres=a.genres?.split(",")||[]
 [...$("genres").options].forEach(o=>{
 o.selected=genres.includes(o.value)
 })
@@ -709,11 +698,14 @@ function openModal(){
 
 editId=null
 
-document.querySelectorAll(".form-grid input,textarea")
+document.querySelectorAll(".form-grid input, textarea")
 .forEach(i=>i.value="")
 
 document.querySelectorAll(".form-grid select")
 .forEach(s=>s.selectedIndex=0)
+
+// reset genres
+[...$("genres").options].forEach(o=>o.selected=false)
 
 $("isHome").checked=false
 $("isTrending").checked=false
@@ -721,6 +713,7 @@ $("isMostViewed").checked=false
 $("isBanner").checked=false
 
 $("modalTitle").innerText="Add Anime"
+
 $("animeModal").style.display="flex"
 
 }
@@ -732,16 +725,37 @@ $("animeModal").style.display="none"
 /* =========================
 AUTO SLUG
 ========================= */
-$("title").oninput=()=>{
-$("slug").value=$("title").value
+document.addEventListener("input",(e)=>{
+
+if(e.target.id==="title"){
+
+$("slug").value=e.target.value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 .replace(/^-+|-+$/g,"")
+
 }
 
+})
+
 /* =========================
-SEARCH DEBOUNCE
+GLOBAL CLICK HANDLER
 ========================= */
+document.addEventListener("click",(e)=>{
+
+if(e.target.id==="openAddAnime") openModal()
+if(e.target.id==="closeModal") closeModal()
+if(e.target.id==="saveAnime") saveAnime()
+
+})
+
+/* =========================
+FILTERS
+========================= */
+$("typeFilter").onchange=loadAnime
+$("statusFilter").onchange=loadAnime
+$("homeFilter").onchange=loadAnime
+
 $("searchAnime").oninput=()=>{
 
 clearTimeout(searchTimer)
@@ -753,17 +767,22 @@ loadAnime()
 }
 
 /* =========================
+UPLOAD EVENTS
+========================= */
+$("posterFile").onchange=async()=>{
+const url=await uploadImage($("posterFile").files[0])
+if(url) $("poster").value=url
+}
+
+$("bannerFile").onchange=async()=>{
+const url=await uploadImage($("bannerFile").files[0])
+if(url) $("banner").value=url
+}
+
+/* =========================
 INIT
 ========================= */
 document.addEventListener("DOMContentLoaded",()=>{
-
-$("saveAnime").onclick=saveAnime
-$("openAddAnime").onclick=openModal
-$("closeModal").onclick=closeModal
-
-$("typeFilter").onchange=loadAnime
-$("statusFilter").onchange=loadAnime
-$("homeFilter").onchange=loadAnime
 
 loadAnime()
 
