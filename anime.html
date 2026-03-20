@@ -448,39 +448,56 @@ height:120px;
 
 <script>
 
-
-
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
+const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
+
 const token=localStorage.getItem("AUTH_TOKEN")
+if(!token) location.href="login.html"
 
 let editId=null
 
-const $ = id => document.getElementById(id)
+const $=id=>document.getElementById(id)
 
 /* =========================
-MODAL CONTROL
-========================= */
-
-$("openAddAnime").addEventListener("click",()=>{
-editId=null
-$("animeModal").style.display="flex"
-})
-
-$("closeModal").addEventListener("click",()=>{
-$("animeModal").style.display="none"
-})
-
-/* =========================
-SLUG AUTO
+AUTO SLUG
 ========================= */
 
 $("title").addEventListener("input",()=>{
 $("slug").value = $("title").value
 .toLowerCase()
-.replace(/\s+/g,"-")
-.replace(/[^\w-]+/g,"")
+.replace(/[^a-z0-9]+/g,"-")
 })
+
+/* =========================
+API HELPER
+========================= */
+
+async function api(url,options={}){
+
+try{
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+}
+})
+
+if(res.status===401){
+localStorage.removeItem("AUTH_TOKEN")
+location.href="login.html"
+return
+}
+
+return await res.json()
+
+}catch(e){
+alert("API Error")
+console.error(e)
+}
+
+}
 
 /* =========================
 LOAD ANIME
@@ -488,17 +505,22 @@ LOAD ANIME
 
 async function loadAnime(){
 
-const res = await fetch(API,{
-headers:{Authorization:"Bearer "+token}
+const params=new URLSearchParams({
+type:$("typeFilter").value,
+status:$("statusFilter").value,
+home:$("homeFilter").value,
+q:$("searchAnime").value
 })
 
-const data = await res.json()
+const data = await api(`${API}?${params}`)
+
+if(!data) return
 
 $("animeList").innerHTML = data.map(a=>`
 
 <div class="row">
 
-<img src="${a.poster||''}">
+<img src="${a.poster || 'https://via.placeholder.com/40x60'}">
 
 <div>${a.title}</div>
 
@@ -506,16 +528,19 @@ $("animeList").innerHTML = data.map(a=>`
 
 <span class="badge">${a.status}</span>
 
-<span>${a.genres||"-"}</span>
+<span>${a.genres || "-"}</span>
 
-<span>${a.is_home?'✅':'❌'}</span>
+<span>${a.is_home ? '✅' : '❌'}</span>
 
-<span>${a.is_trending?'🔥':'➖'}</span>
+<span>${a.is_trending ? '🔥' : '➖'}</span>
 
 <div class="actions">
 
 <button onclick="editAnime('${a.id}')">✏️</button>
 <button onclick="deleteAnime('${a.id}')">🗑</button>
+<button onclick="toggleHide('${a.id}')">
+${a.is_hidden ? '👁' : '🚫'}
+</button>
 
 </div>
 
@@ -526,20 +551,40 @@ $("animeList").innerHTML = data.map(a=>`
 }
 
 /* =========================
+UPLOAD IMAGE (ImageKit API)
+========================= */
+
+async function uploadImage(file){
+
+const form = new FormData()
+form.append("file",file)
+
+const res = await fetch("/api/upload",{
+method:"POST",
+body:form
+})
+
+const data = await res.json()
+
+return data.url
+
+}
+
+/* =========================
 SAVE ANIME
 ========================= */
 
-$("saveAnime").addEventListener("click", async ()=>{
+async function saveAnime(){
 
-const genres=[...$("genres").selectedOptions]
+let genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
 
-const payload={
+let payload={
 
 id:editId,
 
-title:$("title").value,
-slug:$("slug").value,
+title:$("title").value.trim(),
+slug:$("slug").value.trim(),
 
 type:$("type").value,
 status:$("status").value,
@@ -564,60 +609,78 @@ isBanner:$("isBanner").checked
 
 }
 
-await fetch(API,{
+/* IMAGE UPLOAD */
+
+if($("posterFile").files[0]){
+payload.poster = await uploadImage($("posterFile").files[0])
+}
+
+if($("bannerFile").files[0]){
+payload.banner = await uploadImage($("bannerFile").files[0])
+}
+
+/* VALIDATION */
+
+if(!payload.title){
+alert("Title required")
+return
+}
+
+await api(API,{
 method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
 body:JSON.stringify(payload)
 })
 
-$("animeModal").style.display="none"
-
+closeModal()
 loadAnime()
 
-})
+}
 
 /* =========================
-EDIT
+EDIT ANIME
 ========================= */
 
-window.editAnime = async(id)=>{
+async function editAnime(id){
 
-const res = await fetch(API,{
-headers:{Authorization:"Bearer "+token}
-})
+const a = await api(`${API}/${id}`)
 
-const data = await res.json()
-
-const a = data.find(x=>x.id==id)
+if(!a) return
 
 editId=id
 
-$("title").value=a.title
-$("slug").value=a.slug
+$("title").value = a.title
+$("slug").value = a.slug
 
-$("type").value=a.type
-$("status").value=a.status
+$("type").value = a.type
+$("status").value = a.status
 
-$("poster").value=a.poster
-$("banner").value=a.banner
+$("poster").value = a.poster
+$("banner").value = a.banner
 
-$("year").value=a.year
-$("rating").value=a.rating
+$("year").value = a.year
+$("rating").value = a.rating
 
-$("language").value=a.language
-$("duration").value=a.duration
+$("language").value = a.language
+$("duration").value = a.duration
 
-$("tags").value=a.tags
-$("description").value=a.description
+$("tags").value = a.tags
+$("description").value = a.description
 
-$("isHome").checked=a.is_home
-$("isTrending").checked=a.is_trending
-$("isMostViewed").checked=a.is_most_viewed
-$("isBanner").checked=a.is_banner
+$("isHome").checked = !!a.is_home
+$("isTrending").checked = !!a.is_trending
+$("isMostViewed").checked = !!a.is_most_viewed
+$("isBanner").checked = !!a.is_banner
 
+/* GENRES */
+
+if(a.genres){
+const arr = a.genres.split(",")
+[...$("genres").options].forEach(o=>{
+o.selected = arr.includes(o.value)
+})
+}
+
+$("modalTitle").innerText="Edit Anime"
 $("animeModal").style.display="flex"
 
 }
@@ -626,24 +689,88 @@ $("animeModal").style.display="flex"
 DELETE
 ========================= */
 
-window.deleteAnime = async(id)=>{
+async function deleteAnime(id){
 
-if(!confirm("Delete?")) return
+if(!confirm("Delete anime?")) return
 
-await fetch(API+"/"+id,{
-method:"DELETE",
-headers:{Authorization:"Bearer "+token}
-})
+await api(`${API}/${id}`,{method:"DELETE"})
 
 loadAnime()
 
 }
 
-/* INIT */
+/* =========================
+HIDE / UNHIDE
+========================= */
+
+async function toggleHide(id){
+
+await api(`${HIDE_API}/${id}`,{method:"PATCH"})
+
+loadAnime()
+
+}
+
+/* =========================
+MODAL CONTROL
+========================= */
+
+function openModal(){
+
+editId=null
+
+document.querySelectorAll(".form-grid input,textarea").forEach(i=>i.value="")
+document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
+
+$("isHome").checked=false
+$("isTrending").checked=false
+$("isMostViewed").checked=false
+$("isBanner").checked=false
+
+$("modalTitle").innerText="Add Anime"
+$("animeModal").style.display="flex"
+
+}
+
+function closeModal(){
+
+$("animeModal").style.display="none"
+
+}
+
+/* =========================
+SEARCH DEBOUNCE
+========================= */
+
+let timer
+
+$("searchAnime").addEventListener("input",()=>{
+
+clearTimeout(timer)
+
+timer=setTimeout(loadAnime,400)
+
+})
+
+/* =========================
+EVENTS
+========================= */
+
+$("openAddAnime").onclick=openModal
+$("closeModal").onclick=closeModal
+$("saveAnime").onclick=saveAnime
+
+$("typeFilter").onchange=loadAnime
+$("statusFilter").onchange=loadAnime
+$("homeFilter").onchange=loadAnime
+
+/* =========================
+INIT
+========================= */
+
 loadAnime()
 
 </script>
-
 
 
 
