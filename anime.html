@@ -448,9 +448,7 @@ height:120px;
 
 <script>
 
-/* =========================
-CONFIG
-========================= */
+document.addEventListener("DOMContentLoaded",()=>{
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
@@ -460,76 +458,46 @@ if(!token) location.href="login.html"
 
 let editId=null
 
-const $ = id => document.getElementById(id)
+const $=id=>document.getElementById(id)
 
 /* =========================
-SAFE INIT
+AUTO SLUG
 ========================= */
 
-document.addEventListener("DOMContentLoaded", init)
-
-function init(){
-
-console.log("INIT START")
-
-/* SAFE BIND */
-bindEvents()
-
-/* LOAD DATA */
-loadAnime()
-
-}
-
-/* =========================
-SAFE EVENT BIND
-========================= */
-
-function bindEvents(){
-
-safeBind("openAddAnime","click",openModal)
-safeBind("closeModal","click",closeModal)
-safeBind("saveAnime","click",saveAnime)
-
-/* FILTERS */
-safeBind("typeFilter","change",loadAnime)
-safeBind("statusFilter","change",loadAnime)
-safeBind("homeFilter","change",loadAnime)
-
-/* SEARCH */
-let timer
-safeBind("searchAnime","input",(e)=>{
-clearTimeout(timer)
-timer=setTimeout(loadAnime,400)
-})
-
-/* AUTO SLUG */
-safeBind("title","input",(e)=>{
-$("slug").value = e.target.value
+$("title").addEventListener("input",()=>{
+$("slug").value = $("title").value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 })
 
-}
-
 /* =========================
-SAFE BIND HELPER
+AUTO IMAGE UPLOAD (🔥 NEW)
 ========================= */
 
-function safeBind(id,event,callback){
+$("posterFile").addEventListener("change",async ()=>{
+const file = $("posterFile").files[0]
+if(!file) return
 
-const el=$(id)
+$("poster").value="Uploading..."
 
-if(!el){
-console.warn("Missing element:",id)
-return
-}
+const url = await uploadImage(file)
 
-el.addEventListener(event,callback)
+$("poster").value = url
+})
 
-}
+$("bannerFile").addEventListener("change",async ()=>{
+const file = $("bannerFile").files[0]
+if(!file) return
+
+$("banner").value="Uploading..."
+
+const url = await uploadImage(file)
+
+$("banner").value = url
+})
 
 /* =========================
-API
+API HELPER
 ========================= */
 
 async function api(url,options={}){
@@ -553,10 +521,29 @@ return
 return await res.json()
 
 }catch(e){
-console.error("API ERROR:",e)
 alert("API Error")
+console.error(e)
 }
 
+}
+
+/* =========================
+UPLOAD IMAGE
+========================= */
+
+async function uploadImage(file){
+
+const form = new FormData()
+form.append("file",file)
+
+const res = await fetch("/api/upload",{
+method:"POST",
+body:form
+})
+
+const data = await res.json()
+
+return data.url
 }
 
 /* =========================
@@ -565,66 +552,45 @@ LOAD ANIME
 
 async function loadAnime(){
 
-const list=$("animeList")
-if(!list) return
-
-console.log("Loading anime...")
-
 const params=new URLSearchParams({
-type:$("typeFilter")?.value || "",
-status:$("statusFilter")?.value || "",
-home:$("homeFilter")?.value || "",
-q:$("searchAnime")?.value || ""
+type:$("typeFilter").value,
+status:$("statusFilter").value,
+home:$("homeFilter").value,
+q:$("searchAnime").value
 })
 
 const data = await api(`${API}?${params}`)
+if(!data) return
 
-if(!data){
-list.innerHTML="Error loading data"
-return
-}
-
-list.innerHTML = data.map(a=>`
+$("animeList").innerHTML = data.map(a=>`
 
 <div class="row">
-
 <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-
 <div>${a.title}</div>
-
 <span>${a.type}</span>
-
 <span class="badge">${a.status}</span>
-
 <span>${a.genres || "-"}</span>
-
 <span>${a.is_home ? '✅' : '❌'}</span>
-
 <span>${a.is_trending ? '🔥' : '➖'}</span>
 
 <div class="actions">
-
 <button onclick="editAnime('${a.id}')">✏️</button>
 <button onclick="deleteAnime('${a.id}')">🗑</button>
 <button onclick="toggleHide('${a.id}')">
 ${a.is_hidden ? '👁' : '🚫'}
 </button>
-
 </div>
 
 </div>
 
 `).join("")
-
 }
 
 /* =========================
-SAVE ANIME
+SAVE
 ========================= */
 
 async function saveAnime(){
-
-console.log("Saving...")
 
 let genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
@@ -678,7 +644,7 @@ loadAnime()
 EDIT
 ========================= */
 
-async function editAnime(id){
+window.editAnime = async function(id){
 
 const a = await api(`${API}/${id}`)
 if(!a) return
@@ -709,9 +675,9 @@ $("isMostViewed").checked = !!a.is_most_viewed
 $("isBanner").checked = !!a.is_banner
 
 if(a.genres){
-const arr=a.genres.split(",")
+const arr = a.genres.split(",")
 [...$("genres").options].forEach(o=>{
-o.selected=arr.includes(o.value)
+o.selected = arr.includes(o.value)
 })
 }
 
@@ -724,7 +690,7 @@ $("animeModal").style.display="flex"
 DELETE
 ========================= */
 
-async function deleteAnime(id){
+window.deleteAnime = async function(id){
 
 if(!confirm("Delete anime?")) return
 
@@ -737,7 +703,7 @@ loadAnime()
 HIDE
 ========================= */
 
-async function toggleHide(id){
+window.toggleHide = async function(id){
 
 await api(`${HIDE_API}/${id}`,{method:"PATCH"})
 loadAnime()
@@ -750,33 +716,47 @@ MODAL
 
 function openModal(){
 
-console.log("OPEN MODAL")
-
 editId=null
 
-document.querySelectorAll(".form-grid input,textarea")
-.forEach(i=>i.value="")
+document.querySelectorAll(".form-grid input,textarea").forEach(i=>i.value="")
+document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
 
-document.querySelectorAll(".form-grid select")
-.forEach(s=>s.selectedIndex=0)
-
-$("isHome").checked=false
-$("isTrending").checked=false
-$("isMostViewed").checked=false
-$("isBanner").checked=false
-
-$("modalTitle").innerText="Add Anime"
 $("animeModal").style.display="flex"
 
 }
 
 function closeModal(){
-
 $("animeModal").style.display="none"
-
 }
 
+/* =========================
+EVENTS
+========================= */
+
+$("openAddAnime").addEventListener("click",openModal)
+$("closeModal").addEventListener("click",closeModal)
+$("saveAnime").addEventListener("click",saveAnime)
+
+$("typeFilter").onchange=loadAnime
+$("statusFilter").onchange=loadAnime
+$("homeFilter").onchange=loadAnime
+
+/* SEARCH */
+
+let timer
+$("searchAnime").addEventListener("input",()=>{
+clearTimeout(timer)
+timer=setTimeout(loadAnime,400)
+})
+
+/* INIT */
+
+loadAnime()
+
+})
+
 </script>
+
 
 
 </body>
