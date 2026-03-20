@@ -447,23 +447,30 @@ height:120px;
 </div>
 
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const UPLOAD_API="https://animehunt-backend.animehunt715.workers.dev/api/upload"
 
 let editId=null
 
-function slugify(text){
-return text.toLowerCase().replace(/\s+/g,'-')
+/* SLUG AUTO */
+title.oninput=()=>{
+slug.value = title.value
+.toLowerCase()
+.replace(/\s+/g,"-")
+.replace(/[^\w-]+/g,"")
 }
 
-/* AUTO SLUG */
-title.oninput=()=>{
-slug.value = slugify(title.value)
+/* OPEN MODAL */
+openAddAnime.onclick=()=>{
+editId=null
+animeModal.style.display="flex"
 }
+
+/* CLOSE */
+closeModal.onclick=()=>animeModal.style.display="none"
 
 /* IMAGE UPLOAD */
-async function uploadFile(file){
+async function upload(file){
 
 const fd=new FormData()
 fd.append("file",file)
@@ -473,22 +480,28 @@ method:"POST",
 body:fd
 })
 
-const data=await res.json()
+const d=await res.json()
 
-return data.url
+return d.url
+
+}
+
+/* AUTO UPLOAD */
+posterFile.onchange=async()=>{
+poster.value=await upload(posterFile.files[0])
+}
+
+bannerFile.onchange=async()=>{
+banner.value=await upload(bannerFile.files[0])
 }
 
 /* LOAD */
 async function loadAnime(){
 
-const params=new URLSearchParams({
-type:typeFilter.value,
-status:statusFilter.value,
-home:homeFilter.value,
-q:searchAnime.value
+const res=await fetch(API,{
+headers:{Authorization:"Bearer "+token}
 })
 
-const res=await fetch(`${API}?${params}`)
 const data=await res.json()
 
 animeList.innerHTML=data.map(a=>`
@@ -500,16 +513,22 @@ animeList.innerHTML=data.map(a=>`
 <div>${a.title}</div>
 
 <span>${a.type}</span>
+
 <span class="badge">${a.status}</span>
-<span>${a.genres}</span>
+
+<span>${a.genres||"-"}</span>
 
 <span>${a.is_home?'✅':'❌'}</span>
+
 <span>${a.is_trending?'🔥':'➖'}</span>
 
 <div class="actions">
 
 <button onclick="editAnime('${a.id}')">✏️</button>
 <button onclick="deleteAnime('${a.id}')">🗑</button>
+<button onclick="toggleHide('${a.id}')">
+${a.is_hidden?'👁':'🚫'}
+</button>
 
 </div>
 
@@ -522,18 +541,8 @@ animeList.innerHTML=data.map(a=>`
 /* SAVE */
 async function saveAnime(){
 
-let posterUrl=poster.value
-let bannerUrl=banner.value
-
-if(posterFile.files[0]){
-posterUrl=await uploadFile(posterFile.files[0])
-}
-
-if(bannerFile.files[0]){
-bannerUrl=await uploadFile(bannerFile.files[0])
-}
-
-const genres=[...genresSelect.selectedOptions].map(o=>o.value).join(",")
+const genres=[...document.getElementById("genres").selectedOptions]
+.map(o=>o.value).join(",")
 
 const payload={
 
@@ -545,11 +554,12 @@ slug:slug.value,
 type:type.value,
 status:status.value,
 
-poster:posterUrl,
-banner:bannerUrl,
+poster:poster.value,
+banner:banner.value,
 
 year:year.value,
 rating:rating.value,
+
 language:language.value,
 duration:duration.value,
 
@@ -566,7 +576,10 @@ isBanner:isBanner.checked
 
 await fetch(API,{
 method:"POST",
-headers:{"Content-Type":"application/json"},
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+token
+},
 body:JSON.stringify(payload)
 })
 
@@ -577,26 +590,71 @@ loadAnime()
 }
 
 /* EDIT */
-function editAnime(id){
+async function editAnime(id){
 
-const a = window.lastData.find(x=>x.id===id)
+const res=await fetch(API)
+const data=await res.json()
+
+const a=data.find(x=>x.id==id)
 
 editId=id
 
 title.value=a.title
 slug.value=a.slug
+
+type.value=a.type
+status.value=a.status
+
 poster.value=a.poster
 banner.value=a.banner
+
+year.value=a.year
+rating.value=a.rating
+
+language.value=a.language
+duration.value=a.duration
+
+tags.value=a.tags
+description.value=a.description
+
+isHome.checked=a.is_home
+isTrending.checked=a.is_trending
+isMostViewed.checked=a.is_most_viewed
+isBanner.checked=a.is_banner
 
 animeModal.style.display="flex"
 
 }
 
-/* INIT */
-saveAnimeBtn.onclick=saveAnime
+/* DELETE */
+async function deleteAnime(id){
+
+if(!confirm("Delete?")) return
+
+await fetch(API+"/"+id,{
+method:"DELETE",
+headers:{Authorization:"Bearer "+token}
+})
 
 loadAnime()
 
+}
+
+/* HIDE */
+async function toggleHide(id){
+
+await fetch(
+"https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide/"+id,
+{method:"PATCH"}
+)
+
+loadAnime()
+
+}
+
+saveAnime.onclick=saveAnime
+
+loadAnime()
 
 
 </script>
