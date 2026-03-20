@@ -449,7 +449,7 @@ height:120px;
 <script>
 
 /* =========================
-GLOBAL CONFIG
+CONFIG
 ========================= */
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
@@ -460,63 +460,76 @@ if(!token) location.href="login.html"
 
 let editId=null
 
-const $=id=>document.getElementById(id)
+const $ = id => document.getElementById(id)
 
 /* =========================
-GLOBAL ERROR DEBUG
+SAFE INIT
 ========================= */
 
-window.onerror = (e)=>{
-console.error("JS ERROR:",e)
-}
+document.addEventListener("DOMContentLoaded", init)
 
-/* =========================
-INIT (ULTRA SAFE)
-========================= */
-
-window.onload = ()=>{
+function init(){
 
 console.log("INIT START")
 
-/* ELEMENT CHECK */
+/* SAFE BIND */
+bindEvents()
 
-if(!$("openAddAnime")){
-alert("❌ Button ID wrong (openAddAnime not found)")
-return
+/* LOAD DATA */
+loadAnime()
+
 }
 
-/* EVENTS */
+/* =========================
+SAFE EVENT BIND
+========================= */
 
-$("openAddAnime").onclick=openModal
-$("closeModal").onclick=closeModal
-$("saveAnime").onclick=saveAnime
+function bindEvents(){
 
-$("typeFilter").onchange=loadAnime
-$("statusFilter").onchange=loadAnime
-$("homeFilter").onchange=loadAnime
+safeBind("openAddAnime","click",openModal)
+safeBind("closeModal","click",closeModal)
+safeBind("saveAnime","click",saveAnime)
 
+/* FILTERS */
+safeBind("typeFilter","change",loadAnime)
+safeBind("statusFilter","change",loadAnime)
+safeBind("homeFilter","change",loadAnime)
+
+/* SEARCH */
 let timer
-$("searchAnime").addEventListener("input",()=>{
+safeBind("searchAnime","input",(e)=>{
 clearTimeout(timer)
 timer=setTimeout(loadAnime,400)
 })
 
 /* AUTO SLUG */
-
-$("title").addEventListener("input",()=>{
-$("slug").value = $("title").value
+safeBind("title","input",(e)=>{
+$("slug").value = e.target.value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 })
 
-loadAnime()
+}
 
-console.log("INIT DONE")
+/* =========================
+SAFE BIND HELPER
+========================= */
+
+function safeBind(id,event,callback){
+
+const el=$(id)
+
+if(!el){
+console.warn("Missing element:",id)
+return
+}
+
+el.addEventListener(event,callback)
 
 }
 
 /* =========================
-API HELPER
+API
 ========================= */
 
 async function api(url,options={}){
@@ -540,8 +553,8 @@ return
 return await res.json()
 
 }catch(e){
-alert("API ERROR")
-console.error(e)
+console.error("API ERROR:",e)
+alert("API Error")
 }
 
 }
@@ -552,19 +565,26 @@ LOAD ANIME
 
 async function loadAnime(){
 
+const list=$("animeList")
+if(!list) return
+
 console.log("Loading anime...")
 
 const params=new URLSearchParams({
-type:$("typeFilter").value,
-status:$("statusFilter").value,
-home:$("homeFilter").value,
-q:$("searchAnime").value
+type:$("typeFilter")?.value || "",
+status:$("statusFilter")?.value || "",
+home:$("homeFilter")?.value || "",
+q:$("searchAnime")?.value || ""
 })
 
 const data = await api(`${API}?${params}`)
-if(!data) return
 
-$("animeList").innerHTML = data.map(a=>`
+if(!data){
+list.innerHTML="Error loading data"
+return
+}
+
+list.innerHTML = data.map(a=>`
 
 <div class="row">
 
@@ -599,31 +619,12 @@ ${a.is_hidden ? '👁' : '🚫'}
 }
 
 /* =========================
-UPLOAD IMAGE
-========================= */
-
-async function uploadImage(file){
-
-const form = new FormData()
-form.append("file",file)
-
-const res = await fetch("/api/upload",{
-method:"POST",
-body:form
-})
-
-const data = await res.json()
-return data.url
-
-}
-
-/* =========================
 SAVE ANIME
 ========================= */
 
 async function saveAnime(){
 
-console.log("Saving anime...")
+console.log("Saving...")
 
 let genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
@@ -658,18 +659,6 @@ isBanner:$("isBanner").checked
 
 }
 
-/* IMAGE UPLOAD */
-
-if($("posterFile").files[0]){
-payload.poster = await uploadImage($("posterFile").files[0])
-}
-
-if($("bannerFile").files[0]){
-payload.banner = await uploadImage($("bannerFile").files[0])
-}
-
-/* VALIDATION */
-
 if(!payload.title){
 alert("Title required")
 return
@@ -690,8 +679,6 @@ EDIT
 ========================= */
 
 async function editAnime(id){
-
-console.log("Editing:",id)
 
 const a = await api(`${API}/${id}`)
 if(!a) return
@@ -722,9 +709,9 @@ $("isMostViewed").checked = !!a.is_most_viewed
 $("isBanner").checked = !!a.is_banner
 
 if(a.genres){
-const arr = a.genres.split(",")
+const arr=a.genres.split(",")
 [...$("genres").options].forEach(o=>{
-o.selected = arr.includes(o.value)
+o.selected=arr.includes(o.value)
 })
 }
 
@@ -767,8 +754,11 @@ console.log("OPEN MODAL")
 
 editId=null
 
-document.querySelectorAll(".form-grid input,textarea").forEach(i=>i.value="")
-document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
+document.querySelectorAll(".form-grid input,textarea")
+.forEach(i=>i.value="")
+
+document.querySelectorAll(".form-grid select")
+.forEach(s=>s.selectedIndex=0)
 
 $("isHome").checked=false
 $("isTrending").checked=false
@@ -786,7 +776,7 @@ $("animeModal").style.display="none"
 
 }
 
-  </script>
+</script>
 
 
 </body>
