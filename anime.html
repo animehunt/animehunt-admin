@@ -459,6 +459,18 @@ let editId=null
 const $=id=>document.getElementById(id)
 
 /* =========================
+SAFE INIT (FIX MAIN BUG)
+========================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+init()
+
+})
+
+function init(){
+
+/* =========================
 AUTO SLUG
 ========================= */
 
@@ -467,6 +479,29 @@ $("slug").value = $("title").value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 })
+
+/* =========================
+EVENTS (NOW WORKING)
+========================= */
+
+$("openAddAnime").onclick=openModal
+$("closeModal").onclick=closeModal
+$("saveAnime").onclick=saveAnime
+
+$("typeFilter").onchange=loadAnime
+$("statusFilter").onchange=loadAnime
+$("homeFilter").onchange=loadAnime
+
+let timer
+$("searchAnime").addEventListener("input",()=>{
+clearTimeout(timer)
+timer=setTimeout(loadAnime,400)
+})
+
+/* INIT LOAD */
+loadAnime()
+
+}
 
 /* =========================
 API HELPER
@@ -513,7 +548,6 @@ q:$("searchAnime").value
 })
 
 const data = await api(`${API}?${params}`)
-
 if(!data) return
 
 $("animeList").innerHTML = data.map(a=>`
@@ -551,7 +585,7 @@ ${a.is_hidden ? '👁' : '🚫'}
 }
 
 /* =========================
-UPLOAD IMAGE (ImageKit API)
+UPLOAD IMAGE
 ========================= */
 
 async function uploadImage(file){
@@ -565,7 +599,6 @@ body:form
 })
 
 const data = await res.json()
-
 return data.url
 
 }
@@ -637,13 +670,12 @@ loadAnime()
 }
 
 /* =========================
-EDIT ANIME
+EDIT
 ========================= */
 
 async function editAnime(id){
 
 const a = await api(`${API}/${id}`)
-
 if(!a) return
 
 editId=id
@@ -670,8 +702,6 @@ $("isHome").checked = !!a.is_home
 $("isTrending").checked = !!a.is_trending
 $("isMostViewed").checked = !!a.is_most_viewed
 $("isBanner").checked = !!a.is_banner
-
-/* GENRES */
 
 if(a.genres){
 const arr = a.genres.split(",")
@@ -700,7 +730,7 @@ loadAnime()
 }
 
 /* =========================
-HIDE / UNHIDE
+HIDE
 ========================= */
 
 async function toggleHide(id){
@@ -712,7 +742,7 @@ loadAnime()
 }
 
 /* =========================
-MODAL CONTROL
+MODAL
 ========================= */
 
 function openModal(){
@@ -738,41 +768,7 @@ $("animeModal").style.display="none"
 
 }
 
-/* =========================
-SEARCH DEBOUNCE
-========================= */
-
-let timer
-
-$("searchAnime").addEventListener("input",()=>{
-
-clearTimeout(timer)
-
-timer=setTimeout(loadAnime,400)
-
-})
-
-/* =========================
-EVENTS
-========================= */
-
-$("openAddAnime").onclick=openModal
-$("closeModal").onclick=closeModal
-$("saveAnime").onclick=saveAnime
-
-$("typeFilter").onchange=loadAnime
-$("statusFilter").onchange=loadAnime
-$("homeFilter").onchange=loadAnime
-
-/* =========================
-INIT
-========================= */
-
-loadAnime()
-
 </script>
-
-
 
 
 
