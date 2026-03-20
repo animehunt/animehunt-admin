@@ -445,18 +445,8 @@ height:120px;
 
   </div>
 </div>
-
 <script>
-  
-function log(msg){
-  document.body.insertAdjacentHTML("beforeend",
-    "<div style='position:fixed;bottom:0;left:0;background:#000;color:#0f0;padding:5px;font-size:10px;z-index:9999'>"+msg+"</div>"
-  )
-}
-  window.onerror = function(e){
-alert("ERROR: "+e)
-  }
-  
+
 document.addEventListener("DOMContentLoaded",()=>{
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
@@ -464,14 +454,17 @@ const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ani
 const UPLOAD_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
 const token=localStorage.getItem("AUTH_TOKEN")
-if(!token) location.href="login.html"
+if(!token){
+alert("Login Required")
+location.href="login.html"
+}
 
 let editId=null
 
 const $=id=>document.getElementById(id)
 
 /* =========================
-AUTO SLUG
+SLUG AUTO FIX
 ========================= */
 
 $("title").addEventListener("input",()=>{
@@ -479,7 +472,7 @@ $("slug").value = $("title").value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
 .replace(/^-+|-+$/g,"")
-}
+})
 
 /* =========================
 UPLOAD IMAGE
@@ -507,6 +500,8 @@ LOAD ANIME
 ========================= */
 
 async function loadAnime(){
+
+try{
 
 const params=new URLSearchParams({
 type:$("typeFilter").value,
@@ -552,6 +547,12 @@ ${a.is_hidden?'👁':'🚫'}
 </div>
 
 `).join("")
+
+}catch(e){
+alert("Load Failed")
+console.error(e)
+}
+
 }
 
 /* =========================
@@ -565,13 +566,11 @@ try{
 let posterUrl=$("poster").value
 let bannerUrl=$("banner").value
 
-// upload poster
 if($("posterFile").files[0]){
 posterUrl=await uploadImage($("posterFile").files[0])
 $("poster").value=posterUrl
 }
 
-// upload banner
 if($("bannerFile").files[0]){
 bannerUrl=await uploadImage($("bannerFile").files[0])
 $("banner").value=bannerUrl
@@ -610,8 +609,6 @@ isBanner:$("isBanner").checked
 
 }
 
-console.log("SENDING:",payload)
-
 const res=await fetch(API,{
 method:"POST",
 headers:{
@@ -623,18 +620,18 @@ body:JSON.stringify(payload)
 
 const data=await res.json()
 
-console.log("RESPONSE:",data)
-
+if(data.success){
 alert("Anime Saved ✅")
+}else{
+alert("Save Failed ❌")
+}
 
 closeModal()
 loadAnime()
 
 }catch(e){
-
-console.error("SAVE ERROR:",e)
-alert("Save Failed ❌")
-
+alert("Error Saving ❌")
+console.error(e)
 }
 
 }
@@ -684,6 +681,7 @@ o.selected=g.includes(o.value)
 
 $("modalTitle").innerText="Edit Anime"
 $("animeModal").style.display="flex"
+
 }
 
 /* =========================
@@ -700,6 +698,7 @@ headers:{Authorization:"Bearer "+token}
 })
 
 loadAnime()
+
 }
 
 /* =========================
@@ -714,6 +713,7 @@ headers:{Authorization:"Bearer "+token}
 })
 
 loadAnime()
+
 }
 
 /* =========================
@@ -722,45 +722,42 @@ MODAL
 
 function openModal(){
 
-editId = null
+editId=null
 
-// TEXT + INPUT RESET
 document.querySelectorAll(".form-grid input, textarea").forEach(i=>{
-if(i.type !== "file") i.value=""
+if(i.type!=="file") i.value=""
 })
 
-// SELECT RESET
 document.querySelectorAll(".form-grid select").forEach(s=>{
 if(s.multiple){
 [...s.options].forEach(o=>o.selected=false)
 }else{
-s.selectedIndex = 0
+s.selectedIndex=0
 }
 })
 
-// CHECKBOX RESET
 document.querySelectorAll(".form-grid input[type='checkbox']").forEach(c=>{
-c.checked = false
+c.checked=false
 })
 
-// MODAL TITLE
 $("modalTitle").innerText="Add Anime"
-
-// OPEN
 $("animeModal").style.display="flex"
-}
-/* =========================
-BUTTON FIX (IMPORTANT)
-========================= */
 
-setTimeout(()=>{
+}
+
+function closeModal(){
+$("animeModal").style.display="none"
+editId=null
+}
+
+/* =========================
+BUTTON FIX
+========================= */
 
 $("openAddAnime").onclick=openModal
 $("closeModal").onclick=closeModal
 $("saveAnime").onclick=saveAnimeHandler
 
-},100)
-  
 /* FILTER */
 
 $("typeFilter").onchange=loadAnime
