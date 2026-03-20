@@ -468,7 +468,7 @@ let editId=null
 let searchTimer=null
 
 /* =========================
-API HELPER (SAFE)
+API HELPER
 ========================= */
 
 async function api(url,options={}){
@@ -485,27 +485,23 @@ headers:{
 })
 
 if(res.status===401){
-
 localStorage.removeItem("AUTH_TOKEN")
 location.href="login.html"
 return null
-
 }
 
 return await res.json()
 
 }catch(e){
-
 console.error("API ERROR:",e)
 alert("Server Error")
 return null
-
 }
 
 }
 
 /* =========================
-UPLOAD IMAGE (FIXED)
+UPLOAD IMAGE
 ========================= */
 
 async function uploadImage(file){
@@ -608,23 +604,21 @@ ${a.is_hidden ? '👁' : '🚫'}
 }
 
 /* =========================
-SAVE ANIME (FIXED)
+SAVE ANIME
 ========================= */
 
 async function saveAnime(){
 
-// genres multi select
 const genres=[...$("genres").selectedOptions]
 .map(o=>o.value)
 .join(",")
 
-// VALIDATION
 if(!$("title").value.trim()){
 alert("Title required")
 return
 }
 
-// AUTO SLUG fallback
+// AUTO SLUG
 if(!$("slug").value){
 $("slug").value=$("title").value
 .toLowerCase()
@@ -668,14 +662,10 @@ body:JSON.stringify(payload)
 })
 
 if(res?.success){
-
 closeModal()
 loadAnime()
-
 }else{
-
 alert("Save failed")
-
 }
 
 }
@@ -715,7 +705,6 @@ $("isTrending").checked=!!a.is_trending
 $("isMostViewed").checked=!!a.is_most_viewed
 $("isBanner").checked=!!a.is_banner
 
-// genres select
 const genres=a.genres?.split(",")||[]
 
 [...$("genres").options].forEach(o=>{
@@ -765,7 +754,6 @@ document.querySelectorAll(".form-grid input, textarea")
 document.querySelectorAll(".form-grid select")
 .forEach(s=>s.selectedIndex=0)
 
-// reset genres
 [...$("genres").options].forEach(o=>o.selected=false)
 
 $("isHome").checked=false
@@ -779,9 +767,7 @@ $("animeModal").style.display="flex"
 }
 
 function closeModal(){
-
 $("animeModal").style.display="none"
-
 }
 
 /* =========================
@@ -802,20 +788,10 @@ $("slug").value=e.target.value
 })
 
 /* =========================
-EVENTS
-========================= */
-
-document.addEventListener("click",(e)=>{
-
-if(e.target.closest("#openAddAnime")) openModal()
-if(e.target.closest("#closeModal")) closeModal()
-if(e.target.closest("#saveAnime")) saveAnime()
-
-})
-
-/* =========================
 FILTERS
 ========================= */
+
+function initFilters(){
 
 $("typeFilter").onchange=loadAnime
 $("statusFilter").onchange=loadAnime
@@ -831,9 +807,13 @@ loadAnime()
 
 }
 
+}
+
 /* =========================
 UPLOAD HANDLERS
 ========================= */
+
+function initUploads(){
 
 $("posterFile").onchange=async()=>{
 const url=await uploadImage($("posterFile").files[0])
@@ -845,17 +825,29 @@ const url=await uploadImage($("bannerFile").files[0])
 if(url) $("banner").value=url
 }
 
+}
+
 /* =========================
-INIT
+INIT (IMPORTANT FIX)
 ========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
+
+// BUTTON FIX (MAIN ISSUE)
+$("openAddAnime").onclick=openModal
+$("closeModal").onclick=closeModal
+$("saveAnime").onclick=saveAnime
+
+initFilters()
+initUploads()
 
 loadAnime()
 
 })
 
-      </script>
+  </script>
+
+
 
 
 
