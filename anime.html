@@ -447,6 +447,9 @@ height:120px;
 </div>
 
 <script>
+  window.onerror = function(msg, url, line) {
+  alert("ERROR:\n" + msg + "\nLine: " + line);
+};
 
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -489,9 +492,7 @@ body:formData
 })
 
 const data=await res.json()
-
 return data.url
-
 }
 
 /* =========================
@@ -544,7 +545,6 @@ ${a.is_hidden?'👁':'🚫'}
 </div>
 
 `).join("")
-
 }
 
 /* =========================
@@ -556,8 +556,6 @@ async function saveAnimeHandler(){
 let posterUrl=$("poster").value
 let bannerUrl=$("banner").value
 
-/* UPLOAD FILE */
-
 if($("posterFile").files[0]){
 posterUrl=await uploadImage($("posterFile").files[0])
 $("poster").value=posterUrl
@@ -567,8 +565,6 @@ if($("bannerFile").files[0]){
 bannerUrl=await uploadImage($("bannerFile").files[0])
 $("banner").value=bannerUrl
 }
-
-/* GENRES */
 
 const genres=[...$("genres").selectedOptions]
 .map(o=>o.value).join(",")
@@ -614,7 +610,6 @@ body:JSON.stringify(payload)
 
 closeModal()
 loadAnime()
-
 }
 
 /* =========================
@@ -633,7 +628,6 @@ editId=id
 
 $("title").value=a.title
 $("slug").value=a.slug
-
 $("type").value=a.type
 $("status").value=a.status
 
@@ -654,8 +648,6 @@ $("isTrending").checked=a.is_trending
 $("isMostViewed").checked=a.is_most_viewed
 $("isBanner").checked=a.is_banner
 
-/* GENRES */
-
 if(a.genres){
 const g=a.genres.split(",")
 [...$("genres").options].forEach(o=>{
@@ -665,7 +657,6 @@ o.selected=g.includes(o.value)
 
 $("modalTitle").innerText="Edit Anime"
 $("animeModal").style.display="flex"
-
 }
 
 /* =========================
@@ -682,7 +673,6 @@ headers:{Authorization:"Bearer "+token}
 })
 
 loadAnime()
-
 }
 
 /* =========================
@@ -697,7 +687,6 @@ headers:{Authorization:"Bearer "+token}
 })
 
 loadAnime()
-
 }
 
 /* =========================
@@ -708,38 +697,35 @@ function openModal(){
 
 editId=null
 
-document.querySelectorAll(".form-grid input,textarea").forEach(i=>i.value="")
+document.querySelectorAll(".form-grid input, textarea").forEach(i=>i.value="")
 document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
 
 $("modalTitle").innerText="Add Anime"
 $("animeModal").style.display="flex"
-
 }
 
 function closeModal(){
-
 $("animeModal").style.display="none"
-
 }
 
 /* =========================
-EVENTS
+BUTTON FIX (IMPORTANT)
 ========================= */
 
-$("openAddAnime").onclick=openModal
-$("closeModal").onclick=closeModal
-$("saveAnime").onclick=saveAnimeHandler
+$("openAddAnime").addEventListener("click",openModal)
+$("closeModal").addEventListener("click",closeModal)
+$("saveAnime").addEventListener("click",saveAnimeHandler)
+
+/* FILTER */
 
 $("typeFilter").onchange=loadAnime
 $("statusFilter").onchange=loadAnime
 $("homeFilter").onchange=loadAnime
 
-/* SEARCH DEBOUNCE */
-
-let timer
+let t
 $("searchAnime").addEventListener("input",()=>{
-clearTimeout(timer)
-timer=setTimeout(loadAnime,400)
+clearTimeout(t)
+t=setTimeout(loadAnime,400)
 })
 
 /* INIT */
@@ -747,6 +733,7 @@ timer=setTimeout(loadAnime,400)
 loadAnime()
 
 })
+
 </script>
 
 </body>
