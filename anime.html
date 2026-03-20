@@ -453,6 +453,9 @@ function log(msg){
     "<div style='position:fixed;bottom:0;left:0;background:#000;color:#0f0;padding:5px;font-size:10px;z-index:9999'>"+msg+"</div>"
   )
 }
+  window.onerror = function(e){
+alert("ERROR: "+e)
+  }
   
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -475,7 +478,8 @@ $("title").addEventListener("input",()=>{
 $("slug").value = $("title").value
 .toLowerCase()
 .replace(/[^a-z0-9]+/g,"-")
-})
+.replace(/^-+|-+$/g,"")
+}
 
 /* =========================
 UPLOAD IMAGE
@@ -556,14 +560,18 @@ SAVE ANIME
 
 async function saveAnimeHandler(){
 
+try{
+
 let posterUrl=$("poster").value
 let bannerUrl=$("banner").value
 
+// upload poster
 if($("posterFile").files[0]){
 posterUrl=await uploadImage($("posterFile").files[0])
 $("poster").value=posterUrl
 }
 
+// upload banner
 if($("bannerFile").files[0]){
 bannerUrl=await uploadImage($("bannerFile").files[0])
 $("banner").value=bannerUrl
@@ -576,8 +584,8 @@ const payload={
 
 id:editId,
 
-title:$("title").value,
-slug:$("slug").value,
+title:$("title").value.trim(),
+slug:$("slug").value.trim(),
 
 type:$("type").value,
 status:$("status").value,
@@ -602,7 +610,9 @@ isBanner:$("isBanner").checked
 
 }
 
-await fetch(API,{
+console.log("SENDING:",payload)
+
+const res=await fetch(API,{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -611,8 +621,22 @@ Authorization:"Bearer "+token
 body:JSON.stringify(payload)
 })
 
+const data=await res.json()
+
+console.log("RESPONSE:",data)
+
+alert("Anime Saved ✅")
+
 closeModal()
 loadAnime()
+
+}catch(e){
+
+console.error("SAVE ERROR:",e)
+alert("Save Failed ❌")
+
+}
+
 }
 
 /* =========================
@@ -698,27 +722,45 @@ MODAL
 
 function openModal(){
 
-editId=null
+editId = null
 
-document.querySelectorAll(".form-grid input, textarea").forEach(i=>i.value="")
-document.querySelectorAll(".form-grid select").forEach(s=>s.selectedIndex=0)
+// TEXT + INPUT RESET
+document.querySelectorAll(".form-grid input, textarea").forEach(i=>{
+if(i.type !== "file") i.value=""
+})
 
+// SELECT RESET
+document.querySelectorAll(".form-grid select").forEach(s=>{
+if(s.multiple){
+[...s.options].forEach(o=>o.selected=false)
+}else{
+s.selectedIndex = 0
+}
+})
+
+// CHECKBOX RESET
+document.querySelectorAll(".form-grid input[type='checkbox']").forEach(c=>{
+c.checked = false
+})
+
+// MODAL TITLE
 $("modalTitle").innerText="Add Anime"
+
+// OPEN
 $("animeModal").style.display="flex"
 }
-
-function closeModal(){
-$("animeModal").style.display="none"
-}
-
 /* =========================
 BUTTON FIX (IMPORTANT)
 ========================= */
 
-$("openAddAnime").addEventListener("click",openModal)
-$("closeModal").addEventListener("click",closeModal)
-$("saveAnime").addEventListener("click",saveAnimeHandler)
+setTimeout(()=>{
 
+$("openAddAnime").onclick=openModal
+$("closeModal").onclick=closeModal
+$("saveAnime").onclick=saveAnimeHandler
+
+},100)
+  
 /* FILTER */
 
 $("typeFilter").onchange=loadAnime
