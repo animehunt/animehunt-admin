@@ -807,9 +807,9 @@ EVENTS
 
 document.addEventListener("click",(e)=>{
 
-if(e.target.id==="openAddAnime") openModal()
-if(e.target.id==="closeModal") closeModal()
-if(e.target.id==="saveAnime") saveAnime()
+if(e.target.closest("#openAddAnime")) openModal()
+if(e.target.closest("#closeModal")) closeModal()
+if(e.target.closest("#saveAnime")) saveAnime()
 
 })
 
