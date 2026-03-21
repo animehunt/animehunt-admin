@@ -447,157 +447,143 @@ height:120px;
   </div>
 </div>
 <script>
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime";
+const UPLOAD_API = "https://animehunt-backend.animehunt715.workers.dev/upload";
+const token = localStorage.getItem("AUTH_TOKEN");
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
-const HIDE_API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide"
+let editId = null; // Track editing status
 
-const token=localStorage.getItem("AUTH_TOKEN")
+if(!token) location.href="login.html";
 
-if(!token) location.href="login.html"
-
+// --- 1. LOAD DATA ---
 async function loadAnime(){
+    const params = new URLSearchParams({
+        type: typeFilter.value,
+        status: statusFilter.value,
+        home: homeFilter.value,
+        q: searchAnime.value
+    });
 
-const params=new URLSearchParams({
-type:typeFilter.value,
-status:statusFilter.value,
-home:homeFilter.value,
-q:searchAnime.value
-})
+    const res = await fetch(`${API}?${params}`, {
+        headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
 
-const res=await fetch(`${API}?${params}`,{
-headers:{Authorization:"Bearer "+token}
-})
-
-const data=await res.json()
-
-animeList.innerHTML=data.map(a=>`
-
-<div class="row">
-
-<img src="${a.poster||'https://via.placeholder.com/40x60'}">
-
-<div>${a.title}</div>
-
-<span>${a.type}</span>
-
-<span class="badge">${a.status}</span>
-
-<span>${a.genres||"-"}</span>
-
-<span>${a.is_home?'✅':'❌'}</span>
-
-<span>${a.is_trending?'🔥':'➖'}</span>
-
-<div class="actions">
-
-<button onclick="editAnime('${a.id}')">✏️</button>
-
-<button onclick="deleteAnime('${a.id}')">🗑</button>
-
-<button onclick="toggleHide('${a.id}')">
-${a.is_hidden?'👁':'🚫'}
-</button>
-
-</div>
-
-</div>
-
-`).join("")
-
+    animeList.innerHTML = data.map(a => `
+        <div class="row">
+            <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
+            <div>${a.title}</div>
+            <span>${a.type}</span>
+            <span class="badge">${a.status}</span>
+            <span>${a.genres || "-"}</span>
+            <span>${a.is_home ? '✅' : '❌'}</span>
+            <span>${a.is_trending ? '🔥' : '➖'}</span>
+            <div class="actions">
+                <button onclick="editAnime('${a.id}')">✏️</button>
+                <button onclick="deleteAnime('${a.id}')">🗑</button>
+            </div>
+        </div>
+    `).join("");
 }
 
-/* SAVE ANIME */
+// --- 2. IMAGE UPLOAD (AUTO UPDATE URL) ---
+async function uploadToCloud(fileInput, targetInputId) {
+    const file = fileInput.files[0];
+    if(!file) return;
 
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        try {
+            const res = await fetch(UPLOAD_API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                body: JSON.stringify({ file: base64 })
+            });
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById(targetInputId).value = data.url;
+                alert("Image uploaded successfully!");
+            }
+        } catch (e) { alert("Upload failed!"); }
+    };
+}
+
+document.getElementById('posterFile').onchange = (e) => uploadToCloud(e.target, 'poster');
+document.getElementById('bannerFile').onchange = (e) => uploadToCloud(e.target, 'banner');
+
+// --- 3. SAVE / UPDATE ---
 async function saveAnime(){
+    const genres = [...document.getElementById("genres").selectedOptions].map(o => o.value).join(",");
+    
+    const payload = {
+        id: editId, // Agar edit ho raha hai to ID jayegi
+        title: document.getElementById("title").value,
+        slug: document.getElementById("slug").value,
+        type: document.getElementById("type").value,
+        status: document.getElementById("status").value,
+        poster: document.getElementById("poster").value,
+        banner: document.getElementById("banner").value,
+        year: document.getElementById("year").value,
+        rating: document.getElementById("rating").value,
+        language: document.getElementById("language").value,
+        duration: document.getElementById("duration").value,
+        genres,
+        tags: document.getElementById("tags").value,
+        description: document.getElementById("description").value,
+        isHome: document.getElementById("isHome").checked,
+        isTrending: document.getElementById("isTrending").checked,
+        isMostViewed: document.getElementById("isMostViewed").checked,
+        isBanner: document.getElementById("isBanner").checked
+    };
 
-const genres=[...document.getElementById("genres").selectedOptions]
-.map(o=>o.value).join(",")
+    const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify(payload)
+    });
 
-const payload={
-
-title:title.value,
-slug:slug.value,
-type:type.value,
-status:status.value,
-
-poster:poster.value,
-banner:banner.value,
-
-year:year.value,
-rating:rating.value,
-
-language:language.value,
-duration:duration.value,
-
-genres,
-tags:tags.value,
-description:description.value,
-
-isHome:isHome.checked,
-isTrending:isTrending.checked,
-isMostViewed:isMostViewed.checked,
-isBanner:isBanner.checked
-
+    if(res.ok) {
+        animeModal.style.display = "none";
+        editId = null; 
+        loadAnime();
+    }
 }
 
-await fetch(API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+token
-},
-body:JSON.stringify(payload)
-})
-
-animeModal.style.display="none"
-
-loadAnime()
-
+// --- 4. EDIT HELPER ---
+async function editAnime(id) {
+    const res = await fetch(`${API}/${id}`, {
+        headers: { Authorization: "Bearer " + token }
+    });
+    const a = await res.json();
+    
+    editId = a.id;
+    document.getElementById("title").value = a.title;
+    document.getElementById("slug").value = a.slug;
+    document.getElementById("type").value = a.type;
+    document.getElementById("status").value = a.status;
+    document.getElementById("poster").value = a.poster;
+    document.getElementById("banner").value = a.banner;
+    document.getElementById("isHome").checked = a.is_home;
+    document.getElementById("isTrending").checked = a.is_trending;
+    
+    document.getElementById("modalTitle").innerText = "Edit Anime";
+    animeModal.style.display = "flex";
 }
 
-/* DELETE */
+// Auto-slug generation
+document.getElementById("title").oninput = (e) => {
+    if(!editId) document.getElementById("slug").value = e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+};
 
-async function deleteAnime(id){
+document.getElementById("saveAnimeBtn").onclick = saveAnime;
+openAddAnime.onclick = () => { editId = null; animeModal.style.display = "flex"; document.getElementById("modalTitle").innerText = "Add Anime"; };
+closeModal.onclick = () => animeModal.style.display = "none";
 
-if(!confirm("Delete Anime?")) return
-
-await fetch(`${API}/${id}`,{
-method:"DELETE",
-headers:{Authorization:"Bearer "+token}
-})
-
-loadAnime()
-
-}
-
-/* HIDE */
-
-async function toggleHide(id){
-
-await fetch(`${HIDE_API}/${id}`,{
-method:"PATCH",
-headers:{Authorization:"Bearer "+token}
-})
-
-loadAnime()
-
-}
-
-document.getElementById("saveAnimeBtn").onclick = saveAnime
-openAddAnime.onclick=()=>animeModal.style.display="flex"
-
-closeModal.onclick=()=>animeModal.style.display="none"
-
-typeFilter.onchange=loadAnime
-statusFilter.onchange=loadAnime
-homeFilter.onchange=loadAnime
-searchAnime.oninput=loadAnime
-
-loadAnime()
-
-
-
+loadAnime();
 </script>
+  
 
 </body>
 </html>
