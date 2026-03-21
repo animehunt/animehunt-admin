@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -440,7 +441,7 @@ height:120px;
     </div>
 
     <div class="modal-footer">
-      <button id="saveAnime">💾 Save Anime</button>
+      <button id="saveAnimeBtn">💾 Save Anime</button>
     </div>
 
   </div>
@@ -582,8 +583,7 @@ loadAnime()
 
 }
 
-saveAnime.onclick=saveAnime
-
+document.getElementById("saveAnimeBtn").onclick = saveAnime
 openAddAnime.onclick=()=>animeModal.style.display="flex"
 
 closeModal.onclick=()=>animeModal.style.display="none"
