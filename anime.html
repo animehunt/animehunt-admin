@@ -446,7 +446,8 @@ height:120px;
 
   </div>
 </div>
-<script>
+
+  <script>
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime";
 const UPLOAD_API = "https://animehunt-backend.animehunt715.workers.dev/upload";
 const token = localStorage.getItem("AUTH_TOKEN");
@@ -455,25 +456,26 @@ let editId = null;
 
 if(!token) location.href="login.html";
 
-// --- 1. LOAD DATA ---
+// ---------------- LOAD ANIME ----------------
 async function loadAnime(){
     try {
         const params = new URLSearchParams({
-            type: document.getElementById("typeFilter").value,
-            status: document.getElementById("statusFilter").value,
-            home: document.getElementById("homeFilter").value,
-            q: document.getElementById("searchAnime").value
+            type: typeFilter.value,
+            status: statusFilter.value,
+            home: homeFilter.value,
+            q: searchAnime.value
         });
 
         const res = await fetch(`${API}?${params}`, {
             headers: { Authorization: "Bearer " + token }
         });
+
         const data = await res.json();
 
-        document.getElementById("animeList").innerHTML = data.map(a => `
-            <div class="row">
+        animeList.innerHTML = data.map(a => `
+            <div class="row" style="${a.is_hidden ? 'opacity:0.5' : ''}">
                 <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-                <div>${a.title}</div>
+                <div>${a.title} ${a.is_hidden ? '<small>(Hidden)</small>' : ''}</div>
                 <span>${a.type}</span>
                 <span class="badge">${a.status}</span>
                 <span>${a.genres || "-"}</span>
@@ -482,207 +484,191 @@ async function loadAnime(){
                 <div class="actions">
                     <button onclick="editAnime('${a.id}')">✏️</button>
                     <button onclick="deleteAnime('${a.id}')">🗑</button>
-                    <button onclick="toggleHide('${a.id}')">${a.is_hidden ? '👁' : '🚫'}</button>
+                    <button onclick="toggleHide('${a.id}')">
+                        ${a.is_hidden ? '👁️' : '🚫'}
+                    </button>
                 </div>
             </div>
         `).join("");
-    } catch(e) { console.error("Load failed", e); }
+
+    } catch(e) {
+        console.error("Load error:", e);
+    }
 }
 
-// --- 2. FIXED UPLOAD LOGIC (AUTO URL UPDATE) ---
+// ---------------- UPLOAD ----------------
 async function uploadToCloud(fileInput, targetInputId) {
     const file = fileInput.files[0];
     if(!file) return;
 
-    // Loading State
-    const targetInput = document.getElementById(targetInputId);
-    targetInput.value = "Uploading...";
+    const target = document.getElementById(targetInputId);
+    target.value = "Uploading...";
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
+
     reader.onload = async () => {
         const base64 = reader.result.split(',')[1];
+
         try {
             const res = await fetch(UPLOAD_API, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
                 body: JSON.stringify({ file: base64 })
             });
+
             const data = await res.json();
-            if(data.success && data.url) {
-                targetInput.value = data.url; // URL Auto-update
-                alert("Image Uploaded!");
-            } else {
-                throw new Error("Upload fail");
-            }
-        } catch (e) { 
-            targetInput.value = "";
-            alert("Upload failed! Check backend logs."); 
+
+            if(data.success){
+                target.value = data.url;
+                alert("Upload success");
+            } else throw new Error();
+
+        } catch {
+            target.value = "";
+            alert("Upload failed");
         }
     };
 }
 
-// Event Listeners for file inputs
-document.getElementById('posterFile').onchange = (e) => uploadToCloud(e.target, 'poster');
-document.getElementById('bannerFile').onchange = (e) => uploadToCloud(e.target, 'banner');
+posterFile.onchange = e => uploadToCloud(e.target, "poster");
+bannerFile.onchange = e => uploadToCloud(e.target, "banner");
 
-// --- 3. SAVE / UPDATE ---
+// ---------------- SAVE ----------------
 async function saveAnime(){
-    const genres = [...document.getElementById("genres").selectedOptions].map(o => o.value).join(",");
-    
+
+    const genres = [...genresEl.selectedOptions].map(o=>o.value).join(",");
+
     const payload = {
-        id: editId, 
-        title: document.getElementById("title").value,
-        slug: document.getElementById("slug").value,
-        type: document.getElementById("type").value,
-        status: document.getElementById("status").value,
-        poster: document.getElementById("poster").value,
-        banner: document.getElementById("banner").value,
-        year: document.getElementById("year").value,
-        rating: document.getElementById("rating").value,
-        language: document.getElementById("language").value,
-        duration: document.getElementById("duration").value,
+        id: editId,
+        title: title.value,
+        slug: slug.value,
+        type: type.value,
+        status: status.value,
+        poster: poster.value,
+        banner: banner.value,
+        year: year.value,
+        rating: rating.value,
+        language: language.value,
+        duration: duration.value,
         genres,
-        tags: document.getElementById("tags").value,
-        description: document.getElementById("description").value,
-        isHome: document.getElementById("isHome").checked,
-        isTrending: document.getElementById("isTrending").checked,
-        isMostViewed: document.getElementById("isMostViewed").checked,
-        isBanner: document.getElementById("isBanner").checked
+        tags: tags.value,
+        description: description.value,
+        isHome: isHome.checked,
+        isTrending: isTrending.checked,
+        isMostViewed: isMostViewed.checked,
+        isBanner: isBanner.checked
     };
 
-    const res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-        body: JSON.stringify(payload)
+    const res = await fetch(API,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            Authorization:"Bearer "+token
+        },
+        body:JSON.stringify(payload)
     });
 
     const result = await res.json();
-    if(result.success) {
-        document.getElementById("animeModal").style.display = "none";
-        editId = null; 
+
+    if(result.success){
+        animeModal.style.display="none";
         loadAnime();
-        alert("Anime Saved Successfully!");
+        alert("Saved");
     } else {
-        alert("Save Error: " + result.error);
+        alert(result.error);
     }
 }
 
-// Helper: Edit button logic
-async function editAnime(id) {
+// ---------------- EDIT ----------------
+async function editAnime(id){
     const res = await fetch(`${API}/${id}`, {
-        headers: { Authorization: "Bearer " + token }
+        headers:{ Authorization:"Bearer "+token }
     });
+
     const a = await res.json();
-    
     editId = a.id;
-    document.getElementById("title").value = a.title;
-    document.getElementById("slug").value = a.slug;
-    document.getElementById("type").value = a.type;
-    document.getElementById("status").value = a.status;
-    document.getElementById("poster").value = a.poster;
-    document.getElementById("banner").value = a.banner;
-    document.getElementById("year").value = a.year;
-    document.getElementById("rating").value = a.rating;
-    document.getElementById("language").value = a.language;
-    document.getElementById("duration").value = a.duration;
-    document.getElementById("tags").value = a.tags;
-    document.getElementById("description").value = a.description;
-    
-    document.getElementById("isHome").checked = a.is_home == 1;
-    document.getElementById("isTrending").checked = a.is_trending == 1;
-    document.getElementById("isMostViewed").checked = a.is_most_viewed == 1;
-    document.getElementById("isBanner").checked = a.is_banner == 1;
-    
-    document.getElementById("modalTitle").innerText = "Edit Anime";
-    document.getElementById("animeModal").style.display = "flex";
+
+    title.value = a.title;
+    slug.value = a.slug;
+    type.value = a.type;
+    status.value = a.status;
+    poster.value = a.poster;
+    banner.value = a.banner;
+    year.value = a.year;
+    rating.value = a.rating;
+    language.value = a.language;
+    duration.value = a.duration;
+    tags.value = a.tags;
+    description.value = a.description;
+
+    isHome.checked = a.is_home==1;
+    isTrending.checked = a.is_trending==1;
+    isMostViewed.checked = a.is_most_viewed==1;
+    isBanner.checked = a.is_banner==1;
+
+    // genres fix
+    const selected = a.genres ? a.genres.split(",") : [];
+    [...genresEl.options].forEach(o=>{
+        o.selected = selected.includes(o.value);
+    });
+
+    animeModal.style.display="flex";
 }
 
-// Delete logic
+// ---------------- DELETE ----------------
 async function deleteAnime(id){
-    if(!confirm("Are you sure?")) return;
-    await fetch(`${API}/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if(!confirm("Delete?")) return;
+
+    await fetch(`${API}/${id}`, {
+        method:"DELETE",
+        headers:{ Authorization:"Bearer "+token }
+    });
+
     loadAnime();
 }
-// --- 4. TOGGLE HIDE/SHOW ---
-async function toggleHide(id) {
-    try {
-        const res = await fetch(`${API}-hide/${id}`, {
-            method: "PATCH",
-            headers: { Authorization: "Bearer " + token }
-        });
-        const result = await res.json();
-        if(result.success) {
-            loadAnime(); // Refresh list to show updated icon
-        } else {
-            alert("Hide action failed");
-        }
-    } catch (e) {
-        console.error("Hide error", e);
-    }
-}
 
-// --- 5. UPDATED LOAD ANIME (Row Generation) ---
-async function loadAnime(){
-    const params = new URLSearchParams({
-        type: document.getElementById("typeFilter").value,
-        status: document.getElementById("statusFilter").value,
-        home: document.getElementById("homeFilter").value,
-        q: document.getElementById("searchAnime").value
+// ---------------- TOGGLE HIDE ----------------
+async function toggleHide(id){
+    await fetch(`${API}/hide/${id}`, {
+        method:"PATCH",
+        headers:{ Authorization:"Bearer "+token }
     });
 
-    const res = await fetch(`${API}?${params}`, {
-        headers: { Authorization: "Bearer " + token }
-    });
-    const data = await res.json();
-
-    document.getElementById("animeList").innerHTML = data.map(a => `
-        <div class="row" style="${a.is_hidden ? 'opacity:0.5' : ''}">
-            <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-            <div>${a.title} ${a.is_hidden ? '<small>(Hidden)</small>' : ''}</div>
-            <span>${a.type}</span>
-            <span class="badge">${a.status}</span>
-            <span>${a.genres || "-"}</span>
-            <span>${a.is_home ? '✅' : '❌'}</span>
-            <span>${a.is_trending ? '🔥' : '➖'}</span>
-            <div class="actions">
-                <button onclick="editAnime('${a.id}')" title="Edit">✏️</button>
-                <button onclick="deleteAnime('${a.id}')" title="Delete">🗑</button>
-                <button onclick="toggleHide('${a.id}')" title="${a.is_hidden ? 'Unhide' : 'Hide'}">
-                    ${a.is_hidden ? '👁️' : '🚫'}
-                </button>
-            </div>
-        </div>
-    `).join("");
+    loadAnime();
 }
-  
-// Auto-slug system
-document.getElementById("title").oninput = (e) => {
-    if(!editId) {
-        document.getElementById("slug").value = e.target.value
-            .toLowerCase()
-            .replace(/ /g, '-')
-            .replace(/[^\w-]+/g, '');
+
+// ---------------- UI ----------------
+openAddAnime.onclick = ()=>{
+    editId=null;
+
+    document.querySelectorAll("input, textarea").forEach(i=>i.value="");
+    document.querySelectorAll("input[type=checkbox]").forEach(i=>i.checked=false);
+
+    animeModal.style.display="flex";
+};
+
+closeModal.onclick = ()=> animeModal.style.display="none";
+
+title.oninput = e=>{
+    if(!editId){
+        slug.value = e.target.value.toLowerCase()
+            .replace(/ /g,"-")
+            .replace(/[^\w-]/g,"");
     }
 };
 
-document.getElementById("saveAnimeBtn").onclick = saveAnime;
-document.getElementById("openAddAnime").onclick = () => { 
-    editId = null; 
-    document.getElementById("animeModal").style.display = "flex"; 
-    document.getElementById("modalTitle").innerText = "Add Anime"; 
-};
-document.getElementById("closeModal").onclick = () => document.getElementById("animeModal").style.display = "none";
-
-// Filter Triggers
-document.getElementById("typeFilter").onchange = loadAnime;
-document.getElementById("statusFilter").onchange = loadAnime;
-document.getElementById("homeFilter").onchange = loadAnime;
-document.getElementById("searchAnime").oninput = loadAnime;
+// filters
+typeFilter.onchange = loadAnime;
+statusFilter.onchange = loadAnime;
+homeFilter.onchange = loadAnime;
+searchAnime.oninput = loadAnime;
 
 loadAnime();
-</script>
-  
+  </script>
 
 </body>
 </html>
