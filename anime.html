@@ -754,9 +754,19 @@ editId=null
 BUTTON FIX
 ========================= */
 
-$("openAddAnime").onclick=openModal
-$("closeModal").onclick=closeModal
-$("saveAnime").onclick=saveAnimeHandler
+document.addEventListener("DOMContentLoaded", () => {
+
+  const openBtn = document.getElementById("openAddAnime")
+  const closeBtn = document.getElementById("closeModal")
+  const saveBtn = document.getElementById("saveAnime")
+
+  if(!openBtn) return alert("Button not found ❌")
+
+  openBtn.addEventListener("click", openModal)
+  closeBtn.addEventListener("click", closeModal)
+  saveBtn.addEventListener("click", saveAnimeHandler)
+
+})
 
 /* FILTER */
 
