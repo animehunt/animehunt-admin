@@ -604,7 +604,58 @@ async function deleteAnime(id){
     await fetch(`${API}/${id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
     loadAnime();
 }
+// --- 4. TOGGLE HIDE/SHOW ---
+async function toggleHide(id) {
+    try {
+        const res = await fetch(`${API}-hide/${id}`, {
+            method: "PATCH",
+            headers: { Authorization: "Bearer " + token }
+        });
+        const result = await res.json();
+        if(result.success) {
+            loadAnime(); // Refresh list to show updated icon
+        } else {
+            alert("Hide action failed");
+        }
+    } catch (e) {
+        console.error("Hide error", e);
+    }
+}
 
+// --- 5. UPDATED LOAD ANIME (Row Generation) ---
+async function loadAnime(){
+    const params = new URLSearchParams({
+        type: document.getElementById("typeFilter").value,
+        status: document.getElementById("statusFilter").value,
+        home: document.getElementById("homeFilter").value,
+        q: document.getElementById("searchAnime").value
+    });
+
+    const res = await fetch(`${API}?${params}`, {
+        headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
+
+    document.getElementById("animeList").innerHTML = data.map(a => `
+        <div class="row" style="${a.is_hidden ? 'opacity:0.5' : ''}">
+            <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
+            <div>${a.title} ${a.is_hidden ? '<small>(Hidden)</small>' : ''}</div>
+            <span>${a.type}</span>
+            <span class="badge">${a.status}</span>
+            <span>${a.genres || "-"}</span>
+            <span>${a.is_home ? '✅' : '❌'}</span>
+            <span>${a.is_trending ? '🔥' : '➖'}</span>
+            <div class="actions">
+                <button onclick="editAnime('${a.id}')" title="Edit">✏️</button>
+                <button onclick="deleteAnime('${a.id}')" title="Delete">🗑</button>
+                <button onclick="toggleHide('${a.id}')" title="${a.is_hidden ? 'Unhide' : 'Hide'}">
+                    ${a.is_hidden ? '👁️' : '🚫'}
+                </button>
+            </div>
+        </div>
+    `).join("");
+}
+  
 // Auto-slug system
 document.getElementById("title").oninput = (e) => {
     if(!editId) {
