@@ -452,7 +452,10 @@ height:120px;
 <script>
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 fetch("https://animehunt-backend.animehunt715.workers.dev/api/upload")
-  // ==========================
+const animeModal = document.getElementById("animeModal")
+const openAddAnime = document.getElementById("openAddAnime")
+const closeModal = document.getElementById("closeModal")
+// ==========================
 // GLOBAL STATE
 // ==========================
 let animeData = []
@@ -494,7 +497,8 @@ async function uploadImage(fileInput, urlInput) {
       body: formData
     })
 
-    const data = await res.json()
+    if (!res.ok) throw new Error("Network error")
+const data = await res.json()
 
     if (!data.success) throw new Error(data.message)
 
@@ -578,7 +582,8 @@ saveAnimeBtn.onclick = async () => {
       body: JSON.stringify(data)
     })
 
-    const result = await res.json()
+    if (!res.ok) throw new Error("Network error")
+const data = await res.json()
 
     if (!result.success) throw new Error(result.message)
 
@@ -598,7 +603,8 @@ saveAnimeBtn.onclick = async () => {
 async function loadAnime() {
   try {
     const res = await fetch(`${API_BASE}/anime`)
-    const data = await res.json()
+    if (!res.ok) throw new Error("Network error")
+const data = await res.json()
 
     animeData = data.data || []
     renderTable()
