@@ -450,8 +450,7 @@ height:120px;
 </div>
 
 <script>
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev"
-
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 // ==========================
 // GLOBAL STATE
 // ==========================
@@ -489,7 +488,7 @@ async function uploadImage(fileInput, urlInput) {
   try {
     urlInput.value = "Uploading..."
 
-    const res = await fetch(`${API_BASE}/upload`, {
+    const res = await fetch(`${API_BASE}`, {
       method: "POST",
       body: formData
     })
@@ -567,8 +566,8 @@ saveAnimeBtn.onclick = async () => {
 
   try {
     const url = editId
-      ? `${API_BASE}/anime/${editId}`
-      : `${API_BASE}/anime`
+      ? `${API_BASE}/${editId}`
+      : `${API_BASE}`
 
     const method = editId ? "PUT" : "POST"
 
@@ -615,7 +614,7 @@ async function deleteAnime(id) {
   if (!confirm("Delete this anime?")) return
 
   try {
-    await fetch(`${API_BASE}/anime/${id}`, {
+    await fetch(`${API_BASE}/${id}`, {
       method: "DELETE"
     })
 
