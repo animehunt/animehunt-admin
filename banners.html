@@ -340,8 +340,8 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 <script>
-const API = "https://animehunt-backend.animehunt715.workers.dev"
-
+  const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banner"
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 let banners = []
 let editId = null
 
@@ -383,7 +383,7 @@ banImageFile.onchange = async () => {
   try {
     banImage.value = "Uploading..."
 
-    const res = await fetch(`${API}/upload`, {
+    const res = await fetch(`${API}`)
       method: "POST",
       body: fd
     })
@@ -474,7 +474,7 @@ async function loadBanners() {
 async function deleteBanner(id) {
   if (!confirm("Delete banner?")) return
 
-  await fetch(`${API}/banner/${id}`, { method: "DELETE" })
+  await fetch(`${API}`)/${id}`, { method: "DELETE" })
   loadBanners()
 }
 
@@ -482,7 +482,7 @@ async function deleteBanner(id) {
 // TOGGLE ACTIVE
 // ==========================
 async function toggleActive(id, val) {
-  await fetch(`${API}/banner/${id}`, {
+  await fetch(`${API}`)/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ active: val })
