@@ -492,7 +492,8 @@ async function toggleActive(id, val) {
 // ==========================
 // EDIT
 // ==========================
-function editBanner(b) {
+function editBanner(id) {
+  const b = banners.find(x => x.id === id)
   editId = b.id
   openModal()
 
@@ -532,7 +533,7 @@ function render() {
           </label>
         </span>
         <span class="actions">
-          <button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+          <button onclick="editBanner('${b.id}')">✏️</button>
           <button onclick="deleteBanner('${b.id}')">🗑</button>
         </span>
       </div>
