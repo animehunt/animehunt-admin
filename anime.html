@@ -447,13 +447,13 @@ height:120px;
   </div>
 </div>
 
+
 <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
 const token=localStorage.getItem("AUTH_TOKEN")
-
 if(!token) location.href="login.html"
 
 /* =========================
@@ -486,7 +486,7 @@ return res.json()
 }
 
 /* =========================
-UPLOAD (POSTER)
+UPLOAD POSTER
 ========================= */
 
 posterFile.onchange=async()=>{
@@ -502,9 +502,15 @@ const base64=e.target.result
 
 const data=await api(uploadAPI,"POST",{file:base64})
 
+console.log("POSTER UPLOAD:",data)
+
 if(data?.url){
 
-poster.value=data.url   // 🔥 AUTO FILL
+poster.value=data.url
+
+}else{
+
+alert("Poster upload failed")
 
 }
 
@@ -515,7 +521,7 @@ reader.readAsDataURL(file)
 }
 
 /* =========================
-UPLOAD (BANNER)
+UPLOAD BANNER
 ========================= */
 
 bannerFile.onchange=async()=>{
@@ -531,9 +537,15 @@ const base64=e.target.result
 
 const data=await api(uploadAPI,"POST",{file:base64})
 
+console.log("BANNER UPLOAD:",data)
+
 if(data?.url){
 
-banner.value=data.url   // 🔥 AUTO FILL
+banner.value=data.url
+
+}else{
+
+alert("Banner upload failed")
 
 }
 
@@ -635,6 +647,7 @@ id:window.editId || null,
 
 title:title.value,
 slug:slug.value,
+
 type:type.value,
 status:status.value,
 
@@ -658,7 +671,11 @@ isBanner:isBanner.checked
 
 }
 
+console.log("SAVE PAYLOAD:",payload)
+
 const res=await api(API,"POST",payload)
+
+console.log("SAVE RESPONSE:",res)
 
 if(res?.success){
 
@@ -705,12 +722,14 @@ tags.value=data.tags || ""
 description.value=data.description || ""
 
 /* CHECKBOX */
+
 isHome.checked=!!data.is_home
 isTrending.checked=!!data.is_trending
 isMostViewed.checked=!!data.is_most_viewed
 isBanner.checked=!!data.is_banner
 
 /* GENRES */
+
 if(data.genres){
 
 const arr=data.genres.split(",")
@@ -745,7 +764,7 @@ HIDE
 
 window.toggleHide=async(id)=>{
 
-await api(`https://animehunt-backend.animehunt715.workers.dev/api/admin/anime-hide/${id}`,"PATCH")
+await api(`${API}/hide/${id}`,"PATCH")
 
 loadAnime()
 
@@ -758,6 +777,12 @@ MODAL
 openAddAnime.onclick=()=>{
 
 window.editId=null
+
+title.value=""
+slug.value=""
+poster.value=""
+banner.value=""
+
 animeModal.style.display="flex"
 
 }
@@ -788,6 +813,8 @@ timer=setTimeout(loadAnime,400)
 loadAnime()
 
 </script>
+
+
 
 
   
