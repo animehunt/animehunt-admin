@@ -351,267 +351,130 @@ a{ text-decoration:none; color:inherit }
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/banners"
-const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banners";
+const uploadAPI = "https://animehunt-backend.animehunt715.workers.dev/api/admin/upload";
+const token = localStorage.getItem("AUTH_TOKEN");
 
-const token=localStorage.getItem("AUTH_TOKEN")
-if(!token) location.href="login.html"
+const bannerList = document.getElementById("bannerList");
+const bannerModal = document.getElementById("bannerModal");
+const previewImg = document.getElementById("previewImg");
+const saveBtn = document.getElementById("saveBannerBtn");
 
-const bannerList=document.getElementById("bannerList")
-const bannerModal=document.getElementById("bannerModal")
-
-const banTitle=document.getElementById("banTitle")
-const banPage=document.getElementById("banPage")
-const banCategory=document.getElementById("banCategory")
-const banPosition=document.getElementById("banPosition")
-const banOrder=document.getElementById("banOrder")
-const banImage=document.getElementById("banImage")
-const banImageFile=document.getElementById("banImageFile")
-
-const banActive=document.getElementById("banActive")
-const banRotate=document.getElementById("banRotate")
-
-const previewImg=document.getElementById("previewImg")
-const saveBtn=document.getElementById("saveBannerBtn")
-
-let editId=null
-
-/* =========================
-API
-========================= */
-
-async function api(url,method="GET",body=null){
-
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-body:body?JSON.stringify(body):null
-})
-
-return res.json()
-
+async function api(url, method = "GET", body = null) {
+    const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: body ? JSON.stringify(body) : null
+    });
+    return res.json();
 }
 
-/* =========================
-UPLOAD (FIXED)
-========================= */
+// Upload & Preview URL Update
+document.getElementById("banImageFile").onchange = async () => {
+    const file = document.getElementById("banImageFile").files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const res = await api(uploadAPI, "POST", { file: e.target.result });
+        if (res?.url) {
+            document.getElementById("banImage").value = res.url;
+            previewImg.src = res.url;
+            previewImg.style.display = "block";
+        }
+    };
+    reader.readAsDataURL(file);
+};
 
-banImageFile.onchange=async()=>{
-
-const file=banImageFile.files[0]
-if(!file) return
-
-const reader=new FileReader()
-
-reader.onload=async e=>{
-
-const base64=e.target.result
-
-const data=await api(uploadAPI,"POST",{file:base64})
-
-console.log("UPLOAD:",data)
-
-if(data?.url){
-
-banImage.value=data.url
-previewImg.src=data.url
-previewImg.style.display="block"
-
-}else{
-
-alert("Upload failed")
-
+async function loadBanners() {
+    const data = await api(API);
+    bannerList.innerHTML = "";
+    data.forEach(b => {
+        bannerList.innerHTML += `
+        <div class="row">
+            <div style="display:flex;gap:10px">
+                <img src="${b.image}" style="width:60px;height:35px;object-fit:cover;border-radius:4px">
+                <span>${b.title}</span>
+            </div>
+            <span class="badge">${b.page}</span>
+            <span>${b.category || "-"}</span>
+            <span>${b.position}</span>
+            <span>${b.banner_order}</span>
+            <span>
+                <label class="switch">
+                    <input type="checkbox" ${b.active ? "checked" : ""} onchange="toggleStatus('${b.id}', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </span>
+            <div class="actions">
+                <button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+                <button onclick="deleteBanner('${b.id}')">🗑</button>
+            </div>
+        </div>`;
+    });
 }
 
+async function saveBanner() {
+    const payload = {
+        id: window.editId || null,
+        title: document.getElementById("banTitle").value,
+        page: document.getElementById("banPage").value,
+        category: document.getElementById("banCategory").value,
+        position: document.getElementById("banPosition").value,
+        banner_order: Number(document.getElementById("banOrder").value || 0),
+        image: document.getElementById("banImage").value,
+        active: document.getElementById("banActive").checked,
+        autoRotate: document.getElementById("banRotate").checked
+    };
+
+    if (!payload.image) return alert("Upload image first!");
+
+    const res = await api(API, "POST", payload);
+    if (res?.success) {
+        bannerModal.style.display = "none";
+        loadBanners();
+    }
 }
 
-reader.readAsDataURL(file)
+window.editBanner = (b) => {
+    window.editId = b.id;
+    document.getElementById("banTitle").value = b.title;
+    document.getElementById("banPage").value = b.page;
+    document.getElementById("banCategory").value = b.category || "";
+    document.getElementById("banPosition").value = b.position;
+    document.getElementById("banOrder").value = b.banner_order;
+    document.getElementById("banImage").value = b.image;
+    previewImg.src = b.image;
+    previewImg.style.display = "block";
+    document.getElementById("banActive").checked = !!b.active;
+    document.getElementById("banRotate").checked = !!b.auto_rotate;
+    bannerModal.style.display = "flex";
+};
 
+window.deleteBanner = async (id) => {
+    if (confirm("Delete banner?")) {
+        await api(`${API}/${id}`, "DELETE");
+        loadBanners();
+    }
+};
+
+window.toggleStatus = async (id, active) => {
+    await api(`${API}/${id}/status`, "PATCH", { active });
+};
+
+function openModal() {
+    window.editId = null;
+    document.querySelectorAll(".modal-body input").forEach(i => i.value = "");
+    previewImg.style.display = "none";
+    bannerModal.style.display = "flex";
 }
 
-/* =========================
-LOAD BANNERS
-========================= */
+function closeModal() { bannerModal.style.display = "none"; }
+saveBtn.onclick = saveBanner;
+loadBanners();
+  
 
-async function loadBanners(){
 
-const data=await api(API)
 
-bannerList.innerHTML=""
-
-if(!data.length){
-
-bannerList.innerHTML="<div style='padding:20px'>No banners</div>"
-return
-
-}
-
-data.forEach(b=>{
-
-bannerList.innerHTML+=`
-
-<div class="row">
-
-<div style="display:flex;gap:10px">
-<img src="${b.image}" style="width:60px;height:35px;object-fit:cover;border-radius:4px">
-<span>${b.title}</span>
-</div>
-
-<span class="badge">${b.page}</span>
-<span>${b.category||"-"}</span>
-<span>${b.position}</span>
-<span>${b.banner_order}</span>
-
-<span>
-<label class="switch">
-<input type="checkbox" ${b.active?"checked":""}
-onchange="toggleStatus('${b.id}',this.checked)">
-<span class="slider"></span>
-</label>
-</span>
-
-<div class="actions">
-<button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
-<button onclick="deleteBanner('${b.id}')">🗑</button>
-</div>
-
-</div>
-
-`
-
-})
-
-}
-
-/* =========================
-SAVE
-========================= */
-
-async function saveBanner(){
-
-if(!banImage.value){
-alert("Upload image first")
-return
-}
-
-const payload={
-id:editId,
-title:banTitle.value,
-page:banPage.value,
-category:banCategory.value,
-position:banPosition.value,
-banner_order:Number(banOrder.value||0),
-image:banImage.value,
-active:banActive.checked,
-autoRotate:banRotate.checked
-}
-
-console.log("SAVE:",payload)
-
-const res=await api(API,"POST",payload)
-
-if(res?.success){
-
-closeModal()
-loadBanners()
-
-}else{
-
-alert("Save failed")
-
-}
-
-}
-
-/* =========================
-EDIT
-========================= */
-
-window.editBanner=(b)=>{
-
-editId=b.id
-
-banTitle.value=b.title
-banPage.value=b.page
-banCategory.value=b.category || ""
-banPosition.value=b.position
-banOrder.value=b.banner_order
-
-banImage.value=b.image
-
-if(b.image){
-previewImg.src=b.image
-previewImg.style.display="block"
-}
-
-banActive.checked=!!b.active
-banRotate.checked=!!b.auto_rotate
-
-bannerModal.style.display="flex"
-
-}
-
-/* =========================
-DELETE
-========================= */
-
-async function deleteBanner(id){
-
-if(!confirm("Delete banner?")) return
-
-await api(`${API}/${id}`,"DELETE")
-
-loadBanners()
-
-}
-
-/* =========================
-STATUS
-========================= */
-
-window.toggleStatus=async(id,active)=>{
-
-await api(`${API}/${id}/status`,"PATCH",{active})
-
-}
-
-/* =========================
-MODAL
-========================= */
-
-function openModal(){
-
-editId=null
-
-banTitle.value=""
-banImage.value=""
-banOrder.value=""
-
-previewImg.style.display="none"
-
-banActive.checked=true
-banRotate.checked=false
-
-bannerModal.style.display="flex"
-
-}
-
-function closeModal(){
-
-bannerModal.style.display="none"
-
-}
-
-/* =========================
-INIT
-========================= */
-
-saveBtn.onclick=saveBanner
-
-loadBanners()
 
   </script>
 </body>
