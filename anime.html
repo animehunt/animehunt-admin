@@ -450,367 +450,227 @@ height:120px;
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
-const uploadAPI="https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 
-const token=localStorage.getItem("AUTH_TOKEN")
-if(!token) location.href="login.html"
+
 
 /* =========================
-ELEMENTS
+CONFIG & ELEMENTS
 ========================= */
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime";
+const uploadAPI = "https://animehunt-backend.animehunt715.workers.dev/api/admin/upload";
+const token = localStorage.getItem("AUTH_TOKEN");
 
-const animeList=document.getElementById("animeList")
-const animeModal=document.getElementById("animeModal")
+if (!token) location.href = "login.html";
 
-const posterFile=document.getElementById("posterFile")
-const bannerFile=document.getElementById("bannerFile")
+const animeList = document.getElementById("animeList");
+const animeModal = document.getElementById("animeModal");
+const saveBtn = document.getElementById("saveAnimeBtn");
 
 /* =========================
 API HELPER
 ========================= */
-
-async function api(url,method="GET",body=null){
-
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-body:body?JSON.stringify(body):null
-})
-
-return res.json()
-
+async function api(url, method = "GET", body = null) {
+    const res = await fetch(url, {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+    return res.json();
 }
 
 /* =========================
-UPLOAD POSTER
+UPLOAD LOGIC (FIXED)
 ========================= */
+async function uploadFile(fileInputId, targetInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    const file = fileInput.files[0];
+    if (!file) return;
 
-posterFile.onchange=async()=>{
-
-const file=posterFile.files[0]
-if(!file) return
-
-const reader=new FileReader()
-
-reader.onload=async e=>{
-
-const base64=e.target.result
-
-const data=await api(uploadAPI,"POST",{file:base64})
-
-console.log("POSTER UPLOAD:",data)
-
-if(data?.url){
-
-poster.value=data.url
-
-}else{
-
-alert("Poster upload failed")
-
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const res = await api(uploadAPI, "POST", { file: base64 });
+        
+        if (res?.url) {
+            document.getElementById(targetInputId).value = res.url;
+            alert(targetInputId.toUpperCase() + " Updated!");
+        } else {
+            alert("Upload failed!");
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
-}
-
-reader.readAsDataURL(file)
-
-}
+document.getElementById("posterFile").onchange = () => uploadFile("posterFile", "poster");
+document.getElementById("bannerFile").onchange = () => uploadFile("bannerFile", "banner");
 
 /* =========================
-UPLOAD BANNER
+SAVE ANIME (FULL LOGIC)
 ========================= */
+async function saveAnime() {
+    const genres = [...document.getElementById("genres").selectedOptions].map(o => o.value).join(",");
+    
+    const payload = {
+        id: window.editId || null,
+        title: document.getElementById("title").value,
+        slug: document.getElementById("slug").value,
+        type: document.getElementById("type").value,
+        status: document.getElementById("status").value,
+        poster: document.getElementById("poster").value,
+        banner: document.getElementById("banner").value,
+        year: document.getElementById("year").value,
+        rating: document.getElementById("rating").value,
+        language: document.getElementById("language").value,
+        duration: document.getElementById("duration").value,
+        genres: genres,
+        tags: document.getElementById("tags").value,
+        description: document.getElementById("description").value,
+        isHome: document.getElementById("isHome").checked,
+        isTrending: document.getElementById("isTrending").checked,
+        isMostViewed: document.getElementById("isMostViewed").checked,
+        isBanner: document.getElementById("isBanner").checked
+    };
 
-bannerFile.onchange=async()=>{
+    if(!payload.title) return alert("Title is required!");
 
-const file=bannerFile.files[0]
-if(!file) return
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving...";
 
-const reader=new FileReader()
+    const res = await api(API, "POST", payload);
+    
+    saveBtn.disabled = false;
+    saveBtn.innerText = "💾 Save Anime";
 
-reader.onload=async e=>{
-
-const base64=e.target.result
-
-const data=await api(uploadAPI,"POST",{file:base64})
-
-console.log("BANNER UPLOAD:",data)
-
-if(data?.url){
-
-banner.value=data.url
-
-}else{
-
-alert("Banner upload failed")
-
-}
-
-}
-
-reader.readAsDataURL(file)
-
-}
-
-/* =========================
-AUTO SLUG
-========================= */
-
-title.oninput=()=>{
-
-slug.value=title.value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-.replace(/(^-|-$)/g,"")
-
+    if (res?.success) {
+        animeModal.style.display = "none";
+        window.editId = null;
+        loadAnime();
+    } else {
+        alert("Error: " + (res.error || "Save failed"));
+    }
 }
 
 /* =========================
 LOAD ANIME
 ========================= */
+async function loadAnime() {
+    const params = new URLSearchParams({
+        type: document.getElementById("typeFilter").value,
+        status: document.getElementById("statusFilter").value,
+        home: document.getElementById("homeFilter").value,
+        q: document.getElementById("searchAnime").value
+    });
 
-async function loadAnime(){
+    const data = await api(`${API}?${params}`);
+    animeList.innerHTML = "";
 
-const params=new URLSearchParams({
-type:typeFilter.value,
-status:statusFilter.value,
-home:homeFilter.value,
-q:searchAnime.value
-})
+    if (!data || data.length === 0) {
+        animeList.innerHTML = "<div style='padding:20px'>No anime found</div>";
+        return;
+    }
 
-const data=await api(`${API}?${params}`)
-
-animeList.innerHTML=""
-
-if(!data.length){
-
-animeList.innerHTML="<div style='padding:20px'>No anime found</div>"
-return
-
-}
-
-data.forEach(a=>{
-
-animeList.innerHTML+=`
-
-<div class="row">
-
-<img src="${a.poster||'https://via.placeholder.com/40x60'}">
-
-<div>${a.title}</div>
-
-<span>${a.type}</span>
-
-<span class="badge">${a.status}</span>
-
-<span>${a.genres||"-"}</span>
-
-<span>${a.is_home?'✅':'❌'}</span>
-
-<span>${a.is_trending?'🔥':'➖'}</span>
-
-<div class="actions">
-
-<button onclick="editAnime('${a.id}')">✏️</button>
-
-<button onclick="deleteAnime('${a.id}')">🗑</button>
-
-<button onclick="toggleHide('${a.id}')">
-${a.is_hidden?'👁':'🚫'}
-</button>
-
-</div>
-
-</div>
-
-`
-
-})
-
+    data.forEach(a => {
+        animeList.innerHTML += `
+        <div class="row">
+            <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
+            <div>${a.title}</div>
+            <span>${a.type}</span>
+            <span class="badge">${a.status}</span>
+            <span>${a.genres || "-"}</span>
+            <span>${a.is_home ? '✅' : '❌'}</span>
+            <span>${a.is_trending ? '🔥' : '➖'}</span>
+            <div class="actions">
+                <button onclick="editAnime('${a.id}')">✏️</button>
+                <button onclick="deleteAnime('${a.id}')">🗑</button>
+                <button onclick="toggleHide('${a.id}')">${a.is_hidden ? '👁' : '🚫'}</button>
+            </div>
+        </div>`;
+    });
 }
 
 /* =========================
-SAVE ANIME
+EDIT / DELETE / ACTIONS
 ========================= */
+window.editAnime = async (id) => {
+    const data = await api(`${API}/${id}`);
+    if (!data) return;
 
-async function saveAnime(){
+    window.editId = id;
+    document.getElementById("modalTitle").innerText = "Edit Anime";
+    
+    document.getElementById("title").value = data.title || "";
+    document.getElementById("slug").value = data.slug || "";
+    document.getElementById("type").value = data.type || "anime";
+    document.getElementById("status").value = data.status || "ongoing";
+    document.getElementById("poster").value = data.poster || "";
+    document.getElementById("banner").value = data.banner || "";
+    document.getElementById("year").value = data.year || "";
+    document.getElementById("rating").value = data.rating || "";
+    document.getElementById("language").value = data.language || "";
+    document.getElementById("duration").value = data.duration || "";
+    document.getElementById("tags").value = data.tags || "";
+    document.getElementById("description").value = data.description || "";
 
-const genres=[...document.getElementById("genres").selectedOptions]
-.map(o=>o.value).join(",")
+    document.getElementById("isHome").checked = !!data.is_home;
+    document.getElementById("isTrending").checked = !!data.is_trending;
+    document.getElementById("isMostViewed").checked = !!data.is_most_viewed;
+    document.getElementById("isBanner").checked = !!data.is_banner;
 
-const payload={
+    if (data.genres) {
+        const arr = data.genres.split(",");
+        [...document.getElementById("genres").options].forEach(o => o.selected = arr.includes(o.value));
+    }
+    animeModal.style.display = "flex";
+};
 
-id:window.editId || null,
+window.deleteAnime = async (id) => {
+    if (confirm("Delete this anime?")) {
+        await api(`${API}/${id}`, "DELETE");
+        loadAnime();
+    }
+};
 
-title:title.value,
-slug:slug.value,
-
-type:type.value,
-status:status.value,
-
-poster:poster.value,
-banner:banner.value,
-
-year:year.value,
-rating:rating.value,
-
-language:language.value,
-duration:duration.value,
-
-genres,
-tags:tags.value,
-description:description.value,
-
-isHome:isHome.checked,
-isTrending:isTrending.checked,
-isMostViewed:isMostViewed.checked,
-isBanner:isBanner.checked
-
-}
-
-console.log("SAVE PAYLOAD:",payload)
-
-const res=await api(API,"POST",payload)
-
-console.log("SAVE RESPONSE:",res)
-
-if(res?.success){
-
-animeModal.style.display="none"
-window.editId=null
-loadAnime()
-
-}else{
-
-alert("Save failed")
-
-}
-
-}
+window.toggleHide = async (id) => {
+    await api(`${API}/hide/${id}`, "PATCH");
+    loadAnime();
+};
 
 /* =========================
-EDIT ANIME
+UI CONTROLS
 ========================= */
+document.getElementById("openAddAnime").onclick = () => {
+    window.editId = null;
+    document.getElementById("modalTitle").innerText = "Add Anime";
+    document.querySelectorAll(".modal-body input, .modal-body textarea").forEach(i => i.value = "");
+    document.querySelectorAll(".modal-body input[type='checkbox']").forEach(i => i.checked = false);
+    animeModal.style.display = "flex";
+};
 
-window.editAnime=async(id)=>{
+document.getElementById("closeModal").onclick = () => animeModal.style.display = "none";
+saveBtn.onclick = saveAnime;
 
-const data=await api(`${API}/${id}`)
+document.getElementById("title").oninput = () => {
+    document.getElementById("slug").value = document.getElementById("title").value
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+};
 
-if(!data) return
+// Filters
+document.getElementById("typeFilter").onchange = loadAnime;
+document.getElementById("statusFilter").onchange = loadAnime;
+document.getElementById("homeFilter").onchange = loadAnime;
 
-window.editId=id
+let searchTimer;
+document.getElementById("searchAnime").oninput = () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadAnime, 500);
+};
 
-title.value=data.title || ""
-slug.value=data.slug || ""
-
-type.value=data.type || "anime"
-status.value=data.status || "ongoing"
-
-poster.value=data.poster || ""
-banner.value=data.banner || ""
-
-year.value=data.year || ""
-rating.value=data.rating || ""
-
-language.value=data.language || ""
-duration.value=data.duration || ""
-
-tags.value=data.tags || ""
-description.value=data.description || ""
-
-/* CHECKBOX */
-
-isHome.checked=!!data.is_home
-isTrending.checked=!!data.is_trending
-isMostViewed.checked=!!data.is_most_viewed
-isBanner.checked=!!data.is_banner
-
-/* GENRES */
-
-if(data.genres){
-
-const arr=data.genres.split(",")
-
-;[...genres.options].forEach(o=>{
-o.selected=arr.includes(o.value)
-})
-
-}
-
-animeModal.style.display="flex"
-
-}
-
-/* =========================
-DELETE
-========================= */
-
-window.deleteAnime=async(id)=>{
-
-if(!confirm("Delete Anime?")) return
-
-await api(`${API}/${id}`,"DELETE")
-
-loadAnime()
-
-}
-
-/* =========================
-HIDE
-========================= */
-
-window.toggleHide=async(id)=>{
-
-await api(`${API}/hide/${id}`,"PATCH")
-
-loadAnime()
-
-}
-
-/* =========================
-MODAL
-========================= */
-
-openAddAnime.onclick=()=>{
-
-window.editId=null
-
-title.value=""
-slug.value=""
-poster.value=""
-banner.value=""
-
-animeModal.style.display="flex"
-
-}
-
-closeModal.onclick=()=>animeModal.style.display="none"
-
-document.getElementById("saveAnimeBtn").onclick=saveAnime
-
-/* =========================
-FILTERS
-========================= */
-
-typeFilter.onchange=loadAnime
-statusFilter.onchange=loadAnime
-homeFilter.onchange=loadAnime
-
-let timer
-
-searchAnime.oninput=()=>{
-
-clearTimeout(timer)
-
-timer=setTimeout(loadAnime,400)
-
-}
-
-/* INIT */
-loadAnime()
+// Start
+loadAnime();
+  
 
 </script>
 
