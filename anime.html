@@ -449,74 +449,85 @@ height:120px;
 
 
 <script>
-
-
-
-
-/* =========================
-CONFIG & ELEMENTS
-========================= */
+// --- CONFIGURATION ---
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime";
 const uploadAPI = "https://animehunt-backend.animehunt715.workers.dev/api/admin/upload";
 const token = localStorage.getItem("AUTH_TOKEN");
 
 if (!token) location.href = "login.html";
 
+// --- GLOBAL ELEMENTS ---
 const animeList = document.getElementById("animeList");
 const animeModal = document.getElementById("animeModal");
 const saveBtn = document.getElementById("saveAnimeBtn");
+const titleInput = document.getElementById("title");
+const slugInput = document.getElementById("slug");
 
-/* =========================
-API HELPER
-========================= */
+/* ==========================================
+   1. API HELPER (Common Fetch)
+   ========================================== */
 async function api(url, method = "GET", body = null) {
-    const res = await fetch(url, {
-        method,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-        },
-        body: body ? JSON.stringify(body) : null
-    });
-    return res.json();
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: body ? JSON.stringify(body) : null
+        });
+        return await res.json();
+    } catch (err) {
+        console.error("API Error:", err);
+        return { success: false, error: "Network Error" };
+    }
 }
 
-/* =========================
-UPLOAD LOGIC (FIXED)
-========================= */
-async function uploadFile(fileInputId, targetInputId) {
+/* ==========================================
+   2. UPLOAD & AUTO-URL UPDATE (FIXED)
+   ========================================== */
+async function handleUpload(fileInputId, targetUrlId) {
     const fileInput = document.getElementById(fileInputId);
+    const targetInput = document.getElementById(targetUrlId);
     const file = fileInput.files[0];
+
     if (!file) return;
+
+    // UI Update: Uploading status
+    const originalPlaceholder = targetInput.placeholder;
+    targetInput.value = "Uploading... Please wait";
 
     const reader = new FileReader();
     reader.onload = async (e) => {
         const base64 = e.target.result;
         const res = await api(uploadAPI, "POST", { file: base64 });
-        
-        if (res?.url) {
-            document.getElementById(targetInputId).value = res.url;
-            alert(targetInputId.toUpperCase() + " Updated!");
+
+        if (res && res.url) {
+            targetInput.value = res.url; // UPDATE THE URL BOX
+            alert(targetUrlId.toUpperCase() + " uploaded successfully!");
         } else {
-            alert("Upload failed!");
+            targetInput.value = "";
+            targetInput.placeholder = "Upload failed!";
+            alert("Upload failed. Check console for details.");
         }
     };
     reader.readAsDataURL(file);
 }
 
-document.getElementById("posterFile").onchange = () => uploadFile("posterFile", "poster");
-document.getElementById("bannerFile").onchange = () => uploadFile("bannerFile", "banner");
+// Bind upload events
+document.getElementById("posterFile").onchange = () => handleUpload("posterFile", "poster");
+document.getElementById("bannerFile").onchange = () => handleUpload("bannerFile", "banner");
 
-/* =========================
-SAVE ANIME (FULL LOGIC)
-========================= */
+/* ==========================================
+   3. SAVE / UPDATE ANIME
+   ========================================== */
 async function saveAnime() {
     const genres = [...document.getElementById("genres").selectedOptions].map(o => o.value).join(",");
     
     const payload = {
         id: window.editId || null,
-        title: document.getElementById("title").value,
-        slug: document.getElementById("slug").value,
+        title: titleInput.value.trim(),
+        slug: slugInput.value.trim(),
         type: document.getElementById("type").value,
         status: document.getElementById("status").value,
         poster: document.getElementById("poster").value,
@@ -534,7 +545,7 @@ async function saveAnime() {
         isBanner: document.getElementById("isBanner").checked
     };
 
-    if(!payload.title) return alert("Title is required!");
+    if (!payload.title) return alert("Title is mandatory!");
 
     saveBtn.disabled = true;
     saveBtn.innerText = "Saving...";
@@ -547,15 +558,15 @@ async function saveAnime() {
     if (res?.success) {
         animeModal.style.display = "none";
         window.editId = null;
-        loadAnime();
+        loadAnime(); // Refresh table
     } else {
-        alert("Error: " + (res.error || "Save failed"));
+        alert("Save failed: " + (res.error || "Server error"));
     }
 }
 
-/* =========================
-LOAD ANIME
-========================= */
+/* ==========================================
+   4. LOAD ANIME LIST
+   ========================================== */
 async function loadAnime() {
     const params = new URLSearchParams({
         type: document.getElementById("typeFilter").value,
@@ -568,15 +579,15 @@ async function loadAnime() {
     animeList.innerHTML = "";
 
     if (!data || data.length === 0) {
-        animeList.innerHTML = "<div style='padding:20px'>No anime found</div>";
+        animeList.innerHTML = "<div style='padding:20px'>No results found</div>";
         return;
     }
 
     data.forEach(a => {
         animeList.innerHTML += `
         <div class="row">
-            <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-            <div>${a.title}</div>
+            <img src="${a.poster || 'https://via.placeholder.com/40x60'}" onerror="this.src='https://via.placeholder.com/40x60'">
+            <div><strong>${a.title}</strong></div>
             <span>${a.type}</span>
             <span class="badge">${a.status}</span>
             <span>${a.genres || "-"}</span>
@@ -591,9 +602,9 @@ async function loadAnime() {
     });
 }
 
-/* =========================
-EDIT / DELETE / ACTIONS
-========================= */
+/* ==========================================
+   5. EDIT / DELETE / HIDE
+   ========================================== */
 window.editAnime = async (id) => {
     const data = await api(`${API}/${id}`);
     if (!data) return;
@@ -601,8 +612,9 @@ window.editAnime = async (id) => {
     window.editId = id;
     document.getElementById("modalTitle").innerText = "Edit Anime";
     
-    document.getElementById("title").value = data.title || "";
-    document.getElementById("slug").value = data.slug || "";
+    // Fill all fields
+    titleInput.value = data.title || "";
+    slugInput.value = data.slug || "";
     document.getElementById("type").value = data.type || "anime";
     document.getElementById("status").value = data.status || "ongoing";
     document.getElementById("poster").value = data.poster || "";
@@ -614,22 +626,27 @@ window.editAnime = async (id) => {
     document.getElementById("tags").value = data.tags || "";
     document.getElementById("description").value = data.description || "";
 
+    // Checkboxes
     document.getElementById("isHome").checked = !!data.is_home;
     document.getElementById("isTrending").checked = !!data.is_trending;
     document.getElementById("isMostViewed").checked = !!data.is_most_viewed;
     document.getElementById("isBanner").checked = !!data.is_banner;
 
+    // Multi-select Genres
     if (data.genres) {
         const arr = data.genres.split(",");
-        [...document.getElementById("genres").options].forEach(o => o.selected = arr.includes(o.value));
+        const genreOptions = document.getElementById("genres").options;
+        for (let opt of genreOptions) {
+            opt.selected = arr.includes(opt.value);
+        }
     }
     animeModal.style.display = "flex";
 };
 
 window.deleteAnime = async (id) => {
-    if (confirm("Delete this anime?")) {
-        await api(`${API}/${id}`, "DELETE");
-        loadAnime();
+    if (confirm("Permanently delete this anime?")) {
+        const res = await api(`${API}/${id}`, "DELETE");
+        if(res.success) loadAnime();
     }
 };
 
@@ -638,40 +655,44 @@ window.toggleHide = async (id) => {
     loadAnime();
 };
 
-/* =========================
-UI CONTROLS
-========================= */
+/* ==========================================
+   6. EVENT LISTENERS & INITIALIZATION
+   ========================================== */
+// Auto Slug Generation
+titleInput.oninput = () => {
+    slugInput.value = titleInput.value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+};
+
+// Modal Control
 document.getElementById("openAddAnime").onclick = () => {
     window.editId = null;
     document.getElementById("modalTitle").innerText = "Add Anime";
-    document.querySelectorAll(".modal-body input, .modal-body textarea").forEach(i => i.value = "");
-    document.querySelectorAll(".modal-body input[type='checkbox']").forEach(i => i.checked = false);
+    document.getElementById("animeModal").querySelector('.form-grid').querySelectorAll('input, textarea').forEach(i => {
+        if(i.type === 'checkbox') i.checked = false;
+        else i.value = "";
+    });
     animeModal.style.display = "flex";
 };
 
 document.getElementById("closeModal").onclick = () => animeModal.style.display = "none";
 saveBtn.onclick = saveAnime;
 
-document.getElementById("title").oninput = () => {
-    document.getElementById("slug").value = document.getElementById("title").value
-        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-};
-
-// Filters
+// Filter Events
 document.getElementById("typeFilter").onchange = loadAnime;
 document.getElementById("statusFilter").onchange = loadAnime;
 document.getElementById("homeFilter").onchange = loadAnime;
 
-let searchTimer;
+let timer;
 document.getElementById("searchAnime").oninput = () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadAnime, 500);
+    clearTimeout(timer);
+    timer = setTimeout(loadAnime, 500);
 };
 
-// Start
+// Initial Load
 loadAnime();
-  
-
 </script>
 
 
