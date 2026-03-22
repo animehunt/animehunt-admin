@@ -449,7 +449,296 @@ height:120px;
   </div>
 </div>
 
+<script>
+const API_BASE = "https://your-worker-url.workers.dev"
 
+// ==========================
+// GLOBAL STATE
+// ==========================
+let animeData = []
+let editId = null
+
+// ==========================
+// UTILITIES
+// ==========================
+
+// slug auto generate
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+// toast (basic)
+function toast(msg) {
+  alert(msg)
+}
+
+// ==========================
+// IMAGE AUTO UPLOAD
+// ==========================
+
+async function uploadImage(fileInput, urlInput) {
+  const file = fileInput.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append("file", file)
+
+  try {
+    urlInput.value = "Uploading..."
+
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      body: formData
+    })
+
+    const data = await res.json()
+
+    if (!data.success) throw new Error(data.message)
+
+    urlInput.value = data.data.url
+
+  } catch (err) {
+    console.error(err)
+    toast("Image upload failed")
+    urlInput.value = ""
+  }
+}
+
+// bind upload
+posterFile.onchange = () => uploadImage(posterFile, poster)
+bannerFile.onchange = () => uploadImage(bannerFile, banner)
+
+// ==========================
+// AUTO SLUG
+// ==========================
+title.addEventListener("input", () => {
+  slug.value = slugify(title.value)
+})
+
+// ==========================
+// MODAL CONTROL
+// ==========================
+openAddAnime.onclick = () => {
+  animeModal.style.display = "flex"
+  editId = null
+}
+
+closeModal.onclick = () => {
+  animeModal.style.display = "none"
+}
+
+// ==========================
+// GET FORM DATA
+// ==========================
+function getFormData() {
+  return {
+    title: title.value,
+    slug: slug.value,
+    type: type.value,
+    status: status.value,
+    poster: poster.value,
+    banner: banner.value,
+    year: year.value,
+    rating: rating.value,
+    language: language.value,
+    duration: duration.value,
+    genres: [...genres.selectedOptions].map(o => o.value),
+    tags: tags.value.split(',').map(t => t.trim()),
+    isHome: isHome.checked,
+    isTrending: isTrending.checked,
+    isMostViewed: isMostViewed.checked,
+    isBanner: isBanner.checked,
+    isHidden: isHidden.checked,
+    description: description.value
+  }
+}
+
+// ==========================
+// SAVE ANIME
+// ==========================
+saveAnimeBtn.onclick = async () => {
+  const data = getFormData()
+
+  if (!data.title) return toast("Title required")
+  if (!data.poster) return toast("Poster required")
+
+  try {
+    const url = editId
+      ? `${API_BASE}/anime/${editId}`
+      : `${API_BASE}/anime`
+
+    const method = editId ? "PUT" : "POST"
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+
+    const result = await res.json()
+
+    if (!result.success) throw new Error(result.message)
+
+    toast("Saved successfully")
+    animeModal.style.display = "none"
+    loadAnime()
+
+  } catch (err) {
+    console.error(err)
+    toast("Save failed")
+  }
+}
+
+// ==========================
+// LOAD ANIME
+// ==========================
+async function loadAnime() {
+  try {
+    const res = await fetch(`${API_BASE}/anime`)
+    const data = await res.json()
+
+    animeData = data.data || []
+    renderTable()
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// ==========================
+// DELETE
+// ==========================
+async function deleteAnime(id) {
+  if (!confirm("Delete this anime?")) return
+
+  try {
+    await fetch(`${API_BASE}/anime/${id}`, {
+      method: "DELETE"
+    })
+
+    loadAnime()
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// ==========================
+// EDIT
+// ==========================
+function editAnime(item) {
+  editId = item.id
+  animeModal.style.display = "flex"
+
+  title.value = item.title
+  slug.value = item.slug
+  type.value = item.type
+  status.value = item.status
+  poster.value = item.poster
+  banner.value = item.banner
+  year.value = item.year
+  rating.value = item.rating
+  language.value = item.language
+  duration.value = item.duration
+  tags.value = item.tags.join(",")
+
+  isHome.checked = item.isHome
+  isTrending.checked = item.isTrending
+  isMostViewed.checked = item.isMostViewed
+  isBanner.checked = item.isBanner
+  isHidden.checked = item.isHidden
+
+  description.value = item.description
+
+  // genres select
+  [...genres.options].forEach(o => {
+    o.selected = item.genres.includes(o.value)
+  })
+}
+
+// ==========================
+// RENDER TABLE
+// ==========================
+function renderTable() {
+  const list = document.getElementById("animeList")
+  list.innerHTML = ""
+
+  animeData.forEach(a => {
+    list.innerHTML += `
+      <div class="row">
+        <img src="${a.poster}">
+        <span>${a.title}</span>
+        <span>${a.type}</span>
+        <span>${a.status}</span>
+        <span>${a.genres.join(",")}</span>
+        <span>${a.isHidden ? "Hidden" : "Public"}</span>
+        <span>${a.isTrending ? "Yes" : "No"}</span>
+        <span class="actions">
+          <button onclick='editAnime(${JSON.stringify(a)})'>✏️</button>
+          <button onclick="deleteAnime('${a.id}')">🗑</button>
+        </span>
+      </div>
+    `
+  })
+}
+
+// ==========================
+// FILTER SYSTEM
+// ==========================
+[typeFilter, statusFilter, homeFilter, searchAnime].forEach(el => {
+  el.oninput = renderFiltered
+})
+
+function renderFiltered() {
+  let filtered = [...animeData]
+
+  if (typeFilter.value)
+    filtered = filtered.filter(a => a.type === typeFilter.value)
+
+  if (statusFilter.value)
+    filtered = filtered.filter(a => a.status === statusFilter.value)
+
+  if (homeFilter.value)
+    filtered = filtered.filter(a =>
+      homeFilter.value === "yes" ? a.isHome : !a.isHome
+    )
+
+  if (searchAnime.value)
+    filtered = filtered.filter(a =>
+      a.title.toLowerCase().includes(searchAnime.value.toLowerCase())
+    )
+
+  const list = document.getElementById("animeList")
+  list.innerHTML = ""
+
+  filtered.forEach(a => {
+    list.innerHTML += `
+      <div class="row">
+        <img src="${a.poster}">
+        <span>${a.title}</span>
+        <span>${a.type}</span>
+        <span>${a.status}</span>
+        <span>${a.genres.join(",")}</span>
+        <span>${a.isHidden ? "Hidden" : "Public"}</span>
+        <span>${a.isTrending ? "Yes" : "No"}</span>
+        <span class="actions">
+          <button onclick='editAnime(${JSON.stringify(a)})'>✏️</button>
+          <button onclick="deleteAnime('${a.id}')">🗑</button>
+        </span>
+      </div>
+    `
+  })
+}
+
+// ==========================
+// INIT
+// ==========================
+loadAnime()
+
+</script>
 
    
 
