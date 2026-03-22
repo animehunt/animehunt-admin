@@ -376,8 +376,12 @@ const saveBtn=document.getElementById("saveBannerBtn")
 
 let editId=null
 
-/* API */
+/* =========================
+API
+========================= */
+
 async function api(url,method="GET",body=null){
+
 const res=await fetch(url,{
 method,
 headers:{
@@ -386,44 +390,69 @@ headers:{
 },
 body:body?JSON.stringify(body):null
 })
+
 return res.json()
+
 }
 
-/* UPLOAD */
+/* =========================
+UPLOAD (FIXED)
+========================= */
+
 banImageFile.onchange=async()=>{
+
 const file=banImageFile.files[0]
 if(!file) return
 
 const reader=new FileReader()
 
 reader.onload=async e=>{
-const base64=e.target.result.split(",")[1]
 
-const data=await api(uploadAPI,"POST",{
-file:base64,
-fileName:file.name
-})
+const base64=e.target.result
+
+const data=await api(uploadAPI,"POST",{file:base64})
+
+console.log("UPLOAD:",data)
 
 if(data?.url){
+
 banImage.value=data.url
 previewImg.src=data.url
 previewImg.style.display="block"
+
+}else{
+
+alert("Upload failed")
+
 }
+
 }
 
 reader.readAsDataURL(file)
+
 }
 
-/* LOAD */
+/* =========================
+LOAD BANNERS
+========================= */
+
 async function loadBanners(){
 
 const data=await api(API)
 
 bannerList.innerHTML=""
 
+if(!data.length){
+
+bannerList.innerHTML="<div style='padding:20px'>No banners</div>"
+return
+
+}
+
 data.forEach(b=>{
 
 bannerList.innerHTML+=`
+
 <div class="row">
 
 <div style="display:flex;gap:10px">
@@ -450,13 +479,23 @@ onchange="toggleStatus('${b.id}',this.checked)">
 </div>
 
 </div>
+
 `
+
 })
 
 }
 
-/* SAVE */
+/* =========================
+SAVE
+========================= */
+
 async function saveBanner(){
+
+if(!banImage.value){
+alert("Upload image first")
+return
+}
 
 const payload={
 id:editId,
@@ -470,16 +509,27 @@ active:banActive.checked,
 autoRotate:banRotate.checked
 }
 
+console.log("SAVE:",payload)
+
 const res=await api(API,"POST",payload)
 
 if(res?.success){
+
 closeModal()
 loadBanners()
-}
+
+}else{
+
+alert("Save failed")
 
 }
 
-/* EDIT */
+}
+
+/* =========================
+EDIT
+========================= */
+
 window.editBanner=(b)=>{
 
 editId=b.id
@@ -491,8 +541,11 @@ banPosition.value=b.position
 banOrder.value=b.banner_order
 
 banImage.value=b.image
+
+if(b.image){
 previewImg.src=b.image
 previewImg.style.display="block"
+}
 
 banActive.checked=!!b.active
 banRotate.checked=!!b.auto_rotate
@@ -501,41 +554,65 @@ bannerModal.style.display="flex"
 
 }
 
-/* DELETE */
+/* =========================
+DELETE
+========================= */
+
 async function deleteBanner(id){
 
 if(!confirm("Delete banner?")) return
 
 await api(`${API}/${id}`,"DELETE")
+
 loadBanners()
 
 }
 
-/* STATUS */
-async function toggleStatus(id,active){
+/* =========================
+STATUS
+========================= */
+
+window.toggleStatus=async(id,active)=>{
 
 await api(`${API}/${id}/status`,"PATCH",{active})
+
 }
 
-/* MODAL */
+/* =========================
+MODAL
+========================= */
+
 function openModal(){
+
 editId=null
+
 banTitle.value=""
 banImage.value=""
+banOrder.value=""
+
 previewImg.style.display="none"
+
+banActive.checked=true
+banRotate.checked=false
+
 bannerModal.style.display="flex"
+
 }
 
 function closeModal(){
+
 bannerModal.style.display="none"
+
 }
 
-/* INIT */
+/* =========================
+INIT
+========================= */
+
 saveBtn.onclick=saveBanner
+
 loadBanners()
 
-
-</script>
-
+  </script>
 </body>
 </html>
