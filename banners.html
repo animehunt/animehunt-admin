@@ -339,7 +339,212 @@ a{ text-decoration:none; color:inherit }
 </div>
 </div>
 
+<script>
+const API = "https://your-worker-url.workers.dev"
 
+let banners = []
+let editId = null
+
+// ==========================
+// MODAL
+// ==========================
+function openModal() {
+  bannerModal.style.display = "flex"
+  editId = null
+  resetForm()
+}
+
+function closeModal() {
+  bannerModal.style.display = "none"
+}
+
+// ==========================
+// RESET FORM
+// ==========================
+function resetForm() {
+  banTitle.value = ""
+  banImage.value = ""
+  banOrder.value = ""
+  banActive.checked = true
+  banRotate.checked = false
+  previewImg.style.display = "none"
+}
+
+// ==========================
+// IMAGE UPLOAD AUTO
+// ==========================
+banImageFile.onchange = async () => {
+  const file = banImageFile.files[0]
+  if (!file) return
+
+  const fd = new FormData()
+  fd.append("file", file)
+
+  try {
+    banImage.value = "Uploading..."
+
+    const res = await fetch(`${API}/upload`, {
+      method: "POST",
+      body: fd
+    })
+
+    const data = await res.json()
+    if (!data.success) throw new Error()
+
+    banImage.value = data.data.url
+    loadPreview()
+
+  } catch {
+    alert("Upload failed")
+    banImage.value = ""
+  }
+}
+
+// ==========================
+// IMAGE PREVIEW
+// ==========================
+function loadPreview() {
+  previewImg.src = banImage.value
+  previewImg.style.display = "block"
+}
+
+banImage.oninput = loadPreview
+
+previewImg.onerror = () => {
+  previewImg.style.display = "none"
+  document.querySelector(".preview-error").style.display = "block"
+}
+
+// ==========================
+// SAVE
+// ==========================
+saveBannerBtn.onclick = async () => {
+  const data = {
+    page: banPage.value,
+    category: banCategory.value,
+    position: banPosition.value,
+    title: banTitle.value,
+    image: banImage.value,
+    order: Number(banOrder.value || 0),
+    active: banActive.checked,
+    rotate: banRotate.checked
+  }
+
+  if (!data.title) return alert("Title required")
+  if (!data.image) return alert("Image required")
+
+  try {
+    const url = editId
+      ? `${API}/banner/${editId}`
+      : `${API}/banner`
+
+    const method = editId ? "PUT" : "POST"
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+
+    const r = await res.json()
+    if (!r.success) throw new Error()
+
+    closeModal()
+    loadBanners()
+
+  } catch {
+    alert("Save failed")
+  }
+}
+
+// ==========================
+// LOAD
+// ==========================
+async function loadBanners() {
+  const res = await fetch(`${API}/banner`)
+  const data = await res.json()
+
+  banners = data.data || []
+  render()
+}
+
+// ==========================
+// DELETE
+// ==========================
+async function deleteBanner(id) {
+  if (!confirm("Delete banner?")) return
+
+  await fetch(`${API}/banner/${id}`, { method: "DELETE" })
+  loadBanners()
+}
+
+// ==========================
+// TOGGLE ACTIVE
+// ==========================
+async function toggleActive(id, val) {
+  await fetch(`${API}/banner/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ active: val })
+  })
+}
+
+// ==========================
+// EDIT
+// ==========================
+function editBanner(b) {
+  editId = b.id
+  openModal()
+
+  banPage.value = b.page
+  banCategory.value = b.category
+  banPosition.value = b.position
+  banTitle.value = b.title
+  banImage.value = b.image
+  banOrder.value = b.order
+  banActive.checked = b.active
+  banRotate.checked = b.rotate
+
+  loadPreview()
+}
+
+// ==========================
+// RENDER
+// ==========================
+function render() {
+  bannerList.innerHTML = ""
+
+  banners.sort((a,b)=>a.order-b.order)
+
+  banners.forEach(b => {
+    bannerList.innerHTML += `
+      <div class="row">
+        <span>${b.title}</span>
+        <span>${b.page}</span>
+        <span>${b.category || '-'}</span>
+        <span>${b.position}</span>
+        <span>${b.order}</span>
+        <span>
+          <label class="switch">
+            <input type="checkbox" ${b.active ? "checked" : ""}
+              onchange="toggleActive('${b.id}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </span>
+        <span class="actions">
+          <button onclick='editBanner(${JSON.stringify(b)})'>✏️</button>
+          <button onclick="deleteBanner('${b.id}')">🗑</button>
+        </span>
+      </div>
+    `
+  })
+}
+
+// ==========================
+// INIT
+// ==========================
+loadBanners()
+</script>
 
 </body>
 </html>
