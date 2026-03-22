@@ -461,7 +461,7 @@ saveBannerBtn.onclick = async () => {
 // LOAD
 // ==========================
 async function loadBanners() {
-  const res = await fetch(`${API}/banner`)
+  const res = await fetch(`${API}/banners`)
   const data = await res.json()
 
   banners = data.data || []
