@@ -629,7 +629,8 @@ async function deleteAnime(id) {
 // ==========================
 // EDIT
 // ==========================
-function editAnime(item) {
+function editAnime(id) {
+  const item = animeData.find(a => a.id === id)
   editId = item.id
   animeModal.style.display = "flex"
 
@@ -677,7 +678,7 @@ function renderTable() {
         <span>${a.isHidden ? "Hidden" : "Public"}</span>
         <span>${a.isTrending ? "Yes" : "No"}</span>
         <span class="actions">
-          <button onclick='editAnime(${JSON.stringify(a)})'>✏️</button>
+          <button onclick="editAnime('${a.id}')">✏️</button>
           <button onclick="deleteAnime('${a.id}')">🗑</button>
         </span>
       </div>
@@ -725,7 +726,7 @@ function renderFiltered() {
         <span>${a.isHidden ? "Hidden" : "Public"}</span>
         <span>${a.isTrending ? "Yes" : "No"}</span>
         <span class="actions">
-          <button onclick='editAnime(${JSON.stringify(a)})'>✏️</button>
+          <button onclick="editAnime('${a.id}')">✏️</button>
           <button onclick="deleteAnime('${a.id}')">🗑</button>
         </span>
       </div>
