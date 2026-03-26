@@ -240,6 +240,18 @@ a{ text-decoration:none; color:inherit }
     #genres{
 height:120px;
     }
+    .upload-btn{
+  background:#1a2035;
+  padding:8px;
+  border-radius:6px;
+  text-align:center;
+  cursor:pointer;
+  font-size:12px;
+}
+.upload-btn:hover{
+  background:#ffcc00;
+  color:#000;
+}
   </style>
 </head>
 
@@ -379,12 +391,18 @@ height:120px;
         </select>
 
         <!-- POSTER -->
+<label class="upload-btn">
+  Upload Poster
+  <input type="file" id="posterFile" hidden>
+</label>
 <input id="poster" placeholder="Poster URL" readonly>
-<input type="file" id="posterFile" accept="image/*">
 
+<label class="upload-btn">
+  Upload Banner
+  <input type="file" id="bannerFile" hidden>
+</label>
 <input id="banner" placeholder="Banner URL" readonly>
-<input type="file" id="bannerFile" accept="image/*">
-        
+       
         <input id="year" placeholder="Year">
         <input id="rating" placeholder="Rating">
 
