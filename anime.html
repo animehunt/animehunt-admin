@@ -1,4 +1,4 @@
-,
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -570,17 +570,24 @@ function getFormData() {
     status: status.value,
     poster: poster.value,
     banner: banner.value,
+
+    year: year.value || "",
+    rating: rating.value || "",
+    language: language.value || "",
+    duration: duration.value || "",
+
     genres: [...genres.selectedOptions].map(o => o.value),
     tags: tags.value.split(",").map(t => t.trim()),
+
     isHome: isHome.checked,
     isTrending: isTrending.checked,
     isMostViewed: isMostViewed.checked,
     isBanner: isBanner.checked,
     isHidden: isHidden.checked,
+
     description: description.value
   }
 }
-
 // ==========================
 // SAVE FIX
 // ==========================
