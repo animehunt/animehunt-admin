@@ -341,8 +341,7 @@ a{ text-decoration:none; color:inherit }
 
 <script>
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banner"
-const UPLOAD_API = "https://animehunt-backend.animehunt715.workers.dev/api/upload"
-
+const UPLOAD_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/upload"
 let banners = []
 let editId = null
 
@@ -385,11 +384,18 @@ banImageFile.onchange = async () => {
     banImage.value = "Uploading..."
 
     const res = await fetch(UPLOAD_API, {
-      method: "POST",
-      body: fd
-    })
+  method: "POST",
+  body: fd
+})
 
-    const data = await res.json()
+if (!res.ok) {
+  const text = await res.text()
+  console.error("UPLOAD ERROR:", text)
+  alert("Upload failed")
+  return
+}
+
+const data = await res.json()
     if (!data.success) throw new Error()
 
     banImage.value = data.data.url
