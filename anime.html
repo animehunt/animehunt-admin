@@ -548,6 +548,7 @@ openAddAnime.onclick = () => {
 
 closeModal.onclick = () => {
   animeModal.style.display = "none"
+  editId = null
 }
 
 // ==========================
@@ -601,7 +602,9 @@ function getFormData() {
     duration: duration.value || "",
 
     genres: [...genres.selectedOptions].map(o => o.value),
-    tags: tags.value.split(",").map(t => t.trim()),
+    tags: tags.value
+  ? tags.value.split(",").map(t => t.trim()).filter(Boolean)
+  : [],
 
     isHome: isHome.checked,
     isTrending: isTrending.checked,
@@ -672,6 +675,15 @@ async function deleteAnime(id) {
   })
   loadAnime()
 }
+  // reset पहले
+[...genres.options].forEach(opt => opt.selected = false)
+
+isHome.checked = false
+isTrending.checked = false
+isMostViewed.checked = false
+isBanner.checked = false
+isHidden.checked = false
+  
 function editAnime(id) {
   const a = animeData.find(x => x.id === id)
   if (!a) return
