@@ -682,15 +682,14 @@ function editAnime(id) {
 
   editId = id
 
-  // reset पहले
-[...genres.options].forEach(opt => opt.selected = false)
+  // ✅ reset पहले
+  [...genres.options].forEach(opt => opt.selected = false)
 
-isHome.checked = false
-isTrending.checked = false
-isMostViewed.checked = false
-isBanner.checked = false
-isHidden.checked = false
-  
+  isHome.checked = false
+  isTrending.checked = false
+  isMostViewed.checked = false
+  isBanner.checked = false
+  isHidden.checked = false
 
   // modal open
   animeModal.style.display = "flex"
@@ -723,7 +722,6 @@ isHidden.checked = false
     opt.selected = a.genres?.includes(opt.value)
   })
 
-  // modal title change
   document.getElementById("modalTitle").innerText = "Edit Anime"
 }
 // ==========================
