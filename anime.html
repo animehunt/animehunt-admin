@@ -520,30 +520,6 @@ title.addEventListener("input", () => {
 openAddAnime.onclick = () => {
   animeModal.style.display = "flex"
   editId = null
-
-  // reset form
-  title.value = ""
-  slug.value = ""
-  poster.value = ""
-  banner.value = ""
-  tags.value = ""
-  description.value = ""
-
-  year.value = ""
-  rating.value = ""
-  language.value = ""
-  duration.value = ""
-
-  isHome.checked = false
-  isTrending.checked = false
-  isMostViewed.checked = false
-  isBanner.checked = false
-  isHidden.checked = false
-
-  // reset genres
-  [...genres.options].forEach(opt => opt.selected = false)
-
-  document.getElementById("modalTitle").innerText = "Add Anime"
 }
 
 closeModal.onclick = () => {
@@ -672,46 +648,7 @@ async function deleteAnime(id) {
   })
   loadAnime()
 }
-function editAnime(id) {
-  const a = animeData.find(x => x.id === id)
-  if (!a) return
 
-  editId = id
-
-  // modal open
-  animeModal.style.display = "flex"
-
-  // fill fields
-  title.value = a.title
-  slug.value = a.slug
-  type.value = a.type
-  status.value = a.status
-  poster.value = a.poster
-  banner.value = a.banner
-
-  year.value = a.year || ""
-  rating.value = a.rating || ""
-  language.value = a.language || ""
-  duration.value = a.duration || ""
-
-  description.value = a.description || ""
-  tags.value = (a.tags || []).join(",")
-
-  // checkboxes
-  isHome.checked = a.isHome
-  isTrending.checked = a.isTrending
-  isMostViewed.checked = a.isMostViewed
-  isBanner.checked = a.isBanner
-  isHidden.checked = a.isHidden
-
-  // genres select
-  [...genres.options].forEach(opt => {
-    opt.selected = a.genres?.includes(opt.value)
-  })
-
-  // modal title change
-  document.getElementById("modalTitle").innerText = "Edit Anime"
-}
 // ==========================
 // RENDER
 // ==========================
@@ -730,50 +667,8 @@ function renderTable() {
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
       <span>
-  <button onclick="editAnime('${a.id}')">✏️</button>
-  <button onclick="deleteAnime('${a.id}')">🗑</button>
-</span>
-function editAnime(id) {
-  const a = animeData.find(x => x.id === id)
-  if (!a) return
-
-  editId = id
-
-  // modal open
-  animeModal.style.display = "flex"
-
-  // fill data
-  title.value = a.title
-  slug.value = a.slug
-  type.value = a.type
-  status.value = a.status
-  poster.value = a.poster
-  banner.value = a.banner
-
-  year.value = a.year || ""
-  rating.value = a.rating || ""
-  language.value = a.language || ""
-  duration.value = a.duration || ""
-
-  description.value = a.description || ""
-  tags.value = (a.tags || []).join(",")
-
-  // checkboxes
-  isHome.checked = a.isHome
-  isTrending.checked = a.isTrending
-  isMostViewed.checked = a.isMostViewed
-  isBanner.checked = a.isBanner
-  isHidden.checked = a.isHidden
-
-  // genres select
-  [...genres.options].forEach(opt => {
-    opt.selected = a.genres?.includes(opt.value)
-  })
-
-  // title change
-  document.getElementById("modalTitle").innerText = "Edit Anime"
-}
-
+        <button onclick="deleteAnime('${a.id}')">🗑</button>
+      </span>
     </div>`
   })
 }
