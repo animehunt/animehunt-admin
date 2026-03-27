@@ -682,7 +682,7 @@ function editAnime(id) {
 
   editId = id
 
-  // ✅ reset पहले
+  // ✅ RESET FIRST (VERY IMPORTANT)
   [...genres.options].forEach(opt => opt.selected = false)
 
   isHome.checked = false
@@ -717,7 +717,7 @@ function editAnime(id) {
   isBanner.checked = a.isBanner
   isHidden.checked = a.isHidden
 
-  // genres select
+  // genres
   [...genres.options].forEach(opt => {
     opt.selected = a.genres?.includes(opt.value)
   })
