@@ -340,9 +340,10 @@ a{ text-decoration:none; color:inherit }
 </div>
 
 <script>
-  const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banner"
-fetch("https://animehunt-backend.animehunt715.workers.dev/api/upload")
-  let banners = []
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/banner"
+const UPLOAD_API = "https://animehunt-backend.animehunt715.workers.dev/api/upload"
+
+let banners = []
 let editId = null
 
 // ==========================
@@ -359,7 +360,7 @@ function closeModal() {
 }
 
 // ==========================
-// RESET FORM
+// RESET
 // ==========================
 function resetForm() {
   banTitle.value = ""
@@ -371,7 +372,7 @@ function resetForm() {
 }
 
 // ==========================
-// IMAGE UPLOAD AUTO
+// IMAGE UPLOAD
 // ==========================
 banImageFile.onchange = async () => {
   const file = banImageFile.files[0]
@@ -383,7 +384,7 @@ banImageFile.onchange = async () => {
   try {
     banImage.value = "Uploading..."
 
-    const res = await fetch(`${API}`)
+    const res = await fetch(UPLOAD_API, {
       method: "POST",
       body: fd
     })
@@ -401,7 +402,7 @@ banImageFile.onchange = async () => {
 }
 
 // ==========================
-// IMAGE PREVIEW
+// PREVIEW
 // ==========================
 function loadPreview() {
   previewImg.src = banImage.value
@@ -434,10 +435,7 @@ saveBannerBtn.onclick = async () => {
   if (!data.image) return alert("Image required")
 
   try {
-    const url = editId
-      ? `${API}/banner/${editId}`
-      : `${API}/banner`
-
+    const url = editId ? `${API}/${editId}` : `${API}`
     const method = editId ? "PUT" : "POST"
 
     const res = await fetch(url, {
@@ -461,7 +459,7 @@ saveBannerBtn.onclick = async () => {
 // LOAD
 // ==========================
 async function loadBanners() {
-  const res = await fetch(`${API}/banners`)
+  const res = await fetch(API)
   const data = await res.json()
 
   banners = data.data || []
@@ -474,15 +472,15 @@ async function loadBanners() {
 async function deleteBanner(id) {
   if (!confirm("Delete banner?")) return
 
-  await fetch(`${API}`)/${id}`, { method: "DELETE" })
+  await fetch(`${API}/${id}`, { method: "DELETE" })
   loadBanners()
 }
 
 // ==========================
-// TOGGLE ACTIVE
+// TOGGLE
 // ==========================
 async function toggleActive(id, val) {
-  await fetch(`${API}`)/${id}`, {
+  await fetch(`${API}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ active: val })
@@ -541,11 +539,8 @@ function render() {
   })
 }
 
-// ==========================
 // INIT
-// ==========================
 loadBanners()
 </script>
-
 </body>
 </html>
