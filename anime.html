@@ -675,6 +675,13 @@ async function deleteAnime(id) {
   })
   loadAnime()
 }
+  
+function editAnime(id) {
+  const a = animeData.find(x => x.id === id)
+  if (!a) return
+
+  editId = id
+
   // reset पहले
 [...genres.options].forEach(opt => opt.selected = false)
 
@@ -684,11 +691,6 @@ isMostViewed.checked = false
 isBanner.checked = false
 isHidden.checked = false
   
-function editAnime(id) {
-  const a = animeData.find(x => x.id === id)
-  if (!a) return
-
-  editId = id
 
   // modal open
   animeModal.style.display = "flex"
