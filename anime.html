@@ -477,7 +477,9 @@ const closeModal = document.getElementById("closeModal")
 let animeData = []
 let editId = null
 
-// INPUTS
+// ==========================
+// FIX: Elements select
+// ==========================
 const title = document.getElementById("title")
 const slug = document.getElementById("slug")
 const type = document.getElementById("type")
@@ -496,13 +498,11 @@ const isMostViewed = document.getElementById("isMostViewed")
 const isBanner = document.getElementById("isBanner")
 const isHidden = document.getElementById("isHidden")
 
+const saveAnimeBtn = document.getElementById("saveAnimeBtn")
 const year = document.getElementById("year")
 const rating = document.getElementById("rating")
 const language = document.getElementById("language")
 const duration = document.getElementById("duration")
-
-const saveAnimeBtn = document.getElementById("saveAnimeBtn")
-
 // ==========================
 // SLUG
 // ==========================
@@ -515,9 +515,13 @@ title.addEventListener("input", () => {
 })
 
 // ==========================
-// RESET FORM
+// MODAL
 // ==========================
-function resetForm() {
+openAddAnime.onclick = () => {
+  animeModal.style.display = "flex"
+  editId = null
+
+  // reset form
   title.value = ""
   slug.value = ""
   poster.value = ""
@@ -536,16 +540,9 @@ function resetForm() {
   isBanner.checked = false
   isHidden.checked = false
 
+  // reset genres
   [...genres.options].forEach(opt => opt.selected = false)
-}
 
-// ==========================
-// MODAL OPEN (ADD)
-// ==========================
-openAddAnime.onclick = () => {
-  animeModal.style.display = "flex"
-  editId = null
-  resetForm()
   document.getElementById("modalTitle").innerText = "Add Anime"
 }
 
@@ -554,45 +551,7 @@ closeModal.onclick = () => {
 }
 
 // ==========================
-// EDIT
-// ==========================
-function editAnime(id) {
-  const a = animeData.find(x => x.id === id)
-  if (!a) return
-
-  editId = id
-  animeModal.style.display = "flex"
-
-  title.value = a.title
-  slug.value = a.slug
-  type.value = a.type
-  status.value = a.status
-  poster.value = a.poster
-  banner.value = a.banner
-
-  year.value = a.year || ""
-  rating.value = a.rating || ""
-  language.value = a.language || ""
-  duration.value = a.duration || ""
-
-  description.value = a.description || ""
-  tags.value = (a.tags || []).join(",")
-
-  isHome.checked = a.isHome
-  isTrending.checked = a.isTrending
-  isMostViewed.checked = a.isMostViewed
-  isBanner.checked = a.isBanner
-  isHidden.checked = a.isHidden
-
-  [...genres.options].forEach(opt => {
-    opt.selected = a.genres?.includes(opt.value)
-  })
-
-  document.getElementById("modalTitle").innerText = "Edit Anime"
-}
-
-// ==========================
-// UPLOAD
+// UPLOAD IMAGE FIX
 // ==========================
 async function uploadImage(fileInput, urlInput) {
   const file = fileInput.files[0]
@@ -625,7 +584,7 @@ posterFile.onchange = () => uploadImage(posterFile, poster)
 bannerFile.onchange = () => uploadImage(bannerFile, banner)
 
 // ==========================
-// FORM DATA
+// GET DATA
 // ==========================
 function getFormData() {
   return {
@@ -653,9 +612,8 @@ function getFormData() {
     description: description.value
   }
 }
-
 // ==========================
-// SAVE (ADD + UPDATE)
+// SAVE FIX
 // ==========================
 saveAnimeBtn.onclick = async () => {
   const form = getFormData()
@@ -709,15 +667,51 @@ async function loadAnime() {
 // DELETE
 // ==========================
 async function deleteAnime(id) {
-  if (!confirm("Delete this anime?")) return
-
   await fetch(`${API_BASE}/anime/${id}`, {
     method: "DELETE"
   })
-
   loadAnime()
 }
+function editAnime(id) {
+  const a = animeData.find(x => x.id === id)
+  if (!a) return
 
+  editId = id
+
+  // modal open
+  animeModal.style.display = "flex"
+
+  // fill fields
+  title.value = a.title
+  slug.value = a.slug
+  type.value = a.type
+  status.value = a.status
+  poster.value = a.poster
+  banner.value = a.banner
+
+  year.value = a.year || ""
+  rating.value = a.rating || ""
+  language.value = a.language || ""
+  duration.value = a.duration || ""
+
+  description.value = a.description || ""
+  tags.value = (a.tags || []).join(",")
+
+  // checkboxes
+  isHome.checked = a.isHome
+  isTrending.checked = a.isTrending
+  isMostViewed.checked = a.isMostViewed
+  isBanner.checked = a.isBanner
+  isHidden.checked = a.isHidden
+
+  // genres select
+  [...genres.options].forEach(opt => {
+    opt.selected = a.genres?.includes(opt.value)
+  })
+
+  // modal title change
+  document.getElementById("modalTitle").innerText = "Edit Anime"
+}
 // ==========================
 // RENDER
 // ==========================
@@ -736,17 +730,14 @@ function renderTable() {
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
       <span>
-        <button onclick="editAnime('${a.id}')">✏️</button>
-        <button onclick="deleteAnime('${a.id}')">🗑</button>
-      </span>
+  <button onclick="editAnime('${a.id}')">✏️</button>
+  <button onclick="deleteAnime('${a.id}')">🗑</button>
+</span>
     </div>`
   })
 }
-
 // ==========================
 loadAnime()
-  
-  
 </script>
         
    
