@@ -428,6 +428,8 @@ async function loadPerformance(){
 
 const data=await apiFetch(API)
 
+  console.log("API DATA:", data)
+
 if(!data) return
 
 TOGGLES.forEach(id=>{
@@ -436,7 +438,7 @@ const el=document.getElementById(id)
 
 if(!el) return
 
-el.checked = Boolean(data?.[id])
+el.checked = data?.[id] == 1
 
 })
 
