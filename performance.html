@@ -331,94 +331,78 @@ a{
 <script>
 
 /* ============================================
-ANIMEHUNT PERFORMANCE CMS
-FULL FINAL VERSION
+ANIMEHUNT PERFORMANCE CMS – FINAL CLEAN
 ============================================ */
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/performance"
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/performance"
+const TOKEN_KEY = "AUTH_TOKEN"
 
-const TOKEN_KEY="AUTH_TOKEN"
+const TOGGLES = [
+  "lazyLoad",
+  "smartPreload",
+  "assetMinify",
+  "imgOptimize",
 
-const TOGGLES=[
+  "jsOptimize",
+  "cssOptimize",
 
-"lazyLoad",
-"smartPreload",
-"assetMinify",
-"imgOptimize",
+  "smartCache",
+  "mobilePriority",
 
-"jsOptimize",
-"cssOptimize",
+  "cdnMode",
+  "adaptiveLoad",
 
-"smartCache",
-"mobilePriority",
-
-"cdnMode",
-"adaptiveLoad",
-
-"preconnect",
-"bandwidth"
-
+  "preconnect",
+  "bandwidth"
 ]
 
-let saveTimer=null
-
+let saveTimer = null
 
 /* =========================
 AUTH TOKEN
 ========================= */
 
 function getToken(){
-
-return localStorage.getItem(TOKEN_KEY) || ""
-
+  return localStorage.getItem(TOKEN_KEY) || ""
 }
-
 
 /* =========================
-API FETCH WRAPPER
+API CALL
 ========================= */
 
-async function apiFetch(url,options={}){
+async function apiFetch(url, options = {}){
 
-try{
+  try{
 
-const res=await fetch(url,{
+    const res = await fetch(url,{
+      ...options,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + getToken(),
+        ...(options.headers || {})
+      }
+    })
 
-...options,
+    if(res.status === 401){
+      alert("Session expired")
+      localStorage.removeItem(TOKEN_KEY)
+      location.href = "login.html"
+      return null
+    }
 
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+getToken(),
-...(options.headers||{})
-}
+    if(!res.ok){
+      console.error("API ERROR:", res.status)
+      return null
+    }
 
-})
+    return await res.json()
 
-if(res.status===401){
-
-location.href="login.html"
-return null
-
-}
-
-if(!res.ok){
-
-throw new Error("API error")
-
-}
-
-return await res.json()
-
-}catch(err){
-
-console.error("API ERROR:",err)
-
-return null
+  }catch(err){
+    console.error("NETWORK ERROR:", err)
+    return null
+  }
 
 }
-
-}
-
 
 /* =========================
 LOAD SETTINGS
@@ -426,26 +410,26 @@ LOAD SETTINGS
 
 async function loadPerformance(){
 
-const data=await apiFetch(API)
+  const data = await apiFetch(API)
 
   console.log("API DATA:", data)
 
-if(!data) return
+  if(!data) return
 
-TOGGLES.forEach(id=>{
+  TOGGLES.forEach(id => {
 
-const el=document.getElementById(id)
+    const el = document.getElementById(id)
 
-if(!el) return
+    if(!el) return
 
-el.checked = data?.[id] == 1
+    // ✅ FINAL FIX (boolean safe)
+    el.checked = !!data[id]
 
-})
+  })
 
-console.log("Performance settings loaded")
+  console.log("Performance settings loaded")
 
 }
-
 
 /* =========================
 SAVE SETTINGS
@@ -453,38 +437,32 @@ SAVE SETTINGS
 
 async function savePerformance(){
 
-const payload={}
+  const payload = {}
 
-TOGGLES.forEach(id=>{
+  TOGGLES.forEach(id => {
 
-const el=document.getElementById(id)
+    const el = document.getElementById(id)
 
-if(!el) return
+    if(!el) return
 
-payload[id]=el.checked
+    payload[id] = el.checked
 
-})
+  })
 
-const res=await apiFetch(API,{
+  console.log("SENDING:", payload)
 
-method:"POST",
+  const res = await apiFetch(API,{
+    method:"POST",
+    body: JSON.stringify(payload)
+  })
 
-body:JSON.stringify(payload)
-
-})
-
-if(res?.success){
-
-console.log("Performance saved")
-
-}else{
-
-console.warn("Performance save failed")
+  if(res?.success){
+    console.log("Performance saved ✅")
+  }else{
+    console.warn("Save failed ❌")
+  }
 
 }
-
-}
-
 
 /* =========================
 AUTO SAVE (DEBOUNCE)
@@ -492,46 +470,45 @@ AUTO SAVE (DEBOUNCE)
 
 function scheduleSave(){
 
-clearTimeout(saveTimer)
+  clearTimeout(saveTimer)
 
-saveTimer=setTimeout(()=>{
-
-savePerformance()
-
-},600)
+  saveTimer = setTimeout(() => {
+    savePerformance()
+  }, 500)
 
 }
-
 
 /* =========================
 INIT
 ========================= */
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", () => {
 
-TOGGLES.forEach(id=>{
+  if(!getToken()){
+    location.href = "login.html"
+    return
+  }
 
-const el=document.getElementById(id)
+  // attach listeners
+  TOGGLES.forEach(id => {
 
-if(el){
+    const el = document.getElementById(id)
 
-el.addEventListener("change",scheduleSave)
+    if(el){
+      el.addEventListener("change", scheduleSave)
+    }
 
-}
+  })
+
+  loadPerformance()
 
 })
-
-loadPerformance()
-
-})
-
 
 /* =========================
-MANUAL SAVE (optional)
+MANUAL DEBUG (optional)
 ========================= */
 
-window.savePerformanceSettings=savePerformance
-
+window.savePerformanceSettings = savePerformance
 
 </script>
 
