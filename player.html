@@ -211,16 +211,28 @@ body{background:#060a14;color:#fff}
 <div class="form">
 
 <label>External Embed Only</label>
-<select><option>Enabled</option></select>
+<select id="secEmbed">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
 
 <label>Cloudflare Protection</label>
-<select><option>Enabled</option></select>
+<select id="secCloud">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
 
 <label>Iframe Sandbox</label>
-<select><option>Enabled</option></select>
+<select id="secSandbox">
+  <option value="true">Enabled</option>
+  <option value="false">Disabled</option>
+</select>
 
 <label>Referrer Policy</label>
-<select><option>Strict</option></select>
+<select id="secReferrer">
+  <option value="strict">Strict-Origin</option>
+  <option value="no-referrer">No-Referrer</option>
+</select>
 
 </div>
 </div>
@@ -346,12 +358,21 @@ el("showRelated").value = String(d.ui.related)
 
 /* SECURITY */
 
-el("secEmbed").value = String(d.security.embedOnly)
-el("secCloud").value = String(d.security.cloudflare)
-el("secSandbox").value = String(d.security.sandbox)
+if(el("secEmbed")){
+  el("secEmbed").value = String(d.security.embedOnly)
+}
 
-el("secReferrer").value = d.security.referrer || "strict"
+if(el("secCloud")){
+  el("secCloud").value = String(d.security.cloudflare)
+}
 
+if(el("secSandbox")){
+  el("secSandbox").value = String(d.security.sandbox)
+}
+
+if(el("secReferrer")){
+  el("secReferrer").value = d.security.referrer || "strict"
+}
 saveBtn.innerText="💾 Save Player"
 
 }
@@ -383,10 +404,10 @@ related:el("showRelated").value==="true"
 },
 
 security:{
-embedOnly:el("secEmbed").value==="true",
-cloudflare:el("secCloud").value==="true",
-sandbox:el("secSandbox").value==="true",
-referrer:el("secReferrer").value
+  embedOnly: el("secEmbed")?.value === "true",
+  cloudflare: el("secCloud")?.value === "true",
+  sandbox: el("secSandbox")?.value === "true",
+  referrer: el("secReferrer")?.value
 }
 
 }
