@@ -234,6 +234,7 @@ color:#ccc;
     grid-template-columns:1fr;
   }
 }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </style>
 </head>
 
@@ -352,10 +353,39 @@ color:#ccc;
 
 <div class="card">
 <h3>Core Protection</h3>
-<div class="toggle">Bot Protection<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Scraper Shield<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Hotlink Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Embed Lock<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+
+<div class="toggle">
+Bot Protection
+<label class="switch">
+<input type="checkbox" id="botProt">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="toggle">
+Scraper Shield
+<label class="switch">
+<input type="checkbox" id="scraperShield">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="toggle">
+Hotlink Block
+<label class="switch">
+<input type="checkbox" id="hotlinkBlock">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="toggle">
+Embed Lock
+<label class="switch">
+<input type="checkbox" id="embedLock">
+<span class="slider"></span>
+</label>
+</div>
+
 </div>
 
 <div class="card">
@@ -407,6 +437,13 @@ color:#ccc;
 <input placeholder="Allowed Domain" style="width:100%;padding:6px;background:#11162a;border:1px solid #222;color:#fff">
 <div class="list">animehunt.in</div>
 </div>
+
+  <div class="security-section">
+<h2>📈 Real Attack Graph</h2>
+
+<canvas id="attackChart" height="120"></canvas>
+
+  </div>
   
   <div class="security-section">
   <h2>Geo Protection</h2>
@@ -521,6 +558,8 @@ color:#ccc;
   
   <div class="security-section">
   <h2>👻 Stealth Mode</h2>
+
+    <ul class="activity-log" id="activityLog">
 
   <label>
     <input type="checkbox" id="hideServerInfo">
@@ -809,6 +848,74 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(emergencyBtn) emergencyBtn.onclick = emergencyBlock
 
 })
+
+  async function loadGraph(){
+
+  const res = await api("/api/security/graph")
+  if(!res) return
+
+  const labels = res.map(()=> "")
+  const requests = res.map(r=>r.requests)
+  const blocked = res.map(r=>r.blocked)
+  const suspicious = res.map(r=>r.suspicious)
+
+  const ctx = document.getElementById("attackChart").getContext("2d")
+
+  if(window.attackChart) window.attackChart.destroy()
+
+  window.attackChart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels,
+      datasets:[
+        {
+          label:"Requests",
+          data:requests,
+          borderColor:"#00ffb3"
+        },
+        {
+          label:"Blocked",
+          data:blocked,
+          borderColor:"#ff2d2d"
+        },
+        {
+          label:"Suspicious",
+          data:suspicious,
+          borderColor:"#ffcc00"
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{labels:{color:"#fff"}}
+      },
+      scales:{
+        x:{ticks:{color:"#888"}},
+        y:{ticks:{color:"#888"}}
+      }
+    }
+  })
+
+  }
+async function loadLogs(){
+
+  const res = await api("/api/security/logs")
+  if(!res) return
+
+  const box = el("activityLog")
+  if(!box) return
+
+  box.innerHTML = ""
+
+  res.forEach(log=>{
+    const li = document.createElement("li")
+    li.textContent = log.event + " – " + log.ip
+    box.appendChild(li)
+  })
+
+}
+  
 
 </script>
   
