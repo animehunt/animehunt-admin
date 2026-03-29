@@ -583,9 +583,6 @@ Embed Lock
 </main>
 </div>
 
-
-        
-
 <script>
 
 /* =========================
@@ -597,6 +594,7 @@ const STATS_API="https://animehunt-backend.animehunt715.workers.dev/api/security
 const GRAPH_API="https://animehunt-backend.animehunt715.workers.dev/api/security/graph"
 const LOGS_API="https://animehunt-backend.animehunt715.workers.dev/api/security/logs"
 const HEATMAP_API="https://animehunt-backend.animehunt715.workers.dev/api/security/heatmap"
+const WS_URL="wss://animehunt-backend.animehunt715.workers.dev/ws"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 const el = id => document.getElementById(id)
@@ -680,7 +678,6 @@ function saveSecurity(){
     const payload = {
 
       ultra: el("ultraMode").checked,
-
       firewallLevel:Number(el("firewallLevel").value),
 
       core:{
@@ -706,9 +703,11 @@ function saveSecurity(){
         bot:el("banBots").checked
       },
 
-      sessionMonitor:el("sessionMonitor").checked,
-      hideServer:el("hideServerInfo").checked,
-      hideStack:el("hideTechStack").checked
+      advanced:{
+        sessionMonitor:el("sessionMonitor").checked,
+        hideServer:el("hideServerInfo").checked,
+        hideStack:el("hideTechStack").checked
+      }
 
     }
 
@@ -775,9 +774,7 @@ async function loadGraph(){
     },
     options:{
       responsive:true,
-      plugins:{
-        legend:{labels:{color:"#fff"}}
-      },
+      plugins:{ legend:{labels:{color:"#fff"}} },
       scales:{
         x:{ticks:{color:"#aaa"}},
         y:{ticks:{color:"#aaa"}}
@@ -787,7 +784,7 @@ async function loadGraph(){
 }
 
 /* =========================
-ACTIVITY LOG
+LOGS
 ========================= */
 
 async function loadLogs(){
@@ -800,7 +797,7 @@ async function loadLogs(){
 
   logs.forEach(l=>{
     const li = document.createElement("li")
-    li.innerText = l.ip + " → " + l.event
+    li.innerText = l.ip+" → "+l.event
     list.appendChild(li)
   })
 }
@@ -823,6 +820,87 @@ async function loadHeatmap(){
     div.innerHTML = c.country+" <span>"+c.count+"</span>"
     container.appendChild(div)
   })
+}
+
+/* =========================
+WEBSOCKET (REAL-TIME)
+========================= */
+
+function connectSocket(){
+
+  const ws = new WebSocket(WS_URL)
+
+  ws.onopen = ()=> console.log("WS Connected")
+
+  ws.onmessage = (e)=>{
+    try{
+      const data = JSON.parse(e.data)
+
+      if(data.type==="attack"){
+        addAttackPoint(data.country)
+      }
+
+    }catch{}
+  }
+
+  ws.onclose = ()=>{
+    console.log("WS Reconnecting...")
+    setTimeout(connectSocket,3000)
+  }
+}
+
+/* =========================
+MAP
+========================= */
+
+let mapChart
+
+async function initMap(){
+
+  const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+  const world = await res.json()
+
+  const countries = ChartGeo.topojson.feature(world, world.objects.countries).features
+
+  const ctx = document.getElementById("attackMap").getContext("2d")
+
+  mapChart = new Chart(ctx,{
+    type:"choropleth",
+    data:{
+      labels:countries.map(d=>d.properties.name),
+      datasets:[{
+        label:"Attacks",
+        data:countries.map(d=>({feature:d,value:0}))
+      }]
+    },
+    options:{
+      showOutline:true,
+      plugins:{
+        legend:{display:false}
+      },
+      scales:{
+        projection:{
+          axis:"x",
+          projection:"equalEarth"
+        }
+      }
+    }
+  })
+}
+
+function addAttackPoint(country){
+
+  if(!mapChart) return
+
+  const dataset = mapChart.data.datasets[0].data
+
+  const found = dataset.find(d=>d.feature.properties.name===country)
+
+  if(found){
+    found.value += 1
+  }
+
+  mapChart.update()
 }
 
 /* =========================
@@ -860,12 +938,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   loadLogs()
   loadHeatmap()
 
+  initMap()
+  connectSocket()
+
   setInterval(loadStats,5000)
   setInterval(loadGraph,5000)
   setInterval(loadLogs,5000)
   setInterval(loadHeatmap,10000)
-  initMap()
-connectSocket()
 
   document.querySelectorAll("input").forEach(i=>{
     i.addEventListener("change",()=>{
@@ -892,83 +971,6 @@ connectSocket()
   }
 
 })
-  /* =========================
-REAL ATTACK MAP
-========================= */
-
-let attackPoints = []
-let attackLines = []
-
-async function initMap(){
-
-  const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas/countries-110m.json")
-  const world = await res.json()
-
-  const countries = ChartGeo.topojson.feature(world, world.objects.countries).features
-
-  const ctx = document.getElementById("attackMap").getContext("2d")
-
-  window.mapChart = new Chart(ctx,{
-    type:"choropleth",
-    data:{
-      labels:countries.map(d=>d.properties.name),
-      datasets:[{
-        label:"Attacks",
-        data:countries.map(d=>({feature:d,value:0}))
-      }]
-    },
-    options:{
-      showOutline:true,
-      plugins:{
-        legend:{display:false}
-      },
-      scales:{
-        projection:{
-          axis:"x",
-          projection:"equalEarth"
-        }
-      }
-    }
-  })
-}
-
-  /* =========================
-WEBSOCKET REALTIME
-========================= */
-
-function connectSocket(){
-
-  const ws = new WebSocket("wss://animehunt-backend.animehunt715.workers.dev/ws")
-
-  ws.onmessage = (event)=>{
-
-    const data = JSON.parse(event.data)
-
-    // attack point
-    attackPoints.push(data)
-
-    updateMap(data)
-  }
-
-  ws.onclose = ()=>{
-    setTimeout(connectSocket,2000)
-  }
-}
-
-function updateMap(data){
-
-  if(!window.mapChart) return
-
-  const country = data.country
-
-  window.mapChart.data.datasets[0].data.forEach(d=>{
-    if(d.feature.properties.name === country){
-      d.value += 1
-    }
-  })
-
-  window.mapChart.update()
-}
 
 </script>
   
