@@ -6,7 +6,6 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-
 body{background:#0b0f1a;color:#fff}
 
 .cms-app{display:flex;min-height:100vh}
@@ -30,44 +29,35 @@ font-size:13px;
 color:#ccc;
 text-decoration:none;
 }
-.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(6px)}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00}
 
 .cms-main{flex:1;background:#0e1424;display:flex;flex-direction:column}
 .cms-header{
 height:60px;background:#0b0f1a;
 display:flex;align-items:center;
-justify-content:space-between;
 padding:0 20px;border-bottom:1px solid #1a2035
 }
 
-.cms-content{padding:20px}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:14px;
-margin-bottom:20px;
-}
+.cms-content{padding:20px;max-width:900px;margin:auto;width:100%}
 
 .card{
 background:#0b0f1a;
 border:1px solid #1a2035;
 border-radius:12px;
 padding:14px;
+margin-bottom:16px;
 }
 
-.card h3{font-size:13px;color:#ffcc00;margin-bottom:10px}
+.card h3{font-size:14px;color:#ffcc00;margin-bottom:10px}
 
 .toggle{
 display:flex;
 justify-content:space-between;
-margin:6px 0;
-font-size:12px;
+margin:8px 0;
+font-size:13px;
 }
 
-.switch{
-position:relative;width:42px;height:22px;
-}
+.switch{position:relative;width:42px;height:22px}
 .switch input{display:none}
 .slider{
 position:absolute;top:0;left:0;right:0;bottom:0;
@@ -81,162 +71,8 @@ transition:.3s;
 input:checked+.slider{background:#00ffb3}
 input:checked+.slider:before{transform:translateX(20px)}
 
-.big-red{
-background:#ff2d2d;
-padding:10px;
-border:none;
-border-radius:8px;
-color:#fff;
-width:100%;
-font-weight:700;
-margin-top:10px;
-cursor:pointer;
-}
-
-.yellow-btn{
-background:#ffcc00;
-padding:8px;
-border:none;
-border-radius:6px;
-width:100%;
-margin-top:10px;
-cursor:pointer;
-}
-
-.range{
-width:100%;
-margin-top:8px;
-}
-
-.list{
-margin-top:10px;
-font-size:12px;
-color:#ccc;
-}
-  .heatmap-grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:10px;
-  margin-top:10px;
-}
-
-.heat{
-  background:#11162a;
-  padding:10px;
-  border-radius:8px;
-  font-size:12px;
-  display:flex;
-  justify-content:space-between;
-  border:1px solid #1a2035;
-}
-  .activity-log li{
-  font-size:12px;
-  padding:6px 0;
-  border-bottom:1px solid #1a2035;
-}
-  .threat-bar{
-  width:100%;
-  height:12px;
-  background:#111;
-  border-radius:8px;
-  overflow:hidden;
-}
-
-.threat-fill{
-  height:100%;
-  width:30%;
-  background:#ffcc00;
-}
-  /* ===== MAIN CONTENT WIDTH FIX ===== */
-.cms-content{
-  max-width:1400px;
-  margin:auto;
-  width:100%;
-}
-
-/* ===== SECTION SPACING ===== */
-.security-section{
-  margin-bottom:18px;
-}
-
-/* ===== GRID FIX ===== */
-.security-grid{
-  display:grid;
-  grid-template-columns:repeat(4, minmax(220px, 1fr));
-  gap:16px;
-}
-
-/* ===== CARD LOOK IMPROVE ===== */
-.sec-card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:14px;
-  padding:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  min-height:60px;
-  box-shadow:0 0 0 1px rgba(255,255,255,0.02);
-}
-
-/* ===== BIG CONTROL PANELS ===== */
-.security-section{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:14px;
-  padding:18px;
-}
-
-/* ===== HEADER AREA WIDTH ===== */
-.cms-header{
-  max-width:1400px;
-  margin:auto;
-  width:100%;
-}
-
-/* ===== HEATMAP IMPROVE ===== */
-.heatmap-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:10px;
-}
-
-.heat{
-  background:#11162a;
-  padding:12px;
-  border-radius:8px;
-  font-size:12px;
-  display:flex;
-  justify-content:space-between;
-  border:1px solid #1a2035;
-}
-
-/* ===== 3 COLUMN BOTTOM AREA ===== */
-.security-bottom{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-}
-
-/* ===== MOBILE FIX ===== */
-@media (max-width:1100px){
-  .security-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-
-@media (max-width:700px){
-  .security-grid{
-    grid-template-columns:1fr;
-  }
-
-  .security-bottom{
-    grid-template-columns:1fr;
-  }
-}
+.range{width:100%;margin-top:10px}
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo"></script>
 </head>
 
 <body>
@@ -251,8 +87,6 @@ color:#ccc;
   </div>
 
   <nav class="cms-menu">
-
-    <!-- CORE -->
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
@@ -260,32 +94,25 @@ color:#ccc;
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
 
-    <!-- CONTENT -->
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
 
-    <!-- DATA & SEO -->
     <a href="seo.html">📈 Seo</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
 
-    <!-- SECURITY & DEPLOY -->
-   <a href="security.html" class="active">🔐 Security</a>
+    <a href="security.html" class="active">🔐 Security</a>
     <a href="deploy-backup.html">🚀 Deploy-backup</a>
 
-    <!-- AI & ADS -->
     <a href="ads.html">📢 Ads</a>
     <a href="ai-brain.html">🧠 Ai Brain</a>
 
-    <!-- LAYOUT CONTROL -->
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
 
-    <!-- ADMIN / SYSTEM (LAST) -->
     <a href="system-settings.html">⚙ System-settings</a>
-
   </nav>
 </aside>
 
@@ -293,15 +120,12 @@ color:#ccc;
 <main class="cms-main">
 
 <header class="cms-header">
-<div>🔐 Ultra Security Control Center</div>
+<div>🔐 Security Settings</div>
 </header>
 
 <section class="cms-content">
 
-
 <!-- CORE -->
-
-
 <div class="card">
 <h3>Core Protection</h3>
 
@@ -336,9 +160,9 @@ Embed Lock
 <span class="slider"></span>
 </label>
 </div>
-
 </div>
 
+<!-- ADMIN -->
 <div class="card">
 <h3>Admin Security</h3>
 
@@ -359,25 +183,16 @@ Session Monitor
 </div>
 
 </div>
-  
 
-
+<!-- FIREWALL -->
 <div class="card">
-<h3>Anti-DDoS</h3>
-<label>Request Limit</label>
-<input type="range" class="range" min="10" max="500">
-<label>Burst Protection</label>
-<input type="range" class="range" min="10" max="300">
-</div>
-  
-  <div class="security-section">
-  <h2>Firewall Strength</h2>
-
-  <input type="range" id="firewallLevel" min="1" max="5" value="3">
-  <p id="fwLabel">Level 3 – Strong</p>
+<h3>Firewall Level</h3>
+<input type="range" id="firewallLevel" min="1" max="5" value="3">
+<p id="fwLabel">Level 3</p>
 </div>
 
-  <div class="card">
+<!-- AUTO BAN -->
+<div class="card">
 <h3>Auto Protection</h3>
 
 <div class="toggle">
@@ -388,77 +203,6 @@ Auto IP Ban
 </label>
 </div>
 
-  </div>
-
-<div class="card">
-<h3>Geo Lock</h3>
-<input placeholder="Block Country Code" style="width:100%;padding:6px;background:#11162a;border:1px solid #222;color:#fff">
-<div class="list">Blocked: CN, RU, IR</div>
-</div>
-
-
-
-  
-  <label>
-    <input type="checkbox" id="indiaOnly"> India Only Access
-  </label><br>
-
-  <label>
-    <input type="checkbox" id="blockForeign"> Block Foreign Traffic
-  </label>
-</div>
-
-<div class="card">
-<h3>Security Level</h3>
-<label>Low → Extreme</label>
-<input type="range" class="range" min="1" max="5">
-</div>
-  
-  <div class="security-section">
-  <h2>Admin Security</h2>
-
-  <label><input type="checkbox" id="loginLimit"> Limit Login Attempts</label><br>
-  <label><input type="checkbox" id="deviceLock"> Device Lock</label><br>
-  <label><input type="checkbox" id="sessionMonitor"> Session Monitor</label>
-</div>
-  
-  <div class="security-section">
-  <h2>Auto Defense Engine</h2>
-
-  <label><input type="checkbox" id="autoBan"> Auto IP Ban</label><br>
-  <label><input type="checkbox" id="autoLockDownloads"> Lock Downloads on Attack</label><br>
-  <label><input type="checkbox" id="autoProtectPlayer"> Protect Player</label>
-</div>
-  
-  <div class="security-section">
-  <h2>AI Protection</h2>
-
-  <label><input type="checkbox" id="aiDetect"> Auto Threat Detect</label><br>
-  <label><input type="checkbox" id="aiBlock"> Auto Block Attackers</label><br>
-  <label><input type="checkbox" id="aiLearn"> Learning Mode</label>
-</div>
-  
-  <
-  <div class="sec-card">
-    <h3>Blocked Requests</h3>
-    <span id="blockedReq">9</span>
-  </div>
-</div>
-  
-
-
-
-  <label>
-    <input type="checkbox" id="hideServerInfo">
-    Hide Server Info
-  </label><br>
-
-  <label>
-    <input type="checkbox" id="hideTechStack">
-    Hide Tech Stack
-  </label>
-</div>
-
 </div>
 
 </section>
@@ -467,24 +211,11 @@ Auto IP Ban
 
 <script>
 
-/* =========================
-CONFIG
-========================= */
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
-const STATS_API="https://animehunt-backend.animehunt715.workers.dev/api/security/stats"
-const GRAPH_API="https://animehunt-backend.animehunt715.workers.dev/api/security/graph"
-const LOGS_API="https://animehunt-backend.animehunt715.workers.dev/api/security/logs"
-const HEATMAP_API="https://animehunt-backend.animehunt715.workers.dev/api/security/heatmap"
-const WS_URL="wss://animehunt-backend.animehunt715.workers.dev/ws"
-
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 const el = id => document.getElementById(id)
 
-/* =========================
-API
-========================= */
-
+/* API */
 async function api(url, method="GET", body=null){
   try{
     const res = await fetch(url,{
@@ -496,12 +227,6 @@ async function api(url, method="GET", body=null){
       body: body ? JSON.stringify(body) : null
     })
 
-    if(res.status===401){
-      alert("Session expired")
-      location.href="login.html"
-      return null
-    }
-
     if(!res.ok) return null
     return await res.json()
 
@@ -510,16 +235,11 @@ async function api(url, method="GET", body=null){
   }
 }
 
-/* =========================
-LOAD SETTINGS
-========================= */
-
+/* LOAD */
 async function loadSecurity(){
-
   const d = await api(API)
   if(!d) return
 
-  el("ultraMode").checked = d.ultra
   el("firewallLevel").value = d.firewallLevel
 
   el("botProt").checked = d.core.bot
@@ -527,30 +247,16 @@ async function loadSecurity(){
   el("hotlinkBlock").checked = d.core.hotlink
   el("embedLock").checked = d.core.embed
 
-  el("indiaOnly").checked = d.geo.indiaOnly
-  el("blockForeign").checked = d.geo.blockForeign
-
   el("loginLimit").checked = d.admin.loginLimit
-  el("deviceLock").checked = d.admin.deviceLock
+  el("sessionMonitor").checked = d.advanced.sessionMonitor
 
   el("autoBan").checked = d.ai.autoBan
-  el("banBrute").checked = d.ai.brute
-  el("banBots").checked = d.ai.bot
-
-  el("sessionMonitor").checked = d.advanced.sessionMonitor
-  el("hideServerInfo").checked = d.advanced.hideServer
-  el("hideTechStack").checked = d.advanced.hideStack
 
   updateFirewallLabel()
-  updateThreatUI()
 }
 
-/* =========================
-SAVE
-========================= */
-
+/* SAVE */
 let saveTimer
-
 function saveSecurity(){
 
   clearTimeout(saveTimer)
@@ -558,8 +264,6 @@ function saveSecurity(){
   saveTimer = setTimeout(async()=>{
 
     const payload = {
-
-      ultra: el("ultraMode").checked,
       firewallLevel:Number(el("firewallLevel").value),
 
       core:{
@@ -569,28 +273,17 @@ function saveSecurity(){
         embed:el("embedLock").checked
       },
 
-      geo:{
-        indiaOnly:el("indiaOnly").checked,
-        blockForeign:el("blockForeign").checked
-      },
-
       admin:{
-        loginLimit:el("loginLimit").checked,
-        deviceLock:el("deviceLock").checked
-      },
-
-      ai:{
-        autoBan:el("autoBan").checked,
-        brute:el("banBrute").checked,
-        bot:el("banBots").checked
+        loginLimit:el("loginLimit").checked
       },
 
       advanced:{
-        sessionMonitor:el("sessionMonitor").checked,
-        hideServer:el("hideServerInfo").checked,
-        hideStack:el("hideTechStack").checked
-      }
+        sessionMonitor:el("sessionMonitor").checked
+      },
 
+      ai:{
+        autoBan:el("autoBan").checked
+      }
     }
 
     await api(API,"POST",payload)
@@ -598,241 +291,18 @@ function saveSecurity(){
   },300)
 }
 
-/* =========================
-STATS
-========================= */
-
-async function loadStats(){
-
-  const s = await api(STATS_API)
-  if(!s) return
-
-  el("ipCount").innerText = s.blockedIPs
-  el("liveUsers").innerText = s.liveUsers
-  el("reqPerSec").innerText = s.reqPerSec
-  el("blockedReq").innerText = s.blockedReq
-
-  el("threat").innerText = s.suspicious > 20 ? "HIGH" : "LOW"
-}
-
-/* =========================
-GRAPH
-========================= */
-
-async function loadGraph(){
-
-  const res = await api(GRAPH_API)
-  if(!res) return
-
-  const ctx = el("attackChart").getContext("2d")
-
-  if(window.attackChart) window.attackChart.destroy()
-
-  window.attackChart = new Chart(ctx,{
-    type:"line",
-    data:{
-      labels:res.map(()=>""),
-
-      datasets:[
-        {
-          label:"Requests",
-          data:res.map(r=>r.requests),
-          borderColor:"#00ffb3",
-          tension:0.3
-        },
-        {
-          label:"Blocked",
-          data:res.map(r=>r.blocked),
-          borderColor:"#ff2d2d",
-          tension:0.3
-        },
-        {
-          label:"Suspicious",
-          data:res.map(r=>r.suspicious),
-          borderColor:"#ffcc00",
-          tension:0.3
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{labels:{color:"#fff"}} },
-      scales:{
-        x:{ticks:{color:"#aaa"}},
-        y:{ticks:{color:"#aaa"}}
-      }
-    }
-  })
-}
-
-/* =========================
-LOGS
-========================= */
-
-async function loadLogs(){
-
-  const logs = await api(LOGS_API)
-  if(!logs) return
-
-  const list = el("activityLog")
-  list.innerHTML = ""
-
-  logs.forEach(l=>{
-    const li = document.createElement("li")
-    li.innerText = l.ip+" → "+l.event
-    list.appendChild(li)
-  })
-}
-
-/* =========================
-HEATMAP
-========================= */
-
-async function loadHeatmap(){
-
-  const data = await api(HEATMAP_API)
-  if(!data) return
-
-  const container = document.querySelector(".heatmap-grid")
-  container.innerHTML = ""
-
-  data.forEach(c=>{
-    const div=document.createElement("div")
-    div.className="heat"
-    div.innerHTML = c.country+" <span>"+c.count+"</span>"
-    container.appendChild(div)
-  })
-}
-
-/* =========================
-WEBSOCKET (REAL-TIME)
-========================= */
-
-function connectSocket(){
-
-  const ws = new WebSocket(WS_URL)
-
-  ws.onopen = ()=> console.log("WS Connected")
-
-  ws.onmessage = (e)=>{
-    try{
-      const data = JSON.parse(e.data)
-
-      if(data.type==="attack"){
-        addAttackPoint(data.country)
-      }
-
-    }catch{}
-  }
-
-  ws.onclose = ()=>{
-    console.log("WS Reconnecting...")
-    setTimeout(connectSocket,3000)
-  }
-}
-
-/* =========================
-MAP
-========================= */
-
-let mapChart
-
-async function initMap(){
-
-  const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
-  const world = await res.json()
-
-  const countries = ChartGeo.topojson.feature(world, world.objects.countries).features
-
-  const ctx = document.getElementById("attackMap").getContext("2d")
-
-  mapChart = new Chart(ctx,{
-    type:"choropleth",
-    data:{
-      labels:countries.map(d=>d.properties.name),
-      datasets:[{
-        label:"Attacks",
-        data:countries.map(d=>({feature:d,value:0}))
-      }]
-    },
-    options:{
-      showOutline:true,
-      plugins:{
-        legend:{display:false}
-      },
-      scales:{
-        projection:{
-          axis:"x",
-          projection:"equalEarth"
-        }
-      }
-    }
-  })
-}
-
-function addAttackPoint(country){
-
-  if(!mapChart) return
-
-  const dataset = mapChart.data.datasets[0].data
-
-  const found = dataset.find(d=>d.feature.properties.name===country)
-
-  if(found){
-    found.value += 1
-  }
-
-  mapChart.update()
-}
-
-/* =========================
-UI
-========================= */
-
+/* UI */
 function updateFirewallLabel(){
-
-  const lvl = Number(el("firewallLevel").value)
-
-  el("fwLabel").innerText = "Level "+lvl
-  el("fwLive").innerText = lvl
+  el("fwLabel").innerText = "Level "+el("firewallLevel").value
 }
 
-function updateThreatUI(){
-
-  if(el("ultraMode").checked){
-    el("threatFill").style.width="10%"
-    el("protStatus").innerText="LOCKDOWN"
-  }else{
-    el("threatFill").style.width="45%"
-    el("protStatus").innerText="ACTIVE"
-  }
-}
-
-/* =========================
-INIT
-========================= */
-
+/* INIT */
 document.addEventListener("DOMContentLoaded",()=>{
 
   loadSecurity()
-  loadStats()
-  loadGraph()
-  loadLogs()
-  loadHeatmap()
-
-  initMap()
-  connectSocket()
-
-  setInterval(loadStats,5000)
-  setInterval(loadGraph,5000)
-  setInterval(loadLogs,5000)
-  setInterval(loadHeatmap,10000)
 
   document.querySelectorAll("input").forEach(i=>{
-    i.addEventListener("change",()=>{
-      saveSecurity()
-      updateThreatUI()
-    })
+    i.addEventListener("change",saveSecurity)
   })
 
   el("firewallLevel").addEventListener("input",()=>{
@@ -840,22 +310,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     saveSecurity()
   })
 
-  document.querySelector(".big-red").onclick = ()=>{
-    if(confirm("Activate LOCKDOWN?")){
-      el("ultraMode").checked=true
-      saveSecurity()
-      updateThreatUI()
-    }
-  }
-
-  document.querySelector(".yellow-btn").onclick = ()=>{
-    alert("🚨 Emergency Block Triggered")
-  }
-
 })
 
 </script>
-  
 
 </body>
 </html>
