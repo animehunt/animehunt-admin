@@ -298,59 +298,9 @@ color:#ccc;
 
 <section class="cms-content">
 
-<!-- ULTRA MODE -->
-<div class="card">
-<h3>🚨 ULTRA SECURITY MODE</h3>
-<button class="big-red" onclick="alert('Ultra Mode Activated')">ACTIVATE FULL LOCKDOWN</button>
-<button class="yellow-btn">Emergency Traffic Block</button>
-</div>
 
 <!-- CORE -->
-<div class="grid">
-  
-  <div class="security-section">
-  <h2>🔥 Ultra Security Mode</h2>
 
-  <div class="sec-card">
-    <h3>Enable Ultra Protection</h3>
-    <label class="switch">
-      <input type="checkbox" id="ultraMode">
-      <span class="slider"></span>
-    </label>
-  </div>
-</div>
-  
-  <div class="security-section">
-  <h2>Threat Level</h2>
-
-  <div class="threat-bar">
-    <div class="threat-fill" id="threatFill"></div>
-  </div>
-</div>
-  
-  <div class="security-grid">
-
-  <div class="sec-card">
-    <h3>Blocked IPs</h3>
-    <span id="ipCount">0</span>
-  </div>
-
-  <div class="sec-card">
-    <h3>Firewall Level</h3>
-    <span id="fwLive">3</span>
-  </div>
-
-  <div class="sec-card">
-    <h3>Protection Status</h3>
-    <span id="protStatus">Active</span>
-  </div>
-
-  <div class="sec-card">
-    <h3>Threat Level</h3>
-    <span id="threat">Low</span>
-  </div>
-
-</div>
 
 <div class="card">
 <h3>Core Protection</h3>
@@ -391,19 +341,26 @@ Embed Lock
 
 <div class="card">
 <h3>Admin Security</h3>
-<div class="toggle">2FA<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Session Timeout<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Device Lock<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Admin IP Only<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+
+<div class="toggle">
+Login Limit
+<label class="switch">
+<input type="checkbox" id="loginLimit">
+<span class="slider"></span>
+</label>
 </div>
 
-<div class="card">
-<h3>Firewall</h3>
-<div class="toggle">Proxy Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">VPN Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">TOR Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Country Block<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+<div class="toggle">
+Session Monitor
+<label class="switch">
+<input type="checkbox" id="sessionMonitor">
+<span class="slider"></span>
+</label>
 </div>
+
+</div>
+  
+
 
 <div class="card">
 <h3>Anti-DDoS</h3>
@@ -420,12 +377,18 @@ Embed Lock
   <p id="fwLabel">Level 3 – Strong</p>
 </div>
 
-<div class="card">
-<h3>AI Protection</h3>
-<div class="toggle">Auto IP Ban<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Behavior Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
-<div class="toggle">Brute Force Detect<label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+  <div class="card">
+<h3>Auto Protection</h3>
+
+<div class="toggle">
+Auto IP Ban
+<label class="switch">
+<input type="checkbox" id="autoBan">
+<span class="slider"></span>
+</label>
 </div>
+
+  </div>
 
 <div class="card">
 <h3>Geo Lock</h3>
@@ -433,27 +396,9 @@ Embed Lock
 <div class="list">Blocked: CN, RU, IR</div>
 </div>
 
-<div class="card">
-<h3>Domain Control</h3>
-<input placeholder="Allowed Domain" style="width:100%;padding:6px;background:#11162a;border:1px solid #222;color:#fff">
-<div class="list">animehunt.in</div>
-</div>
 
-  <div class="security-section">
-<h2>📈 Real Attack Graph</h2>
 
-<canvas id="attackChart" height="120"></canvas>
-
-  </div>
-
-  <div class="security-section">
-  <h2>🌍 Live Cyber Attack Map</h2>
-  <canvas id="attackMap" height="300"></canvas>
-  </div>
   
-  <div class="security-section">
-  <h2>Geo Protection</h2>
-
   <label>
     <input type="checkbox" id="indiaOnly"> India Only Access
   </label><br>
@@ -493,77 +438,14 @@ Embed Lock
   <label><input type="checkbox" id="aiLearn"> Learning Mode</label>
 </div>
   
-  <div class="security-section">
-  <h2>🔥 Attack Heatmap</h2>
-
-  <div class="heatmap-grid">
-    <div class="heat">India <span>12</span></div>
-    <div class="heat">USA <span>5</span></div>
-    <div class="heat">China <span>21</span></div>
-    <div class="heat">Russia <span>9</span></div>
-    <div class="heat">Brazil <span>3</span></div>
-  </div>
-</div>
-  
-  <div class="security-section">
-  <h2>📡 Live Traffic Monitor</h2>
-
-  <div class="sec-card">
-    <h3>Live Users</h3>
-    <span id="liveUsers">128</span>
-  </div>
-
-  <div class="sec-card">
-    <h3>Requests / sec</h3>
-    <span id="reqPerSec">42</span>
-  </div>
-
+  <
   <div class="sec-card">
     <h3>Blocked Requests</h3>
     <span id="blockedReq">9</span>
   </div>
 </div>
   
-  <div class="security-section">
-  <h2>⚠ Suspicious Activity</h2>
 
-  <ul class="activity-log" id="activityLog">
-    <li>IP 192.168.0.1 blocked</li>
-    <li>Too many requests detected</li>
-    <li>Bot attack prevented</li>
-  </ul>
-</div>
-  
-  <div class="security-section">
-  <h2>🔐 Admin Login Attempts</h2>
-
-  <ul id="loginAttempts">
-    <li>Admin login success – 10:21 PM</li>
-    <li>Failed login – Wrong password</li>
-  </ul>
-</div>
-  
-  <div class="security-section">
-  <h2>🤖 Auto Ban Engine</h2>
-
-  <label>
-    <input type="checkbox" id="banBrute">
-    Ban brute-force attackers
-  </label><br>
-
-  <label>
-    <input type="checkbox" id="banBots">
-    Ban detected bots
-  </label><br>
-
-  <label>
-    <input type="checkbox" id="banScrapers">
-    Ban scrapers
-  </label>
-</div>
-  
-  <div class="security-section">
-  <h2>👻 Stealth Mode</h2>
 
 
   <label>
