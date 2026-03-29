@@ -542,109 +542,88 @@ color:#ccc;
 
             <script>
 
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
+const STATS_API = "https://animehunt-backend.animehunt715.workers.dev/api/security/stats"
 
-/* =========================
-SECURITY CMS SCRIPT
-========================= */
+const TOKEN_KEY = "AUTH_TOKEN"
 
-const API="/api/admin/security"
-const STATS_API="/api/security/stats"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const el = id => document.getElementById(id)
 
-const el=id=>document.getElementById(id)
+function getToken(){
+  return localStorage.getItem(TOKEN_KEY) || ""
+}
 
 /* =========================
 API HELPER
 ========================= */
 
-async function api(url,method="GET",body=null){
+async function api(url, method="GET", body=null){
 
-try{
+  try{
 
-const res=await fetch(url,{
+    const res = await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + getToken()
+      },
+      body: body ? JSON.stringify(body) : null
+    })
 
-method,
+    if(res.status === 401){
+      alert("Session expired")
+      localStorage.removeItem(TOKEN_KEY)
+      location.href = "login.html"
+      return null
+    }
 
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
+    if(!res.ok){
+      console.error("API ERROR", res.status)
+      return null
+    }
 
-body:body?JSON.stringify(body):null
+    return await res.json()
 
-})
-
-if(res.status===401){
-
-alert("Session expired")
-location.href="login.html"
-return null
-
-}
-
-if(!res.ok){
-
-console.error("API ERROR",res.status)
-return null
-
-}
-
-return await res.json()
-
-}catch(e){
-
-console.error(e)
-return null
-
-}
+  }catch(e){
+    console.error("NETWORK ERROR", e)
+    return null
+  }
 
 }
 
 /* =========================
-LOAD SECURITY SETTINGS
+LOAD SETTINGS
 ========================= */
 
 async function loadSecurity(){
 
-const d=await api(API)
+  const d = await api(API)
 
-if(!d) return
+  console.log("API DATA:", d)
 
-/* ULTRA */
+  if(!d) return
 
-if(el("ultraMode"))
-el("ultraMode").checked=d.ultra
+  if(el("ultraMode")) el("ultraMode").checked = d.ultra
 
-/* FIREWALL */
+  if(el("firewallLevel")) el("firewallLevel").value = d.firewallLevel
 
-if(el("firewallLevel"))
-el("firewallLevel").value=d.firewallLevel
+  if(el("botProt")) el("botProt").checked = d.core.bot
+  if(el("scraperShield")) el("scraperShield").checked = d.core.scraper
+  if(el("hotlinkBlock")) el("hotlinkBlock").checked = d.core.hotlink
+  if(el("embedLock")) el("embedLock").checked = d.core.embed
 
-/* CORE */
+  if(el("indiaOnly")) el("indiaOnly").checked = d.geo.indiaOnly
+  if(el("blockForeign")) el("blockForeign").checked = d.geo.blockForeign
 
-if(el("botProt")) el("botProt").checked=d.core.bot
-if(el("scraperShield")) el("scraperShield").checked=d.core.scraper
-if(el("hotlinkBlock")) el("hotlinkBlock").checked=d.core.hotlink
-if(el("embedLock")) el("embedLock").checked=d.core.embed
+  if(el("loginLimit")) el("loginLimit").checked = d.admin.loginLimit
+  if(el("deviceLock")) el("deviceLock").checked = d.admin.deviceLock
 
-/* GEO */
+  if(el("autoBan")) el("autoBan").checked = d.ai.autoBan
+  if(el("banBrute")) el("banBrute").checked = d.ai.brute
+  if(el("banBots")) el("banBots").checked = d.ai.bot
 
-if(el("indiaOnly")) el("indiaOnly").checked=d.geo.indiaOnly
-if(el("blockForeign")) el("blockForeign").checked=d.geo.blockForeign
-
-/* ADMIN */
-
-if(el("loginLimit")) el("loginLimit").checked=d.admin.loginLimit
-if(el("deviceLock")) el("deviceLock").checked=d.admin.deviceLock
-
-/* AI */
-
-if(el("autoBan")) el("autoBan").checked=d.ai.autoBan
-if(el("banBrute")) el("banBrute").checked=d.ai.brute
-if(el("banBots")) el("banBots").checked=d.ai.bot
-
-updateFirewallLabel()
-updateThreatUI()
+  updateFirewallLabel()
+  updateThreatUI()
 
 }
 
@@ -656,127 +635,48 @@ let saveTimer
 
 function saveSecurity(){
 
-clearTimeout(saveTimer)
+  clearTimeout(saveTimer)
 
-saveTimer=setTimeout(async()=>{
+  saveTimer = setTimeout(async()=>{
 
-const payload={
+    const payload = {
 
-ultra:el("ultraMode")?.checked || false,
+      ultra: el("ultraMode")?.checked || false,
 
-firewallLevel:Number(el("firewallLevel")?.value || 3),
+      firewallLevel: Number(el("firewallLevel")?.value || 3),
 
-core:{
-bot:el("botProt")?.checked || false,
-scraper:el("scraperShield")?.checked || false,
-hotlink:el("hotlinkBlock")?.checked || false,
-embed:el("embedLock")?.checked || false
-},
+      core:{
+        bot: el("botProt")?.checked || false,
+        scraper: el("scraperShield")?.checked || false,
+        hotlink: el("hotlinkBlock")?.checked || false,
+        embed: el("embedLock")?.checked || false
+      },
 
-geo:{
-indiaOnly:el("indiaOnly")?.checked || false,
-blockForeign:el("blockForeign")?.checked || false
-},
+      geo:{
+        indiaOnly: el("indiaOnly")?.checked || false,
+        blockForeign: el("blockForeign")?.checked || false
+      },
 
-admin:{
-loginLimit:el("loginLimit")?.checked || false,
-deviceLock:el("deviceLock")?.checked || false
-},
+      admin:{
+        loginLimit: el("loginLimit")?.checked || false,
+        deviceLock: el("deviceLock")?.checked || false
+      },
 
-ai:{
-autoBan:el("autoBan")?.checked || false,
-brute:el("banBrute")?.checked || false,
-bot:el("banBots")?.checked || false
-}
+      ai:{
+        autoBan: el("autoBan")?.checked || false,
+        brute: el("banBrute")?.checked || false,
+        bot: el("banBots")?.checked || false
+      }
 
-}
+    }
 
-await api(API,"POST",payload)
+    console.log("SENDING:", payload)
 
-console.log("Security settings saved")
+    await api(API, "POST", payload)
 
-},500)
+    console.log("Saved ✅")
 
-}
-
-/* =========================
-LIVE STATS
-========================= */
-
-async function loadStats(){
-
-const s=await api(STATS_API)
-
-if(!s) return
-
-if(el("ipCount"))
-el("ipCount").innerText=s.blockedIPs
-
-if(el("liveUsers"))
-el("liveUsers").innerText=s.liveUsers
-
-if(el("reqPerSec"))
-el("reqPerSec").innerText=s.reqPerSec
-
-if(el("blockedReq"))
-el("blockedReq").innerText=s.blockedReq
-
-}
-
-/* =========================
-FIREWALL LABEL
-========================= */
-
-function updateFirewallLabel(){
-
-const labels=[
-"None",
-"Basic",
-"Standard",
-"Strong",
-"Aggressive",
-"Full Shield"
-]
-
-const level=Number(el("firewallLevel")?.value || 3)
-
-if(el("fwLabel"))
-el("fwLabel").innerText="Level "+level+" – "+labels[level]
-
-if(el("fwLive"))
-el("fwLive").innerText=level
-
-}
-
-/* =========================
-THREAT UI
-========================= */
-
-function updateThreatUI(){
-
-const ultra=el("ultraMode")?.checked
-
-const fill=el("threatFill")
-
-if(!fill) return
-
-if(ultra){
-
-fill.style.width="10%"
-fill.style.background="#00ffb3"
-
-if(el("protStatus"))
-el("protStatus").innerText="Lockdown"
-
-}else{
-
-fill.style.width="45%"
-fill.style.background="#ffcc00"
-
-if(el("protStatus"))
-el("protStatus").innerText="Active"
-
-}
+  }, 500)
 
 }
 
@@ -786,40 +686,60 @@ INIT
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-loadSecurity()
+  if(!getToken()){
+    location.href = "login.html"
+    return
+  }
 
-loadStats()
+  loadSecurity()
 
-setInterval(loadStats,10000)
+  document.querySelectorAll("input").forEach(i=>{
+    i.addEventListener("change", ()=>{
+      saveSecurity()
+      updateThreatUI()
+    })
+  })
 
-/* AUTO SAVE */
-
-document.querySelectorAll("input").forEach(i=>{
-
-i.addEventListener("change",()=>{
-
-saveSecurity()
-
-updateThreatUI()
-
-})
-
-})
-
-/* FIREWALL */
-
-if(el("firewallLevel")){
-
-el("firewallLevel").addEventListener("input",()=>{
-
-updateFirewallLabel()
-saveSecurity()
+  if(el("firewallLevel")){
+    el("firewallLevel").addEventListener("input", ()=>{
+      updateFirewallLabel()
+      saveSecurity()
+    })
+  }
 
 })
+
+/* =========================
+UI HELPERS
+========================= */
+
+function updateFirewallLabel(){
+
+  const labels = ["None","Basic","Standard","Strong","Aggressive","Full Shield"]
+
+  const level = Number(el("firewallLevel")?.value || 3)
+
+  if(el("fwLabel"))
+    el("fwLabel").innerText = "Level " + level + " – " + labels[level]
 
 }
 
-})
+function updateThreatUI(){
+
+  const ultra = el("ultraMode")?.checked
+  const fill = el("threatFill")
+
+  if(!fill) return
+
+  if(ultra){
+    fill.style.width = "10%"
+    fill.style.background = "#00ffb3"
+  }else{
+    fill.style.width = "45%"
+    fill.style.background = "#ffcc00"
+  }
+
+}
 
 
 
