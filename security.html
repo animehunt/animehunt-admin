@@ -5,8 +5,12 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#0b0f1a;color:#fff}
 
-.cms-app{display:flex;min-height:100vh}
+.cms-app{
+display:flex;
+min-height:100vh;
+}
 
+/* SIDEBAR */
 .cms-sidebar{
 width:260px;
 background:linear-gradient(180deg,#0b0f1a,#0e1424);
@@ -28,37 +32,51 @@ text-decoration:none;
 }
 .cms-menu a:hover{background:#1a2035;color:#ffcc00}
 
-.cms-main{flex:1;background:#0e1424;display:flex;flex-direction:column}
-
-.cms-header{
-height:60px;background:#0b0f1a;
-display:flex;align-items:center;
-padding:0 20px;border-bottom:1px solid #1a2035
+/* MAIN */
+.cms-main{
+flex:1;
+display:flex;
+flex-direction:column;
+background:#0e1424;
 }
 
+/* HEADER */
+.cms-header{
+height:60px;
+background:#0b0f1a;
+display:flex;
+align-items:center;
+padding:0 20px;
+border-bottom:1px solid #1a2035;
+}
+
+/* CONTENT (FIXED) */
 .cms-content{
 padding:20px;
-max-width:1100px;
-margin:auto;
 width:100%;
+max-width:1100px;
+margin:0 auto;
 }
 
+/* GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:20px;
+align-items:start; /* 🔥 IMPORTANT FIX */
 }
 
 @media(max-width:700px){
 .grid{grid-template-columns:1fr}
 }
 
+/* CARD */
 .card{
 background:#0b0f1a;
 border:1px solid #1a2035;
 border-radius:12px;
 padding:16px;
-transition:0.2s;
+transition:.2s;
 }
 
 .card:hover{
@@ -72,6 +90,7 @@ color:#ffcc00;
 margin-bottom:10px;
 }
 
+/* TOGGLE */
 .toggle{
 display:flex;
 justify-content:space-between;
@@ -101,14 +120,13 @@ input:checked+.slider:before{transform:translateX(20px)}
 <div class="brand">
 <span>Anime</span><b>Hunt</b>
 <small>CMS</small>
-</div><nav class="cms-menu"><a href="dashboard.html">🏠 Dashboard</a>
+</div><nav class="cms-menu">
+<a href="dashboard.html">🏠 Dashboard</a>
 <a href="anime.html">🎬 Anime</a>
 <a href="episodes.html">📺 Episodes</a>
 <a href="categories.html">🗂 Catagorys</a>
 <a href="banners.html">🖼 Banners</a>
-<a href="homepage.html">🏠 Homepage</a>
-
-<a href="downloads.html">📥 Downloads</a>
+<a href="homepage.html">🏠 Homepage</a><a href="downloads.html">📥 Downloads</a>
 <a href="servers.html">🌐 Servers</a>
 <a href="player.html">🎞 Player</a>
 <a href="search.html">🔍 Search</a>
@@ -178,10 +196,9 @@ input:checked+.slider:before{transform:translateX(20px)}
 </div><script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
-const TOKEN = localStorage.getItem("AUTH_TOKEN")
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 const el=id=>document.getElementById(id)
 
-/* API */
 async function api(url,method="GET",body=null){
 try{
 const res=await fetch(url,{
@@ -197,7 +214,6 @@ return await res.json()
 }catch{return null}
 }
 
-/* LOAD */
 async function loadSecurity(){
 const d=await api(API)
 if(!d)return
@@ -217,50 +233,37 @@ el("autoBan").checked=d.ai.autoBan
 updateFirewallLabel()
 }
 
-/* SAVE */
 let timer
 function saveSecurity(){
-
 clearTimeout(timer)
-
 timer=setTimeout(async()=>{
-
 const payload={
 firewallLevel:Number(el("firewallLevel").value),
-
 core:{
 bot:el("botProt").checked,
 scraper:el("scraperShield").checked,
 hotlink:el("hotlinkBlock").checked,
 embed:el("embedLock").checked
 },
-
 admin:{
 loginLimit:el("loginLimit").checked
 },
-
 advanced:{
 sessionMonitor:el("sessionMonitor").checked
 },
-
 ai:{
 autoBan:el("autoBan").checked
 }
 }
-
 await api(API,"POST",payload)
-
 },300)
 }
 
-/* UI */
 function updateFirewallLabel(){
 el("fwLabel").innerText="Level "+el("firewallLevel").value
 }
 
-/* INIT */
 document.addEventListener("DOMContentLoaded",()=>{
-
 loadSecurity()
 
 document.querySelectorAll("input").forEach(i=>{
@@ -271,8 +274,6 @@ el("firewallLevel").addEventListener("input",()=>{
 updateFirewallLabel()
 saveSecurity()
 })
-
 })
-
 </script></body>
 </html>
