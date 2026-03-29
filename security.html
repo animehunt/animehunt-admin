@@ -236,6 +236,8 @@ color:#ccc;
 }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo"></script>
 </head>
 
 <body>
@@ -443,6 +445,11 @@ Embed Lock
 
 <canvas id="attackChart" height="120"></canvas>
 
+  </div>
+
+  <div class="security-section">
+  <h2>🌍 Live Cyber Attack Map</h2>
+  <canvas id="attackMap" height="300"></canvas>
   </div>
   
   <div class="security-section">
@@ -858,6 +865,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   setInterval(loadGraph,5000)
   setInterval(loadLogs,5000)
   setInterval(loadHeatmap,10000)
+  initMap()
+connectSocket()
 
   document.querySelectorAll("input").forEach(i=>{
     i.addEventListener("change",()=>{
@@ -884,6 +893,83 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
 })
+  /* =========================
+REAL ATTACK MAP
+========================= */
+
+let attackPoints = []
+let attackLines = []
+
+async function initMap(){
+
+  const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas/countries-110m.json")
+  const world = await res.json()
+
+  const countries = ChartGeo.topojson.feature(world, world.objects.countries).features
+
+  const ctx = document.getElementById("attackMap").getContext("2d")
+
+  window.mapChart = new Chart(ctx,{
+    type:"choropleth",
+    data:{
+      labels:countries.map(d=>d.properties.name),
+      datasets:[{
+        label:"Attacks",
+        data:countries.map(d=>({feature:d,value:0}))
+      }]
+    },
+    options:{
+      showOutline:true,
+      plugins:{
+        legend:{display:false}
+      },
+      scales:{
+        projection:{
+          axis:"x",
+          projection:"equalEarth"
+        }
+      }
+    }
+  })
+}
+
+  /* =========================
+WEBSOCKET REALTIME
+========================= */
+
+function connectSocket(){
+
+  const ws = new WebSocket("wss://animehunt-backend.animehunt715.workers.dev/ws")
+
+  ws.onmessage = (event)=>{
+
+    const data = JSON.parse(event.data)
+
+    // attack point
+    attackPoints.push(data)
+
+    updateMap(data)
+  }
+
+  ws.onclose = ()=>{
+    setTimeout(connectSocket,2000)
+  }
+}
+
+function updateMap(data){
+
+  if(!window.mapChart) return
+
+  const country = data.country
+
+  window.mapChart.data.datasets[0].data.forEach(d=>{
+    if(d.feature.properties.name === country){
+      d.value += 1
+    }
+  })
+
+  window.mapChart.update()
+}
 
 </script>
   
