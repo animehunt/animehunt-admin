@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta charset="UTF-8">
-<title>Security – AnimeHunt CMS</title>
-
-<style>
+<title>Security – AnimeHunt CMS</title><style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#0b0f1a;color:#fff}
 
@@ -32,39 +29,67 @@ text-decoration:none;
 .cms-menu a:hover{background:#1a2035;color:#ffcc00}
 
 .cms-main{flex:1;background:#0e1424;display:flex;flex-direction:column}
+
 .cms-header{
 height:60px;background:#0b0f1a;
 display:flex;align-items:center;
 padding:0 20px;border-bottom:1px solid #1a2035
 }
 
-.cms-content{padding:20px;max-width:900px;margin:auto;width:100%}
+.cms-content{
+padding:20px;
+max-width:1100px;
+margin:auto;
+width:100%;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+}
+
+@media(max-width:700px){
+.grid{grid-template-columns:1fr}
+}
 
 .card{
 background:#0b0f1a;
 border:1px solid #1a2035;
 border-radius:12px;
-padding:14px;
-margin-bottom:16px;
+padding:16px;
+transition:0.2s;
 }
 
-.card h3{font-size:14px;color:#ffcc00;margin-bottom:10px}
+.card:hover{
+transform:translateY(-3px);
+border-color:#2a3255;
+}
+
+.card h3{
+font-size:14px;
+color:#ffcc00;
+margin-bottom:10px;
+}
 
 .toggle{
 display:flex;
 justify-content:space-between;
-margin:8px 0;
+margin:10px 0;
 font-size:13px;
 }
 
-.switch{position:relative;width:42px;height:22px}
+.switch{
+position:relative;width:42px;height:22px;
+}
 .switch input{display:none}
 .slider{
 position:absolute;top:0;left:0;right:0;bottom:0;
 background:#333;border-radius:22px;
 }
 .slider:before{
-content:"";position:absolute;height:16px;width:16px;
+content:"";
+position:absolute;height:16px;width:16px;
 left:3px;top:3px;background:#fff;border-radius:50%;
 transition:.3s;
 }
@@ -72,247 +97,182 @@ input:checked+.slider{background:#00ffb3}
 input:checked+.slider:before{transform:translateX(20px)}
 
 .range{width:100%;margin-top:10px}
-</style>
-</head>
+</style></head><body><div class="cms-app"><!-- SIDEBAR --><aside class="cms-sidebar">
+<div class="brand">
+<span>Anime</span><b>Hunt</b>
+<small>CMS</small>
+</div><nav class="cms-menu"><a href="dashboard.html">🏠 Dashboard</a>
+<a href="anime.html">🎬 Anime</a>
+<a href="episodes.html">📺 Episodes</a>
+<a href="categories.html">🗂 Catagorys</a>
+<a href="banners.html">🖼 Banners</a>
+<a href="homepage.html">🏠 Homepage</a>
 
-<body>
+<a href="downloads.html">📥 Downloads</a>
+<a href="servers.html">🌐 Servers</a>
+<a href="player.html">🎞 Player</a>
+<a href="search.html">🔍 Search</a>
 
-<div class="cms-app">
+<a href="seo.html">📈 Seo</a>
+<a href="analytics.html">📊 Analytics</a>
+<a href="performance.html">⚡ Performance</a>
 
-<!-- SIDEBAR -->
-<aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
+<a href="security.html" class="active">🔐 Security</a>
+<a href="deploy-backup.html">🚀 Deploy-backup</a>
 
-  <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="anime.html">🎬 Anime</a>
-    <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
-    <a href="banners.html">🖼 Banners</a>
-    <a href="homepage.html">🏠 Homepage</a>
+<a href="ads.html">📢 Ads</a>
+<a href="ai-brain.html">🧠 Ai Brain</a>
 
-    <a href="downloads.html">📥 Downloads</a>
-    <a href="servers.html">🌐 Servers</a>
-    <a href="player.html">🎞 Player</a>
-    <a href="search.html">🔍 Search</a>
+<a href="sidebar.html">📌 Sidebar</a>
+<a href="footer.html">🦶 Footer</a>
 
-    <a href="seo.html">📈 Seo</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="performance.html">⚡ Performance</a>
+<a href="system-settings.html">⚙ System-settings</a>
 
-    <a href="security.html" class="active">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-    <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 Ai Brain</a>
-
-    <a href="sidebar.html">📌 Sidebar</a>
-    <a href="footer.html">🦶 Footer</a>
-
-    <a href="system-settings.html">⚙ System-settings</a>
-  </nav>
-</aside>
-
-<!-- MAIN -->
-<main class="cms-main">
-
-<header class="cms-header">
+</nav>
+</aside><!-- MAIN --><main class="cms-main"><header class="cms-header">
 <div>🔐 Security Settings</div>
-</header>
-
-<section class="cms-content">
-
-<!-- CORE -->
-<div class="card">
-<h3>Core Protection</h3>
-
-<div class="toggle">
-Bot Protection
+</header><section class="cms-content"><div class="grid"><!-- CORE --><div class="card">
+<h3>Core Protection</h3><div class="toggle">Bot Protection
 <label class="switch">
 <input type="checkbox" id="botProt">
 <span class="slider"></span>
 </label>
-</div>
-
-<div class="toggle">
-Scraper Shield
+</div><div class="toggle">Scraper Shield
 <label class="switch">
 <input type="checkbox" id="scraperShield">
 <span class="slider"></span>
 </label>
-</div>
-
-<div class="toggle">
-Hotlink Block
+</div><div class="toggle">Hotlink Block
 <label class="switch">
 <input type="checkbox" id="hotlinkBlock">
 <span class="slider"></span>
 </label>
-</div>
-
-<div class="toggle">
-Embed Lock
+</div><div class="toggle">Embed Lock
 <label class="switch">
 <input type="checkbox" id="embedLock">
 <span class="slider"></span>
 </label>
-</div>
-</div>
-
-<!-- ADMIN -->
-<div class="card">
-<h3>Admin Security</h3>
-
-<div class="toggle">
-Login Limit
+</div></div><!-- ADMIN --><div class="card">
+<h3>Admin Security</h3><div class="toggle">Login Limit
 <label class="switch">
 <input type="checkbox" id="loginLimit">
 <span class="slider"></span>
 </label>
-</div>
-
-<div class="toggle">
-Session Monitor
+</div><div class="toggle">Session Monitor
 <label class="switch">
 <input type="checkbox" id="sessionMonitor">
 <span class="slider"></span>
 </label>
-</div>
-
-</div>
-
-<!-- FIREWALL -->
-<div class="card">
+</div></div><!-- FIREWALL --><div class="card">
 <h3>Firewall Level</h3>
 <input type="range" id="firewallLevel" min="1" max="5" value="3">
 <p id="fwLabel">Level 3</p>
-</div>
-
-<!-- AUTO BAN -->
-<div class="card">
-<h3>Auto Protection</h3>
-
-<div class="toggle">
-Auto IP Ban
+</div><!-- AUTO --><div class="card">
+<h3>Auto Protection</h3><div class="toggle">Auto IP Ban
 <label class="switch">
 <input type="checkbox" id="autoBan">
 <span class="slider"></span>
 </label>
-</div>
-
-</div>
-
-</section>
+</div></div></div></section>
 </main>
-</div>
-
-<script>
+</div><script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
-const el = id => document.getElementById(id)
+const el=id=>document.getElementById(id)
 
 /* API */
-async function api(url, method="GET", body=null){
-  try{
-    const res = await fetch(url,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+TOKEN
-      },
-      body: body ? JSON.stringify(body) : null
-    })
-
-    if(!res.ok) return null
-    return await res.json()
-
-  }catch{
-    return null
-  }
+async function api(url,method="GET",body=null){
+try{
+const res=await fetch(url,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
+if(!res.ok)return null
+return await res.json()
+}catch{return null}
 }
 
 /* LOAD */
 async function loadSecurity(){
-  const d = await api(API)
-  if(!d) return
+const d=await api(API)
+if(!d)return
 
-  el("firewallLevel").value = d.firewallLevel
+el("firewallLevel").value=d.firewallLevel
 
-  el("botProt").checked = d.core.bot
-  el("scraperShield").checked = d.core.scraper
-  el("hotlinkBlock").checked = d.core.hotlink
-  el("embedLock").checked = d.core.embed
+el("botProt").checked=d.core.bot
+el("scraperShield").checked=d.core.scraper
+el("hotlinkBlock").checked=d.core.hotlink
+el("embedLock").checked=d.core.embed
 
-  el("loginLimit").checked = d.admin.loginLimit
-  el("sessionMonitor").checked = d.advanced.sessionMonitor
+el("loginLimit").checked=d.admin.loginLimit
+el("sessionMonitor").checked=d.advanced.sessionMonitor
 
-  el("autoBan").checked = d.ai.autoBan
+el("autoBan").checked=d.ai.autoBan
 
-  updateFirewallLabel()
+updateFirewallLabel()
 }
 
 /* SAVE */
-let saveTimer
+let timer
 function saveSecurity(){
 
-  clearTimeout(saveTimer)
+clearTimeout(timer)
 
-  saveTimer = setTimeout(async()=>{
+timer=setTimeout(async()=>{
 
-    const payload = {
-      firewallLevel:Number(el("firewallLevel").value),
+const payload={
+firewallLevel:Number(el("firewallLevel").value),
 
-      core:{
-        bot:el("botProt").checked,
-        scraper:el("scraperShield").checked,
-        hotlink:el("hotlinkBlock").checked,
-        embed:el("embedLock").checked
-      },
+core:{
+bot:el("botProt").checked,
+scraper:el("scraperShield").checked,
+hotlink:el("hotlinkBlock").checked,
+embed:el("embedLock").checked
+},
 
-      admin:{
-        loginLimit:el("loginLimit").checked
-      },
+admin:{
+loginLimit:el("loginLimit").checked
+},
 
-      advanced:{
-        sessionMonitor:el("sessionMonitor").checked
-      },
+advanced:{
+sessionMonitor:el("sessionMonitor").checked
+},
 
-      ai:{
-        autoBan:el("autoBan").checked
-      }
-    }
+ai:{
+autoBan:el("autoBan").checked
+}
+}
 
-    await api(API,"POST",payload)
+await api(API,"POST",payload)
 
-  },300)
+},300)
 }
 
 /* UI */
 function updateFirewallLabel(){
-  el("fwLabel").innerText = "Level "+el("firewallLevel").value
+el("fwLabel").innerText="Level "+el("firewallLevel").value
 }
 
 /* INIT */
 document.addEventListener("DOMContentLoaded",()=>{
 
-  loadSecurity()
+loadSecurity()
 
-  document.querySelectorAll("input").forEach(i=>{
-    i.addEventListener("change",saveSecurity)
-  })
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("change",saveSecurity)
+})
 
-  el("firewallLevel").addEventListener("input",()=>{
-    updateFirewallLabel()
-    saveSecurity()
-  })
+el("firewallLevel").addEventListener("input",()=>{
+updateFirewallLabel()
+saveSecurity()
+})
 
 })
 
-</script>
-
-</body>
+</script></body>
 </html>
