@@ -193,87 +193,142 @@ input:checked+.slider:before{transform:translateX(20px)}
 </label>
 </div></div></div></section>
 </main>
-</div><script>
+</div>
+
+  <script>
 
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
 const el=id=>document.getElementById(id)
 
+/* ================= API ================= */
+
 async function api(url,method="GET",body=null){
-try{
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-if(!res.ok)return null
-return await res.json()
-}catch{return null}
+  try{
+
+    const TOKEN=localStorage.getItem("AUTH_TOKEN")
+
+    if(!TOKEN){
+      alert("❌ Admin login required")
+      return null
+    }
+
+    const res=await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+TOKEN
+      },
+      body:body?JSON.stringify(body):null
+    })
+
+    if(!res.ok){
+      console.error("API ERROR:",res.status)
+      alert("❌ API Error: "+res.status)
+      return null
+    }
+
+    return await res.json()
+
+  }catch(e){
+    console.error("FETCH ERROR:",e)
+    alert("❌ Network Error")
+    return null
+  }
 }
+
+/* ================= LOAD ================= */
 
 async function loadSecurity(){
-const d=await api(API)
-if(!d)return
 
-el("firewallLevel").value=d.firewallLevel
+  const d=await api(API)
 
-el("botProt").checked=d.core.bot
-el("scraperShield").checked=d.core.scraper
-el("hotlinkBlock").checked=d.core.hotlink
-el("embedLock").checked=d.core.embed
+  console.log("SECURITY DATA:", d)
 
-el("loginLimit").checked=d.admin.loginLimit
-el("sessionMonitor").checked=d.advanced.sessionMonitor
+  if(!d){
+    alert("❌ Security data load failed")
+    return
+  }
 
-el("autoBan").checked=d.ai.autoBan
+  el("firewallLevel").value=d.firewallLevel || 3
 
-updateFirewallLabel()
+  el("botProt").checked=!!d.core?.bot
+  el("scraperShield").checked=!!d.core?.scraper
+  el("hotlinkBlock").checked=!!d.core?.hotlink
+  el("embedLock").checked=!!d.core?.embed
+
+  el("loginLimit").checked=!!d.admin?.loginLimit
+  el("sessionMonitor").checked=!!d.advanced?.sessionMonitor
+
+  el("autoBan").checked=!!d.ai?.autoBan
+
+  updateFirewallLabel()
 }
+
+/* ================= SAVE ================= */
 
 let timer
 function saveSecurity(){
-clearTimeout(timer)
-timer=setTimeout(async()=>{
-const payload={
-firewallLevel:Number(el("firewallLevel").value),
-core:{
-bot:el("botProt").checked,
-scraper:el("scraperShield").checked,
-hotlink:el("hotlinkBlock").checked,
-embed:el("embedLock").checked
-},
-admin:{
-loginLimit:el("loginLimit").checked
-},
-advanced:{
-sessionMonitor:el("sessionMonitor").checked
-},
-ai:{
-autoBan:el("autoBan").checked
+
+  clearTimeout(timer)
+
+  timer=setTimeout(async()=>{
+
+    const payload={
+
+      firewallLevel:Number(el("firewallLevel").value),
+
+      core:{
+        bot:el("botProt").checked,
+        scraper:el("scraperShield").checked,
+        hotlink:el("hotlinkBlock").checked,
+        embed:el("embedLock").checked
+      },
+
+      admin:{
+        loginLimit:el("loginLimit").checked
+      },
+
+      advanced:{
+        sessionMonitor:el("sessionMonitor").checked
+      },
+
+      ai:{
+        autoBan:el("autoBan").checked
+      }
+
+    }
+
+    console.log("SAVE DATA:",payload)
+
+    await api(API,"POST",payload)
+
+  },300)
 }
-}
-await api(API,"POST",payload)
-},300)
-}
+
+/* ================= UI ================= */
 
 function updateFirewallLabel(){
-el("fwLabel").innerText="Level "+el("firewallLevel").value
+  el("fwLabel").innerText="Level "+el("firewallLevel").value
 }
 
+/* ================= INIT ================= */
+
 document.addEventListener("DOMContentLoaded",()=>{
-loadSecurity()
 
-document.querySelectorAll("input").forEach(i=>{
-i.addEventListener("change",saveSecurity)
+  loadSecurity()
+
+  document.querySelectorAll("input").forEach(i=>{
+    i.addEventListener("change",saveSecurity)
+  })
+
+  el("firewallLevel").addEventListener("input",()=>{
+    updateFirewallLabel()
+    saveSecurity()
+  })
+
 })
 
-el("firewallLevel").addEventListener("input",()=>{
-updateFirewallLabel()
-saveSecurity()
-})
-})
-</script></body>
+  </script>
+
+</body>
 </html>
