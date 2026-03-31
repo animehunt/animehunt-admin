@@ -214,6 +214,8 @@ input:checked+.slider:before{transform:translateX(20px)}
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
 const el=id=>document.getElementById(id)
 
+/* ================= API ================= */
+
 async function api(url,method="GET",body=null){
 
   try{
@@ -226,7 +228,6 @@ async function api(url,method="GET",body=null){
 
     const res=await fetch(url,{
       method,
-      mode:"cors",
       headers:{
         "Content-Type":"application/json",
         "Authorization":"Bearer "+TOKEN
@@ -234,41 +235,59 @@ async function api(url,method="GET",body=null){
       body:body?JSON.stringify(body):null
     })
 
-    if(!res.ok){
-      console.error("API ERROR:",res.status)
+    const text = await res.text()
+
+    let data
+    try{
+      data = JSON.parse(text)
+    }catch{
+      console.error("INVALID JSON:", text)
+      alert("Server error")
       return null
     }
 
-    return await res.json()
+    if(!res.ok){
+      console.error("API ERROR:", data)
+      alert(data.error || "API Error")
+      return null
+    }
+
+    return data
 
   }catch(e){
-    console.error("FETCH ERROR:",e)
+    console.error("FETCH ERROR:", e)
+    alert("Network error")
     return null
   }
 }
 
+/* ================= LOAD ================= */
+
 async function loadSecurity(){
 
-  const d=await api(API)
+  const d = await api(API)
 
   if(!d){
     console.log("Load failed")
     return
   }
 
-  el("firewallLevel").value=d.firewallLevel||3
+  el("firewallLevel").value = d.firewallLevel || 3
 
-  el("botProt").checked=!!d.core?.bot
-  el("scraperShield").checked=!!d.core?.scraper
-  el("hotlinkBlock").checked=!!d.core?.hotlink
-  el("embedLock").checked=!!d.core?.embed
+  el("botProt").checked = !!d.core?.bot
+  el("scraperShield").checked = !!d.core?.scraper
+  el("hotlinkBlock").checked = !!d.core?.hotlink
+  el("embedLock").checked = !!d.core?.embed
 
-  el("loginLimit").checked=!!d.admin?.loginLimit
-  el("sessionMonitor").checked=!!d.advanced?.sessionMonitor
-  el("autoBan").checked=!!d.ai?.autoBan
+  el("loginLimit").checked = !!d.admin?.loginLimit
+  el("sessionMonitor").checked = !!d.advanced?.sessionMonitor
+
+  el("autoBan").checked = !!d.ai?.autoBan
 
   updateFirewallLabel()
 }
+
+/* ================= SAVE ================= */
 
 let timer
 
@@ -276,46 +295,55 @@ function saveSecurity(){
 
   clearTimeout(timer)
 
-  timer=setTimeout(async()=>{
+  timer = setTimeout(async()=>{
 
-    const payload={
-      firewallLevel:Number(el("firewallLevel").value),
+    const payload = {
+
+      firewallLevel: Number(el("firewallLevel").value),
 
       core:{
-        bot:el("botProt").checked,
-        scraper:el("scraperShield").checked,
-        hotlink:el("hotlinkBlock").checked,
-        embed:el("embedLock").checked
+        bot: el("botProt").checked,
+        scraper: el("scraperShield").checked,
+        hotlink: el("hotlinkBlock").checked,
+        embed: el("embedLock").checked
       },
 
       admin:{
-        loginLimit:el("loginLimit").checked
+        loginLimit: el("loginLimit").checked
       },
 
       advanced:{
-        sessionMonitor:el("sessionMonitor").checked
+        sessionMonitor: el("sessionMonitor").checked
       },
 
       ai:{
-        autoBan:el("autoBan").checked
+        autoBan: el("autoBan").checked
       }
     }
 
-    await api(API,"POST",payload)
+    const res = await api(API,"POST",payload)
 
-  },400)
+    if(res?.success){
+      console.log("Saved ✅")
+    }
+
+  },300)
 }
+
+/* ================= UI ================= */
 
 function updateFirewallLabel(){
-  el("fwLabel").innerText="Level "+el("firewallLevel").value
+  el("fwLabel").innerText = "Level " + el("firewallLevel").value
 }
+
+/* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
   loadSecurity()
 
   document.querySelectorAll("input").forEach(i=>{
-    i.addEventListener("change",saveSecurity)
+    i.addEventListener("change", saveSecurity)
   })
 
   el("firewallLevel").addEventListener("input",()=>{
@@ -325,6 +353,5 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 })
 </script>
-
 </body>
 </html>
