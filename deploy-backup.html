@@ -222,8 +222,9 @@ body{
 </div>
 
 <script>
+
 /* =====================================
-   ANIMEHUNT CMS – DEPLOY ENGINE
+   ANIMEHUNT CMS – DEPLOY ENGINE (FINAL)
 ===================================== */
 
 const API_BASE =
@@ -258,7 +259,7 @@ location.href="login.html"
 }
 
 /* =====================================
-API HELPER
+API HELPER (IMPROVED)
 ===================================== */
 
 async function api(path,method="GET",body=null){
@@ -278,37 +279,51 @@ body:body?JSON.stringify(body):null
 
 })
 
+const text = await res.text()
+
+let data
+
+try{
+data = JSON.parse(text)
+}catch{
+console.error("INVALID JSON:",text)
+alert("Server error")
+return null
+}
+
 if(res.status===401){
+localStorage.removeItem(TOKEN_KEY)
 location.href="login.html"
-return
+return null
 }
 
 if(!res.ok){
-throw new Error("API Error")
+console.error("API ERROR:",data)
+alert(data.error || "API Error")
+return null
 }
 
-return await res.json()
+return data
 
 }catch(err){
 
-console.error("API ERROR:",err)
+console.error("FETCH ERROR:",err)
+alert("Network error")
 
-alert("Server Error")
+return null
 
 }
 
 }
 
 /* =====================================
-LOADING STATE
+LOADING BUTTON STATE
 ===================================== */
 
 function setLoading(btn,text){
 
 btn.dataset.oldText=btn.innerText
-
 btn.innerText=text
-
 btn.disabled=true
 
 }
@@ -316,7 +331,6 @@ btn.disabled=true
 function clearLoading(btn){
 
 btn.innerText=btn.dataset.oldText
-
 btn.disabled=false
 
 }
@@ -331,36 +345,30 @@ versionList.innerHTML="Loading..."
 backupList.innerHTML="Loading..."
 restoreList.innerHTML="Loading..."
 
-try{
-
 const data=await api("")
 
-if(!data) return
+if(!data){
+versionList.innerHTML="Error"
+backupList.innerHTML="Error"
+restoreList.innerHTML="Error"
+return
+}
 
 updateUI(data.state)
-
-renderVersions(data.versions)
-renderBackups(data.backups)
-
-}catch(e){
-
-console.error(e)
-
-}
+renderVersions(data.versions || [])
+renderBackups(data.backups || [])
 
 }
 
 /* =====================================
-RENDER VERSION LIST
+RENDER VERSIONS
 ===================================== */
 
 function renderVersions(list){
 
 if(!list.length){
 
-versionList.innerHTML=
-"<div class='list-item'>No versions</div>"
-
+versionList.innerHTML="<div class='list-item'>No versions</div>"
 return
 
 }
@@ -368,13 +376,10 @@ return
 versionList.innerHTML=list.map(v=>`
 
 <div class="list-item">
-
 <b>${v.name}</b><br>
-
 <small style="color:#777">
 ${new Date(v.date).toLocaleString()}
 </small>
-
 </div>
 
 `).join("")
@@ -382,16 +387,14 @@ ${new Date(v.date).toLocaleString()}
 }
 
 /* =====================================
-RENDER BACKUPS
+RENDER BACKUPS (WITH DELETE)
 ===================================== */
 
 function renderBackups(list){
 
 if(!list.length){
 
-backupList.innerHTML=
-"<div class='list-item'>No backups</div>"
-
+backupList.innerHTML="<div class='list-item'>No backups</div>"
 restoreList.innerHTML=""
 return
 
@@ -401,8 +404,16 @@ return
 
 backupList.innerHTML=list.map(b=>`
 
-<div class="list-item">
-${b.name}
+<div class="list-item"
+style="display:flex;justify-content:space-between;align-items:center">
+
+<span>${b.name}</span>
+
+<button onclick="deleteBackup('${b.id}')"
+style="background:#ff4c4c;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer">
+Delete
+</button>
+
 </div>
 
 `).join("")
@@ -427,37 +438,25 @@ Restore
 }
 
 /* =====================================
-UPDATE STATE UI
+STATE UI
 ===================================== */
 
 function updateUI(state){
 
 if(!state) return
 
-if(state.frozen){
+freezeBtn.innerText = state.frozen
+? "🧊 Site Frozen"
+: "Freeze Site"
 
-freezeBtn.innerText="🧊 Site Frozen"
-
-}else{
-
-freezeBtn.innerText="Freeze Site"
-
-}
-
-if(state.emergency){
-
-emergencyShutdownBtn.innerText="🚨 SYSTEM OFFLINE"
-
-}else{
-
-emergencyShutdownBtn.innerText="Emergency Shutdown"
-
-}
+emergencyShutdownBtn.innerText = state.emergency
+? "🚨 SYSTEM OFFLINE"
+: "Emergency Shutdown"
 
 }
 
 /* =====================================
-DEPLOY SITE
+DEPLOY
 ===================================== */
 
 deployBtn.onclick=async()=>{
@@ -473,7 +472,7 @@ loadData()
 }
 
 /* =====================================
-CREATE BACKUP
+BACKUP
 ===================================== */
 
 createBackupBtn.onclick=async()=>{
@@ -489,7 +488,7 @@ loadData()
 }
 
 /* =====================================
-CREATE VERSION
+VERSION
 ===================================== */
 
 createVersionBtn.onclick=async()=>{
@@ -505,15 +504,12 @@ loadData()
 }
 
 /* =====================================
-FREEZE / UNFREEZE
+FREEZE
 ===================================== */
 
 freezeBtn.onclick=async()=>{
 
-await api("/state","PATCH",{
-type:"freeze",
-value:true
-})
+await api("/state","PATCH",{type:"freeze",value:true})
 
 loadData()
 
@@ -521,60 +517,61 @@ loadData()
 
 unfreezeBtn.onclick=async()=>{
 
-await api("/state","PATCH",{
-type:"freeze",
-value:false
-})
+await api("/state","PATCH",{type:"freeze",value:false})
 
 loadData()
 
 }
 
 /* =====================================
-EMERGENCY SHUTDOWN
+EMERGENCY
 ===================================== */
 
 emergencyShutdownBtn.onclick=async()=>{
 
 if(!confirm("Shutdown entire site?")) return
 
-await api("/state","PATCH",{
-type:"emergency",
-value:true
-})
+await api("/state","PATCH",{type:"emergency",value:true})
 
 loadData()
 
 }
-
-/* =====================================
-EMERGENCY RECOVER
-===================================== */
 
 emergencyRecoverBtn.onclick=async()=>{
 
-await api("/state","PATCH",{
-type:"emergency",
-value:false
-})
+await api("/state","PATCH",{type:"emergency",value:false})
 
 loadData()
 
 }
 
 /* =====================================
-RESTORE BACKUP
+RESTORE
 ===================================== */
 
 window.restoreBackup=async(id)=>{
 
-if(!confirm("Restore this backup?\nAll current data will be replaced.")){
-return
-}
+if(!confirm("Restore this backup?\nAll current data will be replaced.")) return
 
 await api("/restore","POST",{id})
 
 alert("Restore completed")
+
+loadData()
+
+}
+
+/* =====================================
+DELETE BACKUP (NEW)
+===================================== */
+
+window.deleteBackup=async(id)=>{
+
+if(!confirm("Delete this backup?")) return
+
+await api("/delete-backup","POST",{id})
+
+alert("Backup deleted")
 
 loadData()
 
@@ -590,8 +587,8 @@ setInterval(loadData,30000)
 
 document.addEventListener("DOMContentLoaded",loadData)
 
+            </script>
 
-</script>
 
 
 </body>
