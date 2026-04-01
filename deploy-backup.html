@@ -214,122 +214,328 @@ body{
 
 </main>
 </div>
-
 <script>
+
+/* =====================================
+   ANIMEHUNT CMS – DEPLOY ENGINE FINAL
+===================================== */
 
 const API_BASE =
 "https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"
 
-const token=localStorage.getItem("AUTH_TOKEN")
+const TOKEN_KEY="AUTH_TOKEN"
 
-if(!token) location.href="login.html"
+/* ELEMENTS */
 
-/* API */
+const deployBtn=document.getElementById("deploySite")
+const freezeBtn=document.getElementById("freezeSite")
+const unfreezeBtn=document.getElementById("unfreezeSite")
+
+const createBackupBtn=document.getElementById("createBackup")
+
+const emergencyShutdownBtn=document.getElementById("emergencyShutdown")
+const emergencyRecoverBtn=document.getElementById("emergencyRecover")
+
+const backupList=document.getElementById("backupList")
+const restoreList=document.getElementById("restoreList")
+
+/* =====================================
+AUTH CHECK
+===================================== */
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+if(!token){
+location.href="login.html"
+}
+
+/* =====================================
+API HELPER (FULL SAFE)
+===================================== */
 
 async function api(path,method="GET",body=null){
 
 try{
 
 const res=await fetch(API_BASE+path,{
+
 method,
+
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token
 },
+
 body:body?JSON.stringify(body):null
+
 })
 
-const data=await res.json()
+const text = await res.text()
+
+let data
+
+try{
+data = JSON.parse(text)
+}catch{
+console.error("INVALID JSON:",text)
+alert("Server response invalid")
+return null
+}
+
+if(res.status===401){
+localStorage.removeItem(TOKEN_KEY)
+location.href="login.html"
+return null
+}
 
 if(!res.ok){
+console.error("API ERROR:",data)
 alert(data.error || "API Error")
 return null
 }
 
 return data
 
-}catch(e){
-alert("Server error")
+}catch(err){
+
+console.error("FETCH ERROR:",err)
+alert("Network error")
+
 return null
-}
 
 }
 
-/* LOAD */
+}
+
+/* =====================================
+BUTTON LOADING
+===================================== */
+
+function setLoading(btn,text){
+
+btn.dataset.oldText=btn.innerText
+btn.innerText=text
+btn.disabled=true
+
+}
+
+function clearLoading(btn){
+
+btn.innerText=btn.dataset.oldText
+btn.disabled=false
+
+}
+
+/* =====================================
+LOAD DATA
+===================================== */
 
 async function loadData(){
 
+backupList.innerHTML="Loading..."
+restoreList.innerHTML="Loading..."
+
 const data=await api("")
 
-if(!data) return
+if(!data){
+backupList.innerHTML="Error"
+restoreList.innerHTML="Error"
+return
+}
 
+/* UI UPDATE */
+updateUI(data.state)
+
+/* RENDER */
 renderBackups(data.backups || [])
 
 }
 
-/* RENDER */
+/* =====================================
+UPDATE STATE UI
+===================================== */
+
+function updateUI(state){
+
+if(!state) return
+
+freezeBtn.innerText = state.frozen
+? "🧊 Site Frozen"
+: "Freeze Site"
+
+emergencyShutdownBtn.innerText = state.emergency
+? "🚨 SYSTEM OFFLINE"
+: "Emergency Shutdown"
+
+}
+
+/* =====================================
+RENDER BACKUPS
+===================================== */
 
 function renderBackups(list){
 
-const backupList=document.getElementById("backupList")
-const restoreList=document.getElementById("restoreList")
-
 if(!list.length){
-backupList.innerHTML="No backups"
+
+backupList.innerHTML="<div class='list-item'>No backups</div>"
 restoreList.innerHTML=""
 return
+
 }
+
+/* BACKUP LIST */
 
 backupList.innerHTML=list.map(b=>`
 
-<div style="display:flex;justify-content:space-between;margin:5px">
-${b.name}
-<button onclick="deleteBackup('${b.id}')">Delete</button>
+<div class="list-item"
+style="display:flex;justify-content:space-between;align-items:center">
+
+<span>${b.name}</span>
+
+<button onclick="deleteBackup('${b.id}')"
+style="background:#ff4c4c;color:#fff;border:none;padding:5px 10px;border-radius:6px;cursor:pointer">
+Delete
+</button>
+
 </div>
 
 `).join("")
+
+/* RESTORE LIST */
 
 restoreList.innerHTML=list.map(b=>`
 
-<div style="display:flex;justify-content:space-between;margin:5px">
-${b.name}
-<button onclick="restoreBackup('${b.id}')">Restore</button>
+<div class="list-item"
+style="display:flex;justify-content:space-between">
+
+<span>${b.name}</span>
+
+<button onclick="restoreBackup('${b.id}')"
+style="padding:5px 10px;border-radius:6px;cursor:pointer">
+Restore
+</button>
+
 </div>
 
 `).join("")
 
 }
 
-/* ACTIONS */
+/* =====================================
+DEPLOY
+===================================== */
 
-async function createBackup(){
-await api("/backup","POST")
+deployBtn.onclick=async()=>{
+
+setLoading(deployBtn,"Deploying...")
+
+await api("/deploy","POST")
+
+clearLoading(deployBtn)
+
 loadData()
+
 }
 
-async function restoreBackup(id){
+/* =====================================
+BACKUP
+===================================== */
 
-if(!confirm("Restore backup?")) return
+createBackupBtn.onclick=async()=>{
+
+setLoading(createBackupBtn,"Creating Backup...")
+
+await api("/backup","POST")
+
+clearLoading(createBackupBtn)
+
+loadData()
+
+}
+
+/* =====================================
+FREEZE
+===================================== */
+
+freezeBtn.onclick=async()=>{
+
+await api("/state","PATCH",{type:"freeze",value:true})
+
+loadData()
+
+}
+
+unfreezeBtn.onclick=async()=>{
+
+await api("/state","PATCH",{type:"freeze",value:false})
+
+loadData()
+
+}
+
+/* =====================================
+EMERGENCY
+===================================== */
+
+emergencyShutdownBtn.onclick=async()=>{
+
+if(!confirm("Shutdown entire site?")) return
+
+await api("/state","PATCH",{type:"emergency",value:true})
+
+loadData()
+
+}
+
+emergencyRecoverBtn.onclick=async()=>{
+
+await api("/state","PATCH",{type:"emergency",value:false})
+
+loadData()
+
+}
+
+/* =====================================
+RESTORE
+===================================== */
+
+window.restoreBackup=async(id)=>{
+
+if(!confirm("Restore this backup?\nAll current data will be replaced.")) return
 
 await api("/restore","POST",{id})
 
-alert("Restored")
+alert("Restore completed")
 
 loadData()
 
 }
 
-async function deleteBackup(id){
+/* =====================================
+DELETE BACKUP
+===================================== */
 
-if(!confirm("Delete backup?")) return
+window.deleteBackup=async(id)=>{
+
+if(!confirm("Delete this backup?")) return
 
 await api("/delete-backup","POST",{id})
 
+alert("Backup deleted")
+
 loadData()
 
 }
 
-/* INIT */
+/* =====================================
+AUTO REFRESH
+===================================== */
+
+setInterval(loadData,30000)
+
+/* =====================================
+INIT
+===================================== */
 
 document.addEventListener("DOMContentLoaded",loadData)
 
