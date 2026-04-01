@@ -192,12 +192,6 @@ body{
     </div>
 
     <div class="deploy-card">
-      <h3>Version Control</h3>
-      <div id="versionList"></div>
-      <button id="createVersion">➕ Create Version</button>
-    </div>
-
-    <div class="deploy-card">
       <h3>Backup</h3>
       <button id="createBackup">💾 Create Backup</button>
       <div id="backupList"></div>
@@ -223,372 +217,123 @@ body{
 
 <script>
 
-/* =====================================
-   ANIMEHUNT CMS – DEPLOY ENGINE (FINAL)
-===================================== */
-
 const API_BASE =
 "https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"
 
-const TOKEN_KEY="AUTH_TOKEN"
+const token=localStorage.getItem("AUTH_TOKEN")
 
-/* ELEMENTS */
+if(!token) location.href="login.html"
 
-const deployBtn=document.getElementById("deploySite")
-const freezeBtn=document.getElementById("freezeSite")
-const unfreezeBtn=document.getElementById("unfreezeSite")
-
-const createBackupBtn=document.getElementById("createBackup")
-const createVersionBtn=document.getElementById("createVersion")
-
-const emergencyShutdownBtn=document.getElementById("emergencyShutdown")
-const emergencyRecoverBtn=document.getElementById("emergencyRecover")
-
-const versionList=document.getElementById("versionList")
-const backupList=document.getElementById("backupList")
-const restoreList=document.getElementById("restoreList")
-
-/* =====================================
-AUTH CHECK
-===================================== */
-
-const token=localStorage.getItem(TOKEN_KEY)
-
-if(!token){
-location.href="login.html"
-}
-
-/* =====================================
-API HELPER (IMPROVED)
-===================================== */
+/* API */
 
 async function api(path,method="GET",body=null){
 
 try{
 
 const res=await fetch(API_BASE+path,{
-
 method,
-
 headers:{
 "Content-Type":"application/json",
 "Authorization":"Bearer "+token
 },
-
 body:body?JSON.stringify(body):null
-
 })
 
-const text = await res.text()
-
-let data
-
-try{
-data = JSON.parse(text)
-}catch{
-console.error("INVALID JSON:",text)
-alert("Server error")
-return null
-}
-
-if(res.status===401){
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-return null
-}
+const data=await res.json()
 
 if(!res.ok){
-console.error("API ERROR:",data)
 alert(data.error || "API Error")
 return null
 }
 
 return data
 
-}catch(err){
-
-console.error("FETCH ERROR:",err)
-alert("Network error")
-
+}catch(e){
+alert("Server error")
 return null
-
 }
 
 }
 
-/* =====================================
-LOADING BUTTON STATE
-===================================== */
-
-function setLoading(btn,text){
-
-btn.dataset.oldText=btn.innerText
-btn.innerText=text
-btn.disabled=true
-
-}
-
-function clearLoading(btn){
-
-btn.innerText=btn.dataset.oldText
-btn.disabled=false
-
-}
-
-/* =====================================
-LOAD DATA
-===================================== */
+/* LOAD */
 
 async function loadData(){
 
-versionList.innerHTML="Loading..."
-backupList.innerHTML="Loading..."
-restoreList.innerHTML="Loading..."
-
 const data=await api("")
 
-if(!data){
-versionList.innerHTML="Error"
-backupList.innerHTML="Error"
-restoreList.innerHTML="Error"
-return
-}
+if(!data) return
 
-updateUI(data.state)
-renderVersions(data.versions || [])
 renderBackups(data.backups || [])
 
 }
 
-/* =====================================
-RENDER VERSIONS
-===================================== */
-
-function renderVersions(list){
-
-if(!list.length){
-
-versionList.innerHTML="<div class='list-item'>No versions</div>"
-return
-
-}
-
-versionList.innerHTML=list.map(v=>`
-
-<div class="list-item">
-<b>${v.name}</b><br>
-<small style="color:#777">
-${new Date(v.date).toLocaleString()}
-</small>
-</div>
-
-`).join("")
-
-}
-
-/* =====================================
-RENDER BACKUPS (WITH DELETE)
-===================================== */
+/* RENDER */
 
 function renderBackups(list){
 
-if(!list.length){
+const backupList=document.getElementById("backupList")
+const restoreList=document.getElementById("restoreList")
 
-backupList.innerHTML="<div class='list-item'>No backups</div>"
+if(!list.length){
+backupList.innerHTML="No backups"
 restoreList.innerHTML=""
 return
-
 }
-
-/* BACKUP LIST */
 
 backupList.innerHTML=list.map(b=>`
 
-<div class="list-item"
-style="display:flex;justify-content:space-between;align-items:center">
-
-<span>${b.name}</span>
-
-<button onclick="deleteBackup('${b.id}')"
-style="background:#ff4c4c;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer">
-Delete
-</button>
-
+<div style="display:flex;justify-content:space-between;margin:5px">
+${b.name}
+<button onclick="deleteBackup('${b.id}')">Delete</button>
 </div>
 
 `).join("")
-
-/* RESTORE LIST */
 
 restoreList.innerHTML=list.map(b=>`
 
-<div class="list-item"
-style="display:flex;justify-content:space-between">
-
-<span>${b.name}</span>
-
-<button onclick="restoreBackup('${b.id}')">
-Restore
-</button>
-
+<div style="display:flex;justify-content:space-between;margin:5px">
+${b.name}
+<button onclick="restoreBackup('${b.id}')">Restore</button>
 </div>
 
 `).join("")
 
 }
 
-/* =====================================
-STATE UI
-===================================== */
+/* ACTIONS */
 
-function updateUI(state){
-
-if(!state) return
-
-freezeBtn.innerText = state.frozen
-? "🧊 Site Frozen"
-: "Freeze Site"
-
-emergencyShutdownBtn.innerText = state.emergency
-? "🚨 SYSTEM OFFLINE"
-: "Emergency Shutdown"
-
-}
-
-/* =====================================
-DEPLOY
-===================================== */
-
-deployBtn.onclick=async()=>{
-
-setLoading(deployBtn,"Deploying...")
-
-await api("/deploy","POST")
-
-clearLoading(deployBtn)
-
-loadData()
-
-}
-
-/* =====================================
-BACKUP
-===================================== */
-
-createBackupBtn.onclick=async()=>{
-
-setLoading(createBackupBtn,"Creating Backup...")
-
+async function createBackup(){
 await api("/backup","POST")
-
-clearLoading(createBackupBtn)
-
 loadData()
-
 }
 
-/* =====================================
-VERSION
-===================================== */
+async function restoreBackup(id){
 
-createVersionBtn.onclick=async()=>{
-
-setLoading(createVersionBtn,"Creating Version...")
-
-await api("/version","POST")
-
-clearLoading(createVersionBtn)
-
-loadData()
-
-}
-
-/* =====================================
-FREEZE
-===================================== */
-
-freezeBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"freeze",value:true})
-
-loadData()
-
-}
-
-unfreezeBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"freeze",value:false})
-
-loadData()
-
-}
-
-/* =====================================
-EMERGENCY
-===================================== */
-
-emergencyShutdownBtn.onclick=async()=>{
-
-if(!confirm("Shutdown entire site?")) return
-
-await api("/state","PATCH",{type:"emergency",value:true})
-
-loadData()
-
-}
-
-emergencyRecoverBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"emergency",value:false})
-
-loadData()
-
-}
-
-/* =====================================
-RESTORE
-===================================== */
-
-window.restoreBackup=async(id)=>{
-
-if(!confirm("Restore this backup?\nAll current data will be replaced.")) return
+if(!confirm("Restore backup?")) return
 
 await api("/restore","POST",{id})
 
-alert("Restore completed")
+alert("Restored")
 
 loadData()
 
 }
 
-/* =====================================
-DELETE BACKUP (NEW)
-===================================== */
+async function deleteBackup(id){
 
-window.deleteBackup=async(id)=>{
-
-if(!confirm("Delete this backup?")) return
+if(!confirm("Delete backup?")) return
 
 await api("/delete-backup","POST",{id})
 
-alert("Backup deleted")
-
 loadData()
 
 }
-
-/* =====================================
-AUTO REFRESH
-===================================== */
-
-setInterval(loadData,30000)
 
 /* INIT */
 
 document.addEventListener("DOMContentLoaded",loadData)
 
-            </script>
-
+</script>
 
 
 </body>
