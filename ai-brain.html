@@ -217,22 +217,63 @@ body{background:#060a14;color:#fff}
 
 <script>
 
+/* ===============================
+AI BRAIN v4 ULTRA FRONTEND
+FULL FINAL VERSION
+================================ */
+
 const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
 const AI_API=`${API_BASE}/admin/ai`
-
 const TOKEN_KEY="AUTH_TOKEN"
 
 const pauseBtn=document.querySelector(".pause-btn")
 
-let aiCache=null
 let loading=false
+let aiState=null
+let saveQueue={}
+let saveTimer=null
 
-
-/* ================================
-FORMAT ENGINE / SETTING KEYS
+/* ===============================
+AUTH
 ================================ */
 
-function formatKey(text){
+function getToken(){
+const t=localStorage.getItem(TOKEN_KEY)
+if(!t){
+location.href="login.html"
+return null
+}
+return t
+}
+
+/* ===============================
+ENGINE MAPPING (FIXED)
+================================ */
+
+function getEngine(title){
+
+title=title.toLowerCase()
+
+if(title.includes("server")) return "server"
+if(title.includes("player")) return "player"
+if(title.includes("analytics")) return "analytics"
+if(title.includes("backup")) return "backup"
+if(title.includes("deploy")) return "deploy"
+if(title.includes("category")) return "category"
+if(title.includes("banner")) return "banner"
+if(title.includes("homepage")) return "homepage"
+if(title.includes("search")) return "search"
+if(title.includes("seo")) return "seo"
+if(title.includes("download")) return "download"
+
+return "unknown"
+}
+
+/* ===============================
+SETTING CLEAN
+================================ */
+
+function getSetting(text){
 
 return text
 .toLowerCase()
@@ -242,75 +283,64 @@ return text
 
 }
 
-
-/* ================================
-AUTH TOKEN
+/* ===============================
+SAFE API (RETRY + JSON SAFE)
 ================================ */
 
-function getToken(){
-
-return localStorage.getItem(TOKEN_KEY)
-
-}
-
-
-/* ================================
-API CALL
-================================ */
-
-async function apiFetch(url,options={}){
+async function api(url,method="GET",body=null,retry=1){
 
 const token=getToken()
-
-if(!token){
-
-location.href="login.html"
-return
-
-}
+if(!token) return null
 
 try{
 
 const res=await fetch(url,{
-...options,
+method,
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer "+token,
-...(options.headers||{})
-}
+"Authorization":"Bearer "+token
+},
+body:body?JSON.stringify(body):null
 })
 
 if(res.status===401){
-
 localStorage.removeItem(TOKEN_KEY)
-
 location.href="login.html"
+return null
+}
 
-return
+const text=await res.text()
 
+let data
+try{
+data=JSON.parse(text)
+}catch{
+throw new Error("Invalid JSON")
 }
 
 if(!res.ok){
-
-throw new Error("API error")
-
+throw new Error(data?.error||"API error")
 }
 
-return await res.json()
+return data
 
 }catch(err){
 
-console.error("AI API Error:",err)
+console.error("AI ERROR:",err)
 
-alert("AI system connection error")
+if(retry>0){
+return api(url,method,body,retry-1)
+}
+
+alert("AI system error")
+return null
 
 }
 
 }
 
-
-/* ================================
-LOADING UI
+/* ===============================
+LOADING STATE
 ================================ */
 
 function setLoading(state){
@@ -324,8 +354,7 @@ pauseBtn.disabled=state
 
 }
 
-
-/* ================================
+/* ===============================
 LOAD AI STATE
 ================================ */
 
@@ -335,33 +364,30 @@ if(loading) return
 
 setLoading(true)
 
-const data=await apiFetch(AI_API)
+const data=await api(AI_API)
 
 setLoading(false)
 
 if(!data) return
 
-aiCache=data
+aiState=data
 
 updatePauseUI(data.paused)
 
 document.querySelectorAll(".ai-card").forEach(card=>{
 
-const engine=formatKey(card.querySelector("h3").innerText)
+const engine=getEngine(card.querySelector("h3").innerText)
 
-const engineData=data.engines[engine]||{}
+const engineData=data.engines?.[engine]||{}
 
 card.querySelectorAll(".ai-item").forEach(item=>{
 
-const setting=formatKey(
-item.childNodes[0].textContent
-)
+const label=item.childNodes[0]?.textContent||""
+const setting=getSetting(label)
 
 const checkbox=item.querySelector("input")
 
-if(setting in engineData)
-checkbox.checked=engineData[setting]
-
+checkbox.checked=!!engineData[setting]
 checkbox.disabled=data.paused
 
 item.style.opacity=data.paused?0.5:1
@@ -370,112 +396,119 @@ item.style.opacity=data.paused?0.5:1
 
 })
 
+console.log("AI STATE:",data)
+
 }
 
-
-/* ================================
-HANDLE TOGGLE
+/* ===============================
+QUEUE SAVE (SMART)
 ================================ */
 
-async function handleToggle(e){
+function queueSave(engine,setting,value){
+
+saveQueue[engine+"_"+setting]={engine,setting,value}
+
+clearTimeout(saveTimer)
+
+saveTimer=setTimeout(async()=>{
+
+const tasks=Object.values(saveQueue)
+saveQueue={}
+
+for(const t of tasks){
+
+await api(AI_API,"PATCH",t)
+
+console.log("Saved:",t)
+
+}
+
+},300)
+
+}
+
+/* ===============================
+TOGGLE HANDLER
+================================ */
+
+function handleToggle(e){
 
 if(loading) return
 
 const checkbox=e.target
+
 const item=checkbox.closest(".ai-item")
 const card=checkbox.closest(".ai-card")
 
-const engine=formatKey(card.querySelector("h3").innerText)
+const engine=getEngine(card.querySelector("h3").innerText)
+const setting=getSetting(item.childNodes[0].textContent)
 
-const setting=formatKey(
-item.childNodes[0].textContent
-)
-
-const value=checkbox.checked
-
-try{
-
-await apiFetch(AI_API,{
-method:"PATCH",
-body:JSON.stringify({
-engine,
-setting,
-value
-})
-})
-
-}catch(err){
-
-checkbox.checked=!value
+queueSave(engine,setting,checkbox.checked)
 
 }
 
-}
-
-
-/* ================================
-PAUSE / RESUME ALL AI
+/* ===============================
+PAUSE SYSTEM
 ================================ */
 
 async function togglePause(){
 
 setLoading(true)
 
-await apiFetch(`${AI_API}/pause`,{
-method:"PATCH"
-})
-
-await loadAI()
+const res=await api(`${AI_API}/pause`,"PATCH")
 
 setLoading(false)
 
+if(!res) return
+
+updatePauseUI(res.paused)
+loadAI()
+
 }
 
-
-/* ================================
-UPDATE PAUSE BUTTON
+/* ===============================
+BUTTON UPDATE
 ================================ */
 
 function updatePauseUI(paused){
 
 if(paused){
-
-pauseBtn.innerText="▶ Resume All AI Systems"
-
+pauseBtn.innerText="▶ Resume AI Systems"
 pauseBtn.style.background="#1abc9c"
-
-}
-else{
-
-pauseBtn.innerText="⏸ Pause All AI Systems"
-
+}else{
+pauseBtn.innerText="⏸ Pause AI Systems"
 pauseBtn.style.background="#ffcc00"
-
 }
 
 }
 
-
-/* ================================
+/* ===============================
 AUTO REFRESH
 ================================ */
 
-function startAutoRefresh(){
+function autoRefresh(){
 
 setInterval(()=>{
-
 if(!loading){
-
 loadAI()
+}
+},20000)
 
 }
 
-},30000)
+/* ===============================
+ERROR WATCHER (CRITICAL)
+================================ */
 
-}
+window.addEventListener("error",(e)=>{
+console.error("GLOBAL ERROR:",e.message)
+})
 
+window.addEventListener("unhandledrejection",(e)=>{
+console.error("PROMISE ERROR:",e.reason)
+})
 
-/* ================================
+/* ===============================
 INIT
 ================================ */
 
@@ -483,21 +516,16 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 loadAI()
 
-document
-.querySelectorAll(".ai-item input")
-.forEach(input=>{
-
-input.addEventListener("change",handleToggle)
-
+document.querySelectorAll(".ai-item input")
+.forEach(i=>{
+i.addEventListener("change",handleToggle)
 })
 
 pauseBtn.onclick=togglePause
 
-startAutoRefresh()
+autoRefresh()
 
 })
-
-
 
 </script>
 
