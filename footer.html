@@ -171,95 +171,265 @@ input,select{
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
 const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
+
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
-if(!TOKEN) location.href="login.html"
+if(!TOKEN){
+  location.href="login.html"
+}
 
-const status=document.getElementById("status")
-const debugBox=document.getElementById("debugBox")
+/* ================= DOM ================= */
 
-const fields=[
+const status = document.getElementById("status")
+const debugBox = document.getElementById("debugBox")
+
+const fields = [
 "footerOn","footerLazy","footerBlur","footerLock","footerTheme",
-"about","privacy","disclaimer","dmca","telegram"
+"about","privacy","disclaimer","dmca","telegram","linkBadges",
+"azOn","azAuto","azSticky","azCompact","azMode",
+"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
+"promoOn","promoText","promoLink","promoAutoHide"
 ]
 
-async function api(url,method="GET",body=null){
-  const res=await fetch(url,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+TOKEN
-    },
-    body:body?JSON.stringify(body):null
-  })
-  if(!res.ok) throw new Error("API Error")
-  return res.json()
+/* ================= API WRAPPER ================= */
+
+async function api(url, method="GET", body=null){
+
+  try{
+
+    const res = await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+TOKEN
+      },
+      body: body ? JSON.stringify(body) : null
+    })
+
+    if(!res.ok){
+      throw new Error("API Error: " + res.status)
+    }
+
+    return await res.json()
+
+  }catch(e){
+    console.error("API FAILED:", e)
+    status.innerText = "API Error"
+    throw e
+  }
 }
+
+/* ================= LOAD ADMIN ================= */
 
 async function loadFooter(){
-  const data = await api(API)
-  fields.forEach(id=>{
-    const el=document.getElementById(id)
-    if(el.type==="checkbox") el.checked=!!data[id]
-    else el.value=data[id]||""
-  })
+
+  status.innerText = "Loading..."
+
+  try{
+
+    const data = await api(API)
+
+    fields.forEach(id=>{
+      const el = document.getElementById(id)
+      if(!el) return
+
+      if(el.type === "checkbox"){
+        el.checked = !!data[id]
+      }else{
+        el.value = data[id] ?? ""
+      }
+    })
+
+    status.innerText = "Synced"
+
+  }catch(e){
+    console.error(e)
+  }
 }
+
+/* ================= SAVE ================= */
 
 async function save(){
-  const payload={}
+
+  const payload = {}
+
   fields.forEach(id=>{
-    const el=document.getElementById(id)
-    payload[id]=el.type==="checkbox"?el.checked:el.value
+    const el = document.getElementById(id)
+    if(!el) return
+
+    // 🔥 BOOLEAN FIX (VERY IMPORTANT)
+    payload[id] = el.type === "checkbox"
+      ? (el.checked ? 1 : 0)
+      : el.value
   })
-  await api(API,"POST",payload)
-  status.innerText="Saved"
+
+  status.innerText = "Saving..."
+
+  try{
+    await api(API,"POST",payload)
+    status.innerText = "Saved ✅"
+  }catch{
+    status.innerText = "Save Failed ❌"
+  }
 }
+
+/* ================= RESET ================= */
 
 async function resetCfg(){
-  await api(API+"/reset","POST")
-  loadFooter()
+
+  if(!confirm("Reset footer settings?")) return
+
+  try{
+    await api(API + "/reset","POST")
+    await loadFooter()
+  }catch{}
 }
+
+/* ================= KILL ================= */
 
 async function kill(){
-  await api(API+"/kill","POST")
-  loadFooter()
+
+  if(!confirm("Disable footer system?")) return
+
+  try{
+    await api(API + "/kill","POST")
+    await loadFooter()
+  }catch{}
 }
+
+/* ================= DEBUG ================= */
 
 async function debug(){
-  const data=await api(API)
-  debugBox.textContent=JSON.stringify(data,null,2)
+
+  try{
+    const data = await api(API)
+    debugBox.style.display = "block"
+    debugBox.textContent = JSON.stringify(data,null,2)
+  }catch{}
 }
 
-/* ===== PUBLIC FOOTER ===== */
+/* ================= PUBLIC FOOTER ================= */
 
 async function initFooter(){
-  const res = await fetch(PUBLIC_API)
-  const cfg = await res.json()
 
-  const footer=document.getElementById("footer")
+  try{
 
-  if(!cfg.footerOn){
-    footer.style.display="none"
-    return
+    const res = await fetch(PUBLIC_API)
+
+    if(!res.ok){
+      console.warn("Footer API failed:", res.status)
+      return
+    }
+
+    const cfg = await res.json()
+
+    const footer = document.getElementById("footer")
+    if(!footer) return
+
+    /* ===== ENABLE ===== */
+    if(!cfg.footerOn){
+      footer.style.display = "none"
+      return
+    }
+
+    /* ===== THEME ===== */
+    if(cfg.footerTheme){
+      footer.classList.add(cfg.footerTheme.toLowerCase())
+    }
+
+    /* ===== BLUR ===== */
+    if(cfg.footerBlur){
+      footer.style.backdropFilter = "blur(10px)"
+    }
+
+    /* ===== LOCK ===== */
+    if(cfg.footerLock){
+      footer.style.position = "fixed"
+      footer.style.bottom = "0"
+      footer.style.width = "100%"
+    }
+
+    /* ===== LINKS ===== */
+    const links = []
+
+    if(cfg.about) links.push("About")
+    if(cfg.privacy) links.push("Privacy")
+    if(cfg.disclaimer) links.push("Disclaimer")
+    if(cfg.dmca) links.push("DMCA")
+    if(cfg.telegram) links.push("Telegram")
+
+    const box = document.getElementById("footer-links")
+
+    if(box){
+      box.innerHTML = links.map(l =>
+        `<a href="/${l.toLowerCase()}">${l}</a>`
+      ).join("")
+    }
+
+    /* ===== PROMO ===== */
+    if(cfg.promoOn && cfg.promoText){
+
+      const promo = document.getElementById("footer-promo")
+
+      if(promo){
+        promo.innerHTML = `<a href="${cfg.promoLink}" target="_blank">${cfg.promoText}</a>`
+        promo.style.display = "block"
+
+        if(cfg.promoAutoHide){
+          setTimeout(()=>{
+            promo.style.display = "none"
+          }, 5000)
+        }
+      }
+    }
+
+    /* ===== MOBILE NAV ===== */
+    if(cfg.mobileNav){
+
+      const nav = document.getElementById("mobile-nav")
+
+      if(nav){
+
+        nav.style.display = "flex"
+
+        if(cfg.mobileFloat){
+          nav.style.position = "fixed"
+          nav.style.bottom = "10px"
+        }
+
+        if(cfg.mobileHideScroll){
+
+          let lastScroll = 0
+
+          window.addEventListener("scroll", ()=>{
+
+            const current = window.scrollY
+
+            nav.style.display = current > lastScroll ? "none" : "flex"
+
+            lastScroll = current
+
+          })
+
+        }
+
+      }
+    }
+
+  }catch(e){
+    console.error("Footer Load Error:", e)
   }
-
-  const links=[]
-  if(cfg.about) links.push("About")
-  if(cfg.privacy) links.push("Privacy")
-  if(cfg.disclaimer) links.push("Disclaimer")
-  if(cfg.dmca) links.push("DMCA")
-  if(cfg.telegram) links.push("Telegram")
-
-  document.getElementById("footer-links").innerHTML =
-    links.map(l=>`<a href="/${l.toLowerCase()}">${l}</a>`).join("")
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+/* ================= INIT ================= */
+
+document.addEventListener("DOMContentLoaded", ()=>{
+
   loadFooter()
   initFooter()
+
 })
 
 </script>
-
 </body>
 </html>
