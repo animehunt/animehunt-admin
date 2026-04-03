@@ -170,7 +170,7 @@ input,select{
 <script>
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
-const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer/public"
+const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
@@ -195,20 +195,33 @@ const fields = [
 
 async function api(url, method="GET", body=null){
 
-  const res = await fetch(url,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + TOKEN
-    },
-    body: body ? JSON.stringify(body) : null
-  })
+  try{
 
-  if(!res.ok){
-    throw new Error("API ERROR: " + res.status)
+    const res = await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + TOKEN
+      },
+      body: body ? JSON.stringify(body) : null
+    })
+
+    if(res.status === 401){
+      location.href = "login.html"
+      return
+    }
+
+    if(!res.ok){
+      throw new Error("API ERROR: " + res.status)
+    }
+
+    return await res.json()
+
+  }catch(e){
+    console.error("API FAIL:", e)
+    status.innerText = "API Error ❌"
+    throw e
   }
-
-  return res.json()
 }
 
 /* ================= LOAD ADMIN ================= */
@@ -236,7 +249,6 @@ async function loadFooter(){
 
   }catch(e){
     console.error(e)
-    status.innerText = "API Error ❌"
   }
 }
 
@@ -260,8 +272,7 @@ async function save(){
   try{
     await api(API,"POST",payload)
     status.innerText = "Saved ✅"
-  }catch(e){
-    console.error(e)
+  }catch{
     status.innerText = "Save Failed ❌"
   }
 }
@@ -303,7 +314,6 @@ async function debug(){
 
     debugBox.style.display = "block"
     debugBox.textContent = JSON.stringify(data,null,2)
-
   }catch(e){
     console.error(e)
   }
@@ -322,15 +332,7 @@ async function initFooter(){
       return
     }
 
-    const text = await res.text()
-
-    let cfg
-    try{
-      cfg = JSON.parse(text)
-    }catch{
-      console.error("Invalid JSON:", text)
-      return
-    }
+    const cfg = await res.json()
 
     if(!cfg || Object.keys(cfg).length === 0){
       console.warn("Empty footer config")
@@ -340,28 +342,28 @@ async function initFooter(){
     const footer = document.getElementById("footer")
     if(!footer) return
 
-    /* ===== ENABLE ===== */
+    /* ENABLE */
     if(!cfg.footerOn){
       footer.style.display = "none"
       return
     }
 
-    /* ===== THEME ===== */
+    /* THEME */
     footer.className = cfg.footerTheme?.toLowerCase() || "dark"
 
-    /* ===== BLUR ===== */
+    /* BLUR */
     if(cfg.footerBlur){
       footer.style.backdropFilter = "blur(10px)"
     }
 
-    /* ===== LOCK ===== */
+    /* LOCK */
     if(cfg.footerLock){
       footer.style.position = "fixed"
       footer.style.bottom = "0"
       footer.style.width = "100%"
     }
 
-    /* ===== LINKS ===== */
+    /* LINKS */
     const links = []
 
     if(cfg.about) links.push("About")
@@ -378,17 +380,13 @@ async function initFooter(){
       ).join("")
     }
 
-    /* ===== PROMO ===== */
+    /* PROMO */
     if(cfg.promoOn && cfg.promoText){
 
       const promo = document.getElementById("footer-promo")
 
       if(promo){
-        promo.innerHTML = `
-          <a href="${cfg.promoLink}" target="_blank">
-            ${cfg.promoText}
-          </a>
-        `
+        promo.innerHTML = `<a href="${cfg.promoLink}" target="_blank">${cfg.promoText}</a>`
         promo.style.display = "block"
 
         if(cfg.promoAutoHide){
@@ -399,7 +397,7 @@ async function initFooter(){
       }
     }
 
-    /* ===== MOBILE NAV ===== */
+    /* MOBILE NAV */
     if(cfg.mobileNav){
 
       const nav = document.getElementById("mobile-nav")
@@ -430,7 +428,6 @@ async function initFooter(){
         }
 
       }
-
     }
 
   }catch(e){
@@ -446,8 +443,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 })
 
 </script>
-
-    
     
             
 </body>
