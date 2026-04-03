@@ -145,6 +145,13 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 <label class="check"><input type="checkbox" id="telegram"> Telegram</label>
 <label class="check"><input type="checkbox" id="linkBadges"> Show Badges</label>
 </div>
+  <div id="footer">
+  <div id="footer-links"></div>
+  <div id="footer-promo" style="display:none"></div>
+</div>
+
+<div id="mobile-nav"></div>
+  
 
 <!-- A-Z -->
 <div class="card">
@@ -439,6 +446,112 @@ INIT
 ========================= */
 
 document.addEventListener("DOMContentLoaded",loadFooter)
+
+
+async function initFooter(){
+
+  try{
+
+    const res = await fetch("/api/footer/public")
+    const cfg = await res.json()
+
+    const footer = document.getElementById("footer")
+    if(!footer) return
+
+    /* ===== ENABLE / DISABLE ===== */
+    if(!cfg.footerOn){
+      footer.style.display="none"
+      return
+    }
+
+    /* ===== THEME ===== */
+    footer.className = cfg.footerTheme?.toLowerCase() || "dark"
+
+    if(cfg.footerBlur){
+      footer.style.backdropFilter="blur(10px)"
+    }
+
+    if(cfg.footerLock){
+      footer.style.position="fixed"
+      footer.style.bottom="0"
+      footer.style.width="100%"
+    }
+
+    /* ===== LINKS ===== */
+    const links=[]
+
+    if(cfg.about) links.push("About")
+    if(cfg.privacy) links.push("Privacy")
+    if(cfg.disclaimer) links.push("Disclaimer")
+    if(cfg.dmca) links.push("DMCA")
+    if(cfg.telegram) links.push("Telegram")
+
+    const linksBox=document.getElementById("footer-links")
+
+    if(linksBox){
+      linksBox.innerHTML = links.map(l=>
+        `<a href="/${l.toLowerCase()}">${l}</a>`
+      ).join("")
+    }
+
+    /* ===== PROMO ===== */
+    if(cfg.promoOn && cfg.promoText){
+
+      const promo=document.getElementById("footer-promo")
+
+      if(promo){
+        promo.innerHTML=`<a href="${cfg.promoLink}">${cfg.promoText}</a>`
+        promo.style.display="block"
+
+        if(cfg.promoAutoHide){
+          setTimeout(()=>{
+            promo.style.display="none"
+          },5000)
+        }
+      }
+
+    }
+
+    /* ===== MOBILE NAV ===== */
+    if(cfg.mobileNav){
+
+      const nav=document.getElementById("mobile-nav")
+
+      if(nav){
+
+        if(cfg.mobileFloat){
+          nav.style.position="fixed"
+          nav.style.bottom="10px"
+        }
+
+        if(cfg.mobileHideScroll){
+
+          let lastScroll=0
+
+          window.addEventListener("scroll",()=>{
+
+            const current=window.scrollY
+
+            nav.style.display = current>lastScroll ? "none" : "flex"
+
+            lastScroll=current
+
+          })
+
+        }
+
+      }
+
+    }
+
+  }catch(e){
+    console.log("Footer Load Error",e)
+  }
+
+}
+
+/* ===== INIT ===== */
+document.addEventListener("DOMContentLoaded",initFooter)
 
 </script>
 
