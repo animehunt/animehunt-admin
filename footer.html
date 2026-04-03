@@ -203,283 +203,145 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 </main>
 </div>
 
-
 <script>
 
-const res = await fetch("https://animehunt-backend.animehunt715.workers.dev/api/footer/public")
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
+const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
+
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
-location.href="login.html"
+  location.href="login.html"
 }
 
 const status=document.getElementById("status")
 const debugBox=document.getElementById("debugBox")
 
-/* =========================
-ALL FIELD IDS
-========================= */
-
 const fields=[
-
-"footerOn",
-"footerLazy",
-"footerBlur",
-"footerLock",
-"footerTheme",
-
-"about",
-"privacy",
-"disclaimer",
-"dmca",
-"telegram",
-"linkBadges",
-
-"azOn",
-"azAuto",
-"azSticky",
-"azCompact",
-"azMode",
-
-"mobileNav",
-"mobileFloat",
-"mobileBlur",
-"mobileHideScroll",
-
-"promoOn",
-"promoText",
-"promoLink",
-"promoAutoHide"
-
+"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
+"about","privacy","disclaimer","dmca","telegram","linkBadges",
+"azOn","azAuto","azSticky","azCompact","azMode",
+"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
+"promoOn","promoText","promoLink","promoAutoHide"
 ]
 
-/* =========================
-API WRAPPER
-========================= */
+/* ================= API ================= */
 
 async function api(url,method="GET",body=null){
 
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
+  const res=await fetch(url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+TOKEN
+    },
+    body:body?JSON.stringify(body):null
+  })
 
-if(!res.ok){
-throw new Error("API Error")
+  if(!res.ok){
+    throw new Error("API Error")
+  }
+
+  return res.json()
 }
 
-return res.json()
-
-}
-
-/* =========================
-LOAD FOOTER CONFIG
-========================= */
+/* ================= LOAD ADMIN ================= */
 
 async function loadFooter(){
 
-status.innerText="Loading..."
+  status.innerText="Loading..."
 
-try{
+  try{
 
-const data = await api(API)
+    const data = await api(API)
 
-fields.forEach(id=>{
+    fields.forEach(id=>{
+      const el=document.getElementById(id)
+      if(!el) return
 
-const el=document.getElementById(id)
+      if(el.type==="checkbox"){
+        el.checked=!!data[id]
+      }else{
+        el.value=data[id] || ""
+      }
+    })
 
-if(!el) return
+    status.innerText="Synced"
 
-if(el.type==="checkbox"){
-el.checked=!!data[id]
-}else{
-el.value=data[id] || ""
+  }catch(e){
+    status.innerText="API Error"
+    console.error(e)
+  }
 }
 
-})
-
-status.innerText="Synced"
-
-}catch(e){
-
-status.innerText="API Error"
-
-}
-
-}
-
-/* =========================
-SAVE FOOTER
-========================= */
+/* ================= SAVE ================= */
 
 async function save(){
 
-const payload={}
+  const payload={}
 
-fields.forEach(id=>{
+  fields.forEach(id=>{
+    const el=document.getElementById(id)
+    if(!el) return
 
-const el=document.getElementById(id)
+    payload[id] = el.type==="checkbox"
+      ? el.checked
+      : el.value
+  })
 
-if(!el) return
+  status.innerText="Saving..."
 
-payload[id] = el.type==="checkbox"
-? el.checked
-: el.value
-
-})
-
-status.innerText="Saving..."
-
-try{
-
-await api(API,"POST",payload)
-
-status.innerText="Saved"
-
-}catch{
-
-status.innerText="Save Failed"
-
+  try{
+    await api(API,"POST",payload)
+    status.innerText="Saved"
+  }catch{
+    status.innerText="Save Failed"
+  }
 }
 
-}
-
-/* =========================
-EXPORT CONFIG
-========================= */
-
-async function exportCfg(){
-
-const data = await api(API)
-
-const blob=new Blob([JSON.stringify(data,null,2)],{
-type:"application/json"
-})
-
-const url=URL.createObjectURL(blob)
-
-const a=document.createElement("a")
-
-a.href=url
-a.download="footer-config.json"
-
-a.click()
-
-}
-
-/* =========================
-IMPORT CONFIG
-========================= */
-
-function importCfg(){
-
-const input=document.createElement("input")
-
-input.type="file"
-
-input.onchange=async()=>{
-
-const file=input.files[0]
-
-if(!file) return
-
-const text=await file.text()
-
-const json=JSON.parse(text)
-
-await api(API,"POST",json)
-
-loadFooter()
-
-}
-
-input.click()
-
-}
-
-/* =========================
-RESET CONFIG
-========================= */
+/* ================= RESET ================= */
 
 async function resetCfg(){
-
-if(!confirm("Reset footer settings?")) return
-
-await api(API+"/reset","POST")
-
-loadFooter()
-
+  if(!confirm("Reset footer settings?")) return
+  await api(API+"/reset","POST")
+  loadFooter()
 }
 
-/* =========================
-KILL FOOTER
-========================= */
+/* ================= KILL ================= */
 
 async function kill(){
-
-if(!confirm("Disable footer system?")) return
-
-await api(API+"/kill","POST")
-
-loadFooter()
-
+  if(!confirm("Disable footer system?")) return
+  await api(API+"/kill","POST")
+  loadFooter()
 }
 
-/* =========================
-DEBUG JSON
-========================= */
+/* ================= DEBUG ================= */
 
 async function debug(){
-
-const data=await api(API)
-
-debugBox.style.display="block"
-
-debugBox.textContent=JSON.stringify(data,null,2)
-
+  const data=await api(API)
+  debugBox.style.display="block"
+  debugBox.textContent=JSON.stringify(data,null,2)
 }
 
-/* =========================
-INIT
-========================= */
-
-document.addEventListener("DOMContentLoaded",loadFooter)
-
+/* ================= PUBLIC FOOTER ================= */
 
 async function initFooter(){
 
   try{
 
-    const res = await fetch("/api/footer/public")
+    const res = await fetch(PUBLIC_API)
     const cfg = await res.json()
 
     const footer = document.getElementById("footer")
     if(!footer) return
 
-    /* ===== ENABLE / DISABLE ===== */
     if(!cfg.footerOn){
       footer.style.display="none"
       return
     }
 
-    /* ===== THEME ===== */
     footer.className = cfg.footerTheme?.toLowerCase() || "dark"
 
-    if(cfg.footerBlur){
-      footer.style.backdropFilter="blur(10px)"
-    }
-
-    if(cfg.footerLock){
-      footer.style.position="fixed"
-      footer.style.bottom="0"
-      footer.style.width="100%"
-    }
-
-    /* ===== LINKS ===== */
     const links=[]
 
     if(cfg.about) links.push("About")
@@ -488,74 +350,36 @@ async function initFooter(){
     if(cfg.dmca) links.push("DMCA")
     if(cfg.telegram) links.push("Telegram")
 
-    const linksBox=document.getElementById("footer-links")
+    const box=document.getElementById("footer-links")
 
-    if(linksBox){
-      linksBox.innerHTML = links.map(l=>
+    if(box){
+      box.innerHTML = links.map(l =>
         `<a href="/${l.toLowerCase()}">${l}</a>`
       ).join("")
     }
 
-    /* ===== PROMO ===== */
     if(cfg.promoOn && cfg.promoText){
-
       const promo=document.getElementById("footer-promo")
-
       if(promo){
         promo.innerHTML=`<a href="${cfg.promoLink}">${cfg.promoText}</a>`
         promo.style.display="block"
-
-        if(cfg.promoAutoHide){
-          setTimeout(()=>{
-            promo.style.display="none"
-          },5000)
-        }
       }
-
-    }
-
-    /* ===== MOBILE NAV ===== */
-    if(cfg.mobileNav){
-
-      const nav=document.getElementById("mobile-nav")
-
-      if(nav){
-
-        if(cfg.mobileFloat){
-          nav.style.position="fixed"
-          nav.style.bottom="10px"
-        }
-
-        if(cfg.mobileHideScroll){
-
-          let lastScroll=0
-
-          window.addEventListener("scroll",()=>{
-
-            const current=window.scrollY
-
-            nav.style.display = current>lastScroll ? "none" : "flex"
-
-            lastScroll=current
-
-          })
-
-        }
-
-      }
-
     }
 
   }catch(e){
     console.log("Footer Load Error",e)
   }
-
 }
 
-/* ===== INIT ===== */
-document.addEventListener("DOMContentLoaded",initFooter)
+/* ================= INIT ================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+  loadFooter()
+  initFooter()
+})
 
 </script>
+
 
  
 </body>
