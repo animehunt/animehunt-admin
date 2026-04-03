@@ -10,7 +10,6 @@
 body{background:#060a14;color:#fff}
 .cms-app{display:flex;min-height:100vh}
 
-/* SIDEBAR */
 .cms-sidebar{
   width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
 }
@@ -24,7 +23,6 @@ body{background:#060a14;color:#fff}
   background:#0e1424;color:#ffcc00
 }
 
-/* MAIN */
 .cms-main{flex:1}
 .cms-header{
   display:flex;justify-content:space-between;align-items:center;
@@ -36,7 +34,6 @@ body{background:#060a14;color:#fff}
 }
 .cms-content{padding:20px}
 
-/* GRID */
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card{
   background:#0b0f1a;border:1px solid #1a2035;
@@ -45,7 +42,6 @@ body{background:#060a14;color:#fff}
 }
 .card h3{font-size:14px;color:#ffcc00}
 
-/* FORM */
 label{font-size:12px;color:#aaa}
 input,select{
   background:#0e1424;border:1px solid #1a2035;color:#fff;
@@ -60,7 +56,17 @@ input,select{
 .btns button:hover{background:#ffcc00;color:#000}
 .full{grid-column:1/4}
 .status{font-size:11px;color:#4cff4c}
-pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:auto}
+
+#footer{
+  margin-top:20px;
+  padding:15px;
+  border-top:1px solid #1a2035;
+}
+#footer a{
+  margin-right:10px;
+  color:#ffcc00;
+  text-decoration:none;
+}
 </style>
 </head>
 
@@ -75,8 +81,6 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
   </div>
 
   <nav class="cms-menu">
-
-    <!-- CORE -->
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
@@ -84,32 +88,25 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
 
-    <!-- CONTENT -->
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
 
-    <!-- DATA & SEO -->
     <a href="seo.html">📈 Seo</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
 
-    <!-- SECURITY & DEPLOY -->
     <a href="security.html">🔐 Security</a>
     <a href="deploy-backup.html">🚀 Deploy-backup</a>
 
-    <!-- AI & ADS -->
     <a href="ads.html">📢 Ads</a>
     <a href="ai-brain.html">🧠 Ai Brain</a>
 
-    <!-- LAYOUT CONTROL -->
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html" class="active">🦶 Footer</a>
 
-    <!-- ADMIN / SYSTEM (LAST) -->
     <a href="system-settings.html">⚙ System-settings</a>
-
   </nav>
 </aside>
 
@@ -123,19 +120,17 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 <section class="cms-content">
 <div class="grid">
 
-<!-- GLOBAL -->
 <div class="card">
 <h3>Global Footer</h3>
 <label class="check"><input type="checkbox" id="footerOn"> Enabled</label>
 <label class="check"><input type="checkbox" id="footerLazy"> Lazy Load</label>
-<label class="check"><input type="checkbox" id="footerBlur"> Blur Background</label>
-<label class="check"><input type="checkbox" id="footerLock"> Lock Footer</label>
+<label class="check"><input type="checkbox" id="footerBlur"> Blur</label>
+<label class="check"><input type="checkbox" id="footerLock"> Lock</label>
 <select id="footerTheme">
-  <option>Dark</option><option>Light</option><option>Auto</option>
+<option>Dark</option><option>Light</option><option>Auto</option>
 </select>
 </div>
 
-<!-- LINKS -->
 <div class="card">
 <h3>Footer Links</h3>
 <label class="check"><input type="checkbox" id="about"> About</label>
@@ -143,60 +138,29 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 <label class="check"><input type="checkbox" id="disclaimer"> Disclaimer</label>
 <label class="check"><input type="checkbox" id="dmca"> DMCA</label>
 <label class="check"><input type="checkbox" id="telegram"> Telegram</label>
-<label class="check"><input type="checkbox" id="linkBadges"> Show Badges</label>
-</div>
-  
-  
-
-<!-- A-Z -->
-<div class="card">
-<h3>A–Z Engine</h3>
-<label class="check"><input type="checkbox" id="azOn"> Enable</label>
-<label class="check"><input type="checkbox" id="azAuto"> Auto Generate</label>
-<label class="check"><input type="checkbox" id="azSticky"> Sticky</label>
-<label class="check"><input type="checkbox" id="azCompact"> Mobile Compact</label>
-<select id="azMode"><option>Scroll</option><option>Redirect</option></select>
 </div>
 
-<!-- MOBILE NAV -->
 <div class="card">
-<h3>Mobile Bottom Nav</h3>
+<h3>Mobile Nav</h3>
 <label class="check"><input type="checkbox" id="mobileNav"> Enable</label>
-<label class="check"><input type="checkbox" id="mobileFloat"> Floating</label>
-<label class="check"><input type="checkbox" id="mobileBlur"> Blur</label>
-<label class="check"><input type="checkbox" id="mobileHideScroll"> Hide on Scroll</label>
 </div>
 
-<!-- PROMO -->
-<div class="card">
-<h3>Footer Promo</h3>
-<label class="check"><input type="checkbox" id="promoOn"> Enable Promo</label>
-<input id="promoText" placeholder="Join our Telegram">
-<input id="promoLink" placeholder="https://t.me/...">
-<label class="check"><input type="checkbox" id="promoAutoHide"> Auto Hide</label>
-</div>
-
-<!-- SYSTEM -->
 <div class="card full">
 <h3>System</h3>
 <div class="btns">
-<button onclick="exportCfg()">Export</button>
-<button onclick="importCfg()">Import</button>
 <button onclick="resetCfg()">Reset</button>
-<button onclick="kill()">Kill Footer</button>
-<button onclick="debug()">Debug JSON</button>
+<button onclick="kill()">Kill</button>
+<button onclick="debug()">Debug</button>
 </div>
 <div class="status" id="status">Ready</div>
-<pre id="debugBox" style="display:none"></pre>
+<pre id="debugBox"></pre>
 </div>
 
-  <div id="footer">
+<div id="footer">
   <div id="footer-links"></div>
-  <div id="footer-promo" style="display:none"></div>
+  <div id="footer-promo"></div>
 </div>
 
-<div id="mobile-nav"></div>
-  
 </div>
 </section>
 
@@ -207,28 +171,19 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
 const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
-
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
-if(!TOKEN){
-  location.href="login.html"
-}
+if(!TOKEN) location.href="login.html"
 
 const status=document.getElementById("status")
 const debugBox=document.getElementById("debugBox")
 
 const fields=[
 "footerOn","footerLazy","footerBlur","footerLock","footerTheme",
-"about","privacy","disclaimer","dmca","telegram","linkBadges",
-"azOn","azAuto","azSticky","azCompact","azMode",
-"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
-"promoOn","promoText","promoLink","promoAutoHide"
+"about","privacy","disclaimer","dmca","telegram"
 ]
 
-/* ================= API ================= */
-
 async function api(url,method="GET",body=null){
-
   const res=await fetch(url,{
     method,
     headers:{
@@ -237,141 +192,67 @@ async function api(url,method="GET",body=null){
     },
     body:body?JSON.stringify(body):null
   })
-
-  if(!res.ok){
-    throw new Error("API Error")
-  }
-
+  if(!res.ok) throw new Error("API Error")
   return res.json()
 }
 
-/* ================= LOAD ADMIN ================= */
-
 async function loadFooter(){
-
-  status.innerText="Loading..."
-
-  try{
-
-    const data = await api(API)
-
-    fields.forEach(id=>{
-      const el=document.getElementById(id)
-      if(!el) return
-
-      if(el.type==="checkbox"){
-        el.checked=!!data[id]
-      }else{
-        el.value=data[id] || ""
-      }
-    })
-
-    status.innerText="Synced"
-
-  }catch(e){
-    status.innerText="API Error"
-    console.error(e)
-  }
-}
-
-/* ================= SAVE ================= */
-
-async function save(){
-
-  const payload={}
-
+  const data = await api(API)
   fields.forEach(id=>{
     const el=document.getElementById(id)
-    if(!el) return
-
-    payload[id] = el.type==="checkbox"
-      ? el.checked
-      : el.value
+    if(el.type==="checkbox") el.checked=!!data[id]
+    else el.value=data[id]||""
   })
-
-  status.innerText="Saving..."
-
-  try{
-    await api(API,"POST",payload)
-    status.innerText="Saved"
-  }catch{
-    status.innerText="Save Failed"
-  }
 }
 
-/* ================= RESET ================= */
+async function save(){
+  const payload={}
+  fields.forEach(id=>{
+    const el=document.getElementById(id)
+    payload[id]=el.type==="checkbox"?el.checked:el.value
+  })
+  await api(API,"POST",payload)
+  status.innerText="Saved"
+}
 
 async function resetCfg(){
-  if(!confirm("Reset footer settings?")) return
   await api(API+"/reset","POST")
   loadFooter()
 }
 
-/* ================= KILL ================= */
-
 async function kill(){
-  if(!confirm("Disable footer system?")) return
   await api(API+"/kill","POST")
   loadFooter()
 }
 
-/* ================= DEBUG ================= */
-
 async function debug(){
   const data=await api(API)
-  debugBox.style.display="block"
   debugBox.textContent=JSON.stringify(data,null,2)
 }
 
-/* ================= PUBLIC FOOTER ================= */
+/* ===== PUBLIC FOOTER ===== */
 
 async function initFooter(){
+  const res = await fetch(PUBLIC_API)
+  const cfg = await res.json()
 
-  try{
+  const footer=document.getElementById("footer")
 
-    const res = await fetch(PUBLIC_API)
-    const cfg = await res.json()
-
-    const footer = document.getElementById("footer")
-    if(!footer) return
-
-    if(!cfg.footerOn){
-      footer.style.display="none"
-      return
-    }
-
-    footer.className = cfg.footerTheme?.toLowerCase() || "dark"
-
-    const links=[]
-
-    if(cfg.about) links.push("About")
-    if(cfg.privacy) links.push("Privacy")
-    if(cfg.disclaimer) links.push("Disclaimer")
-    if(cfg.dmca) links.push("DMCA")
-    if(cfg.telegram) links.push("Telegram")
-
-    const box=document.getElementById("footer-links")
-
-    if(box){
-      box.innerHTML = links.map(l =>
-        `<a href="/${l.toLowerCase()}">${l}</a>`
-      ).join("")
-    }
-
-    if(cfg.promoOn && cfg.promoText){
-      const promo=document.getElementById("footer-promo")
-      if(promo){
-        promo.innerHTML=`<a href="${cfg.promoLink}">${cfg.promoText}</a>`
-        promo.style.display="block"
-      }
-    }
-
-  }catch(e){
-    console.log("Footer Load Error",e)
+  if(!cfg.footerOn){
+    footer.style.display="none"
+    return
   }
-}
 
-/* ================= INIT ================= */
+  const links=[]
+  if(cfg.about) links.push("About")
+  if(cfg.privacy) links.push("Privacy")
+  if(cfg.disclaimer) links.push("Disclaimer")
+  if(cfg.dmca) links.push("DMCA")
+  if(cfg.telegram) links.push("Telegram")
+
+  document.getElementById("footer-links").innerHTML =
+    links.map(l=>`<a href="/${l.toLowerCase()}">${l}</a>`).join("")
+}
 
 document.addEventListener("DOMContentLoaded",()=>{
   loadFooter()
@@ -380,7 +261,5 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </script>
 
-
- 
 </body>
 </html>
