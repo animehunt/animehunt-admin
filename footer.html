@@ -170,12 +170,12 @@ input,select{
 <script>
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
-const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
+const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer/public"
 
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
-  location.href="login.html"
+  location.href = "login.html"
 }
 
 /* ================= DOM ================= */
@@ -191,32 +191,24 @@ const fields = [
 "promoOn","promoText","promoLink","promoAutoHide"
 ]
 
-/* ================= API WRAPPER ================= */
+/* ================= API ================= */
 
 async function api(url, method="GET", body=null){
 
-  try{
+  const res = await fetch(url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + TOKEN
+    },
+    body: body ? JSON.stringify(body) : null
+  })
 
-    const res = await fetch(url,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+TOKEN
-      },
-      body: body ? JSON.stringify(body) : null
-    })
-
-    if(!res.ok){
-      throw new Error("API Error: " + res.status)
-    }
-
-    return await res.json()
-
-  }catch(e){
-    console.error("API FAILED:", e)
-    status.innerText = "API Error"
-    throw e
+  if(!res.ok){
+    throw new Error("API ERROR: " + res.status)
   }
+
+  return res.json()
 }
 
 /* ================= LOAD ADMIN ================= */
@@ -240,10 +232,11 @@ async function loadFooter(){
       }
     })
 
-    status.innerText = "Synced"
+    status.innerText = "Synced ✅"
 
   }catch(e){
     console.error(e)
+    status.innerText = "API Error ❌"
   }
 }
 
@@ -257,7 +250,6 @@ async function save(){
     const el = document.getElementById(id)
     if(!el) return
 
-    // 🔥 BOOLEAN FIX (VERY IMPORTANT)
     payload[id] = el.type === "checkbox"
       ? (el.checked ? 1 : 0)
       : el.value
@@ -268,7 +260,8 @@ async function save(){
   try{
     await api(API,"POST",payload)
     status.innerText = "Saved ✅"
-  }catch{
+  }catch(e){
+    console.error(e)
     status.innerText = "Save Failed ❌"
   }
 }
@@ -282,7 +275,9 @@ async function resetCfg(){
   try{
     await api(API + "/reset","POST")
     await loadFooter()
-  }catch{}
+  }catch(e){
+    console.error(e)
+  }
 }
 
 /* ================= KILL ================= */
@@ -294,7 +289,9 @@ async function kill(){
   try{
     await api(API + "/kill","POST")
     await loadFooter()
-  }catch{}
+  }catch(e){
+    console.error(e)
+  }
 }
 
 /* ================= DEBUG ================= */
@@ -303,9 +300,13 @@ async function debug(){
 
   try{
     const data = await api(API)
+
     debugBox.style.display = "block"
     debugBox.textContent = JSON.stringify(data,null,2)
-  }catch{}
+
+  }catch(e){
+    console.error(e)
+  }
 }
 
 /* ================= PUBLIC FOOTER ================= */
@@ -317,11 +318,24 @@ async function initFooter(){
     const res = await fetch(PUBLIC_API)
 
     if(!res.ok){
-      console.warn("Footer API failed:", res.status)
+      console.warn("Public API failed:", res.status)
       return
     }
 
-    const cfg = await res.json()
+    const text = await res.text()
+
+    let cfg
+    try{
+      cfg = JSON.parse(text)
+    }catch{
+      console.error("Invalid JSON:", text)
+      return
+    }
+
+    if(!cfg || Object.keys(cfg).length === 0){
+      console.warn("Empty footer config")
+      return
+    }
 
     const footer = document.getElementById("footer")
     if(!footer) return
@@ -333,9 +347,7 @@ async function initFooter(){
     }
 
     /* ===== THEME ===== */
-    if(cfg.footerTheme){
-      footer.classList.add(cfg.footerTheme.toLowerCase())
-    }
+    footer.className = cfg.footerTheme?.toLowerCase() || "dark"
 
     /* ===== BLUR ===== */
     if(cfg.footerBlur){
@@ -372,13 +384,17 @@ async function initFooter(){
       const promo = document.getElementById("footer-promo")
 
       if(promo){
-        promo.innerHTML = `<a href="${cfg.promoLink}" target="_blank">${cfg.promoText}</a>`
+        promo.innerHTML = `
+          <a href="${cfg.promoLink}" target="_blank">
+            ${cfg.promoText}
+          </a>
+        `
         promo.style.display = "block"
 
         if(cfg.promoAutoHide){
           setTimeout(()=>{
             promo.style.display = "none"
-          }, 5000)
+          },5000)
         }
       }
     }
@@ -401,7 +417,7 @@ async function initFooter(){
 
           let lastScroll = 0
 
-          window.addEventListener("scroll", ()=>{
+          window.addEventListener("scroll",()=>{
 
             const current = window.scrollY
 
@@ -414,6 +430,7 @@ async function initFooter(){
         }
 
       }
+
     }
 
   }catch(e){
@@ -424,12 +441,14 @@ async function initFooter(){
 /* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded", ()=>{
-
   loadFooter()
   initFooter()
-
 })
 
 </script>
+
+    
+    
+            
 </body>
 </html>
