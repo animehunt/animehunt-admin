@@ -204,7 +204,7 @@ pre{background:#070b16;padding:10px;border-radius:8px;font-size:11px;overflow:au
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
+const res = await fetch("https://animehunt-backend.animehunt715.workers.dev/api/footer/public")
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
