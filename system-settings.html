@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>System Settings – AnimeHunt CMS</title>
+<title>Master OTT Control – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -16,79 +16,54 @@ body{background:#060a14;color:#fff}
 }
 .brand{padding:0 18px 14px;font-size:20px}
 .brand b{color:#ffcc00}
-
+.brand small{display:block;font-size:11px;color:#888}
 .cms-menu a{
-  display:block;padding:10px 18px;color:#ccc;text-decoration:none
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
 }
-.cms-menu a.active,.cms-menu a:hover{
-  background:#0e1424;color:#ffcc00
-}
+.cms-menu a.active,.cms-menu a:hover{background:#0e1424;color:#ffcc00}
 
 /* MAIN */
 .cms-main{flex:1}
-
 .cms-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 20px;
-  background:#070b16;
-  border-bottom:1px solid #1a2035
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
 }
-
 .save-btn{
-  background:#ffcc00;
-  border:none;
-  padding:8px 18px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer
+  background:#ffcc00;border:none;padding:8px 18px;
+  border-radius:8px;font-weight:600;cursor:pointer
 }
+.cms-content{padding:20px}
 
-.cms-content{
-  padding:30px;
-  display:flex;
-  justify-content:center
-}
-
-/* CARD */
-.card{
-  width:400px;
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:12px;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
   gap:16px
 }
-
-.card h3{
-  color:#ffcc00;
-  margin-bottom:10px
+.card{
+  background:#0b0f1a;border:1px solid #1a2035;
+  border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px
 }
+.card h3{font-size:14px;color:#ffcc00}
 
-/* TOGGLE */
-.row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:14px
+/* FORM */
+label{font-size:12px;color:#aaa}
+select,input{
+  background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:7px 10px;border-radius:6px;font-size:12px
 }
+.check{display:flex;gap:8px;align-items:center;font-size:12px}
 
-select{
-  background:#0e1424;
-  border:1px solid #1a2035;
-  color:#fff;
-  padding:6px;
-  border-radius:6px
+/* BUTTONS */
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{
+  background:#1a2035;border:none;color:#fff;
+  padding:7px 12px;border-radius:6px;cursor:pointer
 }
+.btns button:hover{background:#ffcc00;color:#000}
 
-.status{
-  margin-top:10px;
-  font-size:12px;
-  color:#4cff4c
-}
+.full{grid-column:1/4}
+.status{font-size:11px;color:#4cff4c}
 </style>
 </head>
 
@@ -96,128 +71,482 @@ select{
 
 <div class="cms-app">
 
-<!-- SIDEBAR (UNCHANGED) -->
 <aside class="cms-sidebar">
-  <div class="brand">Anime<b>Hunt</b></div>
+  <div class="brand">
+    <span>Anime</span><b>Hunt</b>
+    <small>CMS</small>
+  </div>
 
   <nav class="cms-menu">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="anime.html">Anime</a>
-    <a href="episodes.html">Episodes</a>
-    <a href="categories.html">Categorys</a>
-    <a href="banners.html">Banners</a>
-    <a href="homepage.html">Homepage</a>
-    <a href="downloads.html">Downloads</a>
-    <a href="servers.html">Servers</a>
-    <a href="player.html">Player</a>
-    <a href="search.html">Search</a>
-    <a href="seo.html">Seo</a>
-    <a href="analytics.html">Analytics</a>
-    <a href="performance.html">Performance</a>
-    <a href="security.html">Security</a>
-    <a href="deploy-backup.html">Deploy-backup</a>
-    <a href="ads.html">Ads</a>
-    <a href="ai-brain.html">Ai Brain</a>
-    <a href="sidebar.html">Sidebar</a>
-    <a href="footer.html">Footer</a>
-    <a href="system-settings.html" class="active">System-settings</a>
+
+    <!-- CORE -->
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Catagorys</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+
+    <!-- CONTENT -->
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+
+    <!-- DATA & SEO -->
+    <a href="seo.html">📈 Seo</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+
+    <!-- SECURITY & DEPLOY -->
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+    <!-- AI & ADS -->
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 Ai Brain</a>
+
+    <!-- LAYOUT CONTROL -->
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+
+    <!-- ADMIN / SYSTEM (LAST) -->
+    <a href="system-settings.html" class="active">⚙ System-settings</a>
   </nav>
 </aside>
 
-<!-- MAIN -->
 <main class="cms-main">
 
 <header class="cms-header">
-  <div>⚙ System Settings</div>
-  <button class="save-btn" onclick="save()">Save</button>
+  <div>🔥 MASTER OTT CONTROL PANEL</div>
+  <button class="save-btn" onclick="saveAll()">💾 Save All</button>
 </header>
 
 <section class="cms-content">
+<div class="grid">
 
+<!-- SYSTEM -->
 <div class="card">
-
-<h3>Core Controls</h3>
-
-<div class="row">
-  <span>System ON/OFF</span>
-  <input type="checkbox" id="systemOn">
+<h3>System Core</h3>
+<label class="check"><input type="checkbox" id="systemOn"> System ON</label>
+<label class="check"><input type="checkbox" id="maintenanceSoft"> Maintenance (Soft)</label>
+<label class="check"><input type="checkbox" id="maintenanceHard"> Maintenance (Hard)</label>
+<label class="check"><input type="checkbox" id="lockCMS"> Lock CMS</label>
+<label class="check"><input type="checkbox" id="readOnly"> Read Only</label>
+<select id="env">
+  <option>Production</option>
+  <option>Staging</option>
+  <option>Development</option>
+</select>
 </div>
 
-<div class="row">
-  <span>Maintenance Mode</span>
-  <input type="checkbox" id="maintenance">
+<!-- UI -->
+<div class="card">
+<h3>UI & Theme</h3>
+<select id="theme"><option>Dark</option><option>Light</option><option>Auto</option></select>
+<select id="animation"><option>None</option><option>Soft</option><option>Premium</option></select>
+<label class="check"><input type="checkbox" id="skeleton"> Skeleton Loader</label>
+<label class="check"><input type="checkbox" id="imgBlur"> Image Blur Load</label>
+<label class="check"><input type="checkbox" id="mobileUI"> Mobile Override</label>
 </div>
 
-<div class="row">
-  <span>Site Mode</span>
-  <select id="siteMode">
-    <option value="public">Public</option>
-    <option value="private">Private (Login Required)</option>
-  </select>
+<!-- HOMEPAGE -->
+<div class="card">
+<h3>Homepage Engine</h3>
+<label class="check"><input type="checkbox" id="autoHome"> Auto Homepage</label>
+<label class="check"><input type="checkbox" id="aiHome"> AI Reorder</label>
+<label class="check"><input type="checkbox" id="trendBoost"> Trending Boost</label>
+<label class="check"><input type="checkbox" id="manualPin"> Manual Pin Force</label>
+<select id="homeMode"><option>Static</option><option>Dynamic</option></select>
 </div>
 
-<div class="row">
-  <span>API Access</span>
-  <input type="checkbox" id="apiEnabled">
+<!-- CONTENT -->
+<div class="card">
+<h3>Content Control</h3>
+<label class="check"><input type="checkbox" id="geoBlock"> Geo Block</label>
+<label class="check"><input type="checkbox" id="ageLock"> Age Restriction</label>
+<label class="check"><input type="checkbox" id="schedule"> Scheduled Publish</label>
+<label class="check"><input type="checkbox" id="shadow"> Shadow Publish</label>
 </div>
 
-<div class="status" id="status">Ready</div>
-
+<!-- PLAYER -->
+<div class="card">
+<h3>Player Engine</h3>
+<label class="check"><input type="checkbox" id="autoPlay"> Autoplay</label>
+<label class="check"><input type="checkbox" id="resume"> Resume Watch</label>
+<label class="check"><input type="checkbox" id="autoNext"> Auto Next</label>
+<label class="check"><input type="checkbox" id="skipIntro"> Skip Intro</label>
+<label class="check"><input type="checkbox" id="serverSwitch"> Auto Server Switch</label>
 </div>
 
+<!-- DOWNLOAD -->
+<div class="card">
+<h3>Download Engine</h3>
+<label class="check"><input type="checkbox" id="downloads"> Enable Downloads</label>
+<label class="check"><input type="checkbox" id="zip"> ZIP Packs</label>
+<label class="check"><input type="checkbox" id="scan"> Auto Scan Broken</label>
+<label class="check"><input type="checkbox" id="limit"> Daily Limit</label>
+</div>
+
+<!-- SEARCH -->
+<div class="card">
+<h3>Search Engine</h3>
+<label class="check"><input type="checkbox" id="liveSearch"> Live Search</label>
+<label class="check"><input type="checkbox" id="highlight"> Highlight Match</label>
+<label class="check"><input type="checkbox" id="fuzzy"> Fuzzy Search</label>
+<label class="check"><input type="checkbox" id="adult"> Adult Filter</label>
+<input id="maxResult" placeholder="Max Results">
+</div>
+
+<!-- SECURITY -->
+<div class="card">
+<h3>Security</h3>
+<label class="check"><input type="checkbox" id="antiInspect"> Anti Inspect</label>
+<label class="check"><input type="checkbox" id="iframe"> Iframe Protect</label>
+<label class="check"><input type="checkbox" id="rateLimit"> Rate Limit</label>
+<label class="check"><input type="checkbox" id="rightClick"> Disable Right Click</label>
+</div>
+
+<!-- ACTIONS -->
+<div class="card full">
+<h3>System Actions</h3>
+<div class="btns">
+<button onclick="clearCache()">Clear Cache</button>
+<button onclick="exportConfig()">Export</button>
+<button onclick="importConfig()">Import</button>
+<button onclick="resetAll()">Reset</button>
+<button onclick="kill()">Kill Switch</button>
+</div>
+<div class="status" id="statusText">Ready</div>
+</div>
+
+</div>
 </section>
+
 </main>
 </div>
-
-<script>
+  
+  <script>
 
 const API="/api/admin/system"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const TOKEN_KEY="AUTH_TOKEN"
 
-async function api(method="GET",body=null){
+const statusEl=document.getElementById("statusText")
 
-  const res=await fetch(API,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+TOKEN
-    },
-    body:body?JSON.stringify(body):null
-  })
+const FIELD_IDS=[
+"systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
+"theme","animation","skeleton","imgBlur","mobileUI",
+"autoHome","aiHome","trendBoost","manualPin","homeMode",
+"geoBlock","ageLock","schedule","shadow",
+"autoPlay","resume","autoNext","skipIntro","serverSwitch",
+"downloads","zip","scan","limit",
+"liveSearch","highlight","fuzzy","adult","maxResult",
+"antiInspect","iframe","rateLimit","rightClick"
+]
 
-  return res.json()
+/* =========================
+API HELPER
+========================= */
+
+async function apiFetch(url,options={}){
+
+const token=localStorage.getItem(TOKEN_KEY)
+
+try{
+
+const res=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+"Authorization":token?`Bearer ${token}`:""
+}
+})
+
+if(res.status===401){
+
+location.href="login.html"
+return null
+
 }
 
-/* LOAD */
-async function load(){
+return await res.json()
 
-  const data=await api()
+}catch(e){
 
-  document.getElementById("systemOn").checked=!!data.systemOn
-  document.getElementById("maintenance").checked=!!data.maintenance
-  document.getElementById("siteMode").value=data.siteMode||"public"
-  document.getElementById("apiEnabled").checked=!!data.apiEnabled
+showStatus("Network Error",true)
+return null
 
 }
 
-/* SAVE */
-async function save(){
-
-  const payload={
-    systemOn:document.getElementById("systemOn").checked?1:0,
-    maintenance:document.getElementById("maintenance").checked?1:0,
-    siteMode:document.getElementById("siteMode").value,
-    apiEnabled:document.getElementById("apiEnabled").checked?1:0
-  }
-
-  await api("POST",payload)
-
-  document.getElementById("status").innerText="Saved ✅"
 }
 
-document.addEventListener("DOMContentLoaded",load)
+/* =========================
+STATUS MESSAGE
+========================= */
 
-</script>
+function showStatus(msg,error=false){
+
+statusEl.innerText=msg
+statusEl.style.color=error?"#ff4c4c":"#4cff4c"
+
+setTimeout(()=>{
+
+statusEl.innerText="Ready"
+statusEl.style.color="#4cff4c"
+
+},3000)
+
+}
+
+/* =========================
+LOAD CONFIG
+========================= */
+
+async function loadSystem(){
+
+showStatus("Loading...")
+
+const data=await apiFetch(API)
+
+if(!data) return
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(el.type==="checkbox")
+el.checked=!!data[id]
+else
+el.value=data[id]||""
+
+})
+
+showStatus("System Synced")
+
+}
+
+/* =========================
+SAVE CONFIG
+========================= */
+
+async function saveAll(){
+
+const payload={}
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(id==="maxResult")
+payload[id]=parseInt(el.value)||8
+else
+payload[id]=el.type==="checkbox"
+? el.checked
+: el.value
+
+})
+
+showStatus("Saving...")
+
+const res=await apiFetch(API,{
+method:"POST",
+body:JSON.stringify(payload)
+})
+
+if(res?.success)
+showStatus("System Updated 🚀")
+else
+showStatus("Update Failed",true)
+
+}
+
+/* =========================
+EXPORT CONFIG
+========================= */
+
+function exportConfig(){
+
+const payload={}
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+payload[id]=el.type==="checkbox"
+? el.checked
+: el.value
+
+})
+
+const blob=new Blob(
+[JSON.stringify(payload,null,2)],
+{type:"application/json"}
+)
+
+const url=URL.createObjectURL(blob)
+
+const a=document.createElement("a")
+
+a.href=url
+a.download="animehunt-config.json"
+
+a.click()
+
+showStatus("Config Exported")
+
+}
+
+/* =========================
+IMPORT CONFIG
+========================= */
+
+function importConfig(){
+
+const input=document.createElement("input")
+input.type="file"
+input.accept="application/json"
+
+input.onchange=e=>{
+
+const file=e.target.files[0]
+
+const reader=new FileReader()
+
+reader.onload=ev=>{
+
+try{
+
+const data=JSON.parse(ev.target.result)
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+if(el.type==="checkbox")
+el.checked=!!data[id]
+else
+el.value=data[id]||""
+
+})
+
+showStatus("Config Imported")
+
+}catch{
+
+showStatus("Invalid Config File",true)
+
+}
+
+}
+
+reader.readAsText(file)
+
+}
+
+input.click()
+
+}
+
+/* =========================
+RESET CONFIG
+========================= */
+
+async function resetAll(){
+
+if(!confirm("Reset system config?")) return
+
+await apiFetch(API+"/reset",{method:"POST"})
+
+loadSystem()
+
+showStatus("System Reset")
+
+}
+
+/* =========================
+KILL SWITCH
+========================= */
+
+async function kill(){
+
+if(!confirm("⚠ Shutdown platform?")) return
+
+const res=await apiFetch(API+"/kill",{method:"POST"})
+
+if(res?.halted){
+
+showStatus("SYSTEM HALTED",true)
+
+loadSystem()
+
+}
+
+}
+
+/* =========================
+CLEAR CACHE
+========================= */
+
+async function clearCache(){
+
+showStatus("Purging cache...")
+
+try{
+
+await fetch("/api/admin/cache/purge",{method:"POST"})
+
+showStatus("Cache Cleared")
+
+}catch{
+
+showStatus("Cache purge failed",true)
+
+}
+
+}
+
+/* =========================
+AUTO SAVE (OPTIONAL)
+========================= */
+
+let autoSaveTimer
+
+FIELD_IDS.forEach(id=>{
+
+const el=document.getElementById(id)
+
+if(!el) return
+
+el.addEventListener("change",()=>{
+
+clearTimeout(autoSaveTimer)
+
+autoSaveTimer=setTimeout(()=>{
+saveAll()
+},1200)
+
+})
+
+})
+
+/* =========================
+INIT
+========================= */
+
+document.addEventListener("DOMContentLoaded",loadSystem)
+
+  </script>
+
+
+
 
 </body>
 </html>
