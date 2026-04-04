@@ -2,237 +2,220 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>System Settings – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Settings</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#060a14;color:#fff}
-.cms-app{display:flex;min-height:100vh}
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:#020617;
+color:#fff;
+display:flex;
+}
 
-/* SIDEBAR */
-.cms-sidebar{
-  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
+/* SIDEBAR (same style) */
+.sidebar{
+width:220px;
+background:#020617;
+border-right:1px solid #111;
+padding:20px 10px;
+height:100vh;
 }
-.brand{padding:0 18px 14px;font-size:20px}
-.brand b{color:#ffcc00}
-.cms-menu a{
-  display:block;padding:10px 18px;color:#ccc;text-decoration:none
+
+.sidebar h2{
+color:#fff;
+font-size:18px;
+margin-bottom:20px;
 }
-.cms-menu a.active,.cms-menu a:hover{
-  background:#0e1424;color:#ffcc00
+
+.sidebar a{
+display:block;
+color:#aaa;
+padding:10px;
+text-decoration:none;
+border-radius:8px;
+margin-bottom:5px;
+}
+
+.sidebar a:hover,
+.sidebar a.active{
+background:#0f172a;
+color:#fff;
 }
 
 /* MAIN */
-.cms-main{flex:1}
-.cms-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
-}
-.save-btn{
-  background:#ffcc00;border:none;padding:8px 18px;
-  border-radius:8px;font-weight:600;cursor:pointer
+.main{
+flex:1;
+padding:20px;
 }
 
-.cms-content{padding:20px}
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.btn{
+background:#facc15;
+color:#000;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+/* GRID */
 .grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:20px;
 }
 
 /* CARD */
 .card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:12px;
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px
+background:#020617;
+border:1px solid #111;
+border-radius:12px;
+padding:20px;
 }
 
 .card h3{
-  font-size:14px;
-  color:#ffcc00
+margin-bottom:15px;
 }
 
-.check{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  font-size:13px
+/* INPUTS */
+label{
+display:block;
+margin-top:10px;
+font-size:14px;
+color:#aaa;
 }
 
-input,select{
-  background:#0e1424;
-  border:1px solid #1a2035;
-  color:#fff;
-  padding:7px;
-  border-radius:6px
+select{
+width:100%;
+padding:10px;
+margin-top:5px;
+background:#020617;
+border:1px solid #111;
+color:#fff;
+border-radius:8px;
 }
 
-.status{
-  margin-top:10px;
-  font-size:12px;
-  color:#4cff4c
+/* SWITCH */
+.switch{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:15px;
+}
+
+.switch input{
+width:40px;
+height:20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="cms-app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>AnimeHunt</h2>
 
-<!-- SIDEBAR SAME -->
-<aside class="cms-sidebar">
-  <div class="brand">Anime<b>Hunt</b></div>
-  <nav class="cms-menu">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="anime.html">Anime</a>
-    <a href="episodes.html">Episodes</a>
-    <a href="categories.html">Categories</a>
-    <a href="banners.html">Banners</a>
-    <a href="homepage.html">Homepage</a>
-    <a href="downloads.html">Downloads</a>
-    <a href="servers.html">Servers</a>
-    <a href="player.html">Player</a>
-    <a href="search.html">Search</a>
-    <a href="seo.html">SEO</a>
-    <a href="analytics.html">Analytics</a>
-    <a href="performance.html">Performance</a>
-    <a href="security.html">Security</a>
-    <a href="deploy-backup.html">Deploy-backup</a>
-    <a href="ads.html">Ads</a>
-    <a href="ai-brain.html">Ai Brain</a>
-    <a href="sidebar.html">Sidebar</a>
-    <a href="footer.html">Footer</a>
-    <a href="system-settings.html" class="active">System Settings</a>
-  </nav>
-</aside>
+<a href="#">🏠 Dashboard</a>
+<a href="#">🎬 Anime</a>
+<a href="#">📺 Episodes</a>
+<a href="#">📁 Category</a>
+<a href="#">🖼 Banners</a>
+<a href="#">🏠 Homepage</a>
+<a href="#">⬇ Downloads</a>
+<a href="#">🌐 Servers</a>
+<a href="#">▶ Player</a>
+<a href="#">🔍 Search</a>
+<a href="#">📈 SEO</a>
+<a href="#">📊 Analytics</a>
+<a href="#">⚡ Performance</a>
+<a href="#">🔒 Security</a>
+<a href="#">🚀 Deploy-backup</a>
+<a href="#">📢 Ads</a>
+<a href="#">🧠 AI Brain</a>
+<a href="#">📌 Sidebar</a>
+<a href="#">🦶 Footer</a>
+
+<a class="active">⚙ System Settings</a>
+</div>
 
 <!-- MAIN -->
-<main class="cms-main">
+<div class="main">
 
-<header class="cms-header">
-  <div>⚙ System Settings (OTT Core)</div>
-  <button class="save-btn" onclick="save()">Save</button>
-</header>
-
-<section class="cms-content">
+<div class="topbar">
+<h2>⚙ System Settings</h2>
+<button class="btn" onclick="saveSettings()">💾 Save Settings</button>
+</div>
 
 <div class="grid">
 
-<!-- GLOBAL -->
+<!-- CORE -->
 <div class="card">
-<h3>🔥 Global Control</h3>
-<label class="check"><input type="checkbox" id="systemOn"> System ON</label>
-<label class="check"><input type="checkbox" id="maintenance"> Maintenance Mode</label>
-<label class="check"><input type="checkbox" id="emergency"> Emergency Shutdown</label>
+<h3>🔥 Core Control</h3>
+
+<div class="switch">
+<span>System ON</span>
+<input type="checkbox" id="systemOn">
+</div>
+
+<div class="switch">
+<span>Maintenance Mode</span>
+<input type="checkbox" id="maintenance">
+</div>
+
 </div>
 
 <!-- ACCESS -->
 <div class="card">
-<h3>🌍 Platform Access</h3>
+<h3>🌍 Access & API</h3>
+
+<label>Site Mode</label>
 <select id="siteMode">
 <option value="public">Public</option>
 <option value="private">Private</option>
 </select>
-<label class="check"><input type="checkbox" id="registration"> User Registration</label>
-<label class="check"><input type="checkbox" id="guest"> Guest Access</label>
-</div>
 
-<!-- API -->
-<div class="card">
-<h3>📡 API & System</h3>
-<label class="check"><input type="checkbox" id="api"> API Enabled</label>
-<label class="check"><input type="checkbox" id="cache"> Cache System</label>
-<label class="check"><input type="checkbox" id="logs"> Debug Logs</label>
-</div>
-
-<!-- LIMITS -->
-<div class="card">
-<h3>⚙️ Limits</h3>
-<input id="upload" placeholder="Max Upload (MB)">
-<input id="rate" placeholder="Request Limit/sec">
-<input id="timeout" placeholder="Timeout (ms)">
-</div>
-
-<!-- AUTOMATION -->
-<div class="card">
-<h3>🧠 Smart Control</h3>
-<label class="check"><input type="checkbox" id="cleanup"> Auto Cleanup</label>
-<label class="check"><input type="checkbox" id="sync"> Auto Sync</label>
+<div class="switch">
+<span>API Enabled</span>
+<input type="checkbox" id="api">
 </div>
 
 </div>
 
-<div class="status" id="status">Ready</div>
+</div>
 
-</section>
-</main>
 </div>
 
 <script>
+async function saveSettings(){
 
-const API="/api/admin/system"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
-
-const fields=[
-"systemOn","maintenance","emergency",
-"siteMode","registration","guest",
-"api","cache","logs",
-"upload","rate","timeout",
-"cleanup","sync"
-]
-
-async function apiCall(method="GET",body=null){
-const res=await fetch(API,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-return res.json()
+const data = {
+systemOn: document.getElementById("systemOn").checked,
+maintenance: document.getElementById("maintenance").checked,
+siteMode: document.getElementById("siteMode").value,
+api: document.getElementById("api").checked
 }
 
-async function load(){
-const data=await apiCall()
+console.log("Saving:", data)
 
-fields.forEach(id=>{
-const el=document.getElementById(id)
-if(!el) return
-
-if(el.type==="checkbox"){
-el.checked=!!data[id]
-}else{
-el.value=data[id]||""
-}
-})
-}
-
-async function save(){
-
-const payload={}
-
-fields.forEach(id=>{
-const el=document.getElementById(id)
-if(!el) return
-
-payload[id]=el.type==="checkbox"
-? (el.checked?1:0)
-: el.value
+/* API CALL */
+await fetch("/api/system-settings",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify(data)
 })
 
-await apiCall("POST",payload)
-
-document.getElementById("status").innerText="Saved ✅"
+alert("Settings Saved ✅")
 }
-
-document.addEventListener("DOMContentLoaded",load)
-
 </script>
 
 </body>
