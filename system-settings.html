@@ -175,50 +175,80 @@ select,input{
 </main>
 </div>
 
+
 <script>
 
-const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
 const TOKEN_KEY = "AUTH_TOKEN"
 
-const FIELD_IDS=[
-"systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
-"theme","animation",
-"geoBlock","ageLock","schedule","shadow"
+const FIELD_IDS = [
+  "systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
+  "theme","animation",
+  "geoBlock","ageLock","schedule","shadow"
 ]
+
+/* ================= TOKEN ================= */
+
+function getToken(){
+  const token = localStorage.getItem(TOKEN_KEY)
+  if(!token){
+    location.href = "login.html"
+    return null
+  }
+  return token
+}
 
 /* ================= API ================= */
 
 async function apiFetch(method="GET", body=null){
-  const token = localStorage.getItem(TOKEN_KEY)
 
-  const res = await fetch(API,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + token
-    },
-    body: body ? JSON.stringify(body) : null
-  })
+  const token = getToken()
+  if(!token) return null
 
-  if(res.status===401){
-    location.href="login.html"
+  try{
+
+    const res = await fetch(API_BASE,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + token
+      },
+      body: body ? JSON.stringify(body) : null
+    })
+
+    if(res.status === 401){
+      localStorage.removeItem(TOKEN_KEY)
+      location.href = "login.html"
+      return null
+    }
+
+    const text = await res.text()
+
+    try{
+      return JSON.parse(text)
+    }catch{
+      console.error("Invalid JSON:", text)
+      return null
+    }
+
+  }catch(err){
+    console.error("API Error:", err)
     return null
   }
-
-  return res.json()
 }
 
 /* ================= STATUS ================= */
 
-function showStatus(msg,error=false){
-  const el=document.getElementById("statusText")
-  el.innerText=msg
-  el.style.color=error?"#ff4c4c":"#4cff4c"
+function showStatus(msg, error=false){
+  const el = document.getElementById("statusText")
+
+  el.innerText = msg
+  el.style.color = error ? "#ff4c4c" : "#4cff4c"
 
   setTimeout(()=>{
-    el.innerText="Ready"
-    el.style.color="#4cff4c"
-  },2000)
+    el.innerText = "Ready"
+    el.style.color = "#4cff4c"
+  }, 2500)
 }
 
 /* ================= LOAD ================= */
@@ -230,18 +260,18 @@ async function loadSystem(){
   const data = await apiFetch()
 
   if(!data){
-    showStatus("Load Failed",true)
+    showStatus("Load Failed ❌", true)
     return
   }
 
   FIELD_IDS.forEach(id=>{
-    const el=document.getElementById(id)
-    if(!el)return
+    const el = document.getElementById(id)
+    if(!el) return
 
-    if(el.type==="checkbox")
-      el.checked=!!data[id]
+    if(el.type === "checkbox")
+      el.checked = !!data[id]
     else
-      el.value=data[id]||""
+      el.value = data[id] ?? ""
   })
 
   showStatus("Synced ✅")
@@ -251,25 +281,25 @@ async function loadSystem(){
 
 async function saveAll(){
 
-  const payload={}
+  const payload = {}
 
   FIELD_IDS.forEach(id=>{
-    const el=document.getElementById(id)
-    if(!el)return
+    const el = document.getElementById(id)
+    if(!el) return
 
-    payload[id] = el.type==="checkbox"
+    payload[id] = el.type === "checkbox"
       ? (el.checked ? 1 : 0)
       : el.value
   })
 
   showStatus("Saving...")
 
-  const res = await apiFetch("POST",payload)
+  const res = await apiFetch("POST", payload)
 
   if(res?.success)
     showStatus("Saved ✅")
   else
-    showStatus("Save Failed ❌",true)
+    showStatus("Save Failed ❌", true)
 }
 
 /* ================= RESET ================= */
@@ -278,15 +308,23 @@ async function resetAll(){
 
   if(!confirm("Reset system settings?")) return
 
-  await fetch(API+"/reset",{
+  showStatus("Resetting...")
+
+  const token = getToken()
+
+  const res = await fetch(API_BASE + "/reset",{
     method:"POST",
     headers:{
-      "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+      "Authorization":"Bearer " + token
     }
   })
 
-  loadSystem()
-  showStatus("Reset Done")
+  if(res.ok){
+    await loadSystem()
+    showStatus("Reset Done ✅")
+  }else{
+    showStatus("Reset Failed ❌", true)
+  }
 }
 
 /* ================= KILL ================= */
@@ -295,18 +333,24 @@ async function kill(){
 
   if(!confirm("⚠ Shutdown system?")) return
 
-  const res = await fetch(API+"/kill",{
+  showStatus("Shutting down...")
+
+  const token = getToken()
+
+  const res = await fetch(API_BASE + "/kill",{
     method:"POST",
     headers:{
-      "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+      "Authorization":"Bearer " + token
     }
   })
 
   const data = await res.json()
 
   if(data?.halted){
-    showStatus("SYSTEM HALTED ❌",true)
+    showStatus("SYSTEM HALTED ❌", true)
     loadSystem()
+  }else{
+    showStatus("Failed ❌", true)
   }
 }
 
@@ -316,17 +360,23 @@ async function clearCache(){
 
   showStatus("Clearing cache...")
 
+  const token = getToken()
+
   try{
-    await fetch(API+"/cache-clear",{
+    const res = await fetch(API_BASE + "/cache-clear",{
       method:"POST",
       headers:{
-        "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+        "Authorization":"Bearer " + token
       }
     })
 
-    showStatus("Cache Cleared ✅")
+    if(res.ok)
+      showStatus("Cache Cleared ✅")
+    else
+      showStatus("Failed ❌", true)
+
   }catch{
-    showStatus("Cache Failed ❌",true)
+    showStatus("Error ❌", true)
   }
 }
 
@@ -335,6 +385,12 @@ async function clearCache(){
 function exportConfig(){
 
   apiFetch().then(data=>{
+
+    if(!data){
+      showStatus("Export Failed ❌", true)
+      return
+    }
+
     const blob = new Blob(
       [JSON.stringify(data,null,2)],
       {type:"application/json"}
@@ -360,18 +416,24 @@ function importConfig(){
   input.accept = "application/json"
 
   input.onchange = e=>{
+
     const file = e.target.files[0]
     const reader = new FileReader()
 
     reader.onload = async ev=>{
+
       try{
         const data = JSON.parse(ev.target.result)
-        await apiFetch("POST",data)
-        loadSystem()
+
+        await apiFetch("POST", data)
+        await loadSystem()
+
         showStatus("Imported ✅")
+
       }catch{
-        showStatus("Invalid File ❌",true)
+        showStatus("Invalid File ❌", true)
       }
+
     }
 
     reader.readAsText(file)
@@ -382,10 +444,9 @@ function importConfig(){
 
 /* ================= INIT ================= */
 
-document.addEventListener("DOMContentLoaded",loadSystem)
+document.addEventListener("DOMContentLoaded", loadSystem)
 
 </script>
-
 
 
 </body>
