@@ -2,220 +2,221 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>System Settings – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>System Settings</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background:#020617;
-color:#fff;
-display:flex;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#060a14;color:#fff}
+.cms-app{display:flex;min-height:100vh}
 
-/* SIDEBAR (same style) */
-.sidebar{
-width:220px;
-background:#020617;
-border-right:1px solid #111;
-padding:20px 10px;
-height:100vh;
+/* SIDEBAR */
+.cms-sidebar{
+  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
 }
+.brand{padding:0 18px 14px;font-size:20px}
+.brand b{color:#ffcc00}
 
-.sidebar h2{
-color:#fff;
-font-size:18px;
-margin-bottom:20px;
+.cms-menu a{
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none
 }
-
-.sidebar a{
-display:block;
-color:#aaa;
-padding:10px;
-text-decoration:none;
-border-radius:8px;
-margin-bottom:5px;
-}
-
-.sidebar a:hover,
-.sidebar a.active{
-background:#0f172a;
-color:#fff;
+.cms-menu a.active,.cms-menu a:hover{
+  background:#0e1424;color:#ffcc00
 }
 
 /* MAIN */
-.main{
-flex:1;
-padding:20px;
+.cms-main{flex:1}
+
+.cms-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 20px;
+  background:#070b16;
+  border-bottom:1px solid #1a2035
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+.save-btn{
+  background:#ffcc00;
+  border:none;
+  padding:8px 18px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer
 }
 
-.btn{
-background:#facc15;
-color:#000;
-border:none;
-padding:10px 15px;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-}
-
-/* GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-gap:20px;
+.cms-content{
+  padding:30px;
+  display:flex;
+  justify-content:center
 }
 
 /* CARD */
 .card{
-background:#020617;
-border:1px solid #111;
-border-radius:12px;
-padding:20px;
+  width:400px;
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:12px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px
 }
 
 .card h3{
-margin-bottom:15px;
+  color:#ffcc00;
+  margin-bottom:10px
 }
 
-/* INPUTS */
-label{
-display:block;
-margin-top:10px;
-font-size:14px;
-color:#aaa;
+/* TOGGLE */
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:14px
 }
 
 select{
-width:100%;
-padding:10px;
-margin-top:5px;
-background:#020617;
-border:1px solid #111;
-color:#fff;
-border-radius:8px;
+  background:#0e1424;
+  border:1px solid #1a2035;
+  color:#fff;
+  padding:6px;
+  border-radius:6px
 }
 
-/* SWITCH */
-.switch{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-top:15px;
-}
-
-.switch input{
-width:40px;
-height:20px;
+.status{
+  margin-top:10px;
+  font-size:12px;
+  color:#4cff4c
 }
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<h2>AnimeHunt</h2>
+<div class="cms-app">
 
-<a href="#">🏠 Dashboard</a>
-<a href="#">🎬 Anime</a>
-<a href="#">📺 Episodes</a>
-<a href="#">📁 Category</a>
-<a href="#">🖼 Banners</a>
-<a href="#">🏠 Homepage</a>
-<a href="#">⬇ Downloads</a>
-<a href="#">🌐 Servers</a>
-<a href="#">▶ Player</a>
-<a href="#">🔍 Search</a>
-<a href="#">📈 SEO</a>
-<a href="#">📊 Analytics</a>
-<a href="#">⚡ Performance</a>
-<a href="#">🔒 Security</a>
-<a href="#">🚀 Deploy-backup</a>
-<a href="#">📢 Ads</a>
-<a href="#">🧠 AI Brain</a>
-<a href="#">📌 Sidebar</a>
-<a href="#">🦶 Footer</a>
+<!-- SIDEBAR (UNCHANGED) -->
+<aside class="cms-sidebar">
+  <div class="brand">Anime<b>Hunt</b></div>
 
-<a class="active">⚙ System Settings</a>
-</div>
+  <nav class="cms-menu">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="anime.html">Anime</a>
+    <a href="episodes.html">Episodes</a>
+    <a href="categories.html">Categorys</a>
+    <a href="banners.html">Banners</a>
+    <a href="homepage.html">Homepage</a>
+    <a href="downloads.html">Downloads</a>
+    <a href="servers.html">Servers</a>
+    <a href="player.html">Player</a>
+    <a href="search.html">Search</a>
+    <a href="seo.html">Seo</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="performance.html">Performance</a>
+    <a href="security.html">Security</a>
+    <a href="deploy-backup.html">Deploy-backup</a>
+    <a href="ads.html">Ads</a>
+    <a href="ai-brain.html">Ai Brain</a>
+    <a href="sidebar.html">Sidebar</a>
+    <a href="footer.html">Footer</a>
+    <a href="system-settings.html" class="active">System-settings</a>
+  </nav>
+</aside>
 
 <!-- MAIN -->
-<div class="main">
+<main class="cms-main">
 
-<div class="topbar">
-<h2>⚙ System Settings</h2>
-<button class="btn" onclick="saveSettings()">💾 Save Settings</button>
-</div>
+<header class="cms-header">
+  <div>⚙ System Settings</div>
+  <button class="save-btn" onclick="save()">Save</button>
+</header>
 
-<div class="grid">
+<section class="cms-content">
 
-<!-- CORE -->
 <div class="card">
-<h3>🔥 Core Control</h3>
 
-<div class="switch">
-<span>System ON</span>
-<input type="checkbox" id="systemOn">
+<h3>Core Controls</h3>
+
+<div class="row">
+  <span>System ON/OFF</span>
+  <input type="checkbox" id="systemOn">
 </div>
 
-<div class="switch">
-<span>Maintenance Mode</span>
-<input type="checkbox" id="maintenance">
+<div class="row">
+  <span>Maintenance Mode</span>
+  <input type="checkbox" id="maintenance">
 </div>
 
+<div class="row">
+  <span>Site Mode</span>
+  <select id="siteMode">
+    <option value="public">Public</option>
+    <option value="private">Private (Login Required)</option>
+  </select>
 </div>
 
-<!-- ACCESS -->
-<div class="card">
-<h3>🌍 Access & API</h3>
-
-<label>Site Mode</label>
-<select id="siteMode">
-<option value="public">Public</option>
-<option value="private">Private</option>
-</select>
-
-<div class="switch">
-<span>API Enabled</span>
-<input type="checkbox" id="api">
+<div class="row">
+  <span>API Access</span>
+  <input type="checkbox" id="apiEnabled">
 </div>
 
-</div>
+<div class="status" id="status">Ready</div>
 
 </div>
 
+</section>
+</main>
 </div>
 
 <script>
-async function saveSettings(){
 
-const data = {
-systemOn: document.getElementById("systemOn").checked,
-maintenance: document.getElementById("maintenance").checked,
-siteMode: document.getElementById("siteMode").value,
-api: document.getElementById("api").checked
+const API="/api/admin/system"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
+
+async function api(method="GET",body=null){
+
+  const res=await fetch(API,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+TOKEN
+    },
+    body:body?JSON.stringify(body):null
+  })
+
+  return res.json()
 }
 
-console.log("Saving:", data)
+/* LOAD */
+async function load(){
 
-/* API CALL */
-await fetch("/api/system-settings",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify(data)
-})
+  const data=await api()
 
-alert("Settings Saved ✅")
+  document.getElementById("systemOn").checked=!!data.systemOn
+  document.getElementById("maintenance").checked=!!data.maintenance
+  document.getElementById("siteMode").value=data.siteMode||"public"
+  document.getElementById("apiEnabled").checked=!!data.apiEnabled
+
 }
+
+/* SAVE */
+async function save(){
+
+  const payload={
+    systemOn:document.getElementById("systemOn").checked?1:0,
+    maintenance:document.getElementById("maintenance").checked?1:0,
+    siteMode:document.getElementById("siteMode").value,
+    apiEnabled:document.getElementById("apiEnabled").checked?1:0
+  }
+
+  await api("POST",payload)
+
+  document.getElementById("status").innerText="Saved ✅"
+}
+
+document.addEventListener("DOMContentLoaded",load)
+
 </script>
 
 </body>
