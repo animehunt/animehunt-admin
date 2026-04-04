@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>system settings– AnimeHunt</title>
+<title>System Settings – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -16,9 +16,8 @@ body{background:#060a14;color:#fff}
 }
 .brand{padding:0 18px 14px;font-size:20px}
 .brand b{color:#ffcc00}
-.brand small{display:block;font-size:11px;color:#888}
 .cms-menu a{
-  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+  display:block;padding:10px 18px;color:#ccc;text-decoration:none
 }
 .cms-menu a.active,.cms-menu a:hover{
   background:#0e1424;color:#ffcc00
@@ -34,26 +33,50 @@ body{background:#060a14;color:#fff}
   background:#ffcc00;border:none;padding:8px 18px;
   border-radius:8px;font-weight:600;cursor:pointer
 }
-.cms-content{padding:20px}
 
-/* GRID */
+.cms-content{padding:20px}
 .grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:16px
 }
+
+/* CARD */
 .card{
-  background:#0b0f1a;border:1px solid #1a2035;
-  border-radius:12px;padding:14px;
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:12px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px
 }
-.card h3{font-size:14px;color:#ffcc00;margin-bottom:10px}
 
-/* FORM */
-.check{display:flex;gap:8px;margin-bottom:6px;font-size:12px}
-input[type="checkbox"]{accent-color:#ffcc00}
+.card h3{
+  font-size:14px;
+  color:#ffcc00
+}
 
-/* STATUS */
-.status{font-size:11px;color:#4cff4c;margin-top:10px}
+.check{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:13px
+}
+
+input,select{
+  background:#0e1424;
+  border:1px solid #1a2035;
+  color:#fff;
+  padding:7px;
+  border-radius:6px
+}
+
+.status{
+  margin-top:10px;
+  font-size:12px;
+  color:#4cff4c
+}
 </style>
 </head>
 
@@ -61,97 +84,85 @@ input[type="checkbox"]{accent-color:#ffcc00}
 
 <div class="cms-app">
 
-<!-- SIDEBAR (UNCHANGED) -->
+<!-- SIDEBAR SAME -->
 <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
-
+  <div class="brand">Anime<b>Hunt</b></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="anime.html">🎬 Anime</a>
-    <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
-    <a href="banners.html">🖼 Banners</a>
-    <a href="homepage.html">🏠 Homepage</a>
-
-    <a href="downloads.html">📥 Downloads</a>
-    <a href="servers.html">🌐 Servers</a>
-    <a href="player.html">🎞 Player</a>
-    <a href="search.html">🔍 Search</a>
-
-    <a href="seo.html">📈 Seo</a>
-    <a href="analytics.html">📊 Analytics</a>
-    <a href="performance.html">⚡ Performance</a>
-
-    <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-    <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html" class="active">🧠 Ai Brain</a>
-
-    <a href="sidebar.html">📌 Sidebar</a>
-    <a href="footer.html">🦶 Footer</a>
-
-    <a href="system-settings.html">⚙ System-settings</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="anime.html">Anime</a>
+    <a href="episodes.html">Episodes</a>
+    <a href="categories.html">Categories</a>
+    <a href="banners.html">Banners</a>
+    <a href="homepage.html">Homepage</a>
+    <a href="downloads.html">Downloads</a>
+    <a href="servers.html">Servers</a>
+    <a href="player.html">Player</a>
+    <a href="search.html">Search</a>
+    <a href="seo.html">SEO</a>
+    <a href="analytics.html">Analytics</a>
+    <a href="performance.html">Performance</a>
+    <a href="security.html">Security</a>
+    <a href="deploy-backup.html">Deploy-backup</a>
+    <a href="ads.html">Ads</a>
+    <a href="ai-brain.html">Ai Brain</a>
+    <a href="sidebar.html">Sidebar</a>
+    <a href="footer.html">Footer</a>
+    <a href="system-settings.html" class="active">System Settings</a>
   </nav>
 </aside>
 
+<!-- MAIN -->
 <main class="cms-main">
 
 <header class="cms-header">
-  <div>🧠 AI Control Center</div>
-  <button class="save-btn" onclick="save()">💾 Save</button>
+  <div>⚙ System Settings (OTT Core)</div>
+  <button class="save-btn" onclick="save()">Save</button>
 </header>
 
 <section class="cms-content">
+
 <div class="grid">
 
-<!-- SYSTEM -->
+<!-- GLOBAL -->
 <div class="card">
-<h3>System Core</h3>
+<h3>🔥 Global Control</h3>
 <label class="check"><input type="checkbox" id="systemOn"> System ON</label>
-<label class="check"><input type="checkbox" id="maintenanceSoft"> Soft Maintenance</label>
-<label class="check"><input type="checkbox" id="maintenanceHard"> Hard Maintenance</label>
-<label class="check"><input type="checkbox" id="lockCMS"> Lock CMS</label>
+<label class="check"><input type="checkbox" id="maintenance"> Maintenance Mode</label>
+<label class="check"><input type="checkbox" id="emergency"> Emergency Shutdown</label>
 </div>
 
-<!-- HOMEPAGE -->
+<!-- ACCESS -->
 <div class="card">
-<h3>Homepage AI</h3>
-<label class="check"><input type="checkbox" id="autoHome"> Auto Homepage</label>
-<label class="check"><input type="checkbox" id="aiHome"> AI Sorting</label>
-<label class="check"><input type="checkbox" id="trendBoost"> Trending Boost</label>
+<h3>🌍 Platform Access</h3>
+<select id="siteMode">
+<option value="public">Public</option>
+<option value="private">Private</option>
+</select>
+<label class="check"><input type="checkbox" id="registration"> User Registration</label>
+<label class="check"><input type="checkbox" id="guest"> Guest Access</label>
 </div>
 
-<!-- PLAYER -->
+<!-- API -->
 <div class="card">
-<h3>Player Engine</h3>
-<label class="check"><input type="checkbox" id="autoNext"> Auto Next</label>
-<label class="check"><input type="checkbox" id="resume"> Resume Watch</label>
-<label class="check"><input type="checkbox" id="serverSwitch"> Auto Server Switch</label>
+<h3>📡 API & System</h3>
+<label class="check"><input type="checkbox" id="api"> API Enabled</label>
+<label class="check"><input type="checkbox" id="cache"> Cache System</label>
+<label class="check"><input type="checkbox" id="logs"> Debug Logs</label>
 </div>
 
-<!-- SEARCH -->
+<!-- LIMITS -->
 <div class="card">
-<h3>Search Engine</h3>
-<label class="check"><input type="checkbox" id="liveSearch"> Live Search</label>
-<label class="check"><input type="checkbox" id="fuzzy"> Fuzzy Search</label>
+<h3>⚙️ Limits</h3>
+<input id="upload" placeholder="Max Upload (MB)">
+<input id="rate" placeholder="Request Limit/sec">
+<input id="timeout" placeholder="Timeout (ms)">
 </div>
 
-<!-- DOWNLOAD -->
+<!-- AUTOMATION -->
 <div class="card">
-<h3>Download Engine</h3>
-<label class="check"><input type="checkbox" id="scan"> Auto Scan Broken Links</label>
-</div>
-
-<!-- SECURITY -->
-<div class="card">
-<h3>Security</h3>
-<label class="check"><input type="checkbox" id="rateLimit"> Rate Limit</label>
-<label class="check"><input type="checkbox" id="antiInspect"> Anti Inspect</label>
-<label class="check"><input type="checkbox" id="rightClick"> Disable Right Click</label>
+<h3>🧠 Smart Control</h3>
+<label class="check"><input type="checkbox" id="cleanup"> Auto Cleanup</label>
+<label class="check"><input type="checkbox" id="sync"> Auto Sync</label>
 </div>
 
 </div>
@@ -159,64 +170,65 @@ input[type="checkbox"]{accent-color:#ffcc00}
 <div class="status" id="status">Ready</div>
 
 </section>
-
 </main>
 </div>
 
 <script>
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
-const TOKEN = localStorage.getItem("AUTH_TOKEN")
+const API="/api/admin/system"
+const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
-const fields = [
-"systemOn","maintenanceSoft","maintenanceHard","lockCMS",
-"autoHome","aiHome","trendBoost",
-"autoNext","resume","serverSwitch",
-"liveSearch","fuzzy",
-"scan",
-"rateLimit","antiInspect","rightClick"
+const fields=[
+"systemOn","maintenance","emergency",
+"siteMode","registration","guest",
+"api","cache","logs",
+"upload","rate","timeout",
+"cleanup","sync"
 ]
 
-const status = document.getElementById("status")
-
-async function api(method="GET",body=null){
-
-  const res = await fetch(API,{
-    method,
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+TOKEN
-    },
-    body: body ? JSON.stringify(body) : null
-  })
-
-  return res.json()
+async function apiCall(method="GET",body=null){
+const res=await fetch(API,{
+method,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+},
+body:body?JSON.stringify(body):null
+})
+return res.json()
 }
 
 async function load(){
+const data=await apiCall()
 
-  const data = await api()
+fields.forEach(id=>{
+const el=document.getElementById(id)
+if(!el) return
 
-  fields.forEach(id=>{
-    const el = document.getElementById(id)
-    if(el) el.checked = !!data[id]
-  })
-
+if(el.type==="checkbox"){
+el.checked=!!data[id]
+}else{
+el.value=data[id]||""
+}
+})
 }
 
 async function save(){
 
-  const payload={}
+const payload={}
 
-  fields.forEach(id=>{
-    payload[id]=document.getElementById(id).checked?1:0
-  })
+fields.forEach(id=>{
+const el=document.getElementById(id)
+if(!el) return
 
-  status.innerText="Saving..."
+payload[id]=el.type==="checkbox"
+? (el.checked?1:0)
+: el.value
+})
 
-  await api("POST",payload)
+await apiCall("POST",payload)
 
-  status.innerText="Saved ✅"
+document.getElementById("status").innerText="Saved ✅"
 }
 
 document.addEventListener("DOMContentLoaded",load)
