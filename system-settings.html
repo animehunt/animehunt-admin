@@ -177,73 +177,216 @@ select,input{
 
 <script>
 
+const API = "/api/admin/system"
+const TOKEN_KEY = "AUTH_TOKEN"
+
 const FIELD_IDS=[
 "systemOn","maintenanceSoft","maintenanceHard","lockCMS","readOnly","env",
 "theme","animation",
 "geoBlock","ageLock","schedule","shadow"
 ]
 
+/* ================= API ================= */
+
+async function apiFetch(method="GET", body=null){
+  const token = localStorage.getItem(TOKEN_KEY)
+
+  const res = await fetch(API,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + token
+    },
+    body: body ? JSON.stringify(body) : null
+  })
+
+  if(res.status===401){
+    location.href="login.html"
+    return null
+  }
+
+  return res.json()
+}
+
+/* ================= STATUS ================= */
+
 function showStatus(msg,error=false){
-const el=document.getElementById("statusText")
-el.innerText=msg
-el.style.color=error?"#ff4c4c":"#4cff4c"
-setTimeout(()=>{el.innerText="Ready"},2000)
+  const el=document.getElementById("statusText")
+  el.innerText=msg
+  el.style.color=error?"#ff4c4c":"#4cff4c"
+
+  setTimeout(()=>{
+    el.innerText="Ready"
+    el.style.color="#4cff4c"
+  },2000)
 }
 
-function saveAll(){
-const data={}
-FIELD_IDS.forEach(id=>{
-const el=document.getElementById(id)
-data[id]=el.type==="checkbox"?el.checked:el.value
-})
-localStorage.setItem("system-config",JSON.stringify(data))
-showStatus("Saved ✅")
+/* ================= LOAD ================= */
+
+async function loadSystem(){
+
+  showStatus("Loading...")
+
+  const data = await apiFetch()
+
+  if(!data){
+    showStatus("Load Failed",true)
+    return
+  }
+
+  FIELD_IDS.forEach(id=>{
+    const el=document.getElementById(id)
+    if(!el)return
+
+    if(el.type==="checkbox")
+      el.checked=!!data[id]
+    else
+      el.value=data[id]||""
+  })
+
+  showStatus("Synced ✅")
 }
 
-function loadSystem(){
-const data=JSON.parse(localStorage.getItem("system-config")||"{}")
-FIELD_IDS.forEach(id=>{
-const el=document.getElementById(id)
-if(!el)return
-if(el.type==="checkbox") el.checked=!!data[id]
-else el.value=data[id]||""
-})
+/* ================= SAVE ================= */
+
+async function saveAll(){
+
+  const payload={}
+
+  FIELD_IDS.forEach(id=>{
+    const el=document.getElementById(id)
+    if(!el)return
+
+    payload[id] = el.type==="checkbox"
+      ? (el.checked ? 1 : 0)
+      : el.value
+  })
+
+  showStatus("Saving...")
+
+  const res = await apiFetch("POST",payload)
+
+  if(res?.success)
+    showStatus("Saved ✅")
+  else
+    showStatus("Save Failed ❌",true)
 }
 
-function clearCache(){showStatus("Cache Cleared")}
+/* ================= RESET ================= */
+
+async function resetAll(){
+
+  if(!confirm("Reset system settings?")) return
+
+  await fetch(API+"/reset",{
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+    }
+  })
+
+  loadSystem()
+  showStatus("Reset Done")
+}
+
+/* ================= KILL ================= */
+
+async function kill(){
+
+  if(!confirm("⚠ Shutdown system?")) return
+
+  const res = await fetch(API+"/kill",{
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+    }
+  })
+
+  const data = await res.json()
+
+  if(data?.halted){
+    showStatus("SYSTEM HALTED ❌",true)
+    loadSystem()
+  }
+}
+
+/* ================= CACHE ================= */
+
+async function clearCache(){
+
+  showStatus("Clearing cache...")
+
+  try{
+    await fetch(API+"/cache-clear",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+localStorage.getItem(TOKEN_KEY)
+      }
+    })
+
+    showStatus("Cache Cleared ✅")
+  }catch{
+    showStatus("Cache Failed ❌",true)
+  }
+}
+
+/* ================= EXPORT ================= */
+
 function exportConfig(){
-const blob=new Blob([localStorage.getItem("system-config")||"{}"])
-const a=document.createElement("a")
-a.href=URL.createObjectURL(blob)
-a.download="config.json"
-a.click()
+
+  apiFetch().then(data=>{
+    const blob = new Blob(
+      [JSON.stringify(data,null,2)],
+      {type:"application/json"}
+    )
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+
+    a.href = url
+    a.download = "system-config.json"
+    a.click()
+
+    showStatus("Exported ✅")
+  })
 }
+
+/* ================= IMPORT ================= */
+
 function importConfig(){
-const i=document.createElement("input")
-i.type="file"
-i.onchange=e=>{
-const r=new FileReader()
-r.onload=ev=>{
-localStorage.setItem("system-config",ev.target.result)
-loadSystem()
-showStatus("Imported")
+
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = "application/json"
+
+  input.onchange = e=>{
+    const file = e.target.files[0]
+    const reader = new FileReader()
+
+    reader.onload = async ev=>{
+      try{
+        const data = JSON.parse(ev.target.result)
+        await apiFetch("POST",data)
+        loadSystem()
+        showStatus("Imported ✅")
+      }catch{
+        showStatus("Invalid File ❌",true)
+      }
+    }
+
+    reader.readAsText(file)
+  }
+
+  input.click()
 }
-r.readAsText(e.target.files[0])
-}
-i.click()
-}
-function resetAll(){
-localStorage.removeItem("system-config")
-loadSystem()
-showStatus("Reset Done")
-}
-function kill(){
-alert("SYSTEM HALTED")
-}
+
+/* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded",loadSystem)
 
 </script>
+
+
 
 </body>
 </html>
