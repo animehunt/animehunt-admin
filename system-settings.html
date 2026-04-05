@@ -175,7 +175,6 @@ select,input{
 </main>
 </div>
 
-
 <script>
 
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
@@ -191,11 +190,52 @@ const FIELD_IDS = [
 
 function getToken(){
   const token = localStorage.getItem(TOKEN_KEY)
+
   if(!token){
+    alert("Login required")
     location.href = "login.html"
     return null
   }
+
   return token
+}
+
+/* ================= SAFE FETCH ================= */
+
+async function safeFetch(url, options = {}){
+
+  try{
+
+    const res = await fetch(url, options)
+
+    const text = await res.text()
+
+    let data = null
+
+    try{
+      data = text ? JSON.parse(text) : null
+    }catch{
+      console.error("❌ Invalid JSON:", text)
+      return { error:true }
+    }
+
+    if(res.status === 401){
+      localStorage.removeItem(TOKEN_KEY)
+      location.href = "login.html"
+      return null
+    }
+
+    if(!res.ok){
+      console.error("❌ API Error:", data)
+      return { error:true }
+    }
+
+    return data
+
+  }catch(err){
+    console.error("❌ Network Error:", err)
+    return { error:true }
+  }
 }
 
 /* ================= API ================= */
@@ -205,47 +245,28 @@ async function apiFetch(method="GET", body=null){
   const token = getToken()
   if(!token) return null
 
-  try{
-
-    const res = await fetch(API_BASE,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + token
-      },
-      body: body ? JSON.stringify(body) : null
-    })
-
-    if(res.status === 401){
-      localStorage.removeItem(TOKEN_KEY)
-      location.href = "login.html"
-      return null
-    }
-
-    const text = await res.text()
-
-    try{
-      return JSON.parse(text)
-    }catch{
-      console.error("Invalid JSON:", text)
-      return null
-    }
-
-  }catch(err){
-    console.error("API Error:", err)
-    return null
-  }
+  return await safeFetch(API_BASE,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + token
+    },
+    body: body ? JSON.stringify(body) : null
+  })
 }
 
 /* ================= STATUS ================= */
 
 function showStatus(msg, error=false){
+
   const el = document.getElementById("statusText")
 
   el.innerText = msg
   el.style.color = error ? "#ff4c4c" : "#4cff4c"
 
-  setTimeout(()=>{
+  clearTimeout(el._t)
+
+  el._t = setTimeout(()=>{
     el.innerText = "Ready"
     el.style.color = "#4cff4c"
   }, 2500)
@@ -259,7 +280,7 @@ async function loadSystem(){
 
   const data = await apiFetch()
 
-  if(!data){
+  if(!data || data.error){
     showStatus("Load Failed ❌", true)
     return
   }
@@ -268,10 +289,11 @@ async function loadSystem(){
     const el = document.getElementById(id)
     if(!el) return
 
-    if(el.type === "checkbox")
+    if(el.type === "checkbox"){
       el.checked = !!data[id]
-    else
+    }else{
       el.value = data[id] ?? ""
+    }
   })
 
   showStatus("Synced ✅")
@@ -296,10 +318,11 @@ async function saveAll(){
 
   const res = await apiFetch("POST", payload)
 
-  if(res?.success)
+  if(res && res.success){
     showStatus("Saved ✅")
-  else
+  }else{
     showStatus("Save Failed ❌", true)
+  }
 }
 
 /* ================= RESET ================= */
@@ -311,15 +334,16 @@ async function resetAll(){
   showStatus("Resetting...")
 
   const token = getToken()
+  if(!token) return
 
-  const res = await fetch(API_BASE + "/reset",{
+  const res = await safeFetch(API_BASE + "/reset",{
     method:"POST",
     headers:{
       "Authorization":"Bearer " + token
     }
   })
 
-  if(res.ok){
+  if(res && res.success){
     await loadSystem()
     showStatus("Reset Done ✅")
   }else{
@@ -336,19 +360,18 @@ async function kill(){
   showStatus("Shutting down...")
 
   const token = getToken()
+  if(!token) return
 
-  const res = await fetch(API_BASE + "/kill",{
+  const res = await safeFetch(API_BASE + "/kill",{
     method:"POST",
     headers:{
       "Authorization":"Bearer " + token
     }
   })
 
-  const data = await res.json()
-
-  if(data?.halted){
+  if(res?.halted){
     showStatus("SYSTEM HALTED ❌", true)
-    loadSystem()
+    await loadSystem()
   }else{
     showStatus("Failed ❌", true)
   }
@@ -361,50 +384,46 @@ async function clearCache(){
   showStatus("Clearing cache...")
 
   const token = getToken()
+  if(!token) return
 
-  try{
-    const res = await fetch(API_BASE + "/cache-clear",{
-      method:"POST",
-      headers:{
-        "Authorization":"Bearer " + token
-      }
-    })
+  const res = await safeFetch(API_BASE + "/cache-clear",{
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer " + token
+    }
+  })
 
-    if(res.ok)
-      showStatus("Cache Cleared ✅")
-    else
-      showStatus("Failed ❌", true)
-
-  }catch{
-    showStatus("Error ❌", true)
+  if(res && res.success){
+    showStatus("Cache Cleared ✅")
+  }else{
+    showStatus("Failed ❌", true)
   }
 }
 
 /* ================= EXPORT ================= */
 
-function exportConfig(){
+async function exportConfig(){
 
-  apiFetch().then(data=>{
+  const data = await apiFetch()
 
-    if(!data){
-      showStatus("Export Failed ❌", true)
-      return
-    }
+  if(!data || data.error){
+    showStatus("Export Failed ❌", true)
+    return
+  }
 
-    const blob = new Blob(
-      [JSON.stringify(data,null,2)],
-      {type:"application/json"}
-    )
+  const blob = new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
+  )
 
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
 
-    a.href = url
-    a.download = "system-config.json"
-    a.click()
+  a.href = url
+  a.download = "system-config.json"
+  a.click()
 
-    showStatus("Exported ✅")
-  })
+  showStatus("Exported ✅")
 }
 
 /* ================= IMPORT ================= */
@@ -415,9 +434,11 @@ function importConfig(){
   input.type = "file"
   input.accept = "application/json"
 
-  input.onchange = e=>{
+  input.onchange = async e=>{
 
     const file = e.target.files[0]
+    if(!file) return
+
     const reader = new FileReader()
 
     reader.onload = async ev=>{
@@ -425,10 +446,14 @@ function importConfig(){
       try{
         const data = JSON.parse(ev.target.result)
 
-        await apiFetch("POST", data)
-        await loadSystem()
+        const res = await apiFetch("POST", data)
 
-        showStatus("Imported ✅")
+        if(res && res.success){
+          await loadSystem()
+          showStatus("Imported ✅")
+        }else{
+          showStatus("Import Failed ❌", true)
+        }
 
       }catch{
         showStatus("Invalid File ❌", true)
@@ -447,6 +472,7 @@ function importConfig(){
 document.addEventListener("DOMContentLoaded", loadSystem)
 
 </script>
+
 
 
 </body>
