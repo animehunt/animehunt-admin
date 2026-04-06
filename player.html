@@ -246,7 +246,7 @@ body{background:#060a14;color:#fff}
 <script>
 
 /* =====================================================
-🎬 ANIMEHUNT PLAYER CMS SCRIPT (FULL)
+🎬 ANIMEHUNT PLAYER CMS SCRIPT (FINAL PRODUCTION)
 ===================================================== */
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/player"
@@ -266,14 +266,26 @@ function getToken(){
 /* ================= DOM ================= */
 
 const $ = id => document.getElementById(id)
-
 const saveBtn = $("savePlayer")
 
 /* ================= STATUS ================= */
 
 function setLoading(state,text=""){
+  if(!saveBtn) return
   saveBtn.disabled = state
   saveBtn.innerText = state ? text : "💾 Save Player"
+}
+
+/* ================= SAFE JSON ================= */
+
+async function safeJSON(res){
+  try{
+    return await res.json()
+  }catch{
+    const txt = await res.text()
+    console.error("Invalid JSON:", txt)
+    return null
+  }
 }
 
 /* ================= API ================= */
@@ -301,21 +313,14 @@ async function api(method="GET",body=null){
     }
 
     if(!res.ok){
-      throw new Error("API "+res.status)
-    }
-
-    const text = await res.text()
-
-    try{
-      return JSON.parse(text)
-    }catch{
-      console.error("Invalid JSON:", text)
+      console.error("API ERROR:", res.status)
       return null
     }
 
+    return await safeJSON(res)
+
   }catch(e){
-    console.error("API ERROR:", e)
-    alert("Network error")
+    console.error("API FAIL:", e)
     return null
   }
 }
@@ -332,32 +337,38 @@ async function loadPlayer(){
 
   if(!d){
     setLoading(false)
+    alert("Failed to load settings ❌")
     return
   }
+
+  /* SAFE ACCESS */
+
+  const ui = d.ui || {}
+  const sec = d.security || {}
 
   /* PLAYER */
 
   $("defaultServer").value = d.defaultServer || "Server 1"
 
-  $("autoplay").value = String(d.autoplay)
-  $("resume").value = String(d.resume)
-  $("autoswitch").value = String(d.autoswitch)
+  $("autoplay").value = String(!!d.autoplay)
+  $("resume").value = String(!!d.resume)
+  $("autoswitch").value = String(!!d.autoswitch)
 
   $("mode").value = d.mode || "responsive"
 
   /* UI */
 
-  $("showServers").value = String(d.ui?.servers)
-  $("showDownload").value = String(d.ui?.download)
-  $("showSubscribe").value = String(d.ui?.subscribe)
-  $("showRelated").value = String(d.ui?.related)
+  $("showServers").value = String(!!ui.servers)
+  $("showDownload").value = String(!!ui.download)
+  $("showSubscribe").value = String(!!ui.subscribe)
+  $("showRelated").value = String(!!ui.related)
 
   /* SECURITY */
 
-  $("secEmbed").value = String(d.security?.embedOnly)
-  $("secCloud").value = String(d.security?.cloudflare)
-  $("secSandbox").value = String(d.security?.sandbox)
-  $("secReferrer").value = d.security?.referrer || "strict"
+  $("secEmbed").value = String(!!sec.embedOnly)
+  $("secCloud").value = String(!!sec.cloudflare)
+  $("secSandbox").value = String(!!sec.sandbox)
+  $("secReferrer").value = sec.referrer || "strict"
 
   setLoading(false)
 
@@ -410,17 +421,16 @@ async function savePlayer(){
 }
 
 /* =====================================================
-🎬 LIVE PLAYER PREVIEW (REAL)
+🎬 LIVE PLAYER PREVIEW (SAFE)
 ===================================================== */
 
 function applyPreview(){
 
+  const iframe = document.querySelector("iframe")
+  if(!iframe) return
+
   const sandbox = $("secSandbox").value === "true"
   const referrer = $("secReferrer").value
-
-  const iframe = document.querySelector("iframe")
-
-  if(!iframe) return
 
   iframe.referrerPolicy = referrer
 
@@ -436,14 +446,14 @@ function applyPreview(){
 }
 
 /* =====================================================
-⚡ AUTO SAVE (SMART UX)
+⚡ AUTO SAVE (DEBOUNCED)
 ===================================================== */
 
-let timer
+let timer = null
 
 function autoSave(){
 
-  clearTimeout(timer)
+  if(timer) clearTimeout(timer)
 
   timer = setTimeout(()=>{
     savePlayer()
@@ -452,7 +462,7 @@ function autoSave(){
 }
 
 /* =====================================================
-📊 SERVER FAIL TEST (REAL)
+📊 SERVER FAIL TEST
 ===================================================== */
 
 function testServerFail(){
@@ -461,7 +471,7 @@ function testServerFail(){
   if(!iframe) return
 
   iframe.onerror = ()=>{
-    console.warn("Server failed → switching triggered")
+    console.warn("⚠ Server failed → autoswitch should trigger")
   }
 
 }
@@ -475,7 +485,7 @@ async function exportConfig(){
   const data = await api()
 
   if(!data){
-    alert("Export failed")
+    alert("Export failed ❌")
     return
   }
 
@@ -506,6 +516,8 @@ function importConfig(){
   input.onchange = e=>{
 
     const file = e.target.files[0]
+    if(!file) return
+
     const reader = new FileReader()
 
     reader.onload = async ev=>{
@@ -514,10 +526,14 @@ function importConfig(){
 
         const data = JSON.parse(ev.target.result)
 
-        await api("POST",data)
-        await loadPlayer()
+        const res = await api("POST", data)
 
-        alert("Imported ✅")
+        if(res?.success){
+          await loadPlayer()
+          alert("Imported ✅")
+        }else{
+          alert("Import failed ❌")
+        }
 
       }catch{
         alert("Invalid file ❌")
@@ -541,17 +557,27 @@ async function resetPlayer(){
   if(!confirm("Reset player settings?")) return
 
   const token = getToken()
+  if(!token) return
 
-  await fetch(API+"/reset",{
-    method:"POST",
-    headers:{
-      "Authorization":"Bearer "+token
+  try{
+
+    const res = await fetch(API+"/reset",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+token
+      }
+    })
+
+    if(res.ok){
+      await loadPlayer()
+      alert("Reset done ✅")
+    }else{
+      alert("Reset failed ❌")
     }
-  })
 
-  await loadPlayer()
-
-  alert("Reset done")
+  }catch{
+    alert("Network error ❌")
+  }
 
 }
 
@@ -563,9 +589,10 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   loadPlayer()
 
-  saveBtn.addEventListener("click",savePlayer)
+  if(saveBtn){
+    saveBtn.addEventListener("click",savePlayer)
+  }
 
-  /* LIVE PREVIEW */
   document.querySelectorAll("select").forEach(el=>{
     el.addEventListener("change",applyPreview)
     el.addEventListener("change",autoSave)
