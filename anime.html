@@ -470,13 +470,22 @@ height:120px;
 <script>
 
 /* =====================================================
-🎬 ANIME CMS FULL FRONTEND (MULTI TYPE + FIXED)
+🎬 ANIME CMS FINAL FRONTEND (CLEAN + FULL + FIXED)
 ===================================================== */
 
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 
 let animeData = []
 let editId = null
+
+/* ================= AUTH ================= */
+
+function getAuthHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
+  }
+}
 
 /* ================= DOM ================= */
 
@@ -532,6 +541,7 @@ openBtn.onclick = () => {
   modal.style.display = "flex"
   editId = null
   resetForm()
+  $("modalTitle").innerText = "Add Anime"
 }
 
 closeBtn.onclick = () => {
@@ -560,10 +570,20 @@ async function uploadImage(fileInput, targetInput){
 
     const res = await fetch(`${API_BASE}/upload`,{
       method:"POST",
+      headers:{
+        "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
+      },
       body:fd
     })
 
-    const data = await res.json()
+    const text = await res.text()
+
+    if(text.startsWith("<")){
+      alert("Upload failed (Auth issue)")
+      return
+    }
+
+    const data = JSON.parse(text)
 
     if(!data.success) throw new Error()
 
@@ -618,7 +638,7 @@ function getFormData(){
 
 }
 
-/* ================= RESET FORM ================= */
+/* ================= RESET ================= */
 
 function resetForm(){
 
@@ -653,11 +673,18 @@ saveBtn.onclick = async ()=>{
 
     const res = await fetch(url,{
       method,
-      headers:{ "Content-Type":"application/json" },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form)
     })
 
-    const data = await res.json()
+    const text = await res.text()
+
+    if(text.startsWith("<")){
+      alert("Auth error ❌ Login again")
+      return
+    }
+
+    const data = JSON.parse(text)
 
     if(!data.success) throw new Error()
 
@@ -678,10 +705,20 @@ async function loadAnime(){
 
   try{
 
-    const res = await fetch(`${API_BASE}/anime`)
-    const data = await res.json()
+    const res = await fetch(`${API_BASE}/anime`,{
+      headers: getAuthHeaders()
+    })
 
-    animeData = (data && data.data) ? data.data : []
+    const text = await res.text()
+
+    if(text.startsWith("<")){
+      alert("❌ Auth required. Set ADMIN_TOKEN")
+      return
+    }
+
+    const data = JSON.parse(text)
+
+    animeData = data.data || []
 
     renderTable()
 
@@ -698,7 +735,8 @@ async function deleteAnime(id){
   if(!confirm("Delete this anime?")) return
 
   await fetch(`${API_BASE}/anime/${id}`,{
-    method:"DELETE"
+    method:"DELETE",
+    headers: getAuthHeaders()
   })
 
   loadAnime()
@@ -736,12 +774,10 @@ function editAnime(id){
   isBanner.checked = !!a.isBanner
   isHidden.checked = !!a.isHidden
 
-  /* MULTI TYPES */
   [...types.options].forEach(opt=>{
     opt.selected = safeArray(a.types).includes(opt.value)
   })
 
-  /* GENRES */
   [...genres.options].forEach(opt=>{
     opt.selected = safeArray(a.genres).includes(opt.value)
   })
@@ -772,12 +808,11 @@ function renderTable(){
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
       <span>
-        <button onclick="editAnime(&quot;${a.id}&quot;)">✏️</button>
-        <button onclick="deleteAnime(&quot;${a.id}&quot;)">🗑</button>
+        <button onclick="editAnime('${a.id}')">✏️</button>
+        <button onclick="deleteAnime('${a.id}')">🗑</button>
       </span>
     </div>
     `
-
   })
 
 }
@@ -785,6 +820,11 @@ function renderTable(){
 /* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded", ()=>{
+
+  if(!localStorage.getItem("ADMIN_TOKEN")){
+    console.warn("⚠️ ADMIN_TOKEN missing")
+  }
+
   loadAnime()
 })
 
