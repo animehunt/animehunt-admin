@@ -466,14 +466,13 @@ height:120px;
 
   </div>
 </div>
-
 <script>
 
-/* =====================================================
-🎬 ANIME CMS FINAL (100% CLEAN + SAFE + STABLE)
-===================================================== */
+/* ================= CONFIG ================= */
 
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+
+/* ================= STATE ================= */
 
 let animeData = []
 let editId = null
@@ -481,13 +480,44 @@ let editId = null
 /* ================= AUTH ================= */
 
 function getToken(){
-  return localStorage.getItem("ADMIN_TOKEN") || ""
+  return localStorage.getItem("ADMIN_TOKEN")
+}
+
+function requireAuth(){
+  const token = getToken()
+  if(!token){
+    alert("❌ Login required. Set ADMIN_TOKEN first.")
+    throw new Error("NO_AUTH")
+  }
+  return token
 }
 
 function getAuthHeaders(){
   return {
     "Content-Type": "application/json",
-    "Authorization": "Bearer " + getToken()
+    "Authorization": "Bearer " + requireAuth()
+  }
+}
+
+/* ================= SAFE FETCH ================= */
+
+async function safeFetch(url, options = {}){
+  try{
+    const res = await fetch(url, options)
+    const text = await res.text()
+
+    if(!text) throw new Error("Empty response")
+
+    if(text.startsWith("<")){
+      console.error("HTML RESPONSE:", text)
+      throw new Error("Auth / Server error")
+    }
+
+    return JSON.parse(text)
+
+  }catch(err){
+    console.error("FETCH ERROR:", err)
+    throw err
   }
 }
 
@@ -500,7 +530,7 @@ const openBtn = $("openAddAnime")
 const closeBtn = $("closeModal")
 const saveBtn = $("saveAnimeBtn")
 
-/* FORM */
+/* ================= FORM ================= */
 
 const title = $("title")
 const slug = $("slug")
@@ -528,9 +558,7 @@ const duration = $("duration")
 /* ================= HELPERS ================= */
 
 function slugify(text){
-  return text
-    ?.toLowerCase()
-    .trim()
+  return text?.toLowerCase().trim()
     .replace(/[^a-z0-9]+/g,"-")
     .replace(/(^-|-$)/g,"")
 }
@@ -539,27 +567,15 @@ function safeArray(v){
   return Array.isArray(v) ? v : []
 }
 
-function escapeHTML(str){
-  return String(str || "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;")
-}
-
 /* ================= MODAL ================= */
 
 openBtn.onclick = () => {
   modal.style.display = "flex"
   editId = null
   resetForm()
-  $("modalTitle").innerText = "Add Anime"
 }
 
-closeBtn.onclick = () => {
-  modal.style.display = "none"
-}
+closeBtn.onclick = () => modal.style.display = "none"
 
 /* ================= SLUG ================= */
 
@@ -567,7 +583,7 @@ title.addEventListener("input", ()=>{
   slug.value = slugify(title.value)
 })
 
-/* ================= IMAGE UPLOAD ================= */
+/* ================= UPLOAD ================= */
 
 async function uploadImage(fileInput, targetInput){
 
@@ -580,71 +596,46 @@ async function uploadImage(fileInput, targetInput){
   targetInput.value = "Uploading..."
 
   try{
-
-    const res = await fetch(`${API_BASE}/upload`,{
+    const data = await safeFetch(`${API_BASE}/upload`,{
       method:"POST",
       headers:{
-        "Authorization": "Bearer " + getToken()
+        "Authorization": "Bearer " + requireAuth()
       },
       body: fd
     })
 
-    const text = await res.text()
-
-    if(text.startsWith("<")){
-      alert("❌ Auth error in upload")
-      targetInput.value = ""
-      return
-    }
-
-    const data = JSON.parse(text)
-
-    if(!data.success) throw new Error()
-
     targetInput.value = data.data.url
 
-  }catch(err){
-    console.error(err)
-    alert("Upload failed ❌")
+  }catch{
+    alert("❌ Upload failed")
     targetInput.value = ""
   }
 }
 
-posterFile.onchange = ()=> uploadImage(posterFile,poster)
-bannerFile.onchange = ()=> uploadImage(bannerFile,banner)
+posterFile.onchange = ()=> uploadImage(posterFile, poster)
+bannerFile.onchange = ()=> uploadImage(bannerFile, banner)
 
-/* ================= FORM ================= */
+/* ================= FORM DATA ================= */
 
 function getFormData(){
-
   return {
     title: title.value.trim(),
     slug: slug.value.trim(),
-
     types: [...types.selectedOptions].map(o=>o.value),
-
     status: status.value,
-
     poster: poster.value,
     banner: banner.value,
-
     year: year.value || null,
     rating: rating.value || null,
     language: language.value || "",
     duration: duration.value || "",
-
     genres: [...genres.selectedOptions].map(o=>o.value),
-
-    tags: tags.value
-      ? tags.value.split(",").map(t=>t.trim()).filter(Boolean)
-      : [],
-
+    tags: tags.value ? tags.value.split(",").map(t=>t.trim()) : [],
     isHome: isHome.checked,
     isTrending: isTrending.checked,
     isMostViewed: isMostViewed.checked,
     isBanner: isBanner.checked,
     isHidden: isHidden.checked,
-
     description: description.value
   }
 }
@@ -652,7 +643,6 @@ function getFormData(){
 /* ================= RESET ================= */
 
 function resetForm(){
-
   document.querySelectorAll("input,textarea").forEach(i=>{
     if(i.type === "checkbox") i.checked = false
     else i.value = ""
@@ -681,30 +671,20 @@ saveBtn.onclick = async ()=>{
 
     const method = editId ? "PUT" : "POST"
 
-    const res = await fetch(url,{
+    const data = await safeFetch(url,{
       method,
       headers: getAuthHeaders(),
       body: JSON.stringify(form)
     })
 
-    const text = await res.text()
-
-    if(text.startsWith("<")){
-      alert("❌ Auth expired")
-      return
-    }
-
-    const data = JSON.parse(text)
-
     if(!data.success) throw new Error()
 
-    alert("Saved ✅")
+    alert("✅ Saved")
     modal.style.display = "none"
     loadAnime()
 
-  }catch(err){
-    console.error(err)
-    alert("Save failed ❌")
+  }catch{
+    alert("❌ Save failed")
   }
 }
 
@@ -713,26 +693,15 @@ saveBtn.onclick = async ()=>{
 async function loadAnime(){
 
   try{
-
-    const res = await fetch(`${API_BASE}/anime`,{
+    const data = await safeFetch(`${API_BASE}/anime`,{
       headers: getAuthHeaders()
     })
 
-    const text = await res.text()
-
-    if(text.startsWith("<")){
-      alert("❌ Login required")
-      return
-    }
-
-    const data = JSON.parse(text)
-
     animeData = data.data || []
-
     renderTable()
 
-  }catch(err){
-    console.error("LOAD ERROR:",err)
+  }catch{
+    alert("❌ Failed to load anime")
   }
 }
 
@@ -742,19 +711,24 @@ async function deleteAnime(id){
 
   if(!confirm("Delete this anime?")) return
 
-  await fetch(`${API_BASE}/anime/${id}`,{
-    method:"DELETE",
-    headers: getAuthHeaders()
-  })
+  try{
+    await safeFetch(`${API_BASE}/anime/${id}`,{
+      method:"DELETE",
+      headers: getAuthHeaders()
+    })
 
-  loadAnime()
+    loadAnime()
+
+  }catch{
+    alert("❌ Delete failed")
+  }
 }
 
 /* ================= EDIT ================= */
 
 function editAnime(id){
 
-  const a = animeData.find(x=>x.id===id)
+  const a = animeData.find(x=>x.id === id)
   if(!a) return
 
   editId = id
@@ -763,7 +737,6 @@ function editAnime(id){
   title.value = a.title || ""
   slug.value = a.slug || ""
   status.value = a.status || "ongoing"
-
   poster.value = a.poster || ""
   banner.value = a.banner || ""
 
@@ -781,15 +754,13 @@ function editAnime(id){
   isBanner.checked = !!a.isBanner
   isHidden.checked = !!a.isHidden
 
-  [...types.options].forEach(opt=>{
-    opt.selected = safeArray(a.types).includes(opt.value)
+  [...types.options].forEach(o=>{
+    o.selected = safeArray(a.types).includes(o.value)
   })
 
-  [...genres.options].forEach(opt=>{
-    opt.selected = safeArray(a.genres).includes(opt.value)
+  [...genres.options].forEach(o=>{
+    o.selected = safeArray(a.genres).includes(o.value)
   })
-
-  $("modalTitle").innerText = "Edit Anime"
 }
 
 /* ================= RENDER ================= */
@@ -801,24 +772,20 @@ function renderTable(){
 
   animeData.forEach(a=>{
 
-    const typesStr = safeArray(a.types).join(", ")
-    const genresStr = safeArray(a.genres).join(", ")
-
     list.innerHTML += `
     <div class="row">
-      <img src="${escapeHTML(a.poster)}">
-      <span>${escapeHTML(a.title)}</span>
-      <span>${escapeHTML(typesStr)}</span>
-      <span>${escapeHTML(a.status)}</span>
-      <span>${escapeHTML(genresStr)}</span>
+      <img src="${a.poster || ''}">
+      <span>${a.title}</span>
+      <span>${safeArray(a.types).join(", ")}</span>
+      <span>${a.status}</span>
+      <span>${safeArray(a.genres).join(", ")}</span>
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
       <span>
-        <button onclick="editAnime(&quot;${a.id}&quot;)">✏️</button>
-        <button onclick="deleteAnime(&quot;${a.id}&quot;)">🗑</button>
+        <button onclick="editAnime('${a.id}')">✏️</button>
+        <button onclick="deleteAnime('${a.id}')">🗑</button>
       </span>
-    </div>
-    `
+    </div>`
   })
 }
 
@@ -826,14 +793,16 @@ function renderTable(){
 
 document.addEventListener("DOMContentLoaded", ()=>{
 
-  if(!getToken()){
-    console.warn("⚠️ ADMIN_TOKEN missing")
+  try{
+    requireAuth()
+    loadAnime()
+  }catch(e){
+    console.warn("No auth")
   }
 
-  loadAnime()
 })
 
-  </script>
+        </script>
 
 </body>
 </html>
