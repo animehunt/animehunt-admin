@@ -378,11 +378,11 @@ height:120px;
         <input id="title" placeholder="Title">
         <input id="slug" placeholder="Slug (auto)">
         
-        <select id="types" multiple size="4">
-  <option value="anime">Anime</option>
-  <option value="movie">Movie</option>
-  <option value="series">Series</option>
-  <option value="cartoon">Cartoon</option>
+        <select id="type">
+          <option value="anime">Anime</option>
+          <option value="movie">Movie</option>
+          <option value="series">Series</option>
+          <option value="cartoon">Cartoon</option>
         </select>
 
         <select id="status">
@@ -468,162 +468,116 @@ height:120px;
 </div>
 
 <script>
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 
-/* =====================================================
-🎬 ANIME CMS FINAL FRONTEND (CLEAN + FULL + FIXED)
-===================================================== */
+const animeModal = document.getElementById("animeModal")
+const openAddAnime = document.getElementById("openAddAnime")
+const closeModal = document.getElementById("closeModal")
 
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime"
 let animeData = []
 let editId = null
 
-/* ================= AUTH ================= */
+// ==========================
+// FIX: Elements select
+// ==========================
+const title = document.getElementById("title")
+const slug = document.getElementById("slug")
+const type = document.getElementById("type")
+const status = document.getElementById("status")
+const poster = document.getElementById("poster")
+const banner = document.getElementById("banner")
+const posterFile = document.getElementById("posterFile")
+const bannerFile = document.getElementById("bannerFile")
+const genres = document.getElementById("genres")
+const tags = document.getElementById("tags")
+const description = document.getElementById("description")
 
-function getAuthHeaders() {
-  return {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
-  }
+const isHome = document.getElementById("isHome")
+const isTrending = document.getElementById("isTrending")
+const isMostViewed = document.getElementById("isMostViewed")
+const isBanner = document.getElementById("isBanner")
+const isHidden = document.getElementById("isHidden")
+
+const saveAnimeBtn = document.getElementById("saveAnimeBtn")
+const year = document.getElementById("year")
+const rating = document.getElementById("rating")
+const language = document.getElementById("language")
+const duration = document.getElementById("duration")
+// ==========================
+// SLUG
+// ==========================
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 }
 
-/* ================= DOM ================= */
-
-const $ = id => document.getElementById(id)
-
-const modal = $("animeModal")
-const openBtn = $("openAddAnime")
-const closeBtn = $("closeModal")
-const saveBtn = $("saveAnimeBtn")
-
-/* FORM ELEMENTS */
-
-const title = $("title")
-const slug = $("slug")
-const types = $("types")
-const status = $("status")
-const poster = $("poster")
-const banner = $("banner")
-const posterFile = $("posterFile")
-const bannerFile = $("bannerFile")
-const genres = $("genres")
-const tags = $("tags")
-const description = $("description")
-
-const isHome = $("isHome")
-const isTrending = $("isTrending")
-const isMostViewed = $("isMostViewed")
-const isBanner = $("isBanner")
-const isHidden = $("isHidden")
-
-const year = $("year")
-const rating = $("rating")
-const language = $("language")
-const duration = $("duration")
-
-/* ================= HELPERS ================= */
-
-function slugify(text){
-  return text
-    ?.toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g,"-")
-    .replace(/(^-|-$)/g,"")
-}
-
-function safeArray(v){
-  return Array.isArray(v) ? v : []
-}
-
-/* ================= MODAL ================= */
-
-openBtn.onclick = () => {
-  modal.style.display = "flex"
-  editId = null
-  resetForm()
-  $("modalTitle").innerText = "Add Anime"
-}
-
-closeBtn.onclick = () => {
-  modal.style.display = "none"
-}
-
-/* ================= SLUG AUTO ================= */
-
-title.addEventListener("input", ()=>{
+title.addEventListener("input", () => {
   slug.value = slugify(title.value)
 })
 
-/* ================= IMAGE UPLOAD ================= */
+// ==========================
+// MODAL
+// ==========================
+openAddAnime.onclick = () => {
+  animeModal.style.display = "flex"
+  editId = null
+}
 
-async function uploadImage(fileInput, targetInput){
+closeModal.onclick = () => {
+  animeModal.style.display = "none"
+}
 
+// ==========================
+// UPLOAD IMAGE FIX
+// ==========================
+async function uploadImage(fileInput, urlInput) {
   const file = fileInput.files[0]
-  if(!file) return
+  if (!file) return
 
   const fd = new FormData()
   fd.append("file", file)
 
-  targetInput.value = "Uploading..."
+  try {
+    urlInput.value = "Uploading..."
 
-  try{
-
-    const res = await fetch(`${API_BASE}/upload`,{
-      method:"POST",
-      headers:{
-        "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
-      },
-      body:fd
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      body: fd
     })
 
-    const text = await res.text()
+    const result = await res.json()
 
-    if(text.startsWith("<")){
-      alert("Upload failed (Auth issue)")
-      return
-    }
+    if (!result.success) throw new Error()
 
-    const data = JSON.parse(text)
+    urlInput.value = result.data.url
 
-    if(!data.success) throw new Error()
-
-    targetInput.value = data.data.url
-
-  }catch{
-    alert("Upload failed ❌")
-    targetInput.value = ""
+  } catch (e) {
+    alert("Upload failed")
+    urlInput.value = ""
   }
-
 }
 
-posterFile.onchange = ()=> uploadImage(posterFile,poster)
-bannerFile.onchange = ()=> uploadImage(bannerFile,banner)
+posterFile.onchange = () => uploadImage(posterFile, poster)
+bannerFile.onchange = () => uploadImage(bannerFile, banner)
 
-/* ================= FORM DATA ================= */
-
-function getFormData(){
-
+// ==========================
+// GET DATA
+// ==========================
+function getFormData() {
   return {
-
-    title: title.value.trim(),
-    slug: slug.value.trim(),
-
-    types: [...types.selectedOptions].map(o=>o.value),
-
+    title: title.value,
+    slug: slug.value,
+    type: type.value,
     status: status.value,
-
     poster: poster.value,
     banner: banner.value,
 
-    year: year.value || null,
-    rating: rating.value || null,
+    year: year.value || "",
+    rating: rating.value || "",
     language: language.value || "",
     duration: duration.value || "",
 
-    genres: [...genres.selectedOptions].map(o=>o.value),
-
-    tags: tags.value
-      ? tags.value.split(",").map(t=>t.trim()).filter(Boolean)
-      : [],
+    genres: [...genres.selectedOptions].map(o => o.value),
+    tags: tags.value.split(",").map(t => t.trim()),
 
     isHome: isHome.checked,
     isTrending: isTrending.checked,
@@ -632,132 +586,109 @@ function getFormData(){
     isHidden: isHidden.checked,
 
     description: description.value
-
   }
-
 }
-
-/* ================= RESET ================= */
-
-function resetForm(){
-
-  document.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.type === "checkbox") i.checked = false
-    else i.value = ""
-  })
-
-  document.querySelectorAll("select").forEach(s=>{
-    [...s.options].forEach(o=>o.selected = false)
-  })
-
-}
-
-/* ================= SAVE ================= */
-
-saveBtn.onclick = async ()=>{
-
+// ==========================
+// SAVE FIX
+// ==========================
+saveAnimeBtn.onclick = async () => {
   const form = getFormData()
 
-  if(!form.title) return alert("Title required")
-  if(!form.poster) return alert("Poster required")
-  if(form.types.length === 0) return alert("Select at least 1 type")
+  if (!form.title) return alert("Title required")
+  if (!form.poster) return alert("Poster required")
 
-  try{
-
+  try {
     const url = editId
       ? `${API_BASE}/anime/${editId}`
       : `${API_BASE}/anime`
 
     const method = editId ? "PUT" : "POST"
 
-    const res = await fetch(url,{
+    const res = await fetch(url, {
       method,
-      headers: getAuthHeaders(),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
     })
 
-    const text = await res.text()
+    const result = await res.json()
 
-    if(text.startsWith("<")){
-      alert("Auth error ❌ Login again")
-      return
-    }
+    if (!result.success) throw new Error()
 
-    const data = JSON.parse(text)
-
-    if(!data.success) throw new Error()
-
-    alert("Saved ✅")
-
-    modal.style.display = "none"
+    alert("Saved")
+    animeModal.style.display = "none"
     loadAnime()
 
-  }catch{
-    alert("Save failed ❌")
+  } catch (e) {
+    alert("Save failed")
   }
-
 }
 
-/* ================= LOAD ================= */
-
-async function loadAnime(){
-
-  try{
-
-    const res = await fetch(`${API_BASE}/anime`,{
-      headers: getAuthHeaders()
-    })
-
-    const text = await res.text()
-
-    if(text.startsWith("<")){
-      alert("❌ Auth required. Set ADMIN_TOKEN")
-      return
-    }
-
-    const data = JSON.parse(text)
+// ==========================
+// LOAD
+// ==========================
+async function loadAnime() {
+  try {
+    const res = await fetch(`${API_BASE}/anime`)
+    const data = await res.json()
 
     animeData = data.data || []
-
     renderTable()
 
-  }catch(e){
-    console.error("LOAD ERROR:",e)
+  } catch (e) {
+    console.error(e)
   }
-
 }
 
-/* ================= DELETE ================= */
-
-async function deleteAnime(id){
-
-  if(!confirm("Delete this anime?")) return
-
-  await fetch(`${API_BASE}/anime/${id}`,{
-    method:"DELETE",
-    headers: getAuthHeaders()
+// ==========================
+// DELETE
+// ==========================
+async function deleteAnime(id) {
+  await fetch(`${API_BASE}/anime/${id}`, {
+    method: "DELETE"
   })
-
   loadAnime()
-
 }
 
-/* ================= EDIT ================= */
+// ==========================
+// RENDER
+// ==========================
+function renderTable() {
+  const list = document.getElementById("animeList")
+  list.innerHTML = ""
 
-function editAnime(id){
-
-  const a = animeData.find(x=>x.id===id)
-  if(!a) return
+  animeData.forEach(a => {
+    list.innerHTML += `
+    <div class="row">
+      <img src="${a.poster}">
+      <span>${a.title}</span>
+      <span>${a.type}</span>
+      <span>${a.status}</span>
+      <span>${a.genres?.join(",")}</span>
+      <span>${a.isHidden ? "Hidden" : "Public"}</span>
+      <span>${a.isTrending ? "Yes" : "No"}</span>
+      <span>    
+  <button onclick="editAnime('${a.id}')">✏️</button>    
+  <button onclick="deleteAnime('${a.id}')">🗑</button>    
+</span>
+    </div>`
+  })
+}
+function editAnime(id) {
+  const a = animeData.find(x => x.id === id)
+  if (!a) return
 
   editId = id
-  modal.style.display = "flex"
 
-  title.value = a.title || ""
-  slug.value = a.slug || ""
-  status.value = a.status || "ongoing"
+  // modal open
+  animeModal.style.display = "flex"
 
-  poster.value = a.poster || ""
-  banner.value = a.banner || ""
+  // fill data
+  title.value = a.title
+  slug.value = a.slug
+  type.value = a.type
+  status.value = a.status
+  poster.value = a.poster
+  banner.value = a.banner
 
   year.value = a.year || ""
   rating.value = a.rating || ""
@@ -765,69 +696,27 @@ function editAnime(id){
   duration.value = a.duration || ""
 
   description.value = a.description || ""
-  tags.value = safeArray(a.tags).join(",")
+  tags.value = (a.tags || []).join(",")
 
-  isHome.checked = !!a.isHome
-  isTrending.checked = !!a.isTrending
-  isMostViewed.checked = !!a.isMostViewed
-  isBanner.checked = !!a.isBanner
-  isHidden.checked = !!a.isHidden
+  // checkboxes
+  isHome.checked = a.isHome
+  isTrending.checked = a.isTrending
+  isMostViewed.checked = a.isMostViewed
+  isBanner.checked = a.isBanner
+  isHidden.checked = a.isHidden
 
-  [...types.options].forEach(opt=>{
-    opt.selected = safeArray(a.types).includes(opt.value)
+  // genres select
+  [...genres.options].forEach(opt => {
+    opt.selected = a.genres?.includes(opt.value)
   })
 
-  [...genres.options].forEach(opt=>{
-    opt.selected = safeArray(a.genres).includes(opt.value)
-  })
-
-  $("modalTitle").innerText = "Edit Anime"
-
-}
-
-/* ================= RENDER ================= */
-
-function renderTable(){
-
-  const list = $("animeList")
-  list.innerHTML = ""
-
-  animeData.forEach(a=>{
-
-    const typesStr = safeArray(a.types).join(", ")
-    const genresStr = safeArray(a.genres).join(", ")
-
-    list.innerHTML += `
-    <div class="row">
-      <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-      <span>${a.title || ""}</span>
-      <span>${typesStr}</span>
-      <span>${a.status || ""}</span>
-      <span>${genresStr}</span>
-      <span>${a.isHidden ? "Hidden" : "Public"}</span>
-      <span>${a.isTrending ? "Yes" : "No"}</span>
-      <span>
-        <button onclick="editAnime('${a.id}')">✏️</button>
-        <button onclick="deleteAnime('${a.id}')">🗑</button>
-      </span>
-    </div>
-    `
-  })
-
-}
-
-/* ================= INIT ================= */
-
-document.addEventListener("DOMContentLoaded", ()=>{
-
-  if(!localStorage.getItem("ADMIN_TOKEN")){
-    console.warn("⚠️ ADMIN_TOKEN missing")
+  // title change
+  document.getElementById("modalTitle").innerText = "Edit Anime"
   }
-
-  loadAnime()
-})
-
-      </script>
+// ==========================
+loadAnime()
+</script>
+        
    
 
 </body>
