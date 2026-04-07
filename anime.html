@@ -470,7 +470,7 @@ height:120px;
 <script>
 
 /* =====================================================
-🎬 ANIME CMS FINAL FRONTEND (CLEAN + FULL + FIXED)
+🎬 ANIME CMS FINAL (100% CLEAN + SAFE + STABLE)
 ===================================================== */
 
 const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
@@ -480,10 +480,14 @@ let editId = null
 
 /* ================= AUTH ================= */
 
-function getAuthHeaders() {
+function getToken(){
+  return localStorage.getItem("ADMIN_TOKEN") || ""
+}
+
+function getAuthHeaders(){
   return {
     "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
+    "Authorization": "Bearer " + getToken()
   }
 }
 
@@ -496,7 +500,7 @@ const openBtn = $("openAddAnime")
 const closeBtn = $("closeModal")
 const saveBtn = $("saveAnimeBtn")
 
-/* FORM ELEMENTS */
+/* FORM */
 
 const title = $("title")
 const slug = $("slug")
@@ -535,6 +539,15 @@ function safeArray(v){
   return Array.isArray(v) ? v : []
 }
 
+function escapeHTML(str){
+  return String(str || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;")
+}
+
 /* ================= MODAL ================= */
 
 openBtn.onclick = () => {
@@ -548,7 +561,7 @@ closeBtn.onclick = () => {
   modal.style.display = "none"
 }
 
-/* ================= SLUG AUTO ================= */
+/* ================= SLUG ================= */
 
 title.addEventListener("input", ()=>{
   slug.value = slugify(title.value)
@@ -571,15 +584,16 @@ async function uploadImage(fileInput, targetInput){
     const res = await fetch(`${API_BASE}/upload`,{
       method:"POST",
       headers:{
-        "Authorization": "Bearer " + localStorage.getItem("ADMIN_TOKEN")
+        "Authorization": "Bearer " + getToken()
       },
-      body:fd
+      body: fd
     })
 
     const text = await res.text()
 
     if(text.startsWith("<")){
-      alert("Upload failed (Auth issue)")
+      alert("❌ Auth error in upload")
+      targetInput.value = ""
       return
     }
 
@@ -589,22 +603,21 @@ async function uploadImage(fileInput, targetInput){
 
     targetInput.value = data.data.url
 
-  }catch{
+  }catch(err){
+    console.error(err)
     alert("Upload failed ❌")
     targetInput.value = ""
   }
-
 }
 
 posterFile.onchange = ()=> uploadImage(posterFile,poster)
 bannerFile.onchange = ()=> uploadImage(bannerFile,banner)
 
-/* ================= FORM DATA ================= */
+/* ================= FORM ================= */
 
 function getFormData(){
 
   return {
-
     title: title.value.trim(),
     slug: slug.value.trim(),
 
@@ -633,9 +646,7 @@ function getFormData(){
     isHidden: isHidden.checked,
 
     description: description.value
-
   }
-
 }
 
 /* ================= RESET ================= */
@@ -650,7 +661,6 @@ function resetForm(){
   document.querySelectorAll("select").forEach(s=>{
     [...s.options].forEach(o=>o.selected = false)
   })
-
 }
 
 /* ================= SAVE ================= */
@@ -661,7 +671,7 @@ saveBtn.onclick = async ()=>{
 
   if(!form.title) return alert("Title required")
   if(!form.poster) return alert("Poster required")
-  if(form.types.length === 0) return alert("Select at least 1 type")
+  if(form.types.length === 0) return alert("Select type")
 
   try{
 
@@ -680,7 +690,7 @@ saveBtn.onclick = async ()=>{
     const text = await res.text()
 
     if(text.startsWith("<")){
-      alert("Auth error ❌ Login again")
+      alert("❌ Auth expired")
       return
     }
 
@@ -689,14 +699,13 @@ saveBtn.onclick = async ()=>{
     if(!data.success) throw new Error()
 
     alert("Saved ✅")
-
     modal.style.display = "none"
     loadAnime()
 
-  }catch{
+  }catch(err){
+    console.error(err)
     alert("Save failed ❌")
   }
-
 }
 
 /* ================= LOAD ================= */
@@ -712,7 +721,7 @@ async function loadAnime(){
     const text = await res.text()
 
     if(text.startsWith("<")){
-      alert("❌ Auth required. Set ADMIN_TOKEN")
+      alert("❌ Login required")
       return
     }
 
@@ -722,10 +731,9 @@ async function loadAnime(){
 
     renderTable()
 
-  }catch(e){
-    console.error("LOAD ERROR:",e)
+  }catch(err){
+    console.error("LOAD ERROR:",err)
   }
-
 }
 
 /* ================= DELETE ================= */
@@ -740,7 +748,6 @@ async function deleteAnime(id){
   })
 
   loadAnime()
-
 }
 
 /* ================= EDIT ================= */
@@ -783,7 +790,6 @@ function editAnime(id){
   })
 
   $("modalTitle").innerText = "Edit Anime"
-
 }
 
 /* ================= RENDER ================= */
@@ -800,36 +806,34 @@ function renderTable(){
 
     list.innerHTML += `
     <div class="row">
-      <img src="${a.poster || 'https://via.placeholder.com/40x60'}">
-      <span>${a.title || ""}</span>
-      <span>${typesStr}</span>
-      <span>${a.status || ""}</span>
-      <span>${genresStr}</span>
+      <img src="${escapeHTML(a.poster)}">
+      <span>${escapeHTML(a.title)}</span>
+      <span>${escapeHTML(typesStr)}</span>
+      <span>${escapeHTML(a.status)}</span>
+      <span>${escapeHTML(genresStr)}</span>
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
       <span>
-        <button onclick="editAnime('${a.id}')">✏️</button>
-        <button onclick="deleteAnime('${a.id}')">🗑</button>
+        <button onclick="editAnime(&quot;${a.id}&quot;)">✏️</button>
+        <button onclick="deleteAnime(&quot;${a.id}&quot;)">🗑</button>
       </span>
     </div>
     `
   })
-
 }
 
 /* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded", ()=>{
 
-  if(!localStorage.getItem("ADMIN_TOKEN")){
+  if(!getToken()){
     console.warn("⚠️ ADMIN_TOKEN missing")
   }
 
   loadAnime()
 })
 
-      </script>
-   
+  </script>
 
 </body>
 </html>
