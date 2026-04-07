@@ -477,9 +477,7 @@ const closeModal = document.getElementById("closeModal")
 let animeData = []
 let editId = null
 
-// ==========================
-// FIX: Elements select
-// ==========================
+// ELEMENTS
 const title = document.getElementById("title")
 const slug = document.getElementById("slug")
 const type = document.getElementById("type")
@@ -503,6 +501,7 @@ const year = document.getElementById("year")
 const rating = document.getElementById("rating")
 const language = document.getElementById("language")
 const duration = document.getElementById("duration")
+
 // ==========================
 // SLUG
 // ==========================
@@ -527,7 +526,20 @@ closeModal.onclick = () => {
 }
 
 // ==========================
-// UPLOAD IMAGE FIX
+// SAFE TEXT
+// ==========================
+function escapeHTML(str = "") {
+  return str.replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[m]))
+}
+
+// ==========================
+// IMAGE UPLOAD
 // ==========================
 async function uploadImage(fileInput, urlInput) {
   const file = fileInput.files[0]
@@ -546,7 +558,7 @@ async function uploadImage(fileInput, urlInput) {
 
     const result = await res.json()
 
-    if (!result.success) throw new Error()
+    if (!result.success) throw new Error(result.message)
 
     urlInput.value = result.data.url
 
@@ -560,13 +572,16 @@ posterFile.onchange = () => uploadImage(posterFile, poster)
 bannerFile.onchange = () => uploadImage(bannerFile, banner)
 
 // ==========================
-// GET DATA
+// FORM DATA
 // ==========================
 function getFormData() {
   return {
     title: title.value,
     slug: slug.value,
-    type: type.value,
+
+    // FIXED MULTI SELECT
+    type: [...type.selectedOptions].map(o => o.value)[0] || "anime",
+
     status: status.value,
     poster: poster.value,
     banner: banner.value,
@@ -588,8 +603,9 @@ function getFormData() {
     description: description.value
   }
 }
+
 // ==========================
-// SAVE FIX
+// SAVE
 // ==========================
 saveAnimeBtn.onclick = async () => {
   const form = getFormData()
@@ -612,14 +628,14 @@ saveAnimeBtn.onclick = async () => {
 
     const result = await res.json()
 
-    if (!result.success) throw new Error()
+    if (!result.success) throw new Error(result.message)
 
     alert("Saved")
     animeModal.style.display = "none"
     loadAnime()
 
   } catch (e) {
-    alert("Save failed")
+    alert("Save failed: " + e.message)
   }
 }
 
@@ -643,49 +659,66 @@ async function loadAnime() {
 // DELETE
 // ==========================
 async function deleteAnime(id) {
+  if (!confirm("Delete this anime?")) return
+
   await fetch(`${API_BASE}/anime/${id}`, {
     method: "DELETE"
   })
+
   loadAnime()
 }
 
 // ==========================
-// RENDER
+// RENDER (FIXED)
 // ==========================
 function renderTable() {
   const list = document.getElementById("animeList")
   list.innerHTML = ""
 
   animeData.forEach(a => {
-    list.innerHTML += `
-    <div class="row">
-      <img src="${a.poster}">
-      <span>${a.title}</span>
-      <span>${a.type}</span>
-      <span>${a.status}</span>
-      <span>${a.genres?.join(",")}</span>
+    const div = document.createElement("div")
+    div.className = "row"
+
+    div.innerHTML = `
+      <img src="${escapeHTML(a.poster)}">
+      <span>${escapeHTML(a.title)}</span>
+      <span>${escapeHTML(a.type)}</span>
+      <span>${escapeHTML(a.status)}</span>
+      <span>${(a.genres || []).join(",")}</span>
       <span>${a.isHidden ? "Hidden" : "Public"}</span>
       <span>${a.isTrending ? "Yes" : "No"}</span>
-      <span>    
-  <button onclick="editAnime('${a.id}')">✏️</button>    
-  <button onclick="deleteAnime('${a.id}')">🗑</button>    
-</span>
-    </div>`
+      <span class="actions"></span>
+    `
+
+    const actions = div.querySelector(".actions")
+
+    const editBtn = document.createElement("button")
+    editBtn.textContent = "✏️"
+    editBtn.onclick = () => editAnime(a.id)
+
+    const delBtn = document.createElement("button")
+    delBtn.textContent = "🗑"
+    delBtn.onclick = () => deleteAnime(a.id)
+
+    actions.appendChild(editBtn)
+    actions.appendChild(delBtn)
+
+    list.appendChild(div)
   })
 }
+
+// ==========================
+// EDIT
+// ==========================
 function editAnime(id) {
   const a = animeData.find(x => x.id === id)
   if (!a) return
 
   editId = id
-
-  // modal open
   animeModal.style.display = "flex"
 
-  // fill data
   title.value = a.title
   slug.value = a.slug
-  type.value = a.type
   status.value = a.status
   poster.value = a.poster
   banner.value = a.banner
@@ -698,24 +731,23 @@ function editAnime(id) {
   description.value = a.description || ""
   tags.value = (a.tags || []).join(",")
 
-  // checkboxes
   isHome.checked = a.isHome
   isTrending.checked = a.isTrending
   isMostViewed.checked = a.isMostViewed
   isBanner.checked = a.isBanner
   isHidden.checked = a.isHidden
 
-  // genres select
+  // GENRES FIX
   [...genres.options].forEach(opt => {
-    opt.selected = a.genres?.includes(opt.value)
+    opt.selected = (a.genres || []).includes(opt.value)
   })
 
-  // title change
   document.getElementById("modalTitle").innerText = "Edit Anime"
-  }
-// ==========================
+}
+
+// INIT
 loadAnime()
-</script>
+    </script>
         
    
 
