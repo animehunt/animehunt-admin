@@ -468,287 +468,255 @@ height:120px;
 </div>
 
 <script>
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+var API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin";
 
-const animeModal = document.getElementById("animeModal")
-const openAddAnime = document.getElementById("openAddAnime")
-const closeModal = document.getElementById("closeModal")
+var animeModal = document.getElementById("animeModal");
+var openAddAnime = document.getElementById("openAddAnime");
+var closeModal = document.getElementById("closeModal");
 
-let animeData = []
-let editId = null
+var animeData = [];
+var editId = null;
 
 // ELEMENTS
-const title = document.getElementById("title")
-const slug = document.getElementById("slug")
-const type = document.getElementById("type")
-const status = document.getElementById("status")
-const poster = document.getElementById("poster")
-const banner = document.getElementById("banner")
-const posterFile = document.getElementById("posterFile")
-const bannerFile = document.getElementById("bannerFile")
-const genres = document.getElementById("genres")
-const tags = document.getElementById("tags")
-const description = document.getElementById("description")
+var title = document.getElementById("title");
+var slug = document.getElementById("slug");
+var type = document.getElementById("type");
+var status = document.getElementById("status");
+var poster = document.getElementById("poster");
+var banner = document.getElementById("banner");
+var posterFile = document.getElementById("posterFile");
+var bannerFile = document.getElementById("bannerFile");
+var genres = document.getElementById("genres");
+var tags = document.getElementById("tags");
+var description = document.getElementById("description");
 
-const isHome = document.getElementById("isHome")
-const isTrending = document.getElementById("isTrending")
-const isMostViewed = document.getElementById("isMostViewed")
-const isBanner = document.getElementById("isBanner")
-const isHidden = document.getElementById("isHidden")
+var isHome = document.getElementById("isHome");
+var isTrending = document.getElementById("isTrending");
+var isMostViewed = document.getElementById("isMostViewed");
+var isBanner = document.getElementById("isBanner");
+var isHidden = document.getElementById("isHidden");
 
-const saveAnimeBtn = document.getElementById("saveAnimeBtn")
-const year = document.getElementById("year")
-const rating = document.getElementById("rating")
-const language = document.getElementById("language")
-const duration = document.getElementById("duration")
+var saveAnimeBtn = document.getElementById("saveAnimeBtn");
+var year = document.getElementById("year");
+var rating = document.getElementById("rating");
+var language = document.getElementById("language");
+var duration = document.getElementById("duration");
 
-// ==========================
-// SLUG
-// ==========================
+// ================= SLUG =================
 function slugify(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-title.addEventListener("input", () => {
-  slug.value = slugify(title.value)
-})
+title.oninput = function () {
+  slug.value = slugify(title.value);
+};
 
-// ==========================
-// MODAL
-// ==========================
-openAddAnime.onclick = () => {
-  animeModal.style.display = "flex"
-  editId = null
-}
+// ================= MODAL =================
+openAddAnime.onclick = function () {
+  animeModal.style.display = "flex";
+  editId = null;
+};
 
-closeModal.onclick = () => {
-  animeModal.style.display = "none"
-}
+closeModal.onclick = function () {
+  animeModal.style.display = "none";
+};
 
-// ==========================
-// SAFE TEXT
-// ==========================
-function escapeHTML(str = "") {
-  return str.replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]))
-}
-
-// ==========================
-// IMAGE UPLOAD
-// ==========================
+// ================= IMAGE UPLOAD =================
 async function uploadImage(fileInput, urlInput) {
-  const file = fileInput.files[0]
-  if (!file) return
+  var file = fileInput.files[0];
+  if (!file) return;
 
-  const fd = new FormData()
-  fd.append("file", file)
+  var fd = new FormData();
+  fd.append("file", file);
 
   try {
-    urlInput.value = "Uploading..."
+    urlInput.value = "Uploading...";
 
-    const res = await fetch(`${API_BASE}/upload`, {
+    var res = await fetch(API_BASE + "/upload", {
       method: "POST",
       body: fd
-    })
+    });
 
-    const result = await res.json()
+    var result = await res.json();
 
-    if (!result.success) throw new Error(result.message)
+    if (!result.success) throw new Error();
 
-    urlInput.value = result.data.url
-
+    urlInput.value = result.data.url;
   } catch (e) {
-    alert("Upload failed")
-    urlInput.value = ""
+    alert("Upload failed");
+    urlInput.value = "";
   }
 }
 
-posterFile.onchange = () => uploadImage(posterFile, poster)
-bannerFile.onchange = () => uploadImage(bannerFile, banner)
+posterFile.onchange = function () {
+  uploadImage(posterFile, poster);
+};
 
-// ==========================
-// FORM DATA
-// ==========================
+bannerFile.onchange = function () {
+  uploadImage(bannerFile, banner);
+};
+
+// ================= FORM DATA =================
 function getFormData() {
+  var selectedGenres = [];
+  for (var i = 0; i < genres.options.length; i++) {
+    if (genres.options[i].selected) {
+      selectedGenres.push(genres.options[i].value);
+    }
+  }
+
   return {
     title: title.value,
     slug: slug.value,
-
-    // FIXED MULTI SELECT
-    type: [...type.selectedOptions].map(o => o.value)[0] || "anime",
-
+    type: type.value,
     status: status.value,
     poster: poster.value,
     banner: banner.value,
-
-    year: year.value || "",
-    rating: rating.value || "",
-    language: language.value || "",
-    duration: duration.value || "",
-
-    genres: [...genres.selectedOptions].map(o => o.value),
-    tags: tags.value.split(",").map(t => t.trim()),
-
+    year: year.value,
+    rating: rating.value,
+    language: language.value,
+    duration: duration.value,
+    genres: selectedGenres,
+    tags: tags.value.split(","),
     isHome: isHome.checked,
     isTrending: isTrending.checked,
     isMostViewed: isMostViewed.checked,
     isBanner: isBanner.checked,
     isHidden: isHidden.checked,
-
     description: description.value
-  }
+  };
 }
 
-// ==========================
-// SAVE
-// ==========================
-saveAnimeBtn.onclick = async () => {
-  const form = getFormData()
+// ================= SAVE =================
+saveAnimeBtn.onclick = async function () {
+  var form = getFormData();
 
-  if (!form.title) return alert("Title required")
-  if (!form.poster) return alert("Poster required")
+  if (!form.title) return alert("Title required");
+  if (!form.poster) return alert("Poster required");
 
   try {
-    const url = editId
-      ? `${API_BASE}/anime/${editId}`
-      : `${API_BASE}/anime`
+    var url = editId ? API_BASE + "/anime/" + editId : API_BASE + "/anime";
+    var method = editId ? "PUT" : "POST";
 
-    const method = editId ? "PUT" : "POST"
-
-    const res = await fetch(url, {
-      method,
+    var res = await fetch(url, {
+      method: method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
-    })
+    });
 
-    const result = await res.json()
+    var result = await res.json();
 
-    if (!result.success) throw new Error(result.message)
+    if (!result.success) throw new Error();
 
-    alert("Saved")
-    animeModal.style.display = "none"
-    loadAnime()
-
+    alert("Saved");
+    animeModal.style.display = "none";
+    loadAnime();
   } catch (e) {
-    alert("Save failed: " + e.message)
+    alert("Save failed");
   }
-}
+};
 
-// ==========================
-// LOAD
-// ==========================
+// ================= LOAD =================
 async function loadAnime() {
   try {
-    const res = await fetch(`${API_BASE}/anime`)
-    const data = await res.json()
+    var res = await fetch(API_BASE + "/anime");
+    var data = await res.json();
 
-    animeData = data.data || []
-    renderTable()
-
+    animeData = data.data || [];
+    renderTable();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 }
 
-// ==========================
-// DELETE
-// ==========================
+// ================= DELETE =================
 async function deleteAnime(id) {
-  if (!confirm("Delete this anime?")) return
+  if (!confirm("Delete this anime?")) return;
 
-  await fetch(`${API_BASE}/anime/${id}`, {
-    method: "DELETE"
-  })
-
-  loadAnime()
+  await fetch(API_BASE + "/anime/" + id, { method: "DELETE" });
+  loadAnime();
 }
 
-// ==========================
-// RENDER (FIXED)
-// ==========================
+// ================= RENDER =================
 function renderTable() {
-  const list = document.getElementById("animeList")
-  list.innerHTML = ""
+  var list = document.getElementById("animeList");
+  list.innerHTML = "";
 
-  animeData.forEach(a => {
-    const div = document.createElement("div")
-    div.className = "row"
+  for (var i = 0; i < animeData.length; i++) {
+    var a = animeData[i];
 
-    div.innerHTML = `
-      <img src="${escapeHTML(a.poster)}">
-      <span>${escapeHTML(a.title)}</span>
-      <span>${escapeHTML(a.type)}</span>
-      <span>${escapeHTML(a.status)}</span>
-      <span>${(a.genres || []).join(",")}</span>
-      <span>${a.isHidden ? "Hidden" : "Public"}</span>
-      <span>${a.isTrending ? "Yes" : "No"}</span>
-      <span class="actions"></span>
-    `
+    var row = document.createElement("div");
+    row.className = "row";
 
-    const actions = div.querySelector(".actions")
+    row.innerHTML =
+      '<img src="' + a.poster + '">' +
+      '<span>' + a.title + '</span>' +
+      '<span>' + a.type + '</span>' +
+      '<span>' + a.status + '</span>' +
+      '<span>' + (a.genres || []).join(",") + '</span>' +
+      '<span>' + (a.isHidden ? "Hidden" : "Public") + '</span>' +
+      '<span>' + (a.isTrending ? "Yes" : "No") + '</span>' +
+      '<span class="actions"></span>';
 
-    const editBtn = document.createElement("button")
-    editBtn.textContent = "✏️"
-    editBtn.onclick = () => editAnime(a.id)
+    var actions = row.querySelector(".actions");
 
-    const delBtn = document.createElement("button")
-    delBtn.textContent = "🗑"
-    delBtn.onclick = () => deleteAnime(a.id)
+    var editBtn = document.createElement("button");
+    editBtn.innerText = "✏️";
+    editBtn.onclick = (function(id) {
+      return function() { editAnime(id); };
+    })(a.id);
 
-    actions.appendChild(editBtn)
-    actions.appendChild(delBtn)
+    var delBtn = document.createElement("button");
+    delBtn.innerText = "🗑";
+    delBtn.onclick = (function(id) {
+      return function() { deleteAnime(id); };
+    })(a.id);
 
-    list.appendChild(div)
-  })
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    list.appendChild(row);
+  }
 }
 
-// ==========================
-// EDIT
-// ==========================
+// ================= EDIT =================
 function editAnime(id) {
-  const a = animeData.find(x => x.id === id)
-  if (!a) return
+  var a = animeData.find(function(x) { return x.id === id; });
+  if (!a) return;
 
-  editId = id
-  animeModal.style.display = "flex"
+  editId = id;
+  animeModal.style.display = "flex";
 
-  title.value = a.title
-  slug.value = a.slug
-  status.value = a.status
-  poster.value = a.poster
-  banner.value = a.banner
+  title.value = a.title;
+  slug.value = a.slug;
+  status.value = a.status;
+  poster.value = a.poster;
+  banner.value = a.banner;
 
-  year.value = a.year || ""
-  rating.value = a.rating || ""
-  language.value = a.language || ""
-  duration.value = a.duration || ""
+  year.value = a.year || "";
+  rating.value = a.rating || "";
+  language.value = a.language || "";
+  duration.value = a.duration || "";
 
-  description.value = a.description || ""
-  tags.value = (a.tags || []).join(",")
+  description.value = a.description || "";
+  tags.value = (a.tags || []).join(",");
 
-  isHome.checked = a.isHome
-  isTrending.checked = a.isTrending
-  isMostViewed.checked = a.isMostViewed
-  isBanner.checked = a.isBanner
-  isHidden.checked = a.isHidden
+  isHome.checked = a.isHome;
+  isTrending.checked = a.isTrending;
+  isMostViewed.checked = a.isMostViewed;
+  isBanner.checked = a.isBanner;
+  isHidden.checked = a.isHidden;
 
-  // GENRES FIX
-  [...genres.options].forEach(opt => {
-    opt.selected = (a.genres || []).includes(opt.value)
-  })
+  for (var i = 0; i < genres.options.length; i++) {
+    genres.options[i].selected = (a.genres || []).indexOf(genres.options[i].value) !== -1;
+  }
 
-  document.getElementById("modalTitle").innerText = "Edit Anime"
+  document.getElementById("modalTitle").innerText = "Edit Anime";
 }
 
 // INIT
-loadAnime()
-    </script>
-        
+loadAnime();
+</script>
    
 
 </body>
