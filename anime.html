@@ -539,7 +539,10 @@ async function uploadImage(fileInput, urlInput) {
 
     var result = await res.json();
 
-    if (!result.success) throw new Error();
+    if (!result.success) {
+      console.log(result);
+      throw new Error(result.message);
+    }
 
     urlInput.value = result.data.url;
   } catch (e) {
@@ -558,6 +561,16 @@ bannerFile.onchange = function () {
 
 // ================= FORM DATA =================
 function getFormData() {
+
+  // ✅ FIX TYPE (multiple select)
+  var selectedType = [];
+  for (var i = 0; i < type.options.length; i++) {
+    if (type.options[i].selected) {
+      selectedType.push(type.options[i].value);
+    }
+  }
+
+  // ✅ GENRES
   var selectedGenres = [];
   for (var i = 0; i < genres.options.length; i++) {
     if (genres.options[i].selected) {
@@ -568,7 +581,7 @@ function getFormData() {
   return {
     title: title.value,
     slug: slug.value,
-    type: type.value,
+    type: selectedType[0] || "anime", // FIXED
     status: status.value,
     poster: poster.value,
     banner: banner.value,
@@ -577,7 +590,7 @@ function getFormData() {
     language: language.value,
     duration: duration.value,
     genres: selectedGenres,
-    tags: tags.value.split(","),
+    tags: tags.value ? tags.value.split(",") : [],
     isHome: isHome.checked,
     isTrending: isTrending.checked,
     isMostViewed: isMostViewed.checked,
@@ -606,12 +619,19 @@ saveAnimeBtn.onclick = async function () {
 
     var result = await res.json();
 
-    if (!result.success) throw new Error();
+    // ✅ DEBUG FIX
+    if (!result.success) {
+      console.log("API ERROR:", result);
+      alert(result.message || "Error");
+      return;
+    }
 
-    alert("Saved");
+    alert("Saved ✅");
     animeModal.style.display = "none";
     loadAnime();
+
   } catch (e) {
+    console.error(e);
     alert("Save failed");
   }
 };
@@ -708,7 +728,8 @@ function editAnime(id) {
   isHidden.checked = a.isHidden;
 
   for (var i = 0; i < genres.options.length; i++) {
-    genres.options[i].selected = (a.genres || []).indexOf(genres.options[i].value) !== -1;
+    genres.options[i].selected =
+      (a.genres || []).indexOf(genres.options[i].value) !== -1;
   }
 
   document.getElementById("modalTitle").innerText = "Edit Anime";
