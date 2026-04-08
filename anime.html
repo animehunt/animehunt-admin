@@ -520,6 +520,37 @@ var rating = document.getElementById("rating");
 var language = document.getElementById("language");
 var duration = document.getElementById("duration");
 
+// ================= RESET FORM =================
+function resetForm() {
+  title.value = "";
+  slug.value = "";
+  status.value = "ongoing";
+  poster.value = "";
+  banner.value = "";
+  year.value = "";
+  rating.value = "";
+  language.value = "";
+  duration.value = "";
+  description.value = "";
+  tags.value = "";
+
+  isHome.checked = false;
+  isTrending.checked = false;
+  isMostViewed.checked = false;
+  isBanner.checked = false;
+  isHidden.checked = false;
+
+  for (var i = 0; i < type.options.length; i++) {
+    type.options[i].selected = false;
+  }
+
+  for (var i = 0; i < genres.options.length; i++) {
+    genres.options[i].selected = false;
+  }
+
+  document.getElementById("modalTitle").innerText = "Add Anime";
+}
+
 // ================= SLUG =================
 function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -531,12 +562,22 @@ title.oninput = function () {
 
 // ================= MODAL =================
 openAddAnime.onclick = function () {
-  animeModal.style.display = "flex";
   editId = null;
+  resetForm();
+  animeModal.style.display = "flex";
 };
 
 closeModal.onclick = function () {
   animeModal.style.display = "none";
+  resetForm();
+};
+
+// click outside modal close
+animeModal.onclick = function(e) {
+  if (e.target === animeModal) {
+    animeModal.style.display = "none";
+    resetForm();
+  }
 };
 
 // ================= IMAGE UPLOAD =================
@@ -580,7 +621,6 @@ bannerFile.onchange = function () {
 // ================= FORM DATA =================
 function getFormData() {
 
-  // ✅ FIX TYPE (multiple select)
   var selectedType = [];
   for (var i = 0; i < type.options.length; i++) {
     if (type.options[i].selected) {
@@ -588,7 +628,6 @@ function getFormData() {
     }
   }
 
-  // ✅ GENRES
   var selectedGenres = [];
   for (var i = 0; i < genres.options.length; i++) {
     if (genres.options[i].selected) {
@@ -599,7 +638,7 @@ function getFormData() {
   return {
     title: title.value,
     slug: slug.value,
-    type: selectedType[0] || "anime", // FIXED
+    type: selectedType[0] || "anime",
     status: status.value,
     poster: poster.value,
     banner: banner.value,
@@ -608,7 +647,9 @@ function getFormData() {
     language: language.value,
     duration: duration.value,
     genres: selectedGenres,
-    tags: tags.value ? tags.value.split(",") : [],
+    tags: tags.value
+      ? tags.value.split(",").map(t => t.trim()).filter(t => t)
+      : [],
     isHome: isHome.checked,
     isTrending: isTrending.checked,
     isMostViewed: isMostViewed.checked,
@@ -637,7 +678,6 @@ saveAnimeBtn.onclick = async function () {
 
     var result = await res.json();
 
-    // ✅ DEBUG FIX
     if (!result.success) {
       console.log("API ERROR:", result);
       alert(result.message || "Error");
@@ -645,6 +685,8 @@ saveAnimeBtn.onclick = async function () {
     }
 
     alert("Saved ✅");
+
+    resetForm();
     animeModal.style.display = "none";
     loadAnime();
 
@@ -687,7 +729,7 @@ function renderTable() {
     row.className = "row";
 
     row.innerHTML =
-      '<img src="' + a.poster + '">' +
+      '<img src="' + (a.poster || "https://via.placeholder.com/40x60") + '">' +
       '<span title="' + a.title + '">' + a.title + '</span>' +
       '<span>' + a.type + '</span>' +
       '<span>' + a.status + '</span>' +
@@ -745,6 +787,13 @@ function editAnime(id) {
   isBanner.checked = a.isBanner;
   isHidden.checked = a.isHidden;
 
+  // FIX TYPE
+  for (var i = 0; i < type.options.length; i++) {
+    type.options[i].selected =
+      type.options[i].value === a.type;
+  }
+
+  // GENRES
   for (var i = 0; i < genres.options.length; i++) {
     genres.options[i].selected =
       (a.genres || []).indexOf(genres.options[i].value) !== -1;
@@ -756,7 +805,6 @@ function editAnime(id) {
 // INIT
 loadAnime();
 </script>
-   
 
 </body>
 </html>
