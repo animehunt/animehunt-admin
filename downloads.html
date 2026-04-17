@@ -4,7 +4,7 @@
 <title>Download CMS – AnimeHunt</title>
 
 <style>
-body{background:#060a14;color:#fff;font-family:system-ui}
+body{background:#060a14;color:#fff;font-family:system-ui;margin:0}
 .cms-app{display:flex;min-height:100vh}
 .cms-sidebar{width:230px;background:#070b16;border-right:1px solid #1a2035}
 .brand{padding:16px;font-size:20px}
@@ -14,7 +14,7 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 
 .cms-main{flex:1}
 .cms-header{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #1a2035}
-.add-btn{background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;font-weight:600}
+.add-btn{background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer}
 
 .cms-content{padding:20px}
 
@@ -39,70 +39,59 @@ padding:12px;font-size:12px;align-items:center
 .modal-body{padding:16px}
 
 .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.form-grid input{
+.form-grid input,.form-grid select{
 background:#0e1424;border:1px solid #1a2035;color:#fff;
 padding:8px;border-radius:6px;font-size:12px
 }
 
-.download-section{margin-top:15px}
+.download-section{grid-column:1/4;border-top:1px solid #1a2035;padding-top:12px}
 
-/* SOURCE CARD */
-.source-card{
-border:1px solid #1a2035;
+/* HOST CARD */
+.download-host-card{
 background:#0e1424;
 padding:12px;
-border-radius:10px;
+border-radius:8px;
 margin-bottom:12px;
-}
-
-.source-header{
-display:flex;
-gap:10px;
-justify-content:space-between;
-}
-
-.source-header input{
-flex:1;
-background:#060a14;
 border:1px solid #1a2035;
-color:#fff;
-padding:6px;
-border-radius:6px;
+}
+
+.host-top{
+display:flex;
+gap:8px;
+margin-bottom:8px;
+}
+
+.host-top select,
+.host-top input{
+flex:1;
 }
 
 .quality-row{
 display:flex;
 gap:8px;
-margin-top:6px;
+margin-top:6px
 }
 
-.quality-row select,
-.quality-row input{
-flex:1;
-background:#060a14;
-border:1px solid #1a2035;
-color:#fff;
-padding:6px;
-border-radius:6px;
-}
+.quality-row select,.quality-row input{flex:1}
 
-.btn-sm{
-background:#1a2035;
-border:none;
+.small-btn{
+background:#111;
+border:1px solid #333;
 color:#ffcc00;
 padding:5px 10px;
 border-radius:6px;
 cursor:pointer;
 }
 
-.add-source{
+.add-host-btn{
 margin-top:10px;
-background:#ffcc00;
-border:none;
-padding:8px 14px;
-border-radius:8px;
+background:#0e1424;
+border:1px dashed #333;
+color:#ffcc00;
+padding:8px;
+border-radius:6px;
 cursor:pointer;
-font-weight:600;
+width:100%;
 }
 </style>
 </head>
@@ -111,7 +100,6 @@ font-weight:600;
 
 <div class="cms-app">
 
-<!-- SIDEBAR -->
 <aside class="cms-sidebar">
 <div class="brand">
 <span>Anime</span><b>Hunt</b>
@@ -150,7 +138,6 @@ font-weight:600;
 </nav>
 </aside>
 
-<!-- MAIN -->
 <main class="cms-main">
 
 <header class="cms-header">
@@ -162,7 +149,7 @@ font-weight:600;
 <div class="downloads-table">
 <div class="downloads-head">
 <span>Anime</span><span>S</span><span>E</span>
-<span>Source</span><span>Quality</span><span>Link</span><span>Actions</span>
+<span>Host</span><span>Quality</span><span>Link</span><span>Actions</span>
 </div>
 <div id="downloadList"></div>
 </div>
@@ -181,17 +168,15 @@ font-weight:600;
 </div>
 
 <div class="modal-body">
-
 <div class="form-grid">
+
 <input id="anime" placeholder="Anime Name">
 <input id="season" placeholder="Season">
 <input id="episode" placeholder="Episode">
+
+<div class="download-section" id="hostSection"></div>
+
 </div>
-
-<div class="download-section" id="sourceSection"></div>
-
-<button class="add-source" id="addSourceBtn">+ Add Source</button>
-
 </div>
 
 <div class="modal-footer">
@@ -208,28 +193,26 @@ const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN) location.href="login.html"
 
-const list=document.getElementById("downloadList")
-const modal=document.getElementById("downloadModal")
-const section=document.getElementById("sourceSection")
+let HOSTS=JSON.parse(localStorage.getItem("HOSTS")||"[]")
 
-async function api(url,method="GET",body=null){
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-if(!res.ok) throw new Error()
-return res.json()
+function saveHost(h){
+if(!HOSTS.includes(h)){
+HOSTS.push(h)
+localStorage.setItem("HOSTS",JSON.stringify(HOSTS))
+}
 }
 
+/* LOAD */
 async function loadDownloads(){
+
+const list=document.getElementById("downloadList")
 list.innerHTML="Loading..."
-try{
-const data=await api(API)
+
+const res=await fetch(API,{headers:{Authorization:"Bearer "+TOKEN}})
+const data=await res.json()
+
 list.innerHTML=""
+
 data.forEach(d=>{
 list.innerHTML+=`
 <div class="row">
@@ -237,46 +220,65 @@ list.innerHTML+=`
 <span>S${d.season}</span>
 <span>E${d.episode}</span>
 <span class="badge">${d.host}</span>
-<span style="color:#ffcc00">${d.quality}</span>
+<span>${d.quality}</span>
 <span>${d.link}</span>
 <div class="actions">
 <button onclick="deleteLink('${d.id}')">🗑</button>
 </div>
-</div>`
+</div>
+`
 })
-}catch{
-list.innerHTML="Error loading"
-}
+
 }
 
-function addSource(){
+/* HOST BLOCK */
+function addHostBlock(){
 
 const div=document.createElement("div")
-div.className="source-card"
+div.className="download-host-card"
 
 div.innerHTML=`
-<div class="source-header">
-<input class="source-name" placeholder="Source (KnightWolf / Mega / Any)">
-<button class="btn-sm" onclick="this.closest('.source-card').remove()">Remove</button>
+<div class="host-top">
+<select class="host-select"></select>
+<input class="host-custom" placeholder="New host (optional)">
 </div>
 
 <div class="quality-container"></div>
 
-<button class="btn-sm" onclick="addQuality(this)">+ Quality</button>
+<div style="margin-top:8px">
+<button class="small-btn" onclick="addQualityRow(this)">+ Quality</button>
+<button class="small-btn" onclick="this.parentElement.parentElement.remove()">Remove</button>
+</div>
 `
 
-section.appendChild(div)
-addQuality(div.querySelector(".btn-sm"))
+document.getElementById("hostSection").appendChild(div)
+
+populateHosts(div.querySelector(".host-select"))
+
+addQualityRow(div.querySelector(".small-btn"))
 }
 
-function addQuality(btn){
-const container=btn.parentElement.querySelector(".quality-container")
+/* POPULATE */
+function populateHosts(select){
+select.innerHTML='<option value="">Select Host</option>'
+HOSTS.forEach(h=>{
+const o=document.createElement("option")
+o.value=h
+o.textContent=h
+select.appendChild(o)
+})
+}
+
+/* QUALITY */
+function addQualityRow(btn){
+
+const container=btn.closest(".download-host-card").querySelector(".quality-container")
 
 const row=document.createElement("div")
 row.className="quality-row"
 
 row.innerHTML=`
-<select class="q">
+<select class="q-val">
 <option>480p</option>
 <option>720p</option>
 <option>1080p</option>
@@ -284,7 +286,7 @@ row.innerHTML=`
 <option>ZIP</option>
 </select>
 
-<input class="l" placeholder="Download Link">
+<input class="quality-link" placeholder="Download Link">
 
 <button onclick="this.parentElement.remove()">✕</button>
 `
@@ -292,70 +294,87 @@ row.innerHTML=`
 container.appendChild(row)
 }
 
+/* SAVE */
 document.getElementById("saveDownload").onclick=async()=>{
 
-const anime=document.getElementById("anime").value.trim()
-const season=document.getElementById("season").value||"1"
-const episode=document.getElementById("episode").value.trim()
-
-if(!anime||!episode){
-alert("Anime & Episode required")
-return
-}
+const anime=document.getElementById("anime").value
+const season=document.getElementById("season").value||1
+const episode=document.getElementById("episode").value
 
 const payload=[]
 
-document.querySelectorAll(".source-card").forEach(card=>{
-const source=card.querySelector(".source-name").value.trim()
-if(!source) return
+document.querySelectorAll(".download-host-card").forEach(card=>{
+
+const hostSel=card.querySelector(".host-select").value
+const hostCustom=card.querySelector(".host-custom").value.trim()
+
+const host=hostCustom||hostSel
+if(!host)return
+
+saveHost(host)
 
 card.querySelectorAll(".quality-row").forEach(r=>{
-const q=r.querySelector(".q").value
-const l=r.querySelector(".l").value.trim()
+const q=r.querySelector(".q-val").value
+const link=r.querySelector(".quality-link").value
 
-if(l){
-payload.push({
-anime,
-season,
-episode,
-host:source,
-quality:q,
-link:l
-})
+if(link){
+payload.push({anime,season,episode,host,quality:q,link})
 }
 })
+
 })
 
-if(!payload.length){
-alert("Add at least one link")
-return
+await fetch(API+"/bulk",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+TOKEN
+},
+body:JSON.stringify(payload)
+})
+
+closeModal()
+loadDownloads()
+
 }
 
-await api(API+"/bulk","POST",payload)
-
-modal.style.display="none"
+/* DELETE */
+async function deleteLink(id){
+await fetch(API+"/"+id,{method:"DELETE",headers:{Authorization:"Bearer "+TOKEN}})
 loadDownloads()
 }
 
-window.deleteLink=async(id)=>{
-if(confirm("Delete?")){
-await api(API+"/"+id,"DELETE")
-loadDownloads()
-}
-}
-
+/* MODAL */
 document.getElementById("openModal").onclick=()=>{
-section.innerHTML=""
-addSource()
-modal.style.display="flex"
+document.getElementById("downloadModal").style.display="flex"
+resetModal()
 }
 
-document.getElementById("closeModal").onclick=()=>{
-modal.style.display="none"
+document.getElementById("closeModal").onclick=closeModal
+
+function closeModal(){
+document.getElementById("downloadModal").style.display="none"
 }
 
-document.getElementById("addSourceBtn").onclick=addSource
+function resetModal(){
+document.getElementById("anime").value=""
+document.getElementById("season").value=""
+document.getElementById("episode").value=""
 
+const sec=document.getElementById("hostSection")
+sec.innerHTML=""
+
+addHostBlock()
+
+const btn=document.createElement("button")
+btn.className="add-host-btn"
+btn.innerText="+ Add Host"
+btn.onclick=addHostBlock
+
+sec.appendChild(btn)
+}
+
+/* INIT */
 loadDownloads()
 
 </script>
