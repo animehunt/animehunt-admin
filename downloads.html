@@ -168,14 +168,13 @@ body{background:#060a14;color:#fff;font-family:system-ui}
 </div>
 </div>
 
-
 <script>
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
 
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
-location.href="login.html"
+  location.href="login.html"
 }
 
 /* ======================
@@ -196,22 +195,21 @@ API WRAPPER
 
 async function api(url,method="GET",body=null){
 
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
+  const res=await fetch(url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+TOKEN
+    },
+    body:body?JSON.stringify(body):null
+  })
 
-if(!res.ok){
-alert("API Error")
-throw new Error("API")
-}
+  if(!res.ok){
+    alert("API Error")
+    throw new Error("API")
+  }
 
-return res.json()
-
+  return res.json()
 }
 
 /* ======================
@@ -220,56 +218,40 @@ LOAD DOWNLOADS
 
 async function loadDownloads(){
 
-downloadList.innerHTML="Loading..."
+  downloadList.innerHTML="Loading..."
 
-try{
+  try{
 
-const data=await api(API)
+    const data=await api(API)
 
-downloadList.innerHTML=""
+    downloadList.innerHTML=""
 
-if(!data.length){
+    if(!data.length){
+      downloadList.innerHTML="<div style='padding:20px;color:#777'>No downloads</div>"
+      return
+    }
 
-downloadList.innerHTML="<div style='padding:20px;color:#777'>No downloads</div>"
-return
+    data.forEach(d=>{
 
-}
+      downloadList.innerHTML+=`
+      <div class="row">
+        <span>${d.anime}</span>
+        <span>S${d.season}</span>
+        <span>E${d.episode}</span>
+        <span class="badge">${d.host}</span>
+        <span style="color:#ffcc00">${d.quality}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis">${d.link}</span>
+        <div class="actions">
+          <button onclick="deleteLink('${d.id}')">🗑</button>
+        </div>
+      </div>
+      `
 
-data.forEach(d=>{
+    })
 
-downloadList.innerHTML+=`
-
-<div class="row">
-
-<span>${d.anime}</span>
-
-<span>S${d.season}</span>
-
-<span>E${d.episode}</span>
-
-<span class="badge">${d.host}</span>
-
-<span style="color:#ffcc00">${d.quality}</span>
-
-<span style="overflow:hidden;text-overflow:ellipsis">${d.link}</span>
-
-<div class="actions">
-
-<button onclick="deleteLink('${d.id}')">🗑</button>
-
-</div>
-
-</div>
-
-`
-
-})
-
-}catch{
-
-downloadList.innerHTML="<div style='padding:20px;color:red'>Failed to load downloads</div>"
-
-}
+  }catch{
+    downloadList.innerHTML="<div style='padding:20px;color:red'>Failed to load downloads</div>"
+  }
 
 }
 
@@ -279,23 +261,23 @@ ADD HOST BLOCK
 
 function addHostBlock(){
 
-const div=document.createElement("div")
+  const div=document.createElement("div")
+  div.className="download-host-card"
 
-div.className="download-host-card"
+  div.innerHTML=`
+    <input class="host-name" placeholder="Host Name (KnightWolf / Mega)">
+    
+    <div class="quality-container"></div>
+    
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button type="button" onclick="addQualityRow(this)">+ Quality</button>
+      <button type="button" onclick="this.parentElement.parentElement.remove()">Remove Host</button>
+    </div>
+  `
 
-div.innerHTML=`
+  section.appendChild(div)
 
-<input class="host-name" placeholder="Host Name (Upload4ever)">
-
-<div class="quality-container"></div>
-
-<button type="button" onclick="addQualityRow(this)">Add Link</button>
-
-`
-
-section.appendChild(div)
-
-addQualityRow(div.querySelector("button"))
+  addQualityRow(div.querySelector("button"))
 
 }
 
@@ -305,31 +287,26 @@ ADD QUALITY ROW
 
 function addQualityRow(btn){
 
-const container=btn.previousElementSibling
+  const container=btn.closest(".download-host-card").querySelector(".quality-container")
 
-const row=document.createElement("div")
+  const row=document.createElement("div")
+  row.className="quality-row"
 
-row.className="quality-row"
+  row.innerHTML=`
+    <select class="q-val">
+      <option>480p</option>
+      <option>720p</option>
+      <option>1080p</option>
+      <option>4K</option>
+      <option>ZIP</option>
+    </select>
 
-row.innerHTML=`
+    <input class="quality-link" placeholder="Download Link">
 
-<select class="q-val">
+    <button onclick="this.parentElement.remove()">✕</button>
+  `
 
-<option>480p</option>
-<option>720p</option>
-<option>1080p</option>
-<option>4K</option>
-<option>ZIP</option>
-
-</select>
-
-<input class="quality-link" placeholder="Download Link">
-
-<button onclick="this.parentElement.remove()">✕</button>
-
-`
-
-container.appendChild(row)
+  container.appendChild(row)
 
 }
 
@@ -339,65 +316,58 @@ SAVE DOWNLOAD
 
 saveBtn.onclick=async()=>{
 
-const anime=document.getElementById("anime").value
-const season=document.getElementById("season").value || "1"
-const episode=document.getElementById("episode").value
+  const anime=document.getElementById("anime").value.trim()
+  const season=document.getElementById("season").value || "1"
+  const episode=document.getElementById("episode").value.trim()
 
-if(!anime || !episode){
+  if(!anime || !episode){
+    alert("Anime and Episode required")
+    return
+  }
 
-alert("Anime and Episode required")
-return
+  const payload=[]
 
-}
+  document.querySelectorAll(".download-host-card").forEach(card=>{
 
-const payload=[]
+    const host=card.querySelector(".host-name").value.trim()
 
-document.querySelectorAll(".download-host-card").forEach(card=>{
+    if(!host) return
 
-const host=card.querySelector(".host-name").value
+    card.querySelectorAll(".quality-row").forEach(row=>{
 
-card.querySelectorAll(".quality-row").forEach(row=>{
+      const quality=row.querySelector(".q-val").value
+      const link=row.querySelector(".quality-link").value.trim()
 
-const quality=row.querySelector(".q-val").value
-const link=row.querySelector(".quality-link").value
+      if(link){
+        payload.push({
+          anime,
+          season,
+          episode,
+          host,
+          quality,
+          link
+        })
+      }
 
-if(link){
+    })
 
-payload.push({
-anime,
-season,
-episode,
-host,
-quality,
-link
-})
+  })
 
-}
+  if(payload.length===0){
+    alert("Add at least one link")
+    return
+  }
 
-})
+  try{
 
-})
+    await api(`${API}/bulk`,"POST",payload)
 
-if(payload.length===0){
+    closeModal()
+    loadDownloads()
 
-alert("Add at least one link")
-return
-
-}
-
-try{
-
-await api(`${API}/bulk`,"POST",payload)
-
-closeModal()
-
-loadDownloads()
-
-}catch{
-
-alert("Failed to save")
-
-}
+  }catch{
+    alert("Failed to save")
+  }
 
 }
 
@@ -407,19 +377,14 @@ DELETE
 
 window.deleteLink=async(id)=>{
 
-if(!confirm("Delete link?")) return
+  if(!confirm("Delete link?")) return
 
-try{
-
-await api(`${API}/${id}`,"DELETE")
-
-loadDownloads()
-
-}catch{
-
-alert("Delete failed")
-
-}
+  try{
+    await api(`${API}/${id}`,"DELETE")
+    loadDownloads()
+  }catch{
+    alert("Delete failed")
+  }
 
 }
 
@@ -429,9 +394,8 @@ MODAL OPEN
 
 openBtn.onclick=()=>{
 
-resetModal()
-
-modal.style.display="flex"
+  resetModal()
+  modal.style.display="flex"
 
 }
 
@@ -442,9 +406,7 @@ MODAL CLOSE
 closeBtn.onclick=closeModal
 
 function closeModal(){
-
-modal.style.display="none"
-
+  modal.style.display="none"
 }
 
 /* ======================
@@ -453,13 +415,22 @@ RESET MODAL
 
 function resetModal(){
 
-document.getElementById("anime").value=""
-document.getElementById("season").value=""
-document.getElementById("episode").value=""
+  document.getElementById("anime").value=""
+  document.getElementById("season").value=""
+  document.getElementById("episode").value=""
 
-section.innerHTML=""
+  section.innerHTML=""
 
-addHostBlock()
+  // 🔥 first host auto add
+  addHostBlock()
+
+  // 🔥 add "Add Host" button
+  const addBtn=document.createElement("button")
+  addBtn.innerText="+ Add Host"
+  addBtn.style.marginTop="10px"
+  addBtn.onclick=addHostBlock
+
+  section.appendChild(addBtn)
 
 }
 
@@ -468,12 +439,8 @@ INIT
 ====================== */
 
 document.addEventListener("DOMContentLoaded",()=>{
-
-loadDownloads()
-
+  loadDownloads()
 })
-
-
 
 </script>
 
