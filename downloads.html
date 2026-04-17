@@ -279,24 +279,34 @@ ADD HOST BLOCK
 
 function addHostBlock(){
 
-const div=document.createElement("div")
+  const div=document.createElement("div")
 
-div.className="download-host-card"
+  div.className="download-host-card"
 
-div.innerHTML=`
+  div.style.border="1px solid #1a2035"
+  div.style.padding="10px"
+  div.style.borderRadius="10px"
 
-<input class="host-name" placeholder="Host Name (Upload4ever)">
+  div.innerHTML=`
 
-<div class="quality-container"></div>
+    <input class="host-name" placeholder="Source (KnightWolf / Mega / GoFile / Any)">
 
-<button type="button" onclick="addQualityRow(this)">Add Link</button>
+    <div class="quality-container"></div>
 
-`
+    <div style="display:flex;gap:10px;margin-top:8px">
 
-section.appendChild(div)
+      <button type="button" onclick="addQualityRow(this)">+ Quality</button>
 
-addQualityRow(div.querySelector("button"))
+      <button type="button" onclick="this.parentElement.parentElement.remove()">
+        Remove
+      </button>
 
+    </div>
+  `
+
+  section.appendChild(div)
+
+  addQualityRow(div.querySelector("button"))
 }
 
 /* ======================
@@ -344,17 +354,21 @@ const season=document.getElementById("season").value || "1"
 const episode=document.getElementById("episode").value
 
 if(!anime || !episode){
+  alert("Anime + Episode required")
+  return
+}
 
-alert("Anime and Episode required")
-return
-
+if(document.querySelectorAll(".download-host-card").length === 0){
+  alert("Add at least one source")
+  return
 }
 
 const payload=[]
 
 document.querySelectorAll(".download-host-card").forEach(card=>{
 
-const host=card.querySelector(".host-name").value
+const host=card.querySelector(".host-name").value.trim()
+if(!host) return
 
 card.querySelectorAll(".quality-row").forEach(row=>{
 
@@ -453,16 +467,26 @@ RESET MODAL
 
 function resetModal(){
 
-document.getElementById("anime").value=""
-document.getElementById("season").value=""
-document.getElementById("episode").value=""
+  document.getElementById("anime").value=""
+  document.getElementById("season").value=""
+  document.getElementById("episode").value=""
 
-section.innerHTML=""
+  section.innerHTML=""
 
-addHostBlock()
+  addHostBlock()
 
+  const addBtn=document.createElement("button")
+  addBtn.innerText="+ Add Source"
+  addBtn.style.marginTop="10px"
+  addBtn.style.background="#ffcc00"
+  addBtn.style.border="none"
+  addBtn.style.padding="6px 12px"
+  addBtn.style.borderRadius="6px"
+
+  addBtn.onclick=addHostBlock
+
+  section.appendChild(addBtn)
 }
-
 /* ======================
 INIT
 ====================== */
