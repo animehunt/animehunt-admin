@@ -5,9 +5,6 @@
 <title>AnimeHunt CMS – Ads Manager</title>
 
 <style>
-
-/* ===== RESET ===== */
-
 *{
 margin:0;
 padding:0;
@@ -19,13 +16,6 @@ body{
 background:#0b0f1a;
 color:#fff;
 }
-
-a{
-text-decoration:none;
-color:inherit;
-}
-
-/* ===== LAYOUT ===== */
 
 .cms-app{
 display:flex;
@@ -64,8 +54,6 @@ grid-template-columns:repeat(2,minmax(360px,1fr));
 gap:20px;
 }
 
-/* ===== SIDEBAR ===== */
-
 .brand{
 font-size:20px;
 font-weight:700;
@@ -100,8 +88,6 @@ background:#1a2035;
 color:#ffcc00;
 }
 
-/* ===== CARD ===== */
-
 .ads-card{
 background:#0b0f1a;
 border:1px solid #1a2035;
@@ -114,8 +100,6 @@ margin-bottom:12px;
 font-size:14px;
 color:#ffcc00;
 }
-
-/* ===== FORM ===== */
 
 .ads-card input,
 .ads-card select,
@@ -135,8 +119,6 @@ min-height:90px;
 resize:vertical;
 }
 
-/* ===== BUTTON ===== */
-
 .btn-primary{
 background:#ffcc00;
 color:#000;
@@ -146,17 +128,6 @@ border-radius:10px;
 cursor:pointer;
 font-weight:600;
 }
-
-.btn-secondary{
-background:#1a2035;
-border:1px solid #2a3358;
-color:#fff;
-padding:10px 20px;
-border-radius:10px;
-cursor:pointer;
-}
-
-/* ===== TABLE ===== */
 
 .ads-table{
 width:100%;
@@ -170,22 +141,14 @@ border-bottom:1px solid #1a2035;
 font-size:13px;
 }
 
-.status.on{
-color:#1abc9c;
-}
-
-.status.off{
-color:#e74c3c;
-}
-
+.status.on{color:#1abc9c;}
+.status.off{color:#e74c3c;}
 </style>
 </head>
 
 <body>
 
 <div class="cms-app">
-
-<!-- SIDEBAR -->
 
 <aside class="cms-sidebar">
 
@@ -227,132 +190,53 @@ color:#e74c3c;
 
 </aside>
 
-<!-- MAIN -->
-
 <main class="cms-main">
 
 <header class="cms-header">
-
 <div>Ads Manager</div>
 <div>Admin</div>
-
 </header>
 
 <section class="cms-content">
 
-<!-- BASIC INFO -->
-
+<!-- ADD AD -->
 <div class="ads-card">
-
-<h3>Basic Ad Info</h3>
+<h3>Create Ad</h3>
 
 <input id="adName" placeholder="Ad Name">
 
 <select id="adType">
-<option>Banner</option>
-<option>Video</option>
-<option>Native</option>
+<option value="redirect">Redirect</option>
+<option value="popup">Popup</option>
+<option value="script">Script</option>
+<option value="banner">Banner</option>
 </select>
 
-<textarea id="adCode" placeholder="Ad Code"></textarea>
+<textarea id="adCode" placeholder="Paste Ad URL or Script"></textarea>
+
+<input id="adPriority" placeholder="Weight (higher = more show)">
+
+<button class="btn-primary" onclick="saveAd()">Save Ad</button>
 
 </div>
 
-<!-- PLACEMENT -->
-
-<div class="ads-card">
-
-<h3>Placement</h3>
-
-<select id="adPage">
-<option>Home</option>
-<option>Watch</option>
-</select>
-
-<select id="adPos">
-<option>Header</option>
-<option>Player</option>
-</select>
-
-<input id="adPriority" placeholder="Priority (1 high)">
-
-</div>
-
-<!-- TARGETING -->
-
-<div class="ads-card">
-
-<h3>Targeting</h3>
-
-<input id="adAnime" placeholder="Anime Slug">
-
-<input id="adEpisode" placeholder="Episode">
-
-<input id="adCountry" placeholder="Country (IN,US)">
-
-</div>
-
-<!-- DEVICE -->
-
-<div class="ads-card">
-
-<h3>Device</h3>
-
-<select id="adDevice">
-<option>All</option>
-<option>Mobile</option>
-<option>Desktop</option>
-</select>
-
-</div>
-
-<!-- BULK IMPORT -->
-
-<div class="ads-card">
-
-<h3>Bulk Import</h3>
-
-<textarea id="bulkData" placeholder="Paste JSON ads"></textarea>
-
-<button class="btn-primary" onclick="bulkAddAds()">Add Ads</button>
-
-</div>
-
-<!-- ACTIONS -->
-
-<div class="ads-card">
-
-<h3>Actions</h3>
-
-<button id="saveBtn" class="btn-primary" onclick="saveAd()">Save Ad</button>
-
-</div>
-
-<!-- TABLE -->
-
+<!-- LIST -->
 <div class="ads-card" style="grid-column:1/-1">
 
-<h3>Existing Ads</h3>
+<h3>All Ads</h3>
 
 <table class="ads-table">
-
 <thead>
 <tr>
 <th>Name</th>
-<th>Page</th>
+<th>Type</th>
 <th>Status</th>
-<th>Action</th>
+<th>Actions</th>
 </tr>
 </thead>
 
 <tbody id="adsList">
-
-<tr>
-<td colspan="4" style="text-align:center;padding:20px;">
-Loading ads...
-</td>
-</tr>
-
+<tr><td colspan="4">Loading...</td></tr>
 </tbody>
 
 </table>
@@ -369,15 +253,13 @@ Loading ads...
 
 const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
 const API=`${API_BASE}/admin/ads`
-
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
 location.href="login.html"
 }
 
-/* API CALL */
-
+/* API */
 async function api(url,method="GET",body=null){
 
 const res=await fetch(url,{
@@ -389,24 +271,15 @@ headers:{
 body:body?JSON.stringify(body):null
 })
 
-if(!res.ok){
-
-if(res.status===401){
-location.href="login.html"
-}
-
-throw new Error("API error")
-}
+if(!res.ok) throw new Error("API")
 
 return res.json()
 }
 
-/* LOAD ADS */
-
+/* LOAD */
 async function loadAds(){
 
 const list=document.getElementById("adsList")
-
 list.innerHTML="<tr><td colspan='4'>Loading...</td></tr>"
 
 try{
@@ -415,167 +288,71 @@ const ads=await api(API)
 
 list.innerHTML=""
 
-if(!ads.length){
-
-list.innerHTML="<tr><td colspan='4'>No ads found</td></tr>"
-return
-
-}
-
 ads.forEach(ad=>{
-
-const status=(ad.status||"OFF").toLowerCase()
 
 list.innerHTML+=`
 <tr>
-
 <td>${ad.name}</td>
-
-<td>${ad.page}</td>
-
-<td class="status ${status}">
-${ad.status}
-</td>
-
+<td>${ad.type}</td>
+<td class="status ${ad.status.toLowerCase()}">${ad.status}</td>
 <td>
-
 <button onclick="toggleAd('${ad.id}')">
-${ad.status==="ON"?"Disable":"Enable"}
+${ad.status==="ON"?"OFF":"ON"}
 </button>
-
-<button onclick="deleteAd('${ad.id}')">
-Delete
-</button>
-
+<button onclick="deleteAd('${ad.id}')">Delete</button>
 </td>
-
 </tr>
 `
 
 })
 
-}catch(e){
-
-list.innerHTML="<tr><td colspan='4'>Failed to load ads</td></tr>"
-
+}catch{
+list.innerHTML="<tr><td colspan='4'>Error</td></tr>"
 }
 
 }
 
-/* SAVE AD */
-
+/* SAVE */
 async function saveAd(){
 
 const payload={
-
 name:adName.value,
 type:adType.value,
 adCode:adCode.value,
-
-page:adPage.value,
-position:adPos.value,
-
-priority:Number(adPriority.value||5),
-
-animeSlug:adAnime.value,
-episodeNumber:adEpisode.value,
-
-country:adCountry.value,
-device:adDevice.value
-
+weight:Number(adPriority.value||1)
 }
 
-if(!payload.name){
-
-alert("Ad name required")
+if(!payload.name || !payload.adCode){
+alert("Fill all fields")
 return
-
 }
-
-try{
 
 await api(API,"POST",payload)
-
-clearForm()
-
-loadAds()
-
-alert("Ad saved")
-
-}catch(e){
-
-alert("Save failed")
-
-}
-
-}
-
-/* CLEAR */
-
-function clearForm(){
 
 adName.value=""
 adCode.value=""
 adPriority.value=""
-adAnime.value=""
-adEpisode.value=""
-adCountry.value=""
+
+loadAds()
 
 }
 
 /* TOGGLE */
-
 async function toggleAd(id){
-
 await api(`${API}/${id}/toggle`,"PATCH")
-
 loadAds()
-
 }
 
 /* DELETE */
-
 async function deleteAd(id){
-
 if(!confirm("Delete ad?")) return
-
 await api(`${API}/${id}`,"DELETE")
-
 loadAds()
-
-}
-
-/* BULK */
-
-async function bulkAddAds(){
-
-try{
-
-const json=JSON.parse(bulkData.value)
-
-await api(API+"/bulk","POST",json)
-
-bulkData.value=""
-
-loadAds()
-
-}catch{
-
-alert("Invalid JSON")
-
-}
-
 }
 
 loadAds()
-
-
-
-
-
 
 </script>
-
 
 </body>
 </html>
