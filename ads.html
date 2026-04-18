@@ -5,143 +5,202 @@
 <title>AnimeHunt CMS – Ads Manager</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#0b0f1a;color:#fff}
 
-.cms-app{display:flex;min-height:100vh}
-
-.cms-sidebar{
-width:260px;
-background:#0b0f1a;
-border-right:1px solid #1a2035;
-padding:20px;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:system-ui;
 }
 
-.cms-main{flex:1;background:#0e1424}
+body{
+  background:#0b0f1a;
+  color:#fff;
+}
+
+.cms-app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ===== SIDEBAR FIXED ===== */
+.cms-sidebar{
+  width:260px;
+  background:#0b0f1a;
+  padding:20px;
+  position:relative;
+}
+
+/* FAKE BORDER (NO BUG) */
+.cms-sidebar::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:0;
+  width:1px;
+  height:100%;
+  background:#1a2035;
+}
+
+/* GPU FIX (REMOVE WHITE LINE BUG) */
+.cms-sidebar,
+.cms-main{
+  transform:translateZ(0);
+}
+
+.cms-main{
+  flex:1;
+  background:#0e1424;
+}
 
 .cms-header{
-height:60px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 20px;
-border-bottom:1px solid #1a2035;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid #1a2035;
 }
 
 .cms-content{
-padding:20px;
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:20px;
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
 }
 
-.brand{font-size:20px;margin-bottom:20px}
-.brand b{color:#ffcc00}
+.brand{
+  font-size:20px;
+  margin-bottom:20px;
+}
 
+.brand b{
+  color:#ffcc00;
+}
+
+/* ===== MENU ===== */
 .cms-menu a{
-display:block;
-padding:10px;
-border-radius:6px;
-color:#ccc;
-}
-.cms-menu a:hover{background:#1a2035;color:#ffcc00}
-
-.card{
-background:#0b0f1a;
-border:1px solid #1a2035;
-border-radius:10px;
-padding:15px;
+  display:block;
+  padding:10px;
+  border-radius:6px;
+  color:#ccc;
+  text-decoration:none;
+  outline:none;
+  border:none;
+  box-shadow:none;
+  -webkit-tap-highlight-color:transparent;
 }
 
-.card h3{margin-bottom:10px;color:#ffcc00}
-
-input,select,textarea{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-background:#11162a;
-border:1px solid #1f2742;
-color:#fff;
-border-radius:6px;
+/* HOVER */
+.cms-menu a:hover{
+  background:#1a2035;
+  color:#ffcc00;
 }
 
-textarea{min-height:80px}
-
-button{
-padding:10px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-background:#ffcc00;
-color:#000;
-font-weight:bold;
+/* ACTIVE FIX */
+.cms-menu a.active{
+  background:#1a2035 !important;
+  color:#ffcc00 !important;
 }
 
-.table{grid-column:1/-1}
-
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #1a2035}
-
-.status.on{color:#2ecc71}
-.status.off{color:#e74c3c}
-
-.toggle{
-display:flex;
-align-items:center;
-gap:10px;
-margin-bottom:10px;
-}
-
-.flex{display:flex;gap:10px}
-
-  /* FORCE REMOVE ANY LINE / BORDER */
-.cms-menu a{
-  border-bottom: none !important;
-}
-
-  /* REMOVE ALL MOBILE TAP + FOCUS EFFECTS */
-.cms-menu a{
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-  background: transparent;
-}
-
-/* REMOVE FOCUS STATE */
+/* REMOVE ALL FOCUS / CLICK EFFECT */
 .cms-menu a:focus,
 .cms-menu a:active,
 .cms-menu a:visited{
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-/* REMOVE ANY ::after / ::before LINE */
-.cms-menu a::before,
-.cms-menu a::after{
-  display: none !important;
-}
-  /* REMOVE SYSTEM SELECTION LINE */
-*{
-  -webkit-tap-highlight-color: transparent;
-}
-  /* FIX ACTIVE LINK STYLE */
-.cms-menu a.active{
-  background:#1a2035;
-  color:#ffcc00;
-  border:none !important;
   outline:none !important;
   box-shadow:none !important;
-}
-  
-  .cms-sidebar{
-  overflow:hidden;
+  background:transparent;
 }
 
-.cms-menu{
-  overflow:hidden;
+/* REMOVE ANY FAKE LINE */
+.cms-menu a::before,
+.cms-menu a::after{
+  display:none !important;
 }
+
+/* GLOBAL TAP FIX */
+*{
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ===== CARDS ===== */
+.card{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:10px;
+  padding:15px;
+}
+
+.card h3{
+  margin-bottom:10px;
+  color:#ffcc00;
+}
+
+/* ===== INPUT ===== */
+input,
+select,
+textarea{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  background:#11162a;
+  border:1px solid #1f2742;
+  color:#fff;
+  border-radius:6px;
+}
+
+textarea{
+  min-height:80px;
+}
+
+/* ===== BUTTON ===== */
+button{
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#ffcc00;
+  color:#000;
+  font-weight:bold;
+}
+
+/* ===== TABLE ===== */
+.table{
+  grid-column:1/-1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid #1a2035;
+}
+
+/* STATUS */
+.status.on{
+  color:#2ecc71;
+}
+
+.status.off{
+  color:#e74c3c;
+}
+
+/* TOGGLE */
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.flex{
+  display:flex;
+  gap:10px;
+}
+
   
 </style>
 </head>
