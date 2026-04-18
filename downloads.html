@@ -18,81 +18,20 @@ body{background:#060a14;color:#fff;font-family:system-ui;margin:0}
 
 .cms-content{padding:20px}
 
-/* TABLE */
-.downloads-table{background:#0b0f1a;border:1px solid #1a2035;border-radius:12px;overflow:hidden}
 .downloads-head,.row{
 display:grid;
-grid-template-columns:1.2fr 80px 80px 1fr 80px 1fr 80px;
-padding:12px;font-size:12px;align-items:center
+grid-template-columns:30px 1fr 60px 60px 1fr 80px 1fr 160px;
+padding:10px;
 }
-.downloads-head{background:#0e1424;color:#aaa}
+.downloads-head{background:#0e1424}
 .row{border-top:1px solid #1a2035}
 
-.badge{background:#1a2035;padding:3px 7px;border-radius:6px;font-size:10px}
-.actions button{background:none;border:none;color:#ffcc00;cursor:pointer}
+.badge{background:#1a2035;padding:3px 6px;border-radius:5px}
 
-/* MODAL */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
-.modal-box{width:900px;background:#0b0f1a;border:1px solid #1a2035;border-radius:14px}
-.modal-header,.modal-footer{padding:14px 16px;background:#0e1424}
-.modal-header{display:flex;justify-content:space-between}
-.modal-body{padding:16px}
-
-.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.form-grid input,.form-grid select{
-background:#0e1424;border:1px solid #1a2035;color:#fff;
-padding:8px;border-radius:6px;font-size:12px
-}
-
-.download-section{grid-column:1/4;border-top:1px solid #1a2035;padding-top:12px}
-
-/* HOST CARD */
-.download-host-card{
-background:#0e1424;
-padding:12px;
-border-radius:8px;
-margin-bottom:12px;
-border:1px solid #1a2035;
-}
-
-.host-top{
-display:flex;
-gap:8px;
-margin-bottom:8px;
-}
-
-.host-top select,
-.host-top input{
-flex:1;
-}
-
-.quality-row{
-display:flex;
-gap:8px;
-margin-top:6px
-}
-
-.quality-row select,.quality-row input{flex:1}
-
-.small-btn{
-background:#111;
-border:1px solid #333;
-color:#ffcc00;
-padding:5px 10px;
-border-radius:6px;
-cursor:pointer;
-}
-
-.add-host-btn{
-margin-top:10px;
-background:#0e1424;
-border:1px dashed #333;
-color:#ffcc00;
-padding:8px;
-border-radius:6px;
-cursor:pointer;
-width:100%;
-}
+.modal-box{width:900px;background:#0b0f1a;border-radius:12px;padding:15px}
+input,select{background:#111;border:1px solid #333;color:#fff;padding:6px;border-radius:5px}
+button{cursor:pointer}
 </style>
 </head>
 
@@ -101,40 +40,28 @@ width:100%;
 <div class="cms-app">
 
 <aside class="cms-sidebar">
-<div class="brand">
-<span>Anime</span><b>Hunt</b>
-<small>CMS</small>
-</div>
-
+<div class="brand">Anime<b>Hunt</b></div>
 <nav class="cms-menu">
-
 <a href="dashboard.html">🏠 Dashboard</a>
 <a href="anime.html">🎬 Anime</a>
 <a href="episodes.html">📺 Episodes</a>
 <a href="categories.html">🗂 Catagorys</a>
 <a href="banners.html">🖼 Banners</a>
 <a href="homepage.html">🏠 Homepage</a>
-
 <a href="downloads.html" class="active">📥 Downloads</a>
 <a href="servers.html">🌐 Servers</a>
 <a href="player.html">🎞 Player</a>
 <a href="search.html">🔍 Search</a>
-
 <a href="seo.html">📈 Seo</a>
 <a href="analytics.html">📊 Analytics</a>
 <a href="performance.html">⚡ Performance</a>
-
 <a href="security.html">🔐 Security</a>
 <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
 <a href="ads.html">📢 Ads</a>
 <a href="ai-brain.html">🧠 Ai Brain</a>
-
 <a href="sidebar.html">📌 Sidebar</a>
 <a href="footer.html">🦶 Footer</a>
-
 <a href="system-settings.html">⚙ System-settings</a>
-
 </nav>
 </aside>
 
@@ -142,59 +69,48 @@ width:100%;
 
 <header class="cms-header">
 <div>📥 Download Manager</div>
-<button class="add-btn" id="openModal">➕ Add Download</button>
+<button class="add-btn" onclick="openModal()">➕ Add</button>
 </header>
 
 <section class="cms-content">
-<div class="downloads-table">
+
+<div style="margin-bottom:10px">
+<button onclick="bulkDelete()">🗑 Bulk Delete</button>
+<button onclick="bulkEdit()">✏️ Bulk Edit</button>
+</div>
+
 <div class="downloads-head">
 <span><input type="checkbox" id="selectAll"></span>
 <span>Anime</span><span>S</span><span>E</span>
-<span>Host</span><span>Quality</span><span>Link</span><span>Actions</span>
+<span>Host</span><span>Q</span><span>Link</span><span>Actions</span>
 </div>
+
 <div id="downloadList"></div>
-</div>
+
 </section>
 
 </main>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="downloadModal">
+<!-- ADD MODAL -->
+<div class="modal" id="modal">
 <div class="modal-box">
 
-<div class="modal-header">
-<h3>Add Download</h3>
-<span id="closeModal">✕</span>
-</div>
-
-<div class="modal-body">
-<div class="form-grid">
-
-<input id="anime" placeholder="Anime Name">
+<input id="anime" placeholder="Anime">
 <input id="season" placeholder="Season">
 <input id="episode" placeholder="Episode">
 
-<div class="download-section" id="hostSection"></div>
+<div id="hosts"></div>
+
+<button onclick="addHost()">+ Host</button>
+<button onclick="save()">Save</button>
 
 </div>
 </div>
 
-<div class="modal-footer">
-<button id="saveDownload">💾 Save</button>
-</div>
-
-</div>
-</div>
-  
+<!-- EDIT MODAL -->
 <div class="modal" id="editModal">
 <div class="modal-box">
-
-<div class="modal-header">
-<h3>Edit Download</h3>
-</div>
-
-<div class="modal-body">
 
 <input id="editAnime">
 <input id="editSeason">
@@ -213,39 +129,22 @@ width:100%;
 <option value="direct">direct</option>
 </select>
 
-</div>
-
-<div class="modal-footer">
 <button onclick="updateDownload()">Update</button>
-</div>
 
 </div>
 </div>
-  
+
 <script>
-
 const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
-
-  async function bulkDelete(){
-
-const ids=[...document.querySelectorAll(".sel:checked")].map(i=>i.value)
-
-for(const id of ids){
-await deleteLink(id)
-}
-
-}
 
 if(!TOKEN) location.href="login.html"
 
 let HOSTS=JSON.parse(localStorage.getItem("HOSTS")||"[]")
+let EDIT_ID=null
 
-function saveHost(h){
-if(!HOSTS.includes(h)){
-HOSTS.push(h)
-localStorage.setItem("HOSTS",JSON.stringify(HOSTS))
-}
+async function shortlink(url){
+return url
 }
 
 /* LOAD */
@@ -257,39 +156,112 @@ list.innerHTML="Loading..."
 const res=await fetch(API,{headers:{Authorization:"Bearer "+TOKEN}})
 const data=await res.json()
 
+list.innerHTML=""
+
+data.forEach(d=>{
 list.innerHTML+=`
 <div class="row">
-
 <span><input type="checkbox" class="sel" value="${d.id}"></span>
-
 <span>${d.anime}</span>
-
-<span>S${d.season}</span>
-
-<span>E${d.episode}</span>
-
+<span>${d.season}</span>
+<span>${d.episode}</span>
 <span class="badge">${d.host}</span>
-
 <span>${d.quality}</span>
-
+<span><a href="/go/${d.id}" target="_blank">${d.link}</a></span>
 <span>
-<a href="/go/${d.id}" target="_blank">${d.link}</a>
-</span>
-
-<div class="actions">
 <button onclick="edit('${d.id}')">✏️</button>
 <button onclick="deleteLink('${d.id}')">🗑</button>
-</div>
-
+</span>
 </div>
 `
 })
 
 }
 
+/* ADD HOST */
+function addHost(){
+const div=document.createElement("div")
+div.innerHTML=`
+<input class="host" placeholder="Host">
+<input class="quality" placeholder="720p">
+<input class="link" placeholder="link">
+`
+document.getElementById("hosts").appendChild(div)
+}
 
-  let EDIT_ID=null
+/* SAVE */
+async function save(){
 
+const anime=document.getElementById("anime").value
+const season=document.getElementById("season").value||1
+const episode=document.getElementById("episode").value
+
+if(!anime || !episode){
+alert("Anime & Episode required")
+return
+}
+
+const payload=[]
+const cards=document.querySelectorAll("#hosts div")
+
+for(const card of cards){
+
+const host=card.querySelector(".host").value
+const q=card.querySelector(".quality").value
+const raw=card.querySelector(".link").value
+
+if(!host || !raw) continue
+
+const link=await shortlink(raw)
+
+payload.push({anime,season,episode,host,quality:q,link})
+
+}
+
+await fetch(API+"/bulk",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+TOKEN
+},
+body:JSON.stringify(payload)
+})
+
+closeModal()
+loadDownloads()
+}
+
+/* DELETE */
+async function deleteLink(id){
+await fetch(API+"/"+id,{method:"DELETE",headers:{Authorization:"Bearer "+TOKEN}})
+loadDownloads()
+}
+
+/* BULK */
+async function bulkDelete(){
+const ids=[...document.querySelectorAll(".sel:checked")].map(i=>i.value)
+for(const id of ids) await deleteLink(id)
+}
+
+async function bulkEdit(){
+const host=prompt("Host?")
+const ids=[...document.querySelectorAll(".sel:checked")].map(i=>i.value)
+
+for(const id of ids){
+await fetch(API+"/update/"+id,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+Authorization:"Bearer "+TOKEN
+},
+body:JSON.stringify({host})
+})
+}
+
+loadDownloads()
+}
+
+/* EDIT */
 async function edit(id){
 
 EDIT_ID=id
@@ -308,151 +280,9 @@ editLink.value=d.link
 
 document.getElementById("editModal").style.display="flex"
 }
-  
-/* HOST BLOCK */
-function addHostBlock(){
 
-const div=document.createElement("div")
-div.className="download-host-card"
-
-div.innerHTML=`
-<div class="host-top">
-<select class="host-select"></select>
-<input class="host-custom" placeholder="New host (optional)">
-</div>
-
-<div class="quality-container"></div>
-
-<div style="margin-top:8px">
-<button class="small-btn" onclick="addQualityRow(this)">+ Quality</button>
-<button class="small-btn" onclick="this.parentElement.parentElement.remove()">Remove</button>
-</div>
-`
-
-document.getElementById("hostSection").appendChild(div)
-
-populateHosts(div.querySelector(".host-select"))
-
-addQualityRow(div.querySelector(".small-btn"))
-}
-
-/* POPULATE */
-function populateHosts(select){
-select.innerHTML='<option value="">Select Host</option>'
-HOSTS.forEach(h=>{
-const o=document.createElement("option")
-o.value=h
-o.textContent=h
-select.appendChild(o)
-})
-}
-
-/* QUALITY */
-function addQualityRow(btn){
-
-const container=btn.closest(".download-host-card").querySelector(".quality-container")
-
-const row=document.createElement("div")
-row.className="quality-row"
-
-row.innerHTML=`
-<select class="q-val">
-<option>480p</option>
-<option>720p</option>
-<option>1080p</option>
-<option>4K</option>
-<option>ZIP</option>
-</select>
-
-<input class="quality-link" placeholder="Download Link">
-
-<button onclick="this.parentElement.remove()">✕</button>
-`
-
-container.appendChild(row)
-}
-
-/* SAVE */
-document.getElementById("saveDownload").onclick=async()=>{
-
-const anime=document.getElementById("anime").value
-const season=document.getElementById("season").value||1
-const episode=document.getElementById("episode").value
-
-if(!anime || !episode){
-alert("Anime & Episode required")
-return
-}
-  
-const payload=[]
-
-document.querySelectorAll(".download-host-card").forEach(card=>{
-
-const hostSel=card.querySelector(".host-select").value
-const hostCustom=card.querySelector(".host-custom").value.trim()
-
-const host=hostCustom||hostSel
-if(!host)return
-
-saveHost(host)
-
-card.querySelectorAll(".quality-row").forEach(r=>{
-const q=r.querySelector(".q-val").value
-const rawLink=r.querySelector(".quality-link").value
-const link=await shortlink(rawLink)
-if(link){
-payload.push({anime,season,episode,host,quality:q,link})
-}
-})
-
-})
-
-await fetch(API+"/bulk",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+TOKEN
-},
-body:JSON.stringify(payload)
-})
-
-closeModal()
-loadDownloads()
-
-}
-
-/* DELETE */
-async function deleteLink(id){
-await fetch(API+"/"+id,{method:"DELETE",headers:{Authorization:"Bearer "+TOKEN}})
-loadDownloads()
-}
-
-  /* 🔥 BULK EDIT */
-async function bulkEdit(){
-
-const host=prompt("New Host?")
-const type=prompt("Type (internal/external)?")
-const route=prompt("Route (go/direct)?")
-
-const ids=[...document.querySelectorAll(".sel:checked")].map(i=>i.value)
-
-for(const id of ids){
-
-await fetch(API+"/update/"+id,{
-method:"PUT",
-headers:{
-"Content-Type":"application/json",
-Authorization:"Bearer "+TOKEN
-},
-body:JSON.stringify({host,type,route})
-})
-
-}
-
-loadDownloads()
-}
-
-  async function updateDownload(){
+/* UPDATE */
+async function updateDownload(){
 
 await fetch(API+"/update/"+EDIT_ID,{
 method:"PUT",
@@ -475,52 +305,33 @@ route:editRoute.value
 document.getElementById("editModal").style.display="none"
 loadDownloads()
 }
-  
-/* MODAL */
-document.getElementById("openModal").onclick=()=>{
-document.getElementById("downloadModal").style.display="flex"
-resetModal()
-}
 
-document.getElementById("closeModal").onclick=closeModal
+/* MODAL */
+function openModal(){
+document.getElementById("modal").style.display="flex"
+document.getElementById("hosts").innerHTML=""
+addHost()
+}
 
 function closeModal(){
-document.getElementById("downloadModal").style.display="none"
+document.getElementById("modal").style.display="none"
 }
 
-function resetModal(){
-document.getElementById("anime").value=""
-document.getElementById("season").value=""
-document.getElementById("episode").value=""
-
-const sec=document.getElementById("hostSection")
-sec.innerHTML=""
-
-addHostBlock()
-
-const btn=document.createElement("button")
-btn.className="add-host-btn"
-btn.innerText="+ Add Host"
-btn.onclick=addHostBlock
-
-sec.appendChild(btn)
+/* SELECT ALL */
+setTimeout(()=>{
+document.getElementById("selectAll").onclick=(e)=>{
+document.querySelectorAll(".sel").forEach(c=>c.checked=e.target.checked)
 }
+},500)
 
-/* INIT */
-loadDownloads()
-
-  window.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("selectAll").onclick=(e)=>{
-    document.querySelectorAll(".sel").forEach(c=>c.checked=e.target.checked)
-  }
-})
-
-
-  window.onclick=function(e){
+/* CLOSE MODAL */
+window.onclick=function(e){
 if(e.target.classList.contains("modal")){
 e.target.style.display="none"
 }
-  }
+}
+
+loadDownloads()
 </script>
 
 </body>
