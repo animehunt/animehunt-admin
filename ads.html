@@ -98,6 +98,30 @@ margin-bottom:10px;
 .cms-menu a{
   border-bottom: none !important;
 }
+
+  /* REMOVE ALL MOBILE TAP + FOCUS EFFECTS */
+.cms-menu a{
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  background: transparent;
+}
+
+/* REMOVE FOCUS STATE */
+.cms-menu a:focus,
+.cms-menu a:active,
+.cms-menu a:visited{
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* REMOVE ANY ::after / ::before LINE */
+.cms-menu a::before,
+.cms-menu a::after{
+  display: none !important;
+}
   
 </style>
 </head>
