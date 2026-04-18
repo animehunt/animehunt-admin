@@ -5,175 +5,94 @@
 <title>AnimeHunt CMS – Ads Manager</title>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#0b0f1a;color:#fff}
 
-/* ===== RESET ===== */
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:system-ui;
-}
+.cms-app{display:flex;min-height:100vh}
 
-/* ===== GLOBAL FIX (WHITE LINE REMOVE) ===== */
-html,body{
-  height:100%;
-  background:#0b0f1a;
-  overflow:hidden; /* 🔥 main fix */
-  color:#fff;
-}
-
-/* ===== LAYOUT ===== */
-.cms-app{
-  display:flex;
-  height:100dvh; /* mobile safe */
-}
-
-/* ===== SIDEBAR ===== */
 .cms-sidebar{
-  width:260px;
-  background:#0b0f1a;
-  border-right:1px solid #1a2035;
-  padding:20px;
-  overflow-y:auto;
+width:260px;
+background:#0b0f1a;
+border-right:1px solid #1a2035;
+padding:20px;
 }
 
-/* ===== MAIN ===== */
-.cms-main{
-  flex:1;
-  background:#0e1424;
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  overflow:hidden;
-}
+.cms-main{flex:1;background:#0e1424}
 
-/* ===== HEADER ===== */
 .cms-header{
-  height:60px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid #1a2035;
-  flex-shrink:0;
+height:60px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+border-bottom:1px solid #1a2035;
 }
 
-/* ===== CONTENT ===== */
 .cms-content{
-  flex:1;
-  padding:20px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:20px;
-  overflow-y:auto; /* 🔥 scroll inside */
+padding:20px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
 }
 
-/* ===== BRAND ===== */
-.brand{
-  font-size:20px;
-  margin-bottom:20px;
-}
-.brand b{
-  color:#ffcc00;
-}
+.brand{font-size:20px;margin-bottom:20px}
+.brand b{color:#ffcc00}
 
-/* ===== MENU ===== */
 .cms-menu a{
-  display:block;
-  padding:10px;
-  border-radius:6px;
-  color:#ccc;
+display:block;
+padding:10px;
+border-radius:6px;
+color:#ccc;
 }
-.cms-menu a:hover{
-  background:#1a2035;
-  color:#ffcc00;
-}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00}
 
-/* ===== CARD ===== */
 .card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:10px;
-  padding:15px;
+background:#0b0f1a;
+border:1px solid #1a2035;
+border-radius:10px;
+padding:15px;
 }
 
-.card h3{
-  margin-bottom:10px;
-  color:#ffcc00;
-}
+.card h3{margin-bottom:10px;color:#ffcc00}
 
-/* ===== INPUT ===== */
 input,select,textarea{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  background:#11162a;
-  border:1px solid #1f2742;
-  color:#fff;
-  border-radius:6px;
+width:100%;
+padding:10px;
+margin-bottom:10px;
+background:#11162a;
+border:1px solid #1f2742;
+color:#fff;
+border-radius:6px;
 }
 
-textarea{
-  min-height:80px;
-}
+textarea{min-height:80px}
 
-/* ===== BUTTON ===== */
 button{
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#ffcc00;
-  color:#000;
-  font-weight:bold;
+padding:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#ffcc00;
+color:#000;
+font-weight:bold;
 }
 
-/* ===== TABLE ===== */
-.table{
-  grid-column:1/-1;
-}
+.table{grid-column:1/-1}
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #1a2035}
 
-th,td{
-  padding:10px;
-  border-bottom:1px solid #1a2035;
-}
+.status.on{color:#2ecc71}
+.status.off{color:#e74c3c}
 
-/* ===== STATUS ===== */
-.status.on{
-  color:#2ecc71;
-}
-.status.off{
-  color:#e74c3c;
-}
-
-/* ===== TOGGLES ===== */
 .toggle{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
 }
 
-/* ===== FLEX ===== */
-.flex{
-  display:flex;
-  gap:10px;
-}
-
-/* ===== SCROLLBAR (OPTIONAL CLEAN UI) ===== */
-::-webkit-scrollbar{
-  width:6px;
-}
-::-webkit-scrollbar-thumb{
-  background:#1a2035;
-  border-radius:10px;
-}
-  
+.flex{display:flex;gap:10px}
 </style>
 </head>
 
