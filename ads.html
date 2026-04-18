@@ -85,9 +85,14 @@ th,td{padding:10px;border-bottom:1px solid #1a2035}
 .status.on{color:#2ecc71}
 .status.off{color:#e74c3c}
 
-.row-actions button{
-margin-right:5px;
+.toggle{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
 }
+
+.flex{display:flex;gap:10px}
 </style>
 </head>
 
@@ -95,7 +100,6 @@ margin-right:5px;
 
 <div class="cms-app">
 
-<!-- SIDEBAR (UNCHANGED) -->
 <aside class="cms-sidebar">
 <div class="brand"><span>Anime</span><b>Hunt</b><small> CMS</small></div>
 
@@ -129,11 +133,10 @@ margin-right:5px;
 </nav>
 </aside>
 
-<!-- MAIN -->
 <main class="cms-main">
 
 <header class="cms-header">
-<div>Advanced Ads Manager</div>
+<div>🔥 Advanced Monetization Panel</div>
 <div>Admin</div>
 </header>
 
@@ -141,7 +144,7 @@ margin-right:5px;
 
 <!-- CREATE -->
 <div class="card">
-<h3>Create Ad</h3>
+<h3>Create / Edit Ad</h3>
 
 <input id="name" placeholder="Ad Name">
 
@@ -156,20 +159,45 @@ margin-right:5px;
 
 <input id="weight" placeholder="Weight (priority)">
 <input id="step" placeholder="Step (1,2,3)">
-<input id="source" placeholder="Source (knightwolf / mega / gdrive etc)">
-<input id="delay" placeholder="Delay (ms optional)">
+<input id="source" placeholder="Source (knightwolf / mega / any)">
+
+<input id="delay" placeholder="Delay (ms)">
+
+<textarea id="shortlinks" placeholder="Shortlinks (1 per line)"></textarea>
+
+<div class="toggle">
+<label>Auto Rotation</label>
+<input type="checkbox" id="autoShort">
+</div>
+
+<div class="toggle">
+<label>Anti Bypass</label>
+<input type="checkbox" id="antiBypass">
+</div>
 
 <button onclick="saveAd()">Save Ad</button>
+
 </div>
 
 <!-- FILTER -->
 <div class="card">
-<h3>Filter & Search</h3>
+<h3>Search / Filter</h3>
 
-<input id="filterSource" placeholder="Filter by source">
-<input id="filterStep" placeholder="Filter by step">
+<input id="search" placeholder="Search name">
+<input id="filterSource" placeholder="Source">
+<input id="filterStep" placeholder="Step">
 
-<button onclick="loadAds()">Apply Filter</button>
+<button onclick="loadAds()">Apply</button>
+
+</div>
+
+<!-- ANALYTICS -->
+<div class="card">
+<h3>Analytics</h3>
+
+<div>Total Ads: <span id="totalAds">0</span></div>
+<div>Total Clicks: <span id="totalClicks">0</span></div>
+
 </div>
 
 <!-- TABLE -->
@@ -184,6 +212,7 @@ margin-right:5px;
 <th>Step</th>
 <th>Source</th>
 <th>Weight</th>
+<th>Clicks</th>
 <th>Status</th>
 <th>Actions</th>
 </tr>
@@ -202,13 +231,9 @@ margin-right:5px;
 
 <script>
 
-const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
-const API=`${API_BASE}/admin/ads`
+const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
 const TOKEN=localStorage.getItem("AUTH_TOKEN")
 
-if(!TOKEN) location.href="login.html"
-
-/* API */
 async function api(url,method="GET",body=null){
 const res=await fetch(url,{
 method,
@@ -221,26 +246,31 @@ body:body?JSON.stringify(body):null
 return res.json()
 }
 
-/* LOAD */
 async function loadAds(){
 
 let ads=await api(API)
 
-const fs=document.getElementById("filterSource").value.toLowerCase()
-const st=document.getElementById("filterStep").value
+const searchVal=search.value.toLowerCase()
+const fs=filterSource.value.toLowerCase()
+const st=filterStep.value
 
-if(fs){
-ads=ads.filter(a=>a.source && a.source.toLowerCase().includes(fs))
+if(searchVal){
+ads=ads.filter(a=>a.name.toLowerCase().includes(searchVal))
 }
-
+if(fs){
+ads=ads.filter(a=>a.source?.toLowerCase().includes(fs))
+}
 if(st){
 ads=ads.filter(a=>String(a.step)===st)
 }
 
-const list=document.getElementById("list")
 list.innerHTML=""
 
+let totalClicks=0
+
 ads.forEach(a=>{
+
+totalClicks+=a.clicks||0
 
 list.innerHTML+=`
 <tr>
@@ -249,19 +279,23 @@ list.innerHTML+=`
 <td>${a.step}</td>
 <td>${a.source}</td>
 <td>${a.weight}</td>
+<td>${a.clicks||0}</td>
 <td class="status ${a.status.toLowerCase()}">${a.status}</td>
-<td class="row-actions">
-<button onclick="toggleAd('${a.id}')">${a.status==="ON"?"OFF":"ON"}</button>
+<td>
+<button onclick="editAd('${a.id}')">Edit</button>
+<button onclick="toggleAd('${a.id}')">ON/OFF</button>
 <button onclick="deleteAd('${a.id}')">Delete</button>
 </td>
 </tr>
 `
-
 })
+
+totalAds.innerText=ads.length
+totalClicksEl = document.getElementById("totalClicks")
+totalClicksEl.innerText=totalClicks
 
 }
 
-/* SAVE */
 async function saveAd(){
 
 const payload={
@@ -271,38 +305,49 @@ adCode:code.value,
 weight:Number(weight.value||1),
 step:Number(step.value||1),
 source:source.value,
-delay:Number(delay.value||0)
+delay:Number(delay.value||0),
+shortlinks:shortlinks.value.split("\n").filter(x=>x.trim()),
+autoShort:autoShort.checked,
+antiBypass:antiBypass.checked
 }
 
 if(!payload.name || !payload.adCode){
-alert("Fill required fields")
+alert("Required fields missing")
 return
 }
 
 await api(API,"POST",payload)
 
+clearForm()
+loadAds()
+
+}
+
+function editAd(id){
+alert("Backend PUT API add karo → phir edit full enable hoga")
+}
+
+async function toggleAd(id){
+await api(`${API}/${id}/toggle`,"PATCH")
+loadAds()
+}
+
+async function deleteAd(id){
+if(!confirm("Delete?")) return
+await api(`${API}/${id}`,"DELETE")
+loadAds()
+}
+
+function clearForm(){
 name.value=""
 code.value=""
 weight.value=""
 step.value=""
 source.value=""
 delay.value=""
-
-loadAds()
-
-}
-
-/* TOGGLE */
-async function toggleAd(id){
-await api(`${API}/${id}/toggle`,"PATCH")
-loadAds()
-}
-
-/* DELETE */
-async function deleteAd(id){
-if(!confirm("Delete?")) return
-await api(`${API}/${id}`,"DELETE")
-loadAds()
+shortlinks.value=""
+autoShort.checked=false
+antiBypass.checked=false
 }
 
 loadAds()
