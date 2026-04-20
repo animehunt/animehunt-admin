@@ -211,6 +211,16 @@ render()
 fillSeason()
 }
 
+  function getQualitiesBySeason(anime,season){
+
+return [...new Set(
+DATA
+.filter(d=>d.anime===anime && d.season===season)
+.map(d=>d.quality)
+)]
+
+  }
+
 /* RENDER */
 function render(){
 
@@ -218,28 +228,51 @@ const s=search.value.toLowerCase()
 const h=hostFilter.value.toLowerCase()
 const sf=seasonFilter.value
 
+const grouped={}
+
+DATA.forEach(d=>{
+
+if(
+(!s || d.anime.toLowerCase().includes(s)) &&
+(!h || d.host.toLowerCase().includes(h)) &&
+(!sf || d.season===sf)
+){
+
+const key=`${d.anime}-S${d.season}`
+
+if(!grouped[key]) grouped[key]={}
+if(!grouped[key][d.episode]) grouped[key][d.episode]=[]
+
+grouped[key][d.episode].push(d)
+
+}
+
+})
+
 downloadList.innerHTML=""
 
-DATA.filter(d=>
-(!s||d.anime.toLowerCase().includes(s)) &&
-(!h||d.host.toLowerCase().includes(h)) &&
-(!sf||d.season===sf)
-).forEach(d=>{
+Object.keys(grouped).forEach(seasonKey=>{
+
+const [anime,season]=seasonKey.split("-S")
 
 downloadList.innerHTML+=`
-<div class="row">
-<span>${d.anime}</span>
-<span>${d.season}</span>
-<span>${d.episode}</span>
-<span class="badge">${d.host}</span>
-<span>${d.storage||"-"}</span>
-<span>${d.quality}</span>
-<span style="overflow:hidden">${d.link}</span>
-<span class="actions">
-<button onclick="del('${d.id}')">Delete</button>
-</span>
+<div style="padding:10px;background:#111;font-weight:bold">
+${anime} Season ${season}
 </div>
 `
+
+Object.keys(grouped[seasonKey]).forEach(ep=>{
+
+downloadList.innerHTML+=`
+<div style="padding:10px;border-top:1px solid #222">
+<b>Episode ${ep}</b><br>
+${grouped[seasonKey][ep].map(l=>`
+<span class="badge">${l.host}</span> (${l.quality})
+`).join(" ")}
+</div>
+`
+
+})
 
 })
 
