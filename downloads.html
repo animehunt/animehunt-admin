@@ -212,207 +212,242 @@ button:hover{
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const BASE = "https://animehunt-backend.animehunt715.workers.dev/api"
+const API = BASE + "/admin/downloads"
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
-let DATA=[]
+let DATA = []
 
-async function api(url,method="GET",body=null){
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-return res.json()
+async function api(url, method="GET", body=null){
+  const res = await fetch(url,{
+    method,
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+TOKEN
+    },
+    body: body ? JSON.stringify(body) : null
+  })
+
+  return res.json()
 }
 
-/* LOAD */
+/* ======================
+LOAD
+====================== */
 async function loadDownloads(){
-DATA=await api(API)
-render()
-fillSeason()
+
+  const res = await api(API)
+
+  // ✅ FIX: ensure array
+  DATA = Array.isArray(res) ? res : []
+
+  render()
+  fillSeason()
+
 }
 
-  function getQualitiesBySeason(anime,season){
-
-return [...new Set(
-DATA
-.filter(d=>d.anime===anime && d.season===season)
-.map(d=>d.quality)
-)]
-
-  }
-
-/* RENDER */
+/* ======================
+RENDER
+====================== */
 function render(){
 
-const s=search.value.toLowerCase()
-const h=hostFilter.value.toLowerCase()
-const sf=seasonFilter.value
+  const s = search.value.toLowerCase()
+  const h = hostFilter.value.toLowerCase()
+  const sf = seasonFilter.value
 
-const grouped={}
+  const grouped = {}
 
-DATA.forEach(d=>{
+  DATA.forEach(d=>{
 
-if(
-(!s || d.anime.toLowerCase().includes(s)) &&
-(!h || d.host.toLowerCase().includes(h)) &&
-(!sf || d.season===sf)
-){
+    if(
+      (!s || d.anime.toLowerCase().includes(s)) &&
+      (!h || d.host.toLowerCase().includes(h)) &&
+      (!sf || d.season == sf)
+    ){
 
-const key=`${d.anime}-S${d.season}`
+      const key = `${d.anime}-S${d.season}`
 
-if(!grouped[key]) grouped[key]={}
-if(!grouped[key][d.episode]) grouped[key][d.episode]=[]
+      if(!grouped[key]) grouped[key] = {}
+      if(!grouped[key][d.episode]) grouped[key][d.episode] = []
 
-grouped[key][d.episode].push(d)
+      grouped[key][d.episode].push(d)
+
+    }
+
+  })
+
+  downloadList.innerHTML = ""
+
+  Object.keys(grouped).forEach(seasonKey=>{
+
+    const [anime,season] = seasonKey.split("-S")
+
+    downloadList.innerHTML += `
+    <div style="padding:10px;background:#111;font-weight:bold">
+      ${anime} Season ${season}
+    </div>
+    `
+
+    Object.keys(grouped[seasonKey]).forEach(ep=>{
+
+      downloadList.innerHTML += `
+      <div style="padding:10px;border-top:1px solid #222">
+        <b>Episode ${ep}</b><br>
+        ${grouped[seasonKey][ep].map(l=>`
+          <span class="badge">${l.host}</span> (${l.quality})
+        `).join(" ")}
+      </div>
+      `
+
+    })
+
+  })
 
 }
 
-})
-
-downloadList.innerHTML=""
-
-Object.keys(grouped).forEach(seasonKey=>{
-
-const [anime,season]=seasonKey.split("-S")
-
-downloadList.innerHTML+=`
-<div style="padding:10px;background:#111;font-weight:bold">
-${anime} Season ${season}
-</div>
-`
-
-Object.keys(grouped[seasonKey]).forEach(ep=>{
-
-downloadList.innerHTML+=`
-<div style="padding:10px;border-top:1px solid #222">
-<b>Episode ${ep}</b><br>
-${grouped[seasonKey][ep].map(l=>`
-<span class="badge">${l.host}</span> (${l.quality})
-`).join(" ")}
-</div>
-`
-
-})
-
-})
-
-}
-
-/* FILTER */
+/* ======================
+FILTER
+====================== */
 function fillSeason(){
-const s=[...new Set(DATA.map(d=>d.season))]
-seasonFilter.innerHTML="<option value=''>All</option>"
-s.forEach(v=>{
-seasonFilter.innerHTML+=`<option>${v}</option>`
-})
+
+  const s = [...new Set(DATA.map(d=>d.season))]
+
+  seasonFilter.innerHTML = "<option value=''>All</option>"
+
+  s.forEach(v=>{
+    seasonFilter.innerHTML += `<option>${v}</option>`
+  })
+
 }
 
-/* DELETE */
+/* ======================
+DELETE
+====================== */
 async function del(id){
-if(!confirm("Delete?")) return
-await api(API+"/"+id,"DELETE")
-loadDownloads()
+
+  if(!confirm("Delete?")) return
+
+  await api(API+"/"+id,"DELETE")
+
+  loadDownloads()
+
 }
 
-/* HOST */
+/* ======================
+HOST ADD
+====================== */
 function addHost(){
 
-const div=document.createElement("div")
-div.className="host-card"
+  const div = document.createElement("div")
+  div.className = "host-card"
 
-div.innerHTML=`
-<input class="host" placeholder="UI Host (KnightWolf)">
-<input class="storage" placeholder="Storage (Mega/GDrive)">
-<div class="links"></div>
-<button onclick="addQuality(this)">+ Quality</button>
-<button onclick="this.parentElement.remove()">Remove Host</button>
-`
+  div.innerHTML = `
+    <input class="host" placeholder="Host">
+    <input class="storage" placeholder="Storage">
+    <div class="links"></div>
 
-hosts.appendChild(div)
-addQuality(div.querySelector("button"))
+    <button onclick="addQuality(this)">+ Quality</button>
+    <button onclick="this.parentElement.remove()">Remove</button>
+  `
+
+  hosts.appendChild(div)
+
+  addQuality(div.querySelector("button"))
 
 }
 
-/* QUALITY */
+/* ======================
+QUALITY ADD
+====================== */
 function addQuality(btn){
 
-const row=document.createElement("div")
-row.className="link-row"
+  const row = document.createElement("div")
+  row.className = "link-row"
 
-row.innerHTML=`
-<select class="q">
-<option>480p</option>
-<option>720p</option>
-<option>1080p</option>
-<option>4K</option>
-<option>ZIP</option>
-</select>
+  row.innerHTML = `
+    <select class="q">
+      <option>480p</option>
+      <option>720p</option>
+      <option>1080p</option>
+      <option>4K</option>
+      <option>ZIP</option>
+    </select>
 
-<input class="link" placeholder="Download Link">
+    <input class="link" placeholder="Download link">
 
-<button onclick="this.parentElement.remove()">✕</button>
-`
+    <button onclick="this.parentElement.remove()">✕</button>
+  `
 
-btn.previousElementSibling.appendChild(row)
-
-}
-
-/* SAVE */
-saveDownload.onclick=async()=>{
-
-const payload=[]
-
-document.querySelectorAll(".host-card").forEach(card=>{
-
-const host=card.querySelector(".host").value
-const storage=card.querySelector(".storage").value
-
-card.querySelectorAll(".link-row").forEach(row=>{
-
-payload.push({
-anime:anime.value,
-season:season.value,
-episode:episode.value,
-host,
-storage,
-quality:row.querySelector(".q").value,
-link:row.querySelector(".link").value
-})
-
-})
-
-})
-
-if(!payload.length){
-alert("Add data")
-return
-}
-
-await api(API+"/bulk","POST",payload)
-
-closeModal()
-loadDownloads()
+  btn.previousElementSibling.appendChild(row)
 
 }
 
-/* MODAL */
-openModal.onclick=()=>{
-downloadModal.style.display="flex"
-hosts.innerHTML=""
-addHost()
+/* ======================
+SAVE
+====================== */
+saveDownload.onclick = async ()=>{
+
+  const payload = []
+
+  document.querySelectorAll(".host-card").forEach(card=>{
+
+    const host = card.querySelector(".host").value
+    const storage = card.querySelector(".storage").value
+
+    card.querySelectorAll(".link-row").forEach(row=>{
+
+      payload.push({
+        anime: anime.value,
+        season: season.value,
+        episode: episode.value,
+        host,
+        storage,
+        quality: row.querySelector(".q").value,
+        link: row.querySelector(".link").value
+      })
+
+    })
+
+  })
+
+  if(!payload.length){
+    alert("Add data")
+    return
+  }
+
+  // ✅ FIX ROUTE
+  await api(BASE + "/admin/downloads/bulk","POST",payload)
+
+  closeModal()
+  loadDownloads()
+
 }
 
-closeModal.onclick=()=>downloadModal.style.display="none"
+/* ======================
+MODAL
+====================== */
+function closeModal(){
+  downloadModal.style.display = "none"
+}
 
-search.oninput=render
-hostFilter.oninput=render
-seasonFilter.onchange=render
+openModal.onclick = ()=>{
+  downloadModal.style.display = "flex"
+  hosts.innerHTML = ""
+  addHost()
+}
 
+closeModalBtn.onclick = closeModal
+
+/* ======================
+EVENTS
+====================== */
+search.oninput = render
+hostFilter.oninput = render
+seasonFilter.onchange = render
+
+/* ======================
+INIT
+====================== */
 loadDownloads()
 
 </script>
