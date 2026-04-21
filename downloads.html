@@ -215,9 +215,29 @@ button:hover{
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/downloads"
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
+/* ================= DOM ================= */
+
+const downloadList = document.getElementById("downloadList")
+const openModalBtn = document.getElementById("openModal")
+const closeModalBtn = document.getElementById("closeModal")
+const downloadModal = document.getElementById("downloadModal")
+const hosts = document.getElementById("hosts")
+
+const search = document.getElementById("search")
+const hostFilter = document.getElementById("hostFilter")
+const seasonFilter = document.getElementById("seasonFilter")
+
+const animeInput = document.getElementById("anime")
+const seasonInput = document.getElementById("season")
+const episodeInput = document.getElementById("episode")
+
+const saveBtn = document.getElementById("saveDownload")
+
+/* ================= STATE ================= */
+
 let DATA = []
 
-let VIEW = "anime" // anime → season → episode → detail
+let VIEW = "anime"
 let CURRENT = {
   anime: null,
   season: null,
@@ -253,27 +273,57 @@ async function loadDownloads(){
 
   DATA = Array.isArray(res) ? res : []
 
+  fillSeason()
   render()
 }
 
-/* ================= VIEW ROUTER ================= */
+/* ================= FILTER ================= */
+
+function applyFilter(data){
+
+  const s = search.value.toLowerCase()
+  const h = hostFilter.value.toLowerCase()
+  const sf = seasonFilter.value
+
+  return data.filter(d =>
+    (!s || d.anime.toLowerCase().includes(s)) &&
+    (!h || d.host.toLowerCase().includes(h)) &&
+    (!sf || d.season == sf)
+  )
+}
+
+function fillSeason(){
+  const seasons = [...new Set(DATA.map(d=>d.season))]
+  seasonFilter.innerHTML = "<option value=''>All</option>"
+
+  seasons.forEach(s=>{
+    seasonFilter.innerHTML += `<option>${s}</option>`
+  })
+}
+
+/* ================= ROUTER ================= */
 
 function render(){
+  if(!DATA.length){
+    downloadList.innerHTML = "No data"
+    return
+  }
 
   if(VIEW==="anime") return renderAnime()
   if(VIEW==="season") return renderSeason()
   if(VIEW==="episode") return renderEpisode()
   if(VIEW==="detail") return renderDetail()
-
 }
 
-/* ================= ANIME VIEW ================= */
+/* ================= ANIME ================= */
 
 function renderAnime(){
 
+  const filtered = applyFilter(DATA)
+
   const grouped = {}
 
-  DATA.forEach(d=>{
+  filtered.forEach(d=>{
     if(!grouped[d.anime]) grouped[d.anime]=[]
     grouped[d.anime].push(d)
   })
@@ -281,17 +331,15 @@ function renderAnime(){
   downloadList.innerHTML = ""
 
   Object.keys(grouped).forEach(anime=>{
-
     downloadList.innerHTML += `
-    <div class="row" onclick="openAnime('${anime}')">
-      <b>${anime}</b>
-    </div>
+      <div class="row" onclick="openAnime('${anime}')">
+        <b>${anime}</b>
+      </div>
     `
   })
-
 }
 
-/* ================= SEASON VIEW ================= */
+/* ================= SEASON ================= */
 
 function openAnime(anime){
   CURRENT.anime = anime
@@ -301,25 +349,22 @@ function openAnime(anime){
 
 function renderSeason(){
 
-  const seasons = [...new Set(
-    DATA.filter(d=>d.anime===CURRENT.anime).map(d=>d.season)
-  )]
+  const list = DATA.filter(d=>d.anime===CURRENT.anime)
 
-  downloadList.innerHTML = `
-    <div onclick="goBack()">⬅ Back</div>
-  `
+  const seasons = [...new Set(list.map(d=>d.season))]
+
+  downloadList.innerHTML = `<div onclick="goBack()">⬅ Back</div>`
 
   seasons.forEach(s=>{
     downloadList.innerHTML += `
-    <div class="row" onclick="openSeason('${s}')">
-      Season ${s}
-    </div>
+      <div class="row" onclick="openSeason('${s}')">
+        Season ${s}
+      </div>
     `
   })
-
 }
 
-/* ================= EPISODE VIEW ================= */
+/* ================= EPISODE ================= */
 
 function openSeason(season){
   CURRENT.season = season
@@ -329,27 +374,25 @@ function openSeason(season){
 
 function renderEpisode(){
 
-  const eps = [...new Set(
-    DATA
-    .filter(d=>d.anime===CURRENT.anime && d.season===CURRENT.season)
-    .map(d=>d.episode)
-  )]
+  const list = DATA.filter(d =>
+    d.anime===CURRENT.anime &&
+    d.season===CURRENT.season
+  )
 
-  downloadList.innerHTML = `
-    <div onclick="goBack()">⬅ Back</div>
-  `
+  const eps = [...new Set(list.map(d=>d.episode))]
+
+  downloadList.innerHTML = `<div onclick="goBack()">⬅ Back</div>`
 
   eps.forEach(ep=>{
     downloadList.innerHTML += `
-    <div class="row" onclick="openEpisode('${ep}')">
-      Episode ${ep}
-    </div>
+      <div class="row" onclick="openEpisode('${ep}')">
+        Episode ${ep}
+      </div>
     `
   })
-
 }
 
-/* ================= DETAIL VIEW ================= */
+/* ================= DETAIL ================= */
 
 function openEpisode(ep){
   CURRENT.episode = ep
@@ -359,7 +402,7 @@ function openEpisode(ep){
 
 function renderDetail(){
 
-  const list = DATA.filter(d=>
+  const list = DATA.filter(d =>
     d.anime===CURRENT.anime &&
     d.season===CURRENT.season &&
     d.episode===CURRENT.episode
@@ -378,36 +421,29 @@ function renderDetail(){
   `
 
   Object.keys(grouped).forEach(host=>{
-
     downloadList.innerHTML += `
-    <div class="host-card">
-      <b>${host}</b><br>
-      Storage: ${grouped[host][0].storage || "-"}<br>
-      ${grouped[host].map(l=>`
-        <div class="badge">${l.quality}</div>
-      `).join("")}
-    </div>
+      <div class="host-card">
+        <b>${host}</b><br>
+        Storage: ${grouped[host][0].storage || "-"}<br>
+        ${grouped[host].map(l=>`
+          <div class="badge">${l.quality}</div>
+        `).join("")}
+      </div>
     `
   })
-
 }
 
 /* ================= BACK ================= */
 
 function goBack(){
-
-  if(VIEW==="detail"){
-    VIEW="episode"
-  }else if(VIEW==="episode"){
-    VIEW="season"
-  }else if(VIEW==="season"){
-    VIEW="anime"
-  }
+  if(VIEW==="detail") VIEW="episode"
+  else if(VIEW==="episode") VIEW="season"
+  else if(VIEW==="season") VIEW="anime"
 
   render()
 }
 
-/* ================= HOST ADD ================= */
+/* ================= HOST ================= */
 
 function addHost(){
 
@@ -415,15 +451,14 @@ function addHost(){
   div.className = "host-card"
 
   div.innerHTML = `
-    <input class="host" placeholder="Host (KnightWolf)">
-    <input class="storage" placeholder="Storage (Mega/GDrive)">
+    <input class="host" placeholder="Host">
+    <input class="storage" placeholder="Storage">
     <div class="links"></div>
     <button onclick="addQuality(this)">+ Quality</button>
-    <button onclick="this.parentElement.remove()">Remove Host</button>
+    <button onclick="this.parentElement.remove()">Remove</button>
   `
 
   hosts.appendChild(div)
-
   addQuality(div.querySelector("button"))
 }
 
@@ -442,9 +477,7 @@ function addQuality(btn){
       <option>4K</option>
       <option>ZIP</option>
     </select>
-
-    <input class="link" placeholder="Download Link">
-
+    <input class="link" placeholder="Link">
     <button onclick="this.parentElement.remove()">✕</button>
   `
 
@@ -453,7 +486,7 @@ function addQuality(btn){
 
 /* ================= SAVE ================= */
 
-saveDownload.onclick = async ()=>{
+saveBtn.onclick = async ()=>{
 
   const payload = []
 
@@ -463,17 +496,15 @@ saveDownload.onclick = async ()=>{
     const storage = card.querySelector(".storage").value
 
     card.querySelectorAll(".link-row").forEach(row=>{
-
       payload.push({
-        anime: anime.value,
-        season: season.value || "1",
-        episode: episode.value,
+        anime: animeInput.value,
+        season: seasonInput.value || "1",
+        episode: episodeInput.value,
         host,
         storage,
         quality: row.querySelector(".q").value,
         link: row.querySelector(".link").value
       })
-
     })
 
   })
@@ -483,23 +514,29 @@ saveDownload.onclick = async ()=>{
     return
   }
 
-  await api(API + "/bulk", "POST", payload)
+  await api(API + "/bulk","POST",payload)
 
-  downloadModal.style.display = "none"
+  downloadModal.style.display="none"
   loadDownloads()
 }
 
 /* ================= MODAL ================= */
 
-openModal.onclick = ()=>{
-  downloadModal.style.display = "flex"
-  hosts.innerHTML = ""
+openModalBtn.onclick = ()=>{
+  downloadModal.style.display="flex"
+  hosts.innerHTML=""
   addHost()
 }
 
-closeModal.onclick = ()=>{
-  downloadModal.style.display = "none"
+closeModalBtn.onclick = ()=>{
+  downloadModal.style.display="none"
 }
+
+/* ================= EVENTS ================= */
+
+search.oninput = render
+hostFilter.oninput = render
+seasonFilter.onchange = render
 
 /* ================= INIT ================= */
 
