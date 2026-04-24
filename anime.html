@@ -486,320 +486,316 @@ input[type="file"]{
 </div>
 
 <script>
-var API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin";
+const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin";
 
-var animeModal = document.getElementById("animeModal");
-var openAddAnime = document.getElementById("openAddAnime");
-var closeModal = document.getElementById("closeModal");
-
-var animeData = [];
-var editId = null;
+// STATE
+let animeData = [];
+let editId = null;
 
 // ELEMENTS
-var title = document.getElementById("title");
-var slug = document.getElementById("slug");
-var type = document.getElementById("type");
-var status = document.getElementById("status");
-var poster = document.getElementById("poster");
-var banner = document.getElementById("banner");
-var posterFile = document.getElementById("posterFile");
-var bannerFile = document.getElementById("bannerFile");
-var genres = document.getElementById("genres");
-var tags = document.getElementById("tags");
-var description = document.getElementById("description");
+const el = (id) => document.getElementById(id);
 
-var isHome = document.getElementById("isHome");
-var isTrending = document.getElementById("isTrending");
-var isMostViewed = document.getElementById("isMostViewed");
-var isBanner = document.getElementById("isBanner");
-var isHidden = document.getElementById("isHidden");
+const elements = {
+  modal: el("animeModal"),
+  openBtn: el("openAddAnime"),
+  closeBtn: el("closeModal"),
+  list: el("animeList"),
 
-var saveAnimeBtn = document.getElementById("saveAnimeBtn");
-var year = document.getElementById("year");
-var rating = document.getElementById("rating");
-var language = document.getElementById("language");
-var duration = document.getElementById("duration");
+  title: el("title"),
+  slug: el("slug"),
+  type: el("type"),
+  status: el("status"),
+  poster: el("poster"),
+  banner: el("banner"),
+  posterFile: el("posterFile"),
+  bannerFile: el("bannerFile"),
+  genres: el("genres"),
+  tags: el("tags"),
+  description: el("description"),
 
-// ================= RESET FORM =================
+  isHome: el("isHome"),
+  isTrending: el("isTrending"),
+  isMostViewed: el("isMostViewed"),
+  isBanner: el("isBanner"),
+  isHidden: el("isHidden"),
+
+  year: el("year"),
+  rating: el("rating"),
+  language: el("language"),
+  duration: el("duration"),
+
+  saveBtn: el("saveAnimeBtn"),
+  modalTitle: el("modalTitle")
+};
+
+// ================= HELPERS =================
+
+const slugify = (text) =>
+  text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+const getMultiSelect = (select) =>
+  [...select.options].filter(o => o.selected).map(o => o.value);
+
+const setMultiSelect = (select, values) => {
+  [...select.options].forEach(o => {
+    o.selected = values.includes(o.value);
+  });
+};
+
+// ================= FORM =================
+
 function resetForm() {
-  title.value = "";
-  slug.value = "";
-  status.value = "ongoing";
-  poster.value = "";
-  banner.value = "";
-  year.value = "";
-  rating.value = "";
-  language.value = "";
-  duration.value = "";
-  description.value = "";
-  tags.value = "";
+  Object.values(elements).forEach(e => {
+    if (e?.type === "text" || e?.tagName === "TEXTAREA") e.value = "";
+  });
 
-  isHome.checked = false;
-  isTrending.checked = false;
-  isMostViewed.checked = false;
-  isBanner.checked = false;
-  isHidden.checked = false;
+  elements.status.value = "ongoing";
 
-  for (var i = 0; i < type.options.length; i++) {
-    type.options[i].selected = false;
-  }
+  elements.isHome.checked = false;
+  elements.isTrending.checked = false;
+  elements.isMostViewed.checked = false;
+  elements.isBanner.checked = false;
+  elements.isHidden.checked = false;
 
-  for (var i = 0; i < genres.options.length; i++) {
-    genres.options[i].selected = false;
-  }
+  setMultiSelect(elements.type, []);
+  setMultiSelect(elements.genres, []);
 
-  document.getElementById("modalTitle").innerText = "Add Anime";
+  elements.modalTitle.innerText = "Add Anime";
 }
 
-// ================= SLUG =================
-function slugify(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
-
-title.oninput = function () {
-  slug.value = slugify(title.value);
+elements.title.oninput = () => {
+  elements.slug.value = slugify(elements.title.value);
 };
 
 // ================= MODAL =================
-openAddAnime.onclick = function () {
+
+elements.openBtn.onclick = () => {
   editId = null;
   resetForm();
-  animeModal.style.display = "flex";
+  elements.modal.style.display = "flex";
 };
 
-closeModal.onclick = function () {
-  animeModal.style.display = "none";
+elements.closeBtn.onclick = closeModal;
+
+elements.modal.onclick = (e) => {
+  if (e.target === elements.modal) closeModal();
+};
+
+function closeModal() {
+  elements.modal.style.display = "none";
   resetForm();
-};
+}
 
-// click outside modal close
-animeModal.onclick = function(e) {
-  if (e.target === animeModal) {
-    animeModal.style.display = "none";
-    resetForm();
-  }
-};
+// ================= UPLOAD =================
 
-// ================= IMAGE UPLOAD =================
 async function uploadImage(fileInput, urlInput) {
-  var file = fileInput.files[0];
+  const file = fileInput.files[0];
   if (!file) return;
 
-  var fd = new FormData();
+  // basic validation
+  if (!file.type.startsWith("image/")) {
+    alert("Only images allowed");
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert("Max size 2MB");
+    return;
+  }
+
+  const fd = new FormData();
   fd.append("file", file);
 
   try {
     urlInput.value = "Uploading...";
 
-    var res = await fetch(API_BASE + "/upload", {
+    const res = await fetch(`${API_BASE}/upload`, {
       method: "POST",
       body: fd
     });
 
-    var result = await res.json();
+    const result = await res.json();
 
-    if (!result.success) {
-      console.log(result);
-      throw new Error(result.message);
-    }
+    if (!result.success) throw new Error(result.message);
 
     urlInput.value = result.data.url;
-  } catch (e) {
+
+  } catch (err) {
+    console.error(err);
     alert("Upload failed");
     urlInput.value = "";
   }
 }
 
-posterFile.onchange = function () {
-  uploadImage(posterFile, poster);
-};
+elements.posterFile.onchange = () => uploadImage(elements.posterFile, elements.poster);
+elements.bannerFile.onchange = () => uploadImage(elements.bannerFile, elements.banner);
 
-bannerFile.onchange = function () {
-  uploadImage(bannerFile, banner);
-};
+// ================= DATA =================
 
-// ================= FORM DATA =================
 function getFormData() {
-
-  var selectedType = [];
-  for (var i = 0; i < type.options.length; i++) {
-    if (type.options[i].selected) {
-      selectedType.push(type.options[i].value);
-    }
-  }
-
-  var selectedGenres = [];
-  for (var i = 0; i < genres.options.length; i++) {
-    if (genres.options[i].selected) {
-      selectedGenres.push(genres.options[i].value);
-    }
-  }
-
   return {
-    title: title.value,
-    slug: slug.value,
-    type: selectedType[0] || "anime",
-    status: status.value,
-    poster: poster.value,
-    banner: banner.value,
-    year: year.value,
-    rating: rating.value,
-    language: language.value,
-    duration: duration.value,
-    genres: selectedGenres,
-    tags: tags.value
-      ? tags.value.split(",").map(t => t.trim()).filter(t => t)
+    title: elements.title.value.trim(),
+    slug: elements.slug.value.trim(),
+    type: getMultiSelect(elements.type)[0] || "anime",
+    status: elements.status.value,
+
+    poster: elements.poster.value,
+    banner: elements.banner.value,
+
+    year: Number(elements.year.value) || null,
+    rating: Number(elements.rating.value) || null,
+    language: elements.language.value,
+    duration: elements.duration.value,
+
+    genres: getMultiSelect(elements.genres),
+
+    tags: elements.tags.value
+      ? elements.tags.value.split(",").map(t => t.trim()).filter(Boolean)
       : [],
-    isHome: isHome.checked,
-    isTrending: isTrending.checked,
-    isMostViewed: isMostViewed.checked,
-    isBanner: isBanner.checked,
-    isHidden: isHidden.checked,
-    description: description.value
+
+    isHome: elements.isHome.checked,
+    isTrending: elements.isTrending.checked,
+    isMostViewed: elements.isMostViewed.checked,
+    isBanner: elements.isBanner.checked,
+    isHidden: elements.isHidden.checked,
+
+    description: elements.description.value
   };
 }
 
 // ================= SAVE =================
-saveAnimeBtn.onclick = async function () {
-  var form = getFormData();
+
+elements.saveBtn.onclick = async () => {
+  const form = getFormData();
 
   if (!form.title) return alert("Title required");
   if (!form.poster) return alert("Poster required");
 
   try {
-    var url = editId ? API_BASE + "/anime/" + editId : API_BASE + "/anime";
-    var method = editId ? "PUT" : "POST";
+    const url = editId
+      ? `${API_BASE}/anime/${editId}`
+      : `${API_BASE}/anime`;
 
-    var res = await fetch(url, {
-      method: method,
+    const method = editId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
     });
 
-    var result = await res.json();
+    const result = await res.json();
 
     if (!result.success) {
-      console.log("API ERROR:", result);
-      alert(result.message || "Error");
-      return;
+      console.error(result);
+      return alert(result.message || "Error");
     }
 
     alert("Saved ✅");
 
-    resetForm();
-    animeModal.style.display = "none";
+    closeModal();
     loadAnime();
 
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert("Save failed");
   }
 };
 
 // ================= LOAD =================
+
 async function loadAnime() {
   try {
-    var res = await fetch(API_BASE + "/anime");
-    var data = await res.json();
+    const res = await fetch(`${API_BASE}/anime`);
+    const json = await res.json();
 
-    animeData = data.data || [];
+    animeData = json.data || [];
     renderTable();
-  } catch (e) {
-    console.error(e);
+
+  } catch (err) {
+    console.error(err);
   }
 }
 
 // ================= DELETE =================
+
 async function deleteAnime(id) {
   if (!confirm("Delete this anime?")) return;
 
-  await fetch(API_BASE + "/anime/" + id, { method: "DELETE" });
+  await fetch(`${API_BASE}/anime/${id}`, { method: "DELETE" });
   loadAnime();
 }
 
 // ================= RENDER =================
+
 function renderTable() {
-  var list = document.getElementById("animeList");
-  list.innerHTML = "";
+  elements.list.innerHTML = "";
 
-  for (var i = 0; i < animeData.length; i++) {
-    var a = animeData[i];
-
-    var row = document.createElement("div");
+  animeData.forEach(a => {
+    const row = document.createElement("div");
     row.className = "row";
 
-    row.innerHTML =
-      '<img src="' + (a.poster || "https://via.placeholder.com/40x60") + '">' +
-      '<span title="' + a.title + '">' + a.title + '</span>' +
-      '<span>' + a.type + '</span>' +
-      '<span>' + a.status + '</span>' +
-      '<span>' + (a.genres || []).join(",") + '</span>' +
-      '<span>' + (a.isHidden ? "Hidden" : "Public") + '</span>' +
-      '<span>' + (a.isTrending ? "Yes" : "No") + '</span>' +
-      '<span class="actions"></span>';
+    row.innerHTML = `
+      <img src="${a.poster || "https://via.placeholder.com/40x60"}">
+      <span title="${a.title}">${a.title}</span>
+      <span>${a.type}</span>
+      <span>${a.status}</span>
+      <span>${(a.genres || []).join(", ")}</span>
+      <span>${a.isHidden ? "Hidden" : "Public"}</span>
+      <span>${a.isTrending ? "Yes" : "No"}</span>
+      <span class="actions"></span>
+    `;
 
-    var actions = row.querySelector(".actions");
+    const actions = row.querySelector(".actions");
 
-    var editBtn = document.createElement("button");
+    const editBtn = document.createElement("button");
     editBtn.innerText = "✏️";
-    editBtn.onclick = (function(id) {
-      return function() { editAnime(id); };
-    })(a.id);
+    editBtn.onclick = () => editAnime(a.id);
 
-    var delBtn = document.createElement("button");
+    const delBtn = document.createElement("button");
     delBtn.innerText = "🗑";
-    delBtn.onclick = (function(id) {
-      return function() { deleteAnime(id); };
-    })(a.id);
+    delBtn.onclick = () => deleteAnime(a.id);
 
-    actions.appendChild(editBtn);
-    actions.appendChild(delBtn);
+    actions.append(editBtn, delBtn);
 
-    list.appendChild(row);
-  }
+    elements.list.appendChild(row);
+  });
 }
 
 // ================= EDIT =================
+
 function editAnime(id) {
-  var a = animeData.find(function(x) { return x.id === id; });
+  const a = animeData.find(x => x.id === id);
   if (!a) return;
 
   editId = id;
-  animeModal.style.display = "flex";
+  elements.modal.style.display = "flex";
 
-  title.value = a.title;
-  slug.value = a.slug;
-  status.value = a.status;
-  poster.value = a.poster;
-  banner.value = a.banner;
+  elements.title.value = a.title;
+  elements.slug.value = a.slug;
+  elements.status.value = a.status;
 
-  year.value = a.year || "";
-  rating.value = a.rating || "";
-  language.value = a.language || "";
-  duration.value = a.duration || "";
+  elements.poster.value = a.poster;
+  elements.banner.value = a.banner;
 
-  description.value = a.description || "";
-  tags.value = (a.tags || []).join(",");
+  elements.year.value = a.year || "";
+  elements.rating.value = a.rating || "";
+  elements.language.value = a.language || "";
+  elements.duration.value = a.duration || "";
 
-  isHome.checked = a.isHome;
-  isTrending.checked = a.isTrending;
-  isMostViewed.checked = a.isMostViewed;
-  isBanner.checked = a.isBanner;
-  isHidden.checked = a.isHidden;
+  elements.description.value = a.description || "";
+  elements.tags.value = (a.tags || []).join(",");
 
-  // FIX TYPE
-  for (var i = 0; i < type.options.length; i++) {
-    type.options[i].selected =
-      type.options[i].value === a.type;
-  }
+  elements.isHome.checked = a.isHome;
+  elements.isTrending.checked = a.isTrending;
+  elements.isMostViewed.checked = a.isMostViewed;
+  elements.isBanner.checked = a.isBanner;
+  elements.isHidden.checked = a.isHidden;
 
-  // GENRES
-  for (var i = 0; i < genres.options.length; i++) {
-    genres.options[i].selected =
-      (a.genres || []).indexOf(genres.options[i].value) !== -1;
-  }
+  setMultiSelect(elements.type, [a.type]);
+  setMultiSelect(elements.genres, a.genres || []);
 
-  document.getElementById("modalTitle").innerText = "Edit Anime";
+  elements.modalTitle.innerText = "Edit Anime";
 }
 
 // INIT
