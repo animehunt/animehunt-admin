@@ -91,15 +91,6 @@ body{background:#060a14;color:#fff;}
 .form-grid textarea{grid-column:1/4;height:70px;resize:none}
 .check{display:flex;gap:6px;align-items:center;font-size:12px}
 
-/* ===== DOWNLOAD ===== */
-.download-section{grid-column:1/4;border-top:1px solid #1a2035;padding-top:12px}
-.download-host{margin-bottom:14px}
-.quality-row{display:flex;gap:8px;margin-top:6px}
-.quality-row select,.quality-row input{flex:1}
-.add-quality{
-  width:38px;background:#0e1424;border:1px solid #1a2035;
-  color:#ffcc00;border-radius:6px;cursor:pointer
-}
 </style>
 </head>
 
@@ -191,22 +182,6 @@ body{background:#060a14;color:#fff;}
 <input id="server3" placeholder="Server 3 URL">
 
 <textarea id="description" placeholder="Description"></textarea>
-
-<div class="download-section">
-
-<div class="download-host">
-<input class="host-name" placeholder="Host Name (Upload4ever)">
-<div class="quality-row">
-<select>
-  <option>480p</option><option>720p</option><option>1080p</option>
-  <option>4K</option><option>ZIP</option>
-</select>
-<input class="quality-link" placeholder="Download Link">
-<button type="button" class="add-quality">＋</button>
-</div>
-</div>
-
-</div>
 
 <label class="check"><input type="checkbox" id="isOngoing"> Ongoing</label>
 <label class="check"><input type="checkbox" id="isFeatured"> Featured</label>
