@@ -201,16 +201,16 @@ body{background:#060a14;color:#fff;}
 
 
 <script>
+
 /* ================================
-   CONFIG
+CONFIG
 ================================ */
 
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
-
 const TOKEN = localStorage.getItem("AUTH_TOKEN")
 
 if(!TOKEN){
-location.href="login.html"
+  location.href="login.html"
 }
 
 /* ================================
@@ -222,7 +222,6 @@ const list = document.getElementById("episodeList")
 
 const openBtn = document.getElementById("openAddEpisode")
 const closeBtn = document.getElementById("closeModal")
-
 const saveBtn = document.getElementById("saveEpisode")
 
 let editId = null
@@ -233,96 +232,58 @@ API WRAPPER
 
 async function api(url,method="GET",body=null){
 
-try{
+  try{
 
-const res = await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body: body ? JSON.stringify(body) : null
-})
+    const res = await fetch(url,{
+      method,
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+TOKEN
+      },
+      body: body ? JSON.stringify(body) : null
+    })
 
-if(res.status === 401){
-location.href="login.html"
-return
-}
+    if(res.status === 401){
+      location.href="login.html"
+      return
+    }
 
-if(!res.ok){
-throw new Error("API Error")
-}
+    if(!res.ok){
+      throw new Error("API Error")
+    }
 
-return await res.json()
+    return await res.json()
 
-}catch(e){
-
-console.error(e)
-alert("Server error")
-
-}
+  }catch(e){
+    console.error(e)
+    alert("Server error")
+  }
 
 }
 
 /* ================================
-MODAL
+MODAL CONTROL
 ================================ */
 
 function openModal(){
-
-editId = null
-
-resetForm()
-
-modal.style.display = "flex"
-
+  editId = null
+  resetForm()
+  modal.style.display = "flex"
 }
 
 function closeModal(){
-
-modal.style.display = "none"
-
+  modal.style.display = "none"
 }
-
-/* BUTTONS */
 
 openBtn.onclick = openModal
 closeBtn.onclick = closeModal
 
-/* ESC CLOSE */
-
 document.addEventListener("keydown",e=>{
-
-if(e.key==="Escape") closeModal()
-
+  if(e.key==="Escape") closeModal()
 })
-
-/* CLICK OUTSIDE CLOSE */
 
 modal.addEventListener("click",e=>{
-
-if(e.target===modal) closeModal()
-
-})
-
-/* ================================
-DOWNLOAD ROW ADD
-================================ */
-
-document.addEventListener("click",e=>{
-
-if(e.target.classList.contains("add-quality")){
-
-const row = e.target.closest(".quality-row")
-
-const clone = row.cloneNode(true)
-
-clone.querySelector(".quality-link").value = ""
-
-row.parentNode.appendChild(clone)
-
-}
-
+  if(e.target===modal) closeModal()
 })
 
 /* ================================
@@ -331,64 +292,44 @@ LOAD EPISODES
 
 async function loadEpisodes(){
 
-list.innerHTML = "<div style='padding:20px'>Loading...</div>"
+  list.innerHTML = "<div style='padding:20px'>Loading...</div>"
 
-try{
+  try{
 
-const data = await api(API)
+    const data = await api(API)
 
-if(!data || !data.length){
+    if(!data || !data.length){
+      list.innerHTML = "<div style='padding:20px;color:#777'>No Episodes</div>"
+      return
+    }
 
-list.innerHTML = "<div style='padding:20px;color:#777'>No Episodes</div>"
-return
+    list.innerHTML = ""
 
-}
+    data.forEach(e=>{
 
-list.innerHTML = ""
+      const row = document.createElement("div")
+      row.className = "row"
 
-data.forEach(e=>{
+      row.innerHTML = `
+        <span>${e.anime || "-"}</span>
+        <span class="badge">S${e.season}</span>
+        <span class="badge">E${e.episode}</span>
+        <span style="color:#aaa">${e.title || "-"}</span>
+        <span>${e.servers?.length || 0}</span>
+        <span>—</span>
+        <span class="actions">
+          <button onclick="editEpisode('${e.id}')">✏️</button>
+          <button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
+        </span>
+      `
 
-const dlCount = e.downloads
-? e.downloads.reduce((acc,h)=>acc+h.links.length,0)
-:0
+      list.appendChild(row)
 
-const row = document.createElement("div")
+    })
 
-row.className = "row"
-
-row.innerHTML = `
-
-<span>${e.anime || "-"}</span>
-
-<span class="badge">S${e.season}</span>
-
-<span class="badge">E${e.episode}</span>
-
-<span style="color:#aaa">${e.title||"-"}</span>
-
-<span>${e.servers?.length || 0}</span>
-
-<span>${dlCount}</span>
-
-<span class="actions">
-
-<button onclick="editEpisode('${e.id}')">✏️</button>
-
-<button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
-
-</span>
-
-`
-
-list.appendChild(row)
-
-})
-
-}catch(e){
-
-list.innerHTML = "<div style='padding:20px;color:red'>Failed to load</div>"
-
-}
+  }catch{
+    list.innerHTML = "<div style='padding:20px;color:red'>Failed to load</div>"
+  }
 
 }
 
@@ -398,78 +339,43 @@ SAVE EPISODE
 
 saveBtn.onclick = async ()=>{
 
-try{
+  try{
 
-const payload = {
+    const payload = {
 
-anime: animeName.value,
+      anime: animeName.value,
+      season: seasonNo.value || "1",
+      episode: episodeNo.value,
+      title: episodeTitle.value,
+      description: description.value,
 
-season: seasonNo.value || "1",
+      servers: [
+        server1.value,
+        server2.value,
+        server3.value
+      ].filter(Boolean),
 
-episode: episodeNo.value,
+      ongoing: isOngoing.checked,
+      featured: isFeatured.checked
 
-title: episodeTitle.value,
+    }
 
-description: description.value,
+    if(!payload.anime || !payload.episode){
+      alert("Anime + Episode required")
+      return
+    }
 
-servers: [
-server1.value,
-server2.value,
-server3.value
-].filter(Boolean),
+    const method = editId ? "PATCH" : "POST"
+    const url = editId ? `${API}/${editId}` : API
 
-downloads: [],
+    await api(url,method,payload)
 
-ongoing: isOngoing.checked,
+    closeModal()
+    loadEpisodes()
 
-featured: isFeatured.checked
-
-}
-
-/* DOWNLOADS */
-
-document.querySelectorAll(".download-host").forEach(block=>{
-
-const host = block.querySelector(".host-name").value
-
-const links = []
-
-block.querySelectorAll(".quality-row").forEach(row=>{
-
-const quality = row.querySelector("select").value
-const url = row.querySelector(".quality-link").value
-
-if(url){
-
-links.push({quality,url})
-
-}
-
-})
-
-if(host && links.length){
-
-payload.downloads.push({host,links})
-
-}
-
-})
-
-const method = editId ? "PATCH":"POST"
-
-const url = editId ? `${API}/${editId}` : API
-
-await api(url,method,payload)
-
-closeModal()
-
-loadEpisodes()
-
-}catch(e){
-
-alert("Failed to save episode")
-
-}
+  }catch{
+    alert("Failed to save episode")
+  }
 
 }
 
@@ -479,19 +385,14 @@ DELETE
 
 window.deleteEpisode = async (id)=>{
 
-if(!confirm("Delete episode?")) return
+  if(!confirm("Delete episode?")) return
 
-try{
-
-await api(`${API}/${id}`,"DELETE")
-
-loadEpisodes()
-
-}catch{
-
-alert("Delete failed")
-
-}
+  try{
+    await api(`${API}/${id}`,"DELETE")
+    loadEpisodes()
+  }catch{
+    alert("Delete failed")
+  }
 
 }
 
@@ -501,32 +402,30 @@ EDIT
 
 window.editEpisode = async (id)=>{
 
-try{
+  try{
 
-const e = await api(`${API}/${id}`)
+    const e = await api(`${API}/${id}`)
 
-editId = id
+    editId = id
 
-animeName.value = e.anime || ""
-seasonNo.value = e.season || ""
-episodeNo.value = e.episode || ""
-episodeTitle.value = e.title || ""
-description.value = e.description || ""
+    animeName.value = e.anime || ""
+    seasonNo.value = e.season || ""
+    episodeNo.value = e.episode || ""
+    episodeTitle.value = e.title || ""
+    description.value = e.description || ""
 
-server1.value = e.servers?.[0] || ""
-server2.value = e.servers?.[1] || ""
-server3.value = e.servers?.[2] || ""
+    server1.value = e.servers?.[0] || ""
+    server2.value = e.servers?.[1] || ""
+    server3.value = e.servers?.[2] || ""
 
-isOngoing.checked = e.ongoing
-isFeatured.checked = e.featured
+    isOngoing.checked = e.ongoing
+    isFeatured.checked = e.featured
 
-modal.style.display = "flex"
+    modal.style.display = "flex"
 
-}catch{
-
-alert("Failed to load episode")
-
-}
+  }catch{
+    alert("Failed to load episode")
+  }
 
 }
 
@@ -536,21 +435,18 @@ RESET FORM
 
 function resetForm(){
 
-animeName.value=""
-seasonNo.value=""
-episodeNo.value=""
-episodeTitle.value=""
-description.value=""
+  animeName.value=""
+  seasonNo.value=""
+  episodeNo.value=""
+  episodeTitle.value=""
+  description.value=""
 
-server1.value=""
-server2.value=""
-server3.value=""
+  server1.value=""
+  server2.value=""
+  server3.value=""
 
-isOngoing.checked=false
-isFeatured.checked=false
-
-document.querySelectorAll(".quality-link")
-.forEach(i=>i.value="")
+  isOngoing.checked=false
+  isFeatured.checked=false
 
 }
 
@@ -560,9 +456,6 @@ INIT
 
 loadEpisodes()
 
-
-
 </script>
-
 </body>
 </html>
