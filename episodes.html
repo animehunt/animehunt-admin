@@ -201,261 +201,248 @@ body{background:#060a14;color:#fff;}
 
 
 <script>
-
 /* ================================
 CONFIG
 ================================ */
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes"
-const TOKEN = localStorage.getItem("AUTH_TOKEN")
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/episodes";
+const ANIME_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/anime";
 
-if(!TOKEN){
-  location.href="login.html"
-}
+const TOKEN = localStorage.getItem("AUTH_TOKEN");
+
+if (!TOKEN) location.href = "login.html";
 
 /* ================================
 ELEMENTS
 ================================ */
 
-const modal = document.getElementById("episodeModal")
-const list = document.getElementById("episodeList")
+const modal = document.getElementById("episodeModal");
+const list = document.getElementById("episodeList");
 
-const openBtn = document.getElementById("openAddEpisode")
-const closeBtn = document.getElementById("closeModal")
-const saveBtn = document.getElementById("saveEpisode")
+const openBtn = document.getElementById("openAddEpisode");
+const closeBtn = document.getElementById("closeModal");
+const saveBtn = document.getElementById("saveEpisode");
 
-let editId = null
+let editId = null;
+let animeList = [];
 
 /* ================================
-API WRAPPER
+API
 ================================ */
 
-async function api(url,method="GET",body=null){
-
-  try{
-
-    const res = await fetch(url,{
+async function api(url, method = "GET", body = null) {
+  try {
+    const res = await fetch(url, {
       method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+TOKEN
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + TOKEN
       },
       body: body ? JSON.stringify(body) : null
-    })
+    });
 
-    if(res.status === 401){
-      location.href="login.html"
-      return
+    if (res.status === 401) {
+      location.href = "login.html";
+      return;
     }
 
-    if(!res.ok){
-      throw new Error("API Error")
-    }
+    const json = await res.json();
 
-    return await res.json()
+    if (!json.success) throw new Error(json.message);
 
-  }catch(e){
-    console.error(e)
-    alert("Server error")
+    return json.data;
+
+  } catch (err) {
+    console.error(err);
+    alert("API Error");
   }
-
 }
 
 /* ================================
-MODAL CONTROL
+LOAD ANIME LIST (🔥 IMPORTANT)
 ================================ */
 
-function openModal(){
-  editId = null
-  resetForm()
-  modal.style.display = "flex"
+async function loadAnimeList() {
+  animeList = await api(ANIME_API);
+
+  const select = document.getElementById("animeSelect");
+
+  select.innerHTML = animeList.map(a => `
+    <option value="${a.id}">${a.title}</option>
+  `).join("");
 }
 
-function closeModal(){
-  modal.style.display = "none"
+/* ================================
+MODAL
+================================ */
+
+function openModal() {
+  editId = null;
+  resetForm();
+  modal.style.display = "flex";
 }
 
-openBtn.onclick = openModal
-closeBtn.onclick = closeModal
+function closeModal() {
+  modal.style.display = "none";
+}
 
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape") closeModal()
-})
+openBtn.onclick = openModal;
+closeBtn.onclick = closeModal;
 
-modal.addEventListener("click",e=>{
-  if(e.target===modal) closeModal()
-})
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
 
 /* ================================
 LOAD EPISODES
 ================================ */
 
-async function loadEpisodes(){
+async function loadEpisodes() {
 
-  list.innerHTML = "<div style='padding:20px'>Loading...</div>"
+  list.innerHTML = "<div style='padding:20px'>Loading...</div>";
 
-  try{
+  const data = await api(API);
 
-    const data = await api(API)
-
-    if(!data || !data.length){
-      list.innerHTML = "<div style='padding:20px;color:#777'>No Episodes</div>"
-      return
-    }
-
-    list.innerHTML = ""
-
-    data.forEach(e=>{
-
-      const row = document.createElement("div")
-      row.className = "row"
-
-      row.innerHTML = `
-        <span>${e.anime || "-"}</span>
-        <span class="badge">S${e.season}</span>
-        <span class="badge">E${e.episode}</span>
-        <span style="color:#aaa">${e.title || "-"}</span>
-        <span>${e.servers?.length || 0}</span>
-        <span>—</span>
-        <span class="actions">
-          <button onclick="editEpisode('${e.id}')">✏️</button>
-          <button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
-        </span>
-      `
-
-      list.appendChild(row)
-
-    })
-
-  }catch{
-    list.innerHTML = "<div style='padding:20px;color:red'>Failed to load</div>"
+  if (!data || !data.length) {
+    list.innerHTML = "<div style='padding:20px;color:#777'>No Episodes</div>";
+    return;
   }
 
+  list.innerHTML = "";
+
+  data.forEach(e => {
+
+    const anime = animeList.find(a => a.id === e.anime_id);
+
+    const row = document.createElement("div");
+    row.className = "row";
+
+    row.innerHTML = `
+      <span>${anime?.title || "Unknown"}</span>
+      <span class="badge">S${e.season}</span>
+      <span class="badge">E${e.episode}</span>
+      <span style="color:#aaa">${e.title || "-"}</span>
+      <span>${e.servers?.length || 0}</span>
+      <span>—</span>
+      <span class="actions">
+        <button onclick="editEpisode('${e.id}')">✏️</button>
+        <button onclick="deleteEpisode('${e.id}')" style="color:#ff4d4d">🗑</button>
+      </span>
+    `;
+
+    list.appendChild(row);
+  });
 }
 
 /* ================================
-SAVE EPISODE
+SAVE
 ================================ */
 
-saveBtn.onclick = async ()=>{
+saveBtn.onclick = async () => {
 
-  try{
+  const payload = {
+    anime_id: document.getElementById("animeSelect").value,
+    anime_title: document.getElementById("animeSelect").selectedOptions[0].text,
 
-    const payload = {
+    season: seasonNo.value || "1",
+    episode: Number(episodeNo.value),
 
-      anime: animeName.value,
-      season: seasonNo.value || "1",
-      episode: episodeNo.value,
-      title: episodeTitle.value,
-      description: description.value,
+    title: episodeTitle.value,
+    description: description.value,
 
-      servers: [
-        server1.value,
-        server2.value,
-        server3.value
-      ].filter(Boolean),
+    thumbnail: thumbnail.value,
 
-      ongoing: isOngoing.checked,
-      featured: isFeatured.checked
+    servers: [
+      server1.value,
+      server2.value,
+      server3.value
+    ].filter(Boolean),
 
-    }
+    ongoing: isOngoing.checked,
+    featured: isFeatured.checked
+  };
 
-    if(!payload.anime || !payload.episode){
-      alert("Anime + Episode required")
-      return
-    }
-
-    const method = editId ? "PATCH" : "POST"
-    const url = editId ? `${API}/${editId}` : API
-
-    await api(url,method,payload)
-
-    closeModal()
-    loadEpisodes()
-
-  }catch{
-    alert("Failed to save episode")
+  if (!payload.anime_id || !payload.episode) {
+    alert("Anime + Episode required");
+    return;
   }
 
-}
+  const method = editId ? "PUT" : "POST";
+  const url = editId ? `${API}/${editId}` : API;
+
+  await api(url, method, payload);
+
+  closeModal();
+  loadEpisodes();
+};
 
 /* ================================
 DELETE
 ================================ */
 
-window.deleteEpisode = async (id)=>{
+window.deleteEpisode = async (id) => {
+  if (!confirm("Delete episode?")) return;
 
-  if(!confirm("Delete episode?")) return
-
-  try{
-    await api(`${API}/${id}`,"DELETE")
-    loadEpisodes()
-  }catch{
-    alert("Delete failed")
-  }
-
-}
+  await api(`${API}/${id}`, "DELETE");
+  loadEpisodes();
+};
 
 /* ================================
 EDIT
 ================================ */
 
-window.editEpisode = async (id)=>{
+window.editEpisode = async (id) => {
 
-  try{
+  const e = await api(`${API}/${id}`);
 
-    const e = await api(`${API}/${id}`)
+  editId = id;
 
-    editId = id
+  document.getElementById("animeSelect").value = e.anime_id;
 
-    animeName.value = e.anime || ""
-    seasonNo.value = e.season || ""
-    episodeNo.value = e.episode || ""
-    episodeTitle.value = e.title || ""
-    description.value = e.description || ""
+  seasonNo.value = e.season || "";
+  episodeNo.value = e.episode || "";
+  episodeTitle.value = e.title || "";
+  description.value = e.description || "";
 
-    server1.value = e.servers?.[0] || ""
-    server2.value = e.servers?.[1] || ""
-    server3.value = e.servers?.[2] || ""
+  thumbnail.value = e.thumbnail || "";
 
-    isOngoing.checked = e.ongoing
-    isFeatured.checked = e.featured
+  server1.value = e.servers?.[0] || "";
+  server2.value = e.servers?.[1] || "";
+  server3.value = e.servers?.[2] || "";
 
-    modal.style.display = "flex"
+  isOngoing.checked = e.ongoing;
+  isFeatured.checked = e.featured;
 
-  }catch{
-    alert("Failed to load episode")
-  }
-
-}
+  modal.style.display = "flex";
+};
 
 /* ================================
-RESET FORM
+RESET
 ================================ */
 
-function resetForm(){
+function resetForm() {
+  seasonNo.value = "";
+  episodeNo.value = "";
+  episodeTitle.value = "";
+  description.value = "";
+  thumbnail.value = "";
 
-  animeName.value=""
-  seasonNo.value=""
-  episodeNo.value=""
-  episodeTitle.value=""
-  description.value=""
+  server1.value = "";
+  server2.value = "";
+  server3.value = "";
 
-  server1.value=""
-  server2.value=""
-  server3.value=""
-
-  isOngoing.checked=false
-  isFeatured.checked=false
-
+  isOngoing.checked = false;
+  isFeatured.checked = false;
 }
 
 /* ================================
 INIT
 ================================ */
 
-loadEpisodes()
-
+(async () => {
+  await loadAnimeList();   // 🔥 FIRST LOAD ANIME
+  await loadEpisodes();
+})();
 </script>
 </body>
 </html>
