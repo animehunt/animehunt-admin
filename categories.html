@@ -210,180 +210,222 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/categories"
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/categories";
 
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
-if(!TOKEN) location.href="login.html"
+const TOKEN = localStorage.getItem("AUTH_TOKEN");
+if (!TOKEN) location.href = "login.html";
 
-let editingId=null
+let editingId = null;
 
-const list=document.getElementById("list")
-const modal=document.getElementById("modal")
+const list = document.getElementById("list");
+const modal = document.getElementById("modal");
 
-const name=document.getElementById("name")
-const slug=document.getElementById("slug")
-const type=document.getElementById("type")
-const order=document.getElementById("order")
-const priority=document.getElementById("priority")
+/* INPUTS */
+const name = document.getElementById("name");
+const slug = document.getElementById("slug");
+const type = document.getElementById("type");
+const order = document.getElementById("order");
+const priority = document.getElementById("priority");
 
-const showHome=document.getElementById("showHome")
-const isActive=document.getElementById("isActive")
-const isFeatured=document.getElementById("isFeatured")
+const showHome = document.getElementById("showHome");
+const isActive = document.getElementById("isActive");
+const isFeatured = document.getElementById("isFeatured");
 
-const aiTrending=document.getElementById("aiTrending")
-const aiPopular=document.getElementById("aiPopular")
-const aiAssign=document.getElementById("aiAssign")
+const aiTrending = document.getElementById("aiTrending");
+const aiPopular = document.getElementById("aiPopular");
+const aiAssign = document.getElementById("aiAssign");
 
-/* API */
-async function api(url,method="GET",body=null){
+/* ================= API ================= */
+async function api(url, method = "GET", body = null) {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + TOKEN
+      },
+      body: body ? JSON.stringify(body) : null
+    });
 
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
+    if (res.status === 401) {
+      location.href = "login.html";
+      return;
+    }
 
-return res.json()
+    const json = await res.json();
+
+    if (!json.success) {
+      throw new Error(json.message || "API failed");
+    }
+
+    return json.data;
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Server error");
+    return null;
+  }
 }
 
-/* LOAD */
-async function loadCategories(){
+/* ================= LOAD ================= */
+async function loadCategories() {
 
-const data=await api(API)
+  list.innerHTML = "<div style='padding:20px'>Loading...</div>";
 
-list.innerHTML=""
+  const data = await api(API);
 
-data.forEach(cat=>{
+  if (!data || !data.length) {
+    list.innerHTML = "<div style='padding:20px;color:#777'>No Categories</div>";
+    return;
+  }
 
-list.innerHTML+=`
-<div class="row">
+  list.innerHTML = "";
 
-<span>${cat.name}</span>
-<span>${cat.slug}</span>
-<span class="badge">${cat.type}</span>
+  data.forEach(cat => {
 
-<span class="${cat.active?'active':'inactive'}">
-${cat.active?'● Online':'○ Offline'}
-</span>
+    list.innerHTML += `
+      <div class="row">
 
-<span>${cat.category_order}</span>
-<span>P${cat.priority}</span>
+        <span>${cat.name}</span>
+        <span>${cat.slug}</span>
+        <span class="badge">${cat.type}</span>
 
-<span class="actions">
-<button onclick="editCategory('${cat.id}')">✏️</button>
-<button onclick="deleteCategory('${cat.id}')">🗑</button>
-</span>
+        <span class="${cat.active ? 'active' : 'inactive'}">
+          ${cat.active ? '● Online' : '○ Offline'}
+        </span>
 
-</div>
-`
-})
+        <span>${cat.category_order}</span>
+        <span>P${cat.priority}</span>
 
+        <span class="actions">
+          <button onclick="editCategory('${cat.id}')">✏️</button>
+          <button onclick="deleteCategory('${cat.id}')" style="color:#ff4d4d">🗑</button>
+        </span>
+
+      </div>
+    `;
+  });
 }
 
-/* SAVE */
-async function saveCategory(){
+/* ================= SAVE ================= */
+async function saveCategory() {
 
-const payload={
+  const payload = {
 
-name:name.value,
-slug:slug.value,
-type:type.value,
+    name: name.value.trim(),
+    slug: slug.value.trim(),
+    type: type.value,
 
-order:Number(order.value||0),
-priority:Number(priority.value||1),
+    order: Number(order.value || 0),
+    priority: Number(priority.value || 1),
 
-showHome:showHome.checked,
-isActive:isActive.checked,
-isFeatured:isFeatured.checked,
+    showHome: showHome.checked,
+    isActive: isActive.checked,
+    isFeatured: isFeatured.checked,
 
-aiTrending:aiTrending.checked,
-aiPopular:aiPopular.checked,
-aiAssign:aiAssign.checked
+    aiTrending: aiTrending.checked,
+    aiPopular: aiPopular.checked,
+    aiAssign: aiAssign.checked
+  };
 
+  if (!payload.name || !payload.slug) {
+    alert("Name + Slug required");
+    return;
+  }
+
+  const url = editingId ? `${API}/${editingId}` : API;
+  const method = editingId ? "PUT" : "POST";
+
+  const res = await api(url, method, payload);
+
+  if (!res) return;
+
+  closeModal();
+  loadCategories();
 }
 
-const url=editingId?`${API}/${editingId}`:API
-const method=editingId?"PUT":"POST"
+/* ================= EDIT ================= */
+window.editCategory = async (id) => {
 
-await api(url,method,payload)
+  const cat = await api(`${API}/${id}`);
+  if (!cat) return;
 
-closeModal()
-loadCategories()
+  editingId = id;
 
+  name.value = cat.name;
+  slug.value = cat.slug;
+  type.value = cat.type;
+
+  order.value = cat.category_order;
+  priority.value = cat.priority;
+
+  showHome.checked = cat.show_home;
+  isActive.checked = cat.active;
+  isFeatured.checked = cat.featured;
+
+  aiTrending.checked = cat.ai_trending;
+  aiPopular.checked = cat.ai_popular;
+  aiAssign.checked = cat.ai_assign;
+
+  modal.style.display = "flex";
+};
+
+/* ================= DELETE ================= */
+window.deleteCategory = async (id) => {
+
+  if (!confirm("Delete category?")) return;
+
+  const res = await api(`${API}/${id}`, "DELETE");
+
+  if (res) loadCategories();
+};
+
+/* ================= MODAL ================= */
+function openModal() {
+
+  editingId = null;
+  resetForm();
+
+  modal.style.display = "flex";
 }
 
-/* EDIT */
-window.editCategory=async(id)=>{
-
-const cat=await api(`${API}/${id}`)
-
-editingId=id
-
-name.value=cat.name
-slug.value=cat.slug
-type.value=cat.type
-
-order.value=cat.category_order
-priority.value=cat.priority
-
-showHome.checked=cat.show_home
-isActive.checked=cat.active
-isFeatured.checked=cat.featured
-
-aiTrending.checked=cat.ai_trending
-aiPopular.checked=cat.ai_popular
-aiAssign.checked=cat.ai_assign
-
-modal.style.display="flex"
-
+function closeModal() {
+  modal.style.display = "none";
 }
 
-/* DELETE */
-async function deleteCategory(id){
+/* ================= RESET ================= */
+function resetForm() {
 
-if(!confirm("Delete?")) return
+  name.value = "";
+  slug.value = "";
+  order.value = "";
+  priority.value = "1";
 
-await api(`${API}/${id}`,"DELETE")
-loadCategories()
+  type.value = "row";
 
+  showHome.checked = false;
+  isActive.checked = true;
+  isFeatured.checked = false;
+
+  aiTrending.checked = false;
+  aiPopular.checked = false;
+  aiAssign.checked = false;
 }
 
-/* MODAL */
-function openModal(){
+/* ================= AUTO SLUG ================= */
+name.oninput = () => {
 
-editingId=null
+  if (editingId) return;
 
-name.value=""
-slug.value=""
-order.value=""
+  slug.value = name.value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
 
-modal.style.display="flex"
-
-}
-
-function closeModal(){
-modal.style.display="none"
-}
-
-/* AUTO SLUG */
-name.oninput=()=>{
-
-if(editingId) return
-
-slug.value=name.value
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-
-}
-
-/* INIT */
-loadCategories()
-
-
-
+/* ================= INIT ================= */
+loadCategories();
 </script>
 
 
