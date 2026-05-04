@@ -210,12 +210,19 @@ body{background:#060a14;color:#fff}
 
 
 <script>
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/categories";
+/* ================= CONFIG ================= */
 
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/categories";
 const TOKEN = localStorage.getItem("AUTH_TOKEN");
+
 if (!TOKEN) location.href = "login.html";
 
+/* ================= STATE ================= */
+
 let editingId = null;
+let loading = false;
+
+/* ================= ELEMENTS ================= */
 
 const list = document.getElementById("list");
 const modal = document.getElementById("modal");
@@ -236,6 +243,7 @@ const aiPopular = document.getElementById("aiPopular");
 const aiAssign = document.getElementById("aiAssign");
 
 /* ================= API ================= */
+
 async function api(url, method = "GET", body = null) {
   try {
     const res = await fetch(url, {
@@ -249,7 +257,7 @@ async function api(url, method = "GET", body = null) {
 
     if (res.status === 401) {
       location.href = "login.html";
-      return;
+      return null;
     }
 
     const json = await res.json();
@@ -261,21 +269,36 @@ async function api(url, method = "GET", body = null) {
     return json.data;
 
   } catch (err) {
-    console.error(err);
-    alert(err.message || "Server error");
+    console.error("API ERROR:", err);
+    showError(err.message || "Server error");
     return null;
   }
 }
 
+/* ================= UI HELPERS ================= */
+
+function showLoading() {
+  list.innerHTML = `<div style="padding:20px">Loading...</div>`;
+}
+
+function showEmpty() {
+  list.innerHTML = `<div style="padding:20px;color:#777">No Categories</div>`;
+}
+
+function showError(msg) {
+  alert(msg);
+}
+
 /* ================= LOAD ================= */
+
 async function loadCategories() {
 
-  list.innerHTML = "<div style='padding:20px'>Loading...</div>";
+  showLoading();
 
   const data = await api(API);
 
   if (!data || !data.length) {
-    list.innerHTML = "<div style='padding:20px;color:#777'>No Categories</div>";
+    showEmpty();
     return;
   }
 
@@ -283,32 +306,37 @@ async function loadCategories() {
 
   data.forEach(cat => {
 
-    list.innerHTML += `
-      <div class="row">
+    const row = document.createElement("div");
+    row.className = "row";
 
-        <span>${cat.name}</span>
-        <span>${cat.slug}</span>
-        <span class="badge">${cat.type}</span>
+    row.innerHTML = `
+      <span>${cat.name}</span>
+      <span>${cat.slug}</span>
+      <span class="badge">${cat.type}</span>
 
-        <span class="${cat.active ? 'active' : 'inactive'}">
-          ${cat.active ? '● Online' : '○ Offline'}
-        </span>
+      <span class="${cat.active ? 'active' : 'inactive'}">
+        ${cat.active ? '● Online' : '○ Offline'}
+      </span>
 
-        <span>${cat.category_order}</span>
-        <span>P${cat.priority}</span>
+      <span>${cat.category_order}</span>
+      <span>P${cat.priority}</span>
 
-        <span class="actions">
-          <button onclick="editCategory('${cat.id}')">✏️</button>
-          <button onclick="deleteCategory('${cat.id}')" style="color:#ff4d4d">🗑</button>
-        </span>
-
-      </div>
+      <span class="actions">
+        <button onclick="editCategory('${cat.id}')">✏️</button>
+        <button onclick="deleteCategory('${cat.id}')" style="color:#ff4d4d">🗑</button>
+      </span>
     `;
+
+    list.appendChild(row);
   });
 }
 
 /* ================= SAVE ================= */
+
 async function saveCategory() {
+
+  if (loading) return;
+  loading = true;
 
   const payload = {
 
@@ -328,15 +356,25 @@ async function saveCategory() {
     aiAssign: aiAssign.checked
   };
 
-  if (!payload.name || !payload.slug) {
-    alert("Name + Slug required");
+  // VALIDATION
+  if (!payload.name) {
+    showError("Name required");
+    loading = false;
     return;
   }
 
-  const url = editingId ? `${API}/${editingId}` : API;
+  if (!payload.slug) {
+    showError("Slug required");
+    loading = false;
+    return;
+  }
+
   const method = editingId ? "PUT" : "POST";
+  const url = editingId ? `${API}/${editingId}` : API;
 
   const res = await api(url, method, payload);
+
+  loading = false;
 
   if (!res) return;
 
@@ -345,6 +383,7 @@ async function saveCategory() {
 }
 
 /* ================= EDIT ================= */
+
 window.editCategory = async (id) => {
 
   const cat = await api(`${API}/${id}`);
@@ -371,6 +410,7 @@ window.editCategory = async (id) => {
 };
 
 /* ================= DELETE ================= */
+
 window.deleteCategory = async (id) => {
 
   if (!confirm("Delete category?")) return;
@@ -381,11 +421,10 @@ window.deleteCategory = async (id) => {
 };
 
 /* ================= MODAL ================= */
-function openModal() {
 
+function openModal() {
   editingId = null;
   resetForm();
-
   modal.style.display = "flex";
 }
 
@@ -394,6 +433,7 @@ function closeModal() {
 }
 
 /* ================= RESET ================= */
+
 function resetForm() {
 
   name.value = "";
@@ -413,6 +453,7 @@ function resetForm() {
 }
 
 /* ================= AUTO SLUG ================= */
+
 name.oninput = () => {
 
   if (editingId) return;
@@ -425,7 +466,10 @@ name.oninput = () => {
 };
 
 /* ================= INIT ================= */
-loadCategories();
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCategories();
+});
 </script>
 
 
