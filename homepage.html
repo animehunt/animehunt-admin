@@ -154,270 +154,252 @@
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/homepage"
+/* ================= CONFIG ================= */
 
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/homepage";
+const TOKEN = localStorage.getItem("AUTH_TOKEN");
 
-if(!TOKEN){
-location.href="login.html"
+if (!TOKEN) location.href = "login.html";
+
+/* ================= STATE ================= */
+
+let editId = null;
+let loading = false;
+
+/* ================= ELEMENTS ================= */
+
+const rowList = document.getElementById("rowList");
+const modal = document.getElementById("rowModal");
+
+const rowTitle = document.getElementById("rowTitle");
+const rowType = document.getElementById("rowType");
+const rowSource = document.getElementById("rowSource");
+const rowLayout = document.getElementById("rowLayout");
+
+const rowLimit = document.getElementById("rowLimit");
+const rowOrder = document.getElementById("rowOrder");
+
+const rowActive = document.getElementById("rowActive");
+const rowAuto = document.getElementById("rowAuto");
+
+const saveBtn = document.getElementById("saveRow");
+
+/* ================= API ================= */
+
+async function api(url, method = "GET", body = null) {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + TOKEN
+      },
+      body: body ? JSON.stringify(body) : null
+    });
+
+    if (res.status === 401) {
+      location.href = "login.html";
+      return null;
+    }
+
+    const json = await res.json();
+
+    if (!json.success) {
+      throw new Error(json.message || "API failed");
+    }
+
+    return json.data;
+
+  } catch (err) {
+    console.error("API ERROR:", err);
+    alert(err.message || "Server error");
+    return null;
+  }
 }
 
-let editId=null
+/* ================= UI ================= */
 
-const rowList=document.getElementById("rowList")
-const modal=document.getElementById("rowModal")
-
-const rowTitle=document.getElementById("rowTitle")
-const rowType=document.getElementById("rowType")
-const rowSource=document.getElementById("rowSource")
-const rowLayout=document.getElementById("rowLayout")
-
-const rowLimit=document.getElementById("rowLimit")
-const rowOrder=document.getElementById("rowOrder")
-
-const rowActive=document.getElementById("rowActive")
-const rowAuto=document.getElementById("rowAuto")
-
-const saveBtn=document.getElementById("saveRow")
-
-/* =========================
-API WRAPPER
-========================= */
-
-async function api(url,method="GET",body=null){
-
-try{
-
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-
-if(res.status===401){
-
-location.href="login.html"
-return
-
+function showLoading() {
+  rowList.innerHTML = `<div style="padding:20px">Loading...</div>`;
 }
 
-return await res.json()
-
-}catch(err){
-
-console.error("API Error:",err)
-
-alert("Server error")
-
+function showEmpty() {
+  rowList.innerHTML = `<div style="padding:20px;color:#777">No Rows</div>`;
 }
 
+/* ================= LOAD ================= */
+
+async function loadRows() {
+
+  showLoading();
+
+  const rows = await api(API);
+
+  if (!rows || !rows.length) {
+    showEmpty();
+    return;
+  }
+
+  rowList.innerHTML = "";
+
+  rows.forEach(r => {
+
+    const row = document.createElement("div");
+    row.className = "row";
+
+    row.innerHTML = `
+      <span>${r.title}</span>
+
+      <span class="badge">${r.type}</span>
+
+      <span>${r.source || "Latest"}</span>
+
+      <span>${r.layout}</span>
+
+      <span>#${r.row_order}</span>
+
+      <span class="status ${r.active ? "active" : "inactive"}">
+        ${r.active ? "● Active" : "○ Hidden"}
+      </span>
+
+      <span class="actions">
+        <button onclick="editRow('${r.id}')">✏️</button>
+        <button onclick="deleteRow('${r.id}')" style="color:#ff4c4c">🗑</button>
+      </span>
+    `;
+
+    rowList.appendChild(row);
+  });
 }
 
-/* =========================
-LOAD HOMEPAGE ROWS
-========================= */
+/* ================= SAVE ================= */
 
-async function loadRows(){
+saveBtn.onclick = async () => {
 
-rowList.innerHTML="Loading..."
+  if (loading) return;
+  loading = true;
 
-const rows=await api(API)
+  const payload = {
 
-if(!rows || !rows.length){
+    title: rowTitle.value.trim(),
 
-rowList.innerHTML="<div style='padding:20px;color:#777'>No Rows</div>"
-return
+    type: rowType.value,
 
+    source: rowSource.value.trim(),
+
+    layout: rowLayout.value,
+
+    limit: Number(rowLimit.value || 10),
+
+    order: Number(rowOrder.value || 0),
+
+    active: rowActive.checked,
+
+    autoUpdate: rowAuto.checked
+  };
+
+  /* VALIDATION */
+  if (!payload.title) {
+    alert("Row title required");
+    loading = false;
+    return;
+  }
+
+  const method = editId ? "PATCH" : "POST";
+  const url = editId ? `${API}/${editId}` : API;
+
+  const res = await api(url, method, payload);
+
+  loading = false;
+
+  if (!res) return;
+
+  closeModal();
+  loadRows();
+};
+
+/* ================= EDIT ================= */
+
+window.editRow = async (id) => {
+
+  const r = await api(`${API}/${id}`);
+  if (!r) return;
+
+  editId = id;
+
+  rowTitle.value = r.title || "";
+  rowType.value = r.type || "auto";
+  rowSource.value = r.source || "";
+  rowLayout.value = r.layout || "scroll";
+
+  rowLimit.value = r.row_limit || 10;
+  rowOrder.value = r.row_order || 0;
+
+  rowActive.checked = !!r.active;
+  rowAuto.checked = !!r.autoUpdate;
+
+  modal.style.display = "flex";
+};
+
+/* ================= DELETE ================= */
+
+window.deleteRow = async (id) => {
+
+  if (!confirm("Delete row?")) return;
+
+  const res = await api(`${API}/${id}`, "DELETE");
+
+  if (res) loadRows();
+};
+
+/* ================= MODAL ================= */
+
+document.getElementById("addRowBtn").onclick = () => {
+
+  editId = null;
+  resetForm();
+
+  modal.style.display = "flex";
+};
+
+document.getElementById("closeModal").onclick = closeModal;
+
+function closeModal() {
+  modal.style.display = "none";
 }
 
-rowList.innerHTML=""
+/* ================= RESET ================= */
 
-rows.forEach(r=>{
+function resetForm() {
 
-rowList.innerHTML+=`
+  rowTitle.value = "";
+  rowSource.value = "";
+  rowLimit.value = "";
+  rowOrder.value = "";
 
-<div class="row">
+  rowType.value = "auto";
+  rowLayout.value = "scroll";
 
-<span>${r.title}</span>
-
-<span class="badge">${r.type}</span>
-
-<span>${r.source || "Latest"}</span>
-
-<span>${r.layout}</span>
-
-<span>#${r.row_order}</span>
-
-<span class="status ${r.active?"active":"inactive"}">
-${r.active?"● Active":"○ Hidden"}
-</span>
-
-<span class="actions">
-
-<button onclick="editRow('${r.id}')">✏️</button>
-
-<button onclick="deleteRow('${r.id}')" style="color:#ff4c4c">🗑</button>
-
-</span>
-
-</div>
-
-`
-
-})
-
+  rowActive.checked = true;
+  rowAuto.checked = false;
 }
 
-/* =========================
-SAVE ROW
-========================= */
+/* ================= AUTO REFRESH ================= */
 
-saveBtn.onclick=async()=>{
+setInterval(loadRows, 60000);
 
-if(!rowTitle.value){
+/* ================= INIT ================= */
 
-alert("Row title required")
-return
-
-}
-
-const payload={
-
-title:rowTitle.value.trim(),
-
-type:rowType.value,
-
-source:rowSource.value.trim(),
-
-layout:rowLayout.value,
-
-limit:Number(rowLimit.value)||10,
-
-order:Number(rowOrder.value)||0,
-
-active:rowActive.checked,
-
-autoUpdate:rowAuto.checked
-
-}
-
-const method=editId?"PATCH":"POST"
-const url=editId?`${API}/${editId}`:API
-
-await api(url,method,payload)
-
-closeModal()
-
-loadRows()
-
-}
-
-/* =========================
-EDIT ROW
-========================= */
-
-window.editRow=async(id)=>{
-
-const r=await api(`${API}/${id}`)
-
-if(!r) return
-
-editId=id
-
-rowTitle.value=r.title || ""
-rowType.value=r.type || "auto"
-rowSource.value=r.source || ""
-rowLayout.value=r.layout || "scroll"
-
-rowLimit.value=r.row_limit || 10
-rowOrder.value=r.row_order || 0
-
-rowActive.checked=!!r.active
-rowAuto.checked=!!r.autoUpdate
-
-modal.style.display="flex"
-
-}
-
-/* =========================
-DELETE ROW
-========================= */
-
-window.deleteRow=async(id)=>{
-
-if(!confirm("Delete row?")) return
-
-await api(`${API}/${id}`,"DELETE")
-
-loadRows()
-
-}
-
-/* =========================
-OPEN MODAL
-========================= */
-
-document.getElementById("addRowBtn").onclick=()=>{
-
-editId=null
-
-resetForm()
-
-modal.style.display="flex"
-
-}
-
-/* =========================
-CLOSE MODAL
-========================= */
-
-document.getElementById("closeModal").onclick=closeModal
-
-function closeModal(){
-
-modal.style.display="none"
-
-}
-
-/* =========================
-RESET FORM
-========================= */
-
-function resetForm(){
-
-rowTitle.value=""
-rowSource.value=""
-rowLimit.value=""
-rowOrder.value=""
-
-rowType.value="auto"
-rowLayout.value="scroll"
-
-rowActive.checked=true
-rowAuto.checked=false
-
-}
-
-/* =========================
-AUTO REFRESH
-========================= */
-
-setInterval(loadRows,60000)
-
-/* =========================
-INIT
-========================= */
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-loadRows()
-
-})
+document.addEventListener("DOMContentLoaded", () => {
+  loadRows();
+});
 
 </script>
+
+
+
+
+
 
 
 </body>
