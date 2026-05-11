@@ -6,202 +6,526 @@
 
 <style>
 
+/* =========================================
+RESET
+========================================= */
+
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
   font-family:system-ui;
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
   background:#0b0f1a;
   color:#fff;
+  overflow-x:hidden;
 }
+
+/* =========================================
+LAYOUT
+========================================= */
 
 .cms-app{
   display:flex;
   min-height:100vh;
 }
 
-/* ===== SIDEBAR FIXED ===== */
+/* =========================================
+SIDEBAR
+========================================= */
+
 .cms-sidebar{
   width:260px;
   background:#0b0f1a;
   padding:20px;
   position:relative;
+  flex-shrink:0;
 }
 
-/* FAKE BORDER (NO BUG) */
 .cms-sidebar::after{
   content:"";
   position:absolute;
-  right:0;
   top:0;
+  right:0;
   width:1px;
   height:100%;
   background:#1a2035;
 }
 
-/* GPU FIX (REMOVE WHITE LINE BUG) */
 .cms-sidebar,
 .cms-main{
   transform:translateZ(0);
 }
 
-.cms-main{
-  flex:1;
-  background:#0e1424;
-}
-
-.cms-header{
-  height:60px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid #1a2035;
-}
-
-.cms-content{
-  padding:20px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:20px;
-}
-
 .brand{
-  font-size:20px;
-  margin-bottom:20px;
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:24px;
 }
 
 .brand b{
   color:#ffcc00;
 }
 
-/* ===== MENU ===== */
-.cms-menu a{
+.brand small{
   display:block;
-  padding:10px;
-  border-radius:6px;
-  color:#ccc;
-  text-decoration:none;
-  outline:none;
-  border:none;
-  box-shadow:none;
-  -webkit-tap-highlight-color:transparent;
+  color:#666;
+  font-size:11px;
+  margin-top:4px;
 }
 
-/* HOVER */
+/* =========================================
+MENU
+========================================= */
+
+.cms-menu{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.cms-menu a{
+  display:block;
+  padding:11px 12px;
+  border-radius:8px;
+  color:#ccc;
+  text-decoration:none;
+  font-size:14px;
+  transition:.2s;
+}
+
 .cms-menu a:hover{
   background:#1a2035;
   color:#ffcc00;
 }
 
-/* ACTIVE FIX */
 .cms-menu a.active{
-  background:#1a2035 !important;
-  color:#ffcc00 !important;
+  background:#1a2035;
+  color:#ffcc00;
 }
 
-/* REMOVE ALL FOCUS / CLICK EFFECT */
 .cms-menu a:focus,
 .cms-menu a:active,
 .cms-menu a:visited{
   outline:none !important;
   box-shadow:none !important;
-  background:transparent;
 }
 
-/* REMOVE ANY FAKE LINE */
-.cms-menu a::before,
-.cms-menu a::after{
-  display:none !important;
+/* =========================================
+MAIN
+========================================= */
+
+.cms-main{
+  flex:1;
+  background:#0e1424;
+  min-width:0;
 }
 
-/* GLOBAL TAP FIX */
-*{
-  -webkit-tap-highlight-color:transparent;
+/* =========================================
+HEADER
+========================================= */
+
+.cms-header{
+  height:65px;
+  padding:0 24px;
+  border-bottom:1px solid #1a2035;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
-/* ===== CARDS ===== */
+.cms-header h1,
+.cms-header h2,
+.cms-header h3{
+  font-size:20px;
+}
+
+/* =========================================
+CONTENT
+========================================= */
+
+.cms-content{
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+}
+
+/* =========================================
+CARDS
+========================================= */
+
 .card{
   background:#0b0f1a;
   border:1px solid #1a2035;
-  border-radius:10px;
-  padding:15px;
+  border-radius:14px;
+  padding:18px;
+  overflow:hidden;
+}
+
+.card.table{
+  grid-column:1/-1;
 }
 
 .card h3{
-  margin-bottom:10px;
   color:#ffcc00;
+  margin-bottom:14px;
+  font-size:18px;
 }
 
-/* ===== INPUT ===== */
+.card h4{
+  margin:12px 0 10px;
+  font-size:14px;
+  color:#ccc;
+}
+
+.card hr{
+  border:none;
+  border-top:1px solid #1a2035;
+  margin:16px 0;
+}
+
+/* =========================================
+INPUTS
+========================================= */
+
 input,
 select,
 textarea{
   width:100%;
-  padding:10px;
-  margin-bottom:10px;
   background:#11162a;
   border:1px solid #1f2742;
   color:#fff;
-  border-radius:6px;
+  border-radius:8px;
+  padding:11px 12px;
+  margin-bottom:12px;
+  outline:none;
+  transition:.2s;
+  font-size:13px;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:#ffcc00;
 }
 
 textarea{
-  min-height:80px;
+  resize:vertical;
+  min-height:100px;
 }
 
-/* ===== BUTTON ===== */
+input::placeholder,
+textarea::placeholder{
+  color:#777;
+}
+
+/* =========================================
+BUTTONS
+========================================= */
+
 button{
-  padding:10px;
   border:none;
-  border-radius:6px;
-  cursor:pointer;
   background:#ffcc00;
   color:#000;
-  font-weight:bold;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+  transition:.2s;
+  font-size:13px;
 }
 
-/* ===== TABLE ===== */
-.table{
-  grid-column:1/-1;
+button:hover{
+  transform:translateY(-1px);
+  opacity:.95;
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
+button.secondary{
+  background:#1a2035;
+  color:#fff;
 }
 
-th,td{
-  padding:10px;
-  border-bottom:1px solid #1a2035;
+button.danger{
+  background:#ff4d4d;
+  color:#fff;
 }
 
-/* STATUS */
-.status.on{
-  color:#2ecc71;
-}
-
-.status.off{
-  color:#e74c3c;
-}
-
-/* TOGGLE */
-.toggle{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
+/* =========================================
+FLEX
+========================================= */
 
 .flex{
   display:flex;
   gap:10px;
 }
 
-  
+/* =========================================
+LIBRARY ITEMS
+========================================= */
+
+.library-item{
+  background:#11162a;
+  border:1px solid #1f2742;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:10px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.library-item b{
+  display:block;
+  margin-bottom:4px;
+}
+
+.library-item small{
+  color:#777;
+  font-size:11px;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+}
+
+.actions button{
+  padding:7px 12px;
+  font-size:11px;
+}
+
+/* =========================================
+HOST MONETIZATION
+========================================= */
+
+#hostMonetizationList{
+  display:grid;
+  gap:18px;
+}
+
+.host-card{
+  background:#11162a;
+  border:1px solid #1f2742;
+  border-radius:14px;
+  padding:18px;
+}
+
+.host-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  margin-bottom:20px;
+}
+
+.host-top h2{
+  font-size:22px;
+  margin-bottom:6px;
+}
+
+.host-top p{
+  color:#888;
+  font-size:13px;
+}
+
+.host-badges{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.host-badges span{
+  background:#1a2035;
+  color:#ffcc00;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.host-section{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid #1f2742;
+}
+
+.host-section h4{
+  margin-bottom:14px;
+  color:#ffcc00;
+  font-size:14px;
+}
+
+.host-section label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  font-size:13px;
+  color:#ddd;
+  cursor:pointer;
+}
+
+.host-section input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  margin:0;
+  accent-color:#ffcc00;
+}
+
+.rotationMode{
+  max-width:260px;
+}
+
+.host-actions{
+  display:flex;
+  gap:10px;
+  margin-top:22px;
+}
+
+/* =========================================
+ANALYTICS
+========================================= */
+
+.analytics-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+
+.analytic-box{
+  background:#11162a;
+  border:1px solid #1f2742;
+  border-radius:12px;
+  padding:20px;
+  text-align:center;
+}
+
+.analytic-box h2{
+  color:#ffcc00;
+  font-size:30px;
+  margin-bottom:8px;
+}
+
+.analytic-box p{
+  color:#888;
+  font-size:13px;
+}
+
+/* =========================================
+TABLE
+========================================= */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  padding:14px 10px;
+  border-bottom:1px solid #1f2742;
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  color:#888;
+  font-weight:600;
+}
+
+/* =========================================
+STATUS
+========================================= */
+
+.status.on{
+  color:#2ecc71;
+}
+
+.status.off{
+  color:#ff4d4d;
+}
+
+/* =========================================
+TOGGLE
+========================================= */
+
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.toggle input{
+  width:18px;
+  height:18px;
+  margin:0;
+}
+
+/* =========================================
+SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#1f2742;
+  border-radius:10px;
+}
+
+::-webkit-scrollbar-track{
+  background:#0b0f1a;
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:1100px){
+
+  .cms-content{
+    grid-template-columns:1fr;
+  }
+
+  .analytics-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:800px){
+
+  .cms-app{
+    flex-direction:column;
+  }
+
+  .cms-sidebar{
+    width:100%;
+  }
+
+  .host-top{
+    flex-direction:column;
+  }
+
+  .analytics-grid{
+    grid-template-columns:1fr;
+  }
+
+  .flex{
+    flex-direction:column;
+  }
+
+}
+
 </style>
 </head>
 
