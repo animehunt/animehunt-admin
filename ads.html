@@ -249,91 +249,298 @@ th,td{
 <div>Admin</div>
 </header>
 
+
 <section class="cms-content">
 
-<!-- CREATE -->
-<div class="card">
-<h3>Create / Edit Ad</h3>
+  <!-- ========================= -->
+  <!-- ADS LIBRARY -->
+  <!-- ========================= -->
 
-<input id="name" placeholder="Ad Name">
+  <div class="card">
 
-<select id="type">
-<option value="redirect">Redirect</option>
-<option value="popup">Popup</option>
-<option value="script">Script</option>
-<option value="banner">Banner</option>
-</select>
+    <h3>📢 Ads Library</h3>
 
-<textarea id="code" placeholder="Ad URL / Script"></textarea>
+    <input type="text" id="adName" placeholder="Ad Name">
 
-<input id="weight" placeholder="Weight (priority)">
-<input id="step" placeholder="Step (1,2,3)">
-<input id="source" placeholder="Source (knightwolf / mega / any)">
+    <select id="adType">
+      <option value="popup">Popup</option>
+      <option value="redirect">Redirect</option>
+      <option value="script">Script</option>
+      <option value="banner">Banner</option>
+      <option value="direct">Direct</option>
+    </select>
 
-<input id="delay" placeholder="Delay (ms)">
+    <textarea id="adCode" placeholder="Ad Script / Redirect URL"></textarea>
 
-<textarea id="shortlinks" placeholder="Shortlinks (1 per line)"></textarea>
+    <div class="flex">
+      <input type="number" id="adDelay" placeholder="Delay (ms)">
+      <input type="number" id="adWeight" placeholder="Weight">
+    </div>
 
-<div class="toggle">
-<label>Auto Rotation</label>
-<input type="checkbox" id="autoShort">
-</div>
+    <button id="saveAdBtn">Save Ad</button>
 
-<div class="toggle">
-<label>Anti Bypass</label>
-<input type="checkbox" id="antiBypass">
-</div>
+    <hr>
 
-<button onclick="saveAd()">Save Ad</button>
+    <h4>Saved Ads</h4>
 
-</div>
+    <div id="adsLibraryList">
 
-<!-- FILTER -->
-<div class="card">
-<h3>Search / Filter</h3>
+      <!-- CARD -->
 
-<input id="search" placeholder="Search name">
-<input id="filterSource" placeholder="Source">
-<input id="filterStep" placeholder="Step">
+      <div class="library-item">
 
-<button onclick="loadAds()">Apply</button>
+        <div>
+          <b>Adsterra Popup</b>
+          <small>popup</small>
+        </div>
 
-</div>
+        <div class="actions">
+          <button>Edit</button>
+          <button>Delete</button>
+        </div>
 
-<!-- ANALYTICS -->
-<div class="card">
-<h3>Analytics</h3>
+      </div>
 
-<div>Total Ads: <span id="totalAds">0</span></div>
-<div>Total Clicks: <span id="totalClicks">0</span></div>
+    </div>
 
-</div>
+  </div>
 
-<!-- TABLE -->
-<div class="card table">
-<h3>All Ads</h3>
+  <!-- ========================= -->
+  <!-- SHORTLINK LIBRARY -->
+  <!-- ========================= -->
 
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Step</th>
-<th>Source</th>
-<th>Weight</th>
-<th>Clicks</th>
-<th>Status</th>
-<th>Actions</th>
-</tr>
-</thead>
+  <div class="card">
 
-<tbody id="list"></tbody>
+    <h3>🔗 Shortlinks Library</h3>
 
-</table>
+    <input type="text" id="shortName" placeholder="Shortlink Name">
 
-</div>
+    <input type="text" id="shortBase" placeholder="Base URL">
+
+    <input type="text" id="shortApi" placeholder="API Key (optional)">
+
+    <button id="saveShortBtn">Save Shortlink</button>
+
+    <hr>
+
+    <h4>Saved Shortlinks</h4>
+
+    <div id="shortLibraryList">
+
+      <div class="library-item">
+
+        <div>
+          <b>cuty.io</b>
+        </div>
+
+        <div class="actions">
+          <button>Edit</button>
+          <button>Delete</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================= -->
+  <!-- POPUP LIBRARY -->
+  <!-- ========================= -->
+
+  <div class="card">
+
+    <h3>🪟 Popup Scripts</h3>
+
+    <input type="text" id="popupName" placeholder="Popup Name">
+
+    <textarea id="popupCode" placeholder="Popup Script"></textarea>
+
+    <button id="savePopupBtn">Save Popup</button>
+
+    <hr>
+
+    <h4>Saved Popups</h4>
+
+    <div id="popupLibraryList">
+
+      <div class="library-item">
+
+        <div>
+          <b>Popup Script #1</b>
+        </div>
+
+        <div class="actions">
+          <button>Edit</button>
+          <button>Delete</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================= -->
+  <!-- HOST MONETIZATION -->
+  <!-- ========================= -->
+
+  <div class="card table">
+
+    <h3>⚡ Host Monetization</h3>
+
+    <div id="hostMonetizationList">
+
+      <!-- HOST CARD -->
+
+      <div class="host-card">
+
+        <div class="host-top">
+
+          <div>
+
+            <h2>KnightWolf</h2>
+
+            <p>
+              Storage : Telegram
+            </p>
+
+          </div>
+
+          <div class="host-badges">
+            <span>Knight : YES</span>
+          </div>
+
+        </div>
+
+        <!-- ADS -->
+
+        <div class="host-section">
+
+          <h4>Ads</h4>
+
+          <label>
+            <input type="checkbox">
+            Adsterra Popup
+          </label>
+
+          <label>
+            <input type="checkbox">
+            Google Redirect
+          </label>
+
+          <label>
+            <input type="checkbox">
+            Direct Script
+          </label>
+
+        </div>
+
+        <!-- SHORTLINKS -->
+
+        <div class="host-section">
+
+          <h4>Shortlinks</h4>
+
+          <label>
+            <input type="checkbox">
+            cuty.io
+          </label>
+
+          <label>
+            <input type="checkbox">
+            shrinkme.io
+          </label>
+
+          <label>
+            <input type="checkbox">
+            adlinkfly
+          </label>
+
+        </div>
+
+        <!-- POPUPS -->
+
+        <div class="host-section">
+
+          <h4>Popup Scripts</h4>
+
+          <label>
+            <input type="checkbox">
+            Popup Script #1
+          </label>
+
+          <label>
+            <input type="checkbox">
+            Popup Script #2
+          </label>
+
+        </div>
+
+        <!-- MODES -->
+
+        <div class="host-section">
+
+          <h4>Mode</h4>
+
+          <select class="rotationMode">
+            <option value="random">Random Rotation</option>
+            <option value="sequence">Sequence Rotation</option>
+          </select>
+
+        </div>
+
+        <!-- ACTIONS -->
+
+        <div class="host-actions">
+
+          <button>Edit</button>
+          <button>Delete</button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================= -->
+  <!-- ANALYTICS -->
+  <!-- ========================= -->
+
+  <div class="card table">
+
+    <h3>📊 Monetization Analytics</h3>
+
+    <div class="analytics-grid">
+
+      <div class="analytic-box">
+        <h2 id="totalHosts">0</h2>
+        <p>Total Hosts</p>
+      </div>
+
+      <div class="analytic-box">
+        <h2 id="totalAds">0</h2>
+        <p>Total Ads</p>
+      </div>
+
+      <div class="analytic-box">
+        <h2 id="totalShortlinks">0</h2>
+        <p>Total Shortlinks</p>
+      </div>
+
+      <div class="analytic-box">
+        <h2 id="totalClicks">0</h2>
+        <p>Total Clicks</p>
+      </div>
+
+    </div>
+
+  </div>
 
 </section>
+
 
 </main>
 </div>
