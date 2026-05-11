@@ -871,126 +871,806 @@ RESPONSIVE
 
 <script>
 
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/ads"
-const TOKEN=localStorage.getItem("AUTH_TOKEN")
+/* =========================================================
+   ⚡ ANIMEHUNT MONETIZATION ENGINE
+   FINAL ADS.HTML SCRIPT
+========================================================= */
 
-async function api(url,method="GET",body=null){
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+TOKEN
-},
-body:body?JSON.stringify(body):null
-})
-return res.json()
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+
+const TOKEN = localStorage.getItem("AUTH_TOKEN")
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const adsLibraryList = document.getElementById("adsLibraryList")
+const shortLibraryList = document.getElementById("shortLibraryList")
+const popupLibraryList = document.getElementById("popupLibraryList")
+const hostMonetizationList = document.getElementById("hostMonetizationList")
+
+const totalHosts = document.getElementById("totalHosts")
+const totalAds = document.getElementById("totalAds")
+const totalShortlinks = document.getElementById("totalShortlinks")
+const totalClicks = document.getElementById("totalClicks")
+
+/* =========================================================
+   FORM FIELDS
+========================================================= */
+
+/* ADS */
+
+const adName = document.getElementById("adName")
+const adType = document.getElementById("adType")
+const adCode = document.getElementById("adCode")
+const adDelay = document.getElementById("adDelay")
+const adWeight = document.getElementById("adWeight")
+
+/* SHORTLINK */
+
+const shortName = document.getElementById("shortName")
+const shortBase = document.getElementById("shortBase")
+const shortApi = document.getElementById("shortApi")
+
+/* POPUP */
+
+const popupName = document.getElementById("popupName")
+const popupCode = document.getElementById("popupCode")
+
+/* BUTTONS */
+
+const saveAdBtn = document.getElementById("saveAdBtn")
+const saveShortBtn = document.getElementById("saveShortBtn")
+const savePopupBtn = document.getElementById("savePopupBtn")
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let ADS = []
+let SHORTLINKS = []
+let POPUPS = []
+let HOSTS = []
+
+/* =========================================================
+   API
+========================================================= */
+
+async function api(url, method="GET", body=null){
+
+  try{
+
+    const res = await fetch(url,{
+
+      method,
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + TOKEN
+      },
+
+      body: body ? JSON.stringify(body) : null
+
+    })
+
+    const json = await res.json()
+
+    if(!res.ok){
+
+      console.error(json)
+
+      return null
+
+    }
+
+    return json
+
+  }catch(err){
+
+    console.error(err)
+
+    return null
+
+  }
+
 }
+
+/* =========================================================
+   LOAD EVERYTHING
+========================================================= */
+
+async function loadAll(){
+
+  await Promise.all([
+
+    loadAds(),
+    loadShortlinks(),
+    loadPopups(),
+    loadHosts()
+
+  ])
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   ADS LIBRARY
+========================================================= */
 
 async function loadAds(){
 
-let ads=await api(API)
+  const data = await api(`${API}/ads-library`)
 
-const searchVal=search.value.toLowerCase()
-const fs=filterSource.value.toLowerCase()
-const st=filterStep.value
+  ADS = Array.isArray(data) ? data : []
 
-if(searchVal){
-ads=ads.filter(a=>a.name.toLowerCase().includes(searchVal))
-}
-if(fs){
-ads=ads.filter(a=>a.source?.toLowerCase().includes(fs))
-}
-if(st){
-ads=ads.filter(a=>String(a.step)===st)
+  renderAds()
+
 }
 
-list.innerHTML=""
+function renderAds(){
 
-let totalClicks=0
+  adsLibraryList.innerHTML = ""
 
-ads.forEach(a=>{
+  if(!ADS.length){
 
-totalClicks+=a.clicks||0
+    adsLibraryList.innerHTML = `<p>No ads found</p>`
 
-list.innerHTML+=`
-<tr>
-<td>${a.name}</td>
-<td>${a.type}</td>
-<td>${a.step}</td>
-<td>${a.source}</td>
-<td>${a.weight}</td>
-<td>${a.clicks||0}</td>
-<td class="status ${a.status.toLowerCase()}">${a.status}</td>
-<td>
-<button onclick="editAd('${a.id}')">Edit</button>
-<button onclick="toggleAd('${a.id}')">ON/OFF</button>
-<button onclick="deleteAd('${a.id}')">Delete</button>
-</td>
-</tr>
-`
-})
+    return
 
-totalAds.innerText=ads.length
-totalClicksEl = document.getElementById("totalClicks")
-totalClicksEl.innerText=totalClicks
+  }
+
+  ADS.forEach(ad=>{
+
+    adsLibraryList.innerHTML += `
+
+      <div class="library-item">
+
+        <div>
+
+          <b>${ad.name}</b>
+          <small>${ad.type}</small>
+
+        </div>
+
+        <div class="actions">
+
+          <button onclick="editAd('${ad.id}')">
+            Edit
+          </button>
+
+          <button onclick="deleteAd('${ad.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+
+  })
 
 }
 
 async function saveAd(){
 
-const payload={
-name:name.value,
-type:type.value,
-adCode:code.value,
-weight:Number(weight.value||1),
-step:Number(step.value||1),
-source:source.value,
-delay:Number(delay.value||0),
-shortlinks:shortlinks.value.split("\n").filter(x=>x.trim()),
-autoShort:autoShort.checked,
-antiBypass:antiBypass.checked
+  const payload = {
+
+    name: adName.value.trim(),
+    type: adType.value,
+    code: adCode.value,
+    delay: Number(adDelay.value || 0),
+    weight: Number(adWeight.value || 1)
+
+  }
+
+  if(!payload.name || !payload.code){
+
+    alert("Fill all fields")
+
+    return
+
+  }
+
+  const res = await api(
+
+    `${API}/ads-library`,
+    "POST",
+    payload
+
+  )
+
+  if(res){
+
+    clearAdForm()
+
+    loadAds()
+
+  }
+
 }
 
-if(!payload.name || !payload.adCode){
-alert("Required fields missing")
-return
+function clearAdForm(){
+
+  adName.value = ""
+  adCode.value = ""
+  adDelay.value = ""
+  adWeight.value = ""
+
 }
 
-await api(API,"POST",payload)
+async function deleteAd(id){
 
-clearForm()
-loadAds()
+  if(!confirm("Delete Ad?")) return
+
+  await api(`${API}/ads-library/${id}`,"DELETE")
+
+  loadAds()
 
 }
 
 function editAd(id){
-alert("Backend PUT API add karo → phir edit full enable hoga")
+
+  const ad = ADS.find(x=>x.id===id)
+
+  if(!ad) return
+
+  adName.value = ad.name
+  adType.value = ad.type
+  adCode.value = ad.code
+  adDelay.value = ad.delay
+  adWeight.value = ad.weight
+
 }
 
-async function toggleAd(id){
-await api(`${API}/${id}/toggle`,"PATCH")
-loadAds()
+/* =========================================================
+   SHORTLINKS
+========================================================= */
+
+async function loadShortlinks(){
+
+  const data = await api(`${API}/shortlinks-library`)
+
+  SHORTLINKS = Array.isArray(data) ? data : []
+
+  renderShortlinks()
+
 }
 
-async function deleteAd(id){
-if(!confirm("Delete?")) return
-await api(`${API}/${id}`,"DELETE")
-loadAds()
+function renderShortlinks(){
+
+  shortLibraryList.innerHTML = ""
+
+  if(!SHORTLINKS.length){
+
+    shortLibraryList.innerHTML = `<p>No shortlinks found</p>`
+
+    return
+
+  }
+
+  SHORTLINKS.forEach(short=>{
+
+    shortLibraryList.innerHTML += `
+
+      <div class="library-item">
+
+        <div>
+
+          <b>${short.name}</b>
+
+        </div>
+
+        <div class="actions">
+
+          <button onclick="editShort('${short.id}')">
+            Edit
+          </button>
+
+          <button onclick="deleteShort('${short.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+
+  })
+
 }
 
-function clearForm(){
-name.value=""
-code.value=""
-weight.value=""
-step.value=""
-source.value=""
-delay.value=""
-shortlinks.value=""
-autoShort.checked=false
-antiBypass.checked=false
+async function saveShort(){
+
+  const payload = {
+
+    name: shortName.value.trim(),
+    base_url: shortBase.value.trim(),
+    api_key: shortApi.value.trim()
+
+  }
+
+  if(!payload.name || !payload.base_url){
+
+    alert("Fill all fields")
+
+    return
+
+  }
+
+  const res = await api(
+
+    `${API}/shortlinks-library`,
+    "POST",
+    payload
+
+  )
+
+  if(res){
+
+    clearShortForm()
+
+    loadShortlinks()
+
+  }
+
 }
 
-loadAds()
+function clearShortForm(){
+
+  shortName.value = ""
+  shortBase.value = ""
+  shortApi.value = ""
+
+}
+
+async function deleteShort(id){
+
+  if(!confirm("Delete Shortlink?")) return
+
+  await api(`${API}/shortlinks-library/${id}`,"DELETE")
+
+  loadShortlinks()
+
+}
+
+function editShort(id){
+
+  const s = SHORTLINKS.find(x=>x.id===id)
+
+  if(!s) return
+
+  shortName.value = s.name
+  shortBase.value = s.base_url
+  shortApi.value = s.api_key || ""
+
+}
+
+/* =========================================================
+   POPUPS
+========================================================= */
+
+async function loadPopups(){
+
+  const data = await api(`${API}/popup-library`)
+
+  POPUPS = Array.isArray(data) ? data : []
+
+  renderPopups()
+
+}
+
+function renderPopups(){
+
+  popupLibraryList.innerHTML = ""
+
+  if(!POPUPS.length){
+
+    popupLibraryList.innerHTML = `<p>No popup scripts found</p>`
+
+    return
+
+  }
+
+  POPUPS.forEach(popup=>{
+
+    popupLibraryList.innerHTML += `
+
+      <div class="library-item">
+
+        <div>
+
+          <b>${popup.name}</b>
+
+        </div>
+
+        <div class="actions">
+
+          <button onclick="editPopup('${popup.id}')">
+            Edit
+          </button>
+
+          <button onclick="deletePopup('${popup.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+
+  })
+
+}
+
+async function savePopup(){
+
+  const payload = {
+
+    name: popupName.value.trim(),
+    script: popupCode.value
+
+  }
+
+  if(!payload.name || !payload.script){
+
+    alert("Fill all fields")
+
+    return
+
+  }
+
+  const res = await api(
+
+    `${API}/popup-library`,
+    "POST",
+    payload
+
+  )
+
+  if(res){
+
+    clearPopupForm()
+
+    loadPopups()
+
+  }
+
+}
+
+function clearPopupForm(){
+
+  popupName.value = ""
+  popupCode.value = ""
+
+}
+
+async function deletePopup(id){
+
+  if(!confirm("Delete Popup?")) return
+
+  await api(`${API}/popup-library/${id}`,"DELETE")
+
+  loadPopups()
+
+}
+
+function editPopup(id){
+
+  const p = POPUPS.find(x=>x.id===id)
+
+  if(!p) return
+
+  popupName.value = p.name
+  popupCode.value = p.script
+
+}
+
+/* =========================================================
+   HOSTS
+========================================================= */
+
+async function loadHosts(){
+
+  const data = await api(`${API}/host-monetization`)
+
+  HOSTS = Array.isArray(data) ? data : []
+
+  renderHosts()
+
+}
+
+function renderHosts(){
+
+  hostMonetizationList.innerHTML = ""
+
+  if(!HOSTS.length){
+
+    hostMonetizationList.innerHTML = `<p>No hosts configured</p>`
+
+    return
+
+  }
+
+  HOSTS.forEach(host=>{
+
+    hostMonetizationList.innerHTML += `
+
+      <div class="host-card">
+
+        <div class="host-top">
+
+          <div>
+
+            <h2>${host.host}</h2>
+
+            <p>
+              Storage : ${host.storage || "-"}
+            </p>
+
+          </div>
+
+          <div class="host-badges">
+
+            <span>
+              Knight : ${host.knight ? "YES" : "NO"}
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- ADS -->
+
+        <div class="host-section">
+
+          <h4>Ads</h4>
+
+          ${ADS.map(ad=>`
+
+            <label>
+
+              <input
+                type="checkbox"
+                class="host-ad"
+                data-host="${host.id}"
+                value="${ad.id}"
+
+                ${host.ads?.includes(ad.id) ? "checked" : ""}
+              >
+
+              ${ad.name}
+
+            </label>
+
+          `).join("")}
+
+        </div>
+
+        <!-- SHORTLINKS -->
+
+        <div class="host-section">
+
+          <h4>Shortlinks</h4>
+
+          ${SHORTLINKS.map(short=>`
+
+            <label>
+
+              <input
+                type="checkbox"
+                class="host-short"
+                data-host="${host.id}"
+                value="${short.id}"
+
+                ${host.shortlinks?.includes(short.id)
+                  ? "checked"
+                  : ""
+                }
+              >
+
+              ${short.name}
+
+            </label>
+
+          `).join("")}
+
+        </div>
+
+        <!-- POPUPS -->
+
+        <div class="host-section">
+
+          <h4>Popup Scripts</h4>
+
+          ${POPUPS.map(pop=>`
+
+            <label>
+
+              <input
+                type="checkbox"
+                class="host-popup"
+                data-host="${host.id}"
+                value="${pop.id}"
+
+                ${host.popups?.includes(pop.id)
+                  ? "checked"
+                  : ""
+                }
+              >
+
+              ${pop.name}
+
+            </label>
+
+          `).join("")}
+
+        </div>
+
+        <!-- MODE -->
+
+        <div class="host-section">
+
+          <h4>Mode</h4>
+
+          <select
+            class="rotationMode"
+            data-host="${host.id}"
+          >
+
+            <option
+              value="random"
+
+              ${host.mode==="random"
+                ? "selected"
+                : ""
+              }
+            >
+              Random Rotation
+            </option>
+
+            <option
+              value="sequence"
+
+              ${host.mode==="sequence"
+                ? "selected"
+                : ""
+              }
+            >
+              Sequence Rotation
+            </option>
+
+          </select>
+
+        </div>
+
+        <!-- ACTIONS -->
+
+        <div class="host-actions">
+
+          <button onclick="saveHost('${host.id}')">
+            Save
+          </button>
+
+          <button onclick="deleteHost('${host.id}')">
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `
+
+  })
+
+}
+
+/* =========================================================
+   SAVE HOST
+========================================================= */
+
+async function saveHost(id){
+
+  const ads = [
+    ...document.querySelectorAll(
+      `.host-ad[data-host="${id}"]:checked`
+    )
+  ].map(x=>x.value)
+
+  const shortlinks = [
+    ...document.querySelectorAll(
+      `.host-short[data-host="${id}"]:checked`
+    )
+  ].map(x=>x.value)
+
+  const popups = [
+    ...document.querySelectorAll(
+      `.host-popup[data-host="${id}"]:checked`
+    )
+  ].map(x=>x.value)
+
+  const mode = document.querySelector(
+    `.rotationMode[data-host="${id}"]`
+  ).value
+
+  const payload = {
+
+    ads,
+    shortlinks,
+    popups,
+    mode
+
+  }
+
+  const res = await api(
+
+    `${API}/host-monetization/${id}`,
+    "PUT",
+    payload
+
+  )
+
+  if(res){
+
+    alert("Saved")
+
+  }
+
+}
+
+/* =========================================================
+   DELETE HOST
+========================================================= */
+
+async function deleteHost(id){
+
+  if(!confirm("Delete Host?")) return
+
+  await api(`${API}/host-monetization/${id}`,"DELETE")
+
+  loadHosts()
+
+}
+
+/* =========================================================
+   ANALYTICS
+========================================================= */
+
+function renderAnalytics(){
+
+  totalHosts.innerText = HOSTS.length
+  totalAds.innerText = ADS.length
+  totalShortlinks.innerText = SHORTLINKS.length
+
+  let clicks = 0
+
+  HOSTS.forEach(h=>{
+
+    clicks += Number(h.clicks || 0)
+
+  })
+
+  totalClicks.innerText = clicks
+
+}
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+saveAdBtn.onclick = saveAd
+saveShortBtn.onclick = saveShort
+savePopupBtn.onclick = savePopup
+
+/* =========================================================
+   INIT
+========================================================= */
+
+loadAll()
 
 </script>
 
