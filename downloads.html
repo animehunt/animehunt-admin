@@ -1608,7 +1608,7 @@ Links
 
 /* =========================================================
    ⚡ ANIMEHUNT DOWNLOAD MANAGER
-   FINAL DOWNLOADS.HTML SCRIPT
+   FINAL DOWNLOADS.HTML SCRIPT V3
 ========================================================= */
 
 const API =
@@ -1651,6 +1651,15 @@ document.getElementById("hostTemplate")
 const linkTemplate =
 document.getElementById("linkTemplate")
 
+const animeCardTemplate =
+document.getElementById("animeCardTemplate")
+
+const episodeCardTemplate =
+document.getElementById("episodeCardTemplate")
+
+const hostDisplayTemplate =
+document.getElementById("hostDisplayTemplate")
+
 /* =========================================================
    STATE
 ========================================================= */
@@ -1680,13 +1689,15 @@ async function api(
         "Authorization":"Bearer " + TOKEN
       },
 
-      body: body
+      body:
+      body
       ? JSON.stringify(body)
       : null
 
     })
 
-    const json = await res.json()
+    const json =
+    await res.json()
 
     if(!res.ok){
 
@@ -1709,7 +1720,7 @@ async function api(
 }
 
 /* =========================================================
-   LOAD EVERYTHING
+   INIT
 ========================================================= */
 
 async function init(){
@@ -1721,6 +1732,8 @@ async function init(){
     loadDownloads()
 
   ])
+
+  renderAnimeGrid()
 
 }
 
@@ -1741,35 +1754,6 @@ async function loadAnime(){
   : []
 
   renderAnimeSelect()
-  renderAnimeGrid()
-
-}
-
-/* =========================================================
-   RENDER ANIME SELECT
-========================================================= */
-
-function renderAnimeSelect(){
-
-  animeSelect.innerHTML = `
-    <option value="">
-      Select Anime
-    </option>
-  `
-
-  ANIME.forEach(anime=>{
-
-    animeSelect.innerHTML += `
-
-      <option value="${anime.id}">
-
-        ${anime.title}
-
-      </option>
-
-    `
-
-  })
 
 }
 
@@ -1806,6 +1790,36 @@ async function loadDownloads(){
 }
 
 /* =========================================================
+   RENDER ANIME SELECT
+========================================================= */
+
+function renderAnimeSelect(){
+
+  animeSelect.innerHTML = `
+
+    <option value="">
+      Select Anime
+    </option>
+
+  `
+
+  ANIME.forEach(anime=>{
+
+    animeSelect.innerHTML += `
+
+      <option value="${anime.id}">
+
+        ${anime.title}
+
+      </option>
+
+    `
+
+  })
+
+}
+
+/* =========================================================
    RENDER ANIME GRID
 ========================================================= */
 
@@ -1816,7 +1830,7 @@ function renderAnimeGrid(){
   if(!ANIME.length){
 
     downloadsView.innerHTML =
-    `<p>No anime found</p>`
+    `<p>No Anime Found</p>`
 
     return
 
@@ -1824,37 +1838,276 @@ function renderAnimeGrid(){
 
   ANIME.forEach(anime=>{
 
-    downloadsView.innerHTML += `
+    const total =
+    DOWNLOADS.filter(
+      x=>x.anime_id === anime.id
+    ).length
 
-      <div class="anime-card">
+    const clone =
+    animeCardTemplate
+    .content
+    .cloneNode(true)
 
-        <div class="anime-poster">
+    clone.querySelector(
+      ".anime-image"
+    ).src =
+    anime.poster
 
-          <img
-            src="${anime.poster}"
-          >
+    clone.querySelector(
+      ".anime-title"
+    ).innerText =
+    anime.title
+
+    clone.querySelector(
+      ".anime-type"
+    ).innerText =
+    `${anime.type || "anime"} • ${total} Downloads`
+
+    const card =
+    clone.querySelector(
+      ".anime-card"
+    )
+
+    card.onclick = ()=>{
+
+      renderEpisodes(anime.id)
+
+    }
+
+    downloadsView.appendChild(clone)
+
+  })
+
+}
+
+/* =========================================================
+   RENDER EPISODES
+========================================================= */
+
+function renderEpisodes(animeId){
+
+  downloadsView.innerHTML = ""
+
+  const anime =
+  ANIME.find(
+    x=>x.id===animeId
+  )
+
+  const list =
+  DOWNLOADS.filter(
+    x=>x.anime_id===animeId
+  )
+
+  if(!list.length){
+
+    downloadsView.innerHTML =
+    `<p>No Downloads Found</p>`
+
+    return
+
+  }
+
+  list.forEach(item=>{
+
+    const clone =
+    episodeCardTemplate
+    .content
+    .cloneNode(true)
+
+    clone.querySelector(
+      ".episode-number"
+    ).innerText =
+
+      item.content_type === "movie"
+      ? "MOVIE"
+      : `EP ${item.episode || "?"}`
+
+    clone.querySelector(
+      ".episode-title"
+    ).innerText =
+
+      item.episode_title ||
+      anime.title
+
+    clone.querySelector(
+      ".host-count"
+    ).innerText =
+
+      `${item.hosts.length} Hosts`
+
+    const card =
+    clone.querySelector(
+      ".episode-card"
+    )
+
+    card.onclick = ()=>{
+
+      renderHostCards(item)
+
+    }
+
+    downloadsView.appendChild(clone)
+
+  })
+
+}
+
+/* =========================================================
+   RENDER HOST CARDS
+========================================================= */
+
+function renderHostCards(item){
+
+  downloadsView.innerHTML = ""
+
+  item.hosts.forEach(host=>{
+
+    const clone =
+    hostDisplayTemplate
+    .content
+    .cloneNode(true)
+
+    clone.querySelector(
+      ".display-host-name"
+    ).innerText =
+    host.host
+
+    clone.querySelector(
+      ".display-storage"
+    ).innerText =
+
+      `Storage : ${host.storage || "Unknown"}`
+
+    clone.querySelector(
+      ".display-knight"
+    ).innerText =
+
+      `Knight : ${host.knight ? "YES" : "NO"}`
+
+    clone.querySelector(
+      ".display-mode"
+    ).innerText =
+
+      host.mode || "random"
+
+    /* ADS */
+
+    const adsBox =
+    clone.querySelector(
+      ".display-ads"
+    )
+
+    if(host.ads?.length){
+
+      host.ads.forEach(ad=>{
+
+        adsBox.innerHTML += `
+
+          <div>
+
+            ${ad.name || ad}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      adsBox.innerHTML =
+      `<div class="empty-tag">
+        OFF
+      </div>`
+
+    }
+
+    /* SHORTLINKS */
+
+    const shortBox =
+    clone.querySelector(
+      ".display-shortlinks"
+    )
+
+    if(host.shortlinks?.length){
+
+      host.shortlinks.forEach(short=>{
+
+        shortBox.innerHTML += `
+
+          <div>
+
+            ${short.name || short}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      shortBox.innerHTML =
+      `<div class="empty-tag">
+        NONE
+      </div>`
+
+    }
+
+    /* POPUPS */
+
+    const popupBox =
+    clone.querySelector(
+      ".display-popups"
+    )
+
+    if(host.popups?.length){
+
+      host.popups.forEach(popup=>{
+
+        popupBox.innerHTML += `
+
+          <div>
+
+            ${popup.name || popup}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      popupBox.innerHTML =
+      `<div class="empty-tag">
+        NONE
+      </div>`
+
+    }
+
+    /* LINKS */
+
+    const linksBox =
+    clone.querySelector(
+      ".display-links"
+    )
+
+    host.links.forEach(link=>{
+
+      linksBox.innerHTML += `
+
+        <div>
+
+          ${link.quality || "LINK"}
 
         </div>
 
-        <div class="anime-meta">
+      `
 
-          <h3 class="anime-title">
+    })
 
-            ${anime.title}
-
-          </h3>
-
-          <small class="anime-type">
-
-            ${anime.type || "anime"}
-
-          </small>
-
-        </div>
-
-      </div>
-
-    `
+    downloadsView.appendChild(clone)
 
   })
 
@@ -1866,7 +2119,8 @@ function renderAnimeGrid(){
 
 openAddModal.onclick = ()=>{
 
-  downloadModal.style.display = "flex"
+  downloadModal.style.display =
+  "flex"
 
   hostsContainer.innerHTML = ""
 
@@ -1880,12 +2134,13 @@ openAddModal.onclick = ()=>{
 
 closeModal.onclick = ()=>{
 
-  downloadModal.style.display = "none"
+  downloadModal.style.display =
+  "none"
 
 }
 
 /* =========================================================
-   ADD HOST
+   ADD HOST BUTTON
 ========================================================= */
 
 addHostBtn.onclick = ()=>{
@@ -1894,34 +2149,52 @@ addHostBtn.onclick = ()=>{
 
 }
 
+/* =========================================================
+   ADD HOST
+========================================================= */
+
 function addHost(){
 
   const clone =
-  hostTemplate.content.cloneNode(true)
+  hostTemplate
+  .content
+  .cloneNode(true)
 
   const card =
-  clone.querySelector(".download-host-card")
+  clone.querySelector(
+    ".download-host-card"
+  )
 
   const hostSelect =
-  clone.querySelector(".host-select")
+  clone.querySelector(
+    ".host-select"
+  )
 
   const removeBtn =
-  clone.querySelector(".remove-host")
+  clone.querySelector(
+    ".remove-host"
+  )
 
   const addLinkBtn =
-  clone.querySelector(".addLinkBtn")
+  clone.querySelector(
+    ".addLinkBtn"
+  )
 
   const linksContainer =
-  clone.querySelector(".linksContainer")
+  clone.querySelector(
+    ".linksContainer"
+  )
 
   /* =========================
-     HOST DROPDOWN
+     HOST LIST
   ========================= */
 
   hostSelect.innerHTML = `
+
     <option value="">
       Select Host
     </option>
+
   `
 
   HOSTS.forEach(host=>{
@@ -1989,12 +2262,9 @@ function addHost(){
       x=>x.host===hostName
     )
 
-    const knight =
-    host?.knight
-
     addLink(
       linksContainer,
-      knight
+      host?.knight
     )
 
   }
@@ -2014,7 +2284,8 @@ function renderHostInfo(card,host){
   card.querySelector(
     ".display-storage"
   ).innerText =
-  host.storage || "Unknown"
+
+    host.storage || "Unknown"
 
   /* KNIGHT */
 
@@ -2024,21 +2295,24 @@ function renderHostInfo(card,host){
   )
 
   knightEl.innerText =
-  host.knight
-  ? "YES"
-  : "NO"
+
+    host.knight
+    ? "YES"
+    : "NO"
 
   knightEl.className =
-  host.knight
-  ? "display-knight-status yes"
-  : "display-knight-status no"
+
+    host.knight
+    ? "display-knight-status yes"
+    : "display-knight-status no"
 
   /* MODE */
 
   card.querySelector(
     ".display-mode"
   ).innerText =
-  host.mode || "random"
+
+    host.mode || "random"
 
   /* ADS */
 
@@ -2054,9 +2328,13 @@ function renderHostInfo(card,host){
     host.ads.forEach(ad=>{
 
       adsBox.innerHTML += `
+
         <div>
+
           ${ad.name || ad}
+
         </div>
+
       `
 
     })
@@ -2084,9 +2362,13 @@ function renderHostInfo(card,host){
     host.shortlinks.forEach(short=>{
 
       shortBox.innerHTML += `
+
         <div>
+
           ${short.name || short}
+
         </div>
+
       `
 
     })
@@ -2114,9 +2396,13 @@ function renderHostInfo(card,host){
     host.popups.forEach(popup=>{
 
       popupBox.innerHTML += `
+
         <div>
+
           ${popup.name || popup}
+
         </div>
+
       `
 
     })
@@ -2142,16 +2428,24 @@ function addLink(
 ){
 
   const clone =
-  linkTemplate.content.cloneNode(true)
+  linkTemplate
+  .content
+  .cloneNode(true)
 
   const row =
-  clone.querySelector(".download-link-row")
+  clone.querySelector(
+    ".download-link-row"
+  )
 
   const quality =
-  clone.querySelector(".quality-select")
+  clone.querySelector(
+    ".quality-select"
+  )
 
   const remove =
-  clone.querySelector(".remove-link")
+  clone.querySelector(
+    ".remove-link"
+  )
 
   /* =========================
      NON KNIGHT
@@ -2159,7 +2453,8 @@ function addLink(
 
   if(!isKnight){
 
-    quality.style.display = "none"
+    quality.style.display =
+    "none"
 
     row.style.gridTemplateColumns =
     "1fr 70px"
@@ -2184,26 +2479,35 @@ function addLink(
    SAVE DOWNLOAD
 ========================================================= */
 
-saveDownloadBtn.onclick = async ()=>{
+saveDownloadBtn.onclick =
+async ()=>{
 
   const animeId =
   animeSelect.value
 
   const contentType =
-  document.getElementById("contentType").value
+  document.getElementById(
+    "contentType"
+  ).value
 
   const season =
-  document.getElementById("seasonNumber").value
+  document.getElementById(
+    "seasonNumber"
+  ).value
 
   const episode =
-  document.getElementById("episodeNumber").value
+  document.getElementById(
+    "episodeNumber"
+  ).value
 
   const episodeTitle =
-  document.getElementById("episodeTitle").value
+  document.getElementById(
+    "episodeTitle"
+  ).value
 
   if(!animeId){
 
-    alert("Select anime")
+    alert("Select Anime")
 
     return
 
@@ -2211,17 +2515,20 @@ saveDownloadBtn.onclick = async ()=>{
 
   const payload = {
 
-    anime_id: animeId,
+    anime_id:
+    animeId,
 
-    content_type: contentType,
+    content_type:
+    contentType,
 
     season,
 
     episode,
 
-    episode_title: episodeTitle,
+    episode_title:
+    episodeTitle,
 
-    hosts: []
+    hosts:[]
 
   }
 
@@ -2230,7 +2537,9 @@ saveDownloadBtn.onclick = async ()=>{
   ===================================================== */
 
   document
-  .querySelectorAll(".download-host-card")
+  .querySelectorAll(
+    ".download-host-card"
+  )
   .forEach(card=>{
 
     const host =
@@ -2248,7 +2557,9 @@ saveDownloadBtn.onclick = async ()=>{
     const links = []
 
     card
-    .querySelectorAll(".download-link-row")
+    .querySelectorAll(
+      ".download-link-row"
+    )
     .forEach(row=>{
 
       const quality =
@@ -2292,7 +2603,9 @@ saveDownloadBtn.onclick = async ()=>{
 
   if(!payload.hosts.length){
 
-    alert("Add at least one host")
+    alert(
+      "Add At Least One Host"
+    )
 
     return
 
@@ -2318,13 +2631,15 @@ saveDownloadBtn.onclick = async ()=>{
     downloadModal.style.display =
     "none"
 
-    loadDownloads()
+    await loadDownloads()
+
+    renderAnimeGrid()
 
   }
 
 }
 
-     </script>
+</script>
 
 </body>
 </html>
