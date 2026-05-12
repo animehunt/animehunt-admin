@@ -159,23 +159,617 @@ button:hover{
 </header>
 
 <section class="cms-content">
-<div class="downloads-table">
 
-<div class="downloads-head">
-<span>Anime</span>
-<span>S</span>
-<span>E</span>
-<span>Host</span>
-<span>Storage</span>
-<span>Q</span>
-<span>Link</span>
-<span>Actions</span>
+<!-- =========================================
+TOP BAR
+========================================= -->
+
+<div class="download-toolbar">
+
+  <div class="left-tools">
+
+    <input
+      type="text"
+      id="searchAnime"
+      placeholder="Search anime..."
+    >
+
+    <select id="filterType">
+
+      <option value="">All Types</option>
+
+      <option value="anime">
+        Anime
+      </option>
+
+      <option value="movie">
+        Movie
+      </option>
+
+      <option value="series">
+        Series
+      </option>
+
+      <option value="cartoon">
+        Cartoon
+      </option>
+
+    </select>
+
+  </div>
+
+  <div class="right-tools">
+
+    <button id="goBackBtn" style="display:none">
+      ← Back
+    </button>
+
+    <button id="openAddModal">
+      ➕ Add Download
+    </button>
+
+  </div>
+
 </div>
 
-<div id="downloadList"></div>
+<!-- =========================================
+BREADCRUMB
+========================================= -->
+
+<div id="downloadBreadcrumb"></div>
+
+<!-- =========================================
+MAIN VIEW
+========================================= -->
+
+<div id="downloadsView">
+
+  <!-- JS RENDER -->
 
 </div>
+
 </section>
+
+<!-- =========================================
+ADD / EDIT MODAL
+========================================= -->
+
+<div class="modal" id="downloadModal">
+
+<div class="modal-box large">
+
+<!-- =========================================
+HEADER
+========================================= -->
+
+<div class="modal-header">
+
+  <h3 id="modalTitle">
+    Add Download
+  </h3>
+
+  <span id="closeModal">
+    ✕
+  </span>
+
+</div>
+
+<!-- =========================================
+BODY
+========================================= -->
+
+<div class="modal-body">
+
+<!-- =========================================
+ANIME INFO
+========================================= -->
+
+<div class="form-section">
+
+  <h4>Anime Information</h4>
+
+  <div class="form-grid">
+
+    <select id="animeSelect"></select>
+
+    <select id="downloadType">
+
+      <option value="episode">
+        Episode
+      </option>
+
+      <option value="season_zip">
+        Season ZIP
+      </option>
+
+      <option value="movie">
+        Movie
+      </option>
+
+      <option value="series_zip">
+        Full Series ZIP
+      </option>
+
+    </select>
+
+    <input
+      id="seasonNumber"
+      placeholder="Season Number"
+    >
+
+    <input
+      id="episodeNumber"
+      placeholder="Episode Number"
+    >
+
+    <input
+      id="episodeTitle"
+      placeholder="Episode Title"
+    >
+
+  </div>
+
+</div>
+
+<!-- =========================================
+HOSTS AREA
+========================================= -->
+
+<div class="form-section">
+
+  <div class="host-header">
+
+    <h4>Hosts</h4>
+
+    <button id="addHostBtn">
+      + Add Host
+    </button>
+
+  </div>
+
+  <div id="hostsContainer">
+
+    <!-- JS -->
+
+  </div>
+
+</div>
+
+</div>
+
+<!-- =========================================
+FOOTER
+========================================= -->
+
+<div class="modal-footer">
+
+  <button id="saveDownloadBtn">
+    💾 Save Download
+  </button>
+
+</div>
+
+</div>
+</div>
+
+<!-- =========================================
+HOST TEMPLATE
+========================================= -->
+
+<template id="hostTemplate">
+
+<div class="host-entry">
+
+<!-- =========================
+TOP
+========================= -->
+
+<div class="host-top">
+
+  <div class="host-left">
+
+    <select class="host-select">
+
+      <option value="">
+        Select Host
+      </option>
+
+    </select>
+
+    <input
+      class="custom-host"
+      placeholder="Custom Host Name"
+    >
+
+  </div>
+
+  <div class="host-right">
+
+    <button class="remove-host">
+      Remove
+    </button>
+
+  </div>
+
+</div>
+
+<!-- =========================
+STORAGE
+========================= -->
+
+<div class="host-storage">
+
+  <select class="storage-select">
+
+    <option value="">
+      Select Storage
+    </option>
+
+  </select>
+
+  <input
+    class="custom-storage"
+    placeholder="Custom Storage"
+  >
+
+</div>
+
+<!-- =========================
+KNIGHT MODE
+========================= -->
+
+<div class="host-flags">
+
+  <label>
+
+    <input
+      type="checkbox"
+      class="is-knight"
+    >
+
+    Knight Mode
+
+  </label>
+
+  <label>
+
+    <input
+      type="checkbox"
+      class="direct-open"
+    >
+
+    Direct Open
+
+  </label>
+
+</div>
+
+<!-- =========================
+MONETIZATION
+========================= -->
+
+<div class="monetization-box">
+
+<!-- ADS -->
+
+<div class="monetization-group">
+
+  <h5>Ads</h5>
+
+  <div class="ads-list dynamic-ads-list">
+
+    <!-- JS -->
+
+  </div>
+
+</div>
+
+<!-- SHORTLINKS -->
+
+<div class="monetization-group">
+
+  <h5>Shortlinks</h5>
+
+  <div class="shortlinks-list dynamic-shortlinks-list">
+
+    <!-- JS -->
+
+  </div>
+
+</div>
+
+<!-- POPUPS -->
+
+<div class="monetization-group">
+
+  <h5>Popup Scripts</h5>
+
+  <div class="popups-list dynamic-popups-list">
+
+    <!-- JS -->
+
+  </div>
+
+</div>
+
+<!-- MODE -->
+
+<div class="monetization-group">
+
+  <h5>Rotation Mode</h5>
+
+  <select class="rotation-mode">
+
+    <option value="random">
+      Random Rotation
+    </option>
+
+    <option value="sequence">
+      Sequence Rotation
+    </option>
+
+    <option value="direct">
+      Direct Open
+    </option>
+
+  </select>
+
+</div>
+
+</div>
+
+<!-- =========================
+LINKS AREA
+========================= -->
+
+<div class="links-area">
+
+  <div class="links-header">
+
+    <h5>Download Links</h5>
+
+    <button class="add-link-btn">
+      + Add Link
+    </button>
+
+  </div>
+
+  <div class="links-container">
+
+    <!-- JS -->
+
+  </div>
+
+</div>
+
+</div>
+
+</template>
+
+<!-- =========================================
+LINK TEMPLATE
+========================================= -->
+
+<template id="linkTemplate">
+
+<div class="link-entry">
+
+<!-- QUALITY -->
+
+<select class="quality-select">
+
+  <option value="">
+    Select Quality
+  </option>
+
+  <option value="480p">
+    480p
+  </option>
+
+  <option value="720p">
+    720p
+  </option>
+
+  <option value="1080p">
+    1080p
+  </option>
+
+  <option value="4K">
+    4K
+  </option>
+
+  <option value="ZIP">
+    ZIP
+  </option>
+
+  <option value="RAW">
+    RAW
+  </option>
+
+</select>
+
+<!-- LINK -->
+
+<input
+  class="download-link"
+  placeholder="Download Link"
+/>
+
+<!-- REMOVE -->
+
+<button class="remove-link">
+
+  ✕
+
+</button>
+
+</div>
+
+</template>
+
+<!-- =========================================
+ANIME GRID VIEW
+========================================= -->
+
+<template id="animeCardTemplate">
+
+<div class="anime-download-card">
+
+  <div class="anime-poster">
+
+    <img class="anime-image">
+
+  </div>
+
+  <div class="anime-info">
+
+    <h3 class="anime-title"></h3>
+
+    <small class="anime-type"></small>
+
+  </div>
+
+</div>
+
+</template>
+
+<!-- =========================================
+SEASON CARD VIEW
+========================================= -->
+
+<template id="seasonCardTemplate">
+
+<div class="season-download-card">
+
+  <h3 class="season-title"></h3>
+
+  <small class="season-count"></small>
+
+</div>
+
+</template>
+
+<!-- =========================================
+EPISODE CARD VIEW
+========================================= -->
+
+<template id="episodeCardTemplate">
+
+<div class="episode-download-card">
+
+  <div class="episode-left">
+
+    <span class="episode-number"></span>
+
+    <h4 class="episode-title"></h4>
+
+  </div>
+
+  <div class="episode-right">
+
+    <span class="episode-host-count"></span>
+
+  </div>
+
+</div>
+
+</template>
+
+<!-- =========================================
+HOST CARD VIEW
+========================================= -->
+
+<template id="hostCardTemplate">
+
+<div class="host-display-card">
+
+<!-- TOP -->
+
+<div class="display-host-top">
+
+  <div>
+
+    <h3 class="display-host-name"></h3>
+
+    <small class="display-storage"></small>
+
+  </div>
+
+  <div class="display-actions">
+
+    <button class="edit-host-btn">
+
+      EDIT
+
+    </button>
+
+    <button class="delete-host-btn">
+
+      DELETE
+
+    </button>
+
+  </div>
+
+</div>
+
+<!-- KNIGHT -->
+
+<div class="display-knight"></div>
+
+<!-- ADS -->
+
+<div class="display-section">
+
+  <h5>Ads</h5>
+
+  <div class="display-ads"></div>
+
+</div>
+
+<!-- SHORTLINKS -->
+
+<div class="display-section">
+
+  <h5>Shortlinks</h5>
+
+  <div class="display-shortlinks"></div>
+
+</div>
+
+<!-- POPUPS -->
+
+<div class="display-section">
+
+  <h5>Popup Scripts</h5>
+
+  <div class="display-popups"></div>
+
+</div>
+
+<!-- MODE -->
+
+<div class="display-section">
+
+  <h5>Mode</h5>
+
+  <div class="display-mode"></div>
+
+</div>
+
+<!-- QUALITIES -->
+
+<div class="display-section">
+
+  <h5>Qualities</h5>
+
+  <div class="display-qualities"></div>
+
+</div>
+
+</div>
+
+</template>
 
 </main>
 </div>
