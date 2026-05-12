@@ -910,688 +910,7 @@ RESPONSIVE
 
 }
 
-/* =========================================================
-PRODUCTION UI EXTENSIONS
-========================================================= */
 
-/* =========================================================
-HEADER
-========================================================= */
-
-.header-subtitle{
-  color:#888;
-  font-size:13px;
-  margin-top:6px;
-}
-
-/* =========================================================
-TOP STATS
-========================================================= */
-
-.top-stats-grid{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:18px;
-  padding:20px;
-  padding-bottom:0;
-}
-
-.top-stat-card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:18px;
-  padding:22px;
-  position:relative;
-  overflow:hidden;
-}
-
-.top-stat-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.08),
-    transparent
-  );
-  pointer-events:none;
-}
-
-.top-stat-card h2{
-  color:#ffcc00;
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.top-stat-card p{
-  color:#888;
-  font-size:13px;
-}
-
-/* =========================================================
-TABS
-========================================================= */
-
-.tabs-bar{
-  display:flex;
-  gap:12px;
-  padding:20px;
-  padding-bottom:0;
-  flex-wrap:wrap;
-}
-
-.tab-btn{
-  height:46px;
-  border:none;
-  background:#11162a;
-  border:1px solid #1f2742;
-  color:#ccc;
-  border-radius:12px;
-  padding:0 18px;
-  font-size:13px;
-  font-weight:700;
-  transition:.2s;
-}
-
-.tab-btn:hover{
-  border-color:#ffcc00;
-  color:#ffcc00;
-}
-
-.tab-btn.active{
-  background:#ffcc00;
-  color:#000;
-  border-color:#ffcc00;
-}
-
-.tab-content{
-  display:none;
-}
-
-.tab-content.active{
-  display:block;
-}
-
-/* =========================================================
-SECTION HEADER
-========================================================= */
-
-.section-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:24px;
-  flex-wrap:wrap;
-}
-
-.section-header h3{
-  font-size:24px;
-  margin-bottom:6px;
-}
-
-.section-header p{
-  color:#888;
-  font-size:13px;
-}
-
-.section-tools{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.section-tools input,
-.section-tools select{
-  width:220px;
-  height:44px;
-}
-
-/* =========================================================
-HOST GRID
-========================================================= */
-
-.host-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:20px;
-}
-
-/* =========================================================
-PRODUCTION HOST CARD
-========================================================= */
-
-.host-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:22px;
-  overflow:hidden;
-  position:relative;
-}
-
-.host-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.04),
-    transparent
-  );
-  pointer-events:none;
-}
-
-.host-card-top{
-  padding:24px;
-  border-bottom:1px solid #1f2742;
-}
-
-.host-card-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:18px;
-}
-
-.host-name{
-  font-size:24px;
-  margin-bottom:8px;
-}
-
-.host-storage{
-  color:#888;
-  font-size:13px;
-}
-
-.host-status{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.host-status span{
-  background:#141d35;
-  border:1px solid #1f2742;
-  color:#ffcc00;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-}
-
-.host-body{
-  padding:24px;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-
-.host-block h5{
-  margin-bottom:12px;
-  color:#ffcc00;
-  font-size:13px;
-}
-
-.tag-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.tag{
-  background:#141b30;
-  border:1px solid #1f2742;
-  border-radius:10px;
-  padding:8px 12px;
-  font-size:12px;
-}
-
-.empty-tag{
-  opacity:.5;
-  border-style:dashed;
-}
-
-.host-card-footer{
-  display:flex;
-  gap:12px;
-  padding:24px;
-  border-top:1px solid #1f2742;
-}
-
-.host-card-footer button{
-  flex:1;
-  height:44px;
-}
-
-/* =========================================================
-LIBRARY GRID
-========================================================= */
-
-.library-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:20px;
-}
-
-/* =========================================================
-LIBRARY CARD
-========================================================= */
-
-.library-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:20px;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-
-.library-card-top{
-  padding:22px;
-  border-bottom:1px solid #1f2742;
-}
-
-.library-card-title{
-  font-size:18px;
-  margin-bottom:10px;
-}
-
-.library-card-sub{
-  color:#888;
-  font-size:12px;
-}
-
-.library-card-body{
-  padding:22px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  flex:1;
-}
-
-.library-meta{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  font-size:12px;
-  color:#999;
-}
-
-.library-card-footer{
-  padding:22px;
-  border-top:1px solid #1f2742;
-  display:flex;
-  gap:10px;
-}
-
-.library-card-footer button{
-  flex:1;
-  height:42px;
-}
-
-/* =========================================================
-ANALYTICS
-========================================================= */
-
-.analytics-layout{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:20px;
-}
-
-.analytics-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:20px;
-  padding:24px;
-}
-
-.analytics-card.large{
-  grid-column:1/-1;
-}
-
-.analytics-card h3{
-  margin-bottom:20px;
-  color:#ffcc00;
-}
-
-.analytics-list{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.analytics-item{
-  background:#141b30;
-  border:1px solid #1f2742;
-  border-radius:14px;
-  padding:14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-}
-
-.analytics-item strong{
-  font-size:14px;
-}
-
-.analytics-item span{
-  color:#ffcc00;
-  font-size:13px;
-  font-weight:700;
-}
-
-/* =========================================================
-MODAL
-========================================================= */
-
-.medium-modal{
-  width:650px;
-  max-width:100%;
-}
-
-.large-modal{
-  width:1200px;
-  max-width:100%;
-}
-
-.modal{
-  backdrop-filter:blur(6px);
-}
-
-.modal-box{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  box-shadow:
-  0 30px 80px rgba(0,0,0,.45);
-}
-
-.modal-body{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
-
-.builder-section{
-  background:#0e1424;
-  border:1px solid #1f2742;
-  border-radius:18px;
-  padding:20px;
-}
-
-.builder-section h4{
-  color:#ffcc00;
-  margin-bottom:18px;
-}
-
-.builder-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:14px;
-}
-
-.builder-grid input,
-.builder-grid select{
-  height:48px;
-}
-
-.dual-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px;
-}
-
-/* =========================================================
-SELECTION GRID
-========================================================= */
-
-.selection-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
-}
-
-.selection-item{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:16px;
-  padding:16px;
-  cursor:pointer;
-  transition:.2s;
-  position:relative;
-}
-
-.selection-item:hover{
-  border-color:#ffcc00;
-}
-
-.selection-item.active{
-  border-color:#ffcc00;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.08),
-    #11162a
-  );
-}
-
-.selection-item h5{
-  margin-bottom:8px;
-  font-size:14px;
-}
-
-.selection-item p{
-  color:#888;
-  font-size:12px;
-}
-
-.selection-check{
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#1f2742;
-}
-
-.selection-item.active
-.selection-check{
-  background:#ffcc00;
-}
-
-/* =========================================================
-TOAST
-========================================================= */
-
-#toastContainer{
-  position:fixed;
-  top:20px;
-  right:20px;
-  z-index:999999;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.toast{
-  min-width:300px;
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-left:4px solid #ffcc00;
-  border-radius:14px;
-  padding:16px;
-  animation:toastIn .25s ease;
-}
-
-.toast.success{
-  border-left-color:#2ecc71;
-}
-
-.toast.error{
-  border-left-color:#ff4d4d;
-}
-
-.toast-title{
-  font-size:14px;
-  margin-bottom:6px;
-}
-
-.toast-msg{
-  color:#888;
-  font-size:12px;
-}
-
-@keyframes toastIn{
-  from{
-    opacity:0;
-    transform:translateX(40px);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
-}
-
-/* =========================================================
-EMPTY STATE
-========================================================= */
-
-.empty-state{
-  background:#0b0f1a;
-  border:1px dashed #1f2742;
-  border-radius:20px;
-  padding:60px 20px;
-  text-align:center;
-}
-
-.empty-state h3{
-  margin-bottom:12px;
-}
-
-.empty-state p{
-  color:#777;
-  font-size:13px;
-}
-
-/* =========================================================
-LOADING STATE
-========================================================= */
-
-.loading-card{
-  height:220px;
-  border-radius:20px;
-  background:
-  linear-gradient(
-    90deg,
-    #0b0f1a,
-    #141b30,
-    #0b0f1a
-  );
-  background-size:300% 100%;
-  animation:loading 1.2s infinite linear;
-}
-
-@keyframes loading{
-  0%{
-    background-position:0% 0%;
-  }
-  100%{
-    background-position:300% 0%;
-  }
-}
-
-/* =========================================================
-RESPONSIVE
-========================================================= */
-
-@media(max-width:1400px){
-
-  .library-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:1200px){
-
-  .host-grid{
-    grid-template-columns:1fr;
-  }
-
-  .builder-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .selection-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:900px){
-
-  .top-stats-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .analytics-layout{
-    grid-template-columns:1fr;
-  }
-
-  .library-grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media(max-width:700px){
-
-  .tabs-bar{
-    overflow:auto;
-    flex-wrap:nowrap;
-  }
-
-  .tab-btn{
-    white-space:nowrap;
-  }
-
-  .builder-grid{
-    grid-template-columns:1fr;
-  }
-
-  .selection-grid{
-    grid-template-columns:1fr;
-  }
-
-  .dual-grid{
-    grid-template-columns:1fr;
-  }
-
-  .top-stats-grid{
-    grid-template-columns:1fr;
-  }
-
-  .section-header{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .section-tools{
-    width:100%;
-  }
-
-  .section-tools input,
-  .section-tools select{
-    width:100%;
-  }
-
- }
 
   
   
@@ -1604,854 +923,1017 @@ RESPONSIVE
 
 <div class="cms-app">
 
-<!-- =====================================================
-SIDEBAR
-===================================================== -->
+  <!-- =======================================================
+  SIDEBAR
+  ======================================================= -->
 
-<aside class="cms-sidebar">
+  <aside class="cms-sidebar">
 
-<div class="brand">
-<span>Anime</span><b>Hunt</b>
-<small>CMS</small>
-</div>
+    <div class="brand">
+      <span>Anime</span><b>Hunt</b>
+      <small>CMS</small>
+    </div>
 
-<nav class="cms-menu">
+    <nav class="cms-menu">
 
-<a href="dashboard.html">🏠 Dashboard</a>
-<a href="anime.html">🎬 Anime</a>
-<a href="episodes.html">📺 Episodes</a>
-<a href="categories.html">🗂 Catagorys</a>
-<a href="banners.html">🖼 Banners</a>
-<a href="homepage.html">🏠 Homepage</a>
+      <!-- CORE -->
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="anime.html">🎬 Anime</a>
+      <a href="episodes.html">📺 Episodes</a>
+      <a href="categories.html">🗂 Catagorys</a>
+      <a href="banners.html">🖼 Banners</a>
+      <a href="homepage.html">🏠 Homepage</a>
 
-<a href="downloads.html">📥 Downloads</a>
-<a href="servers.html">🌐 Servers</a>
-<a href="player.html">🎞 Player</a>
-<a href="search.html">🔍 Search</a>
+      <!-- CONTENT -->
+      <a href="downloads.html" class="active">📥 Downloads</a>
+      <a href="servers.html">🌐 Servers</a>
+      <a href="player.html">🎞 Player</a>
+      <a href="search.html">🔍 Search</a>
 
-<a href="seo.html">📈 Seo</a>
-<a href="analytics.html">📊 Analytics</a>
-<a href="performance.html">⚡ Performance</a>
+      <!-- DATA -->
+      <a href="seo.html">📈 Seo</a>
+      <a href="analytics.html">📊 Analytics</a>
+      <a href="performance.html">⚡ Performance</a>
 
-<a href="security.html">🔐 Security</a>
-<a href="deploy-backup.html">🚀 Deploy-backup</a>
+      <!-- SECURITY -->
+      <a href="security.html">🔐 Security</a>
+      <a href="deploy-backup.html">🚀 Deploy-backup</a>
 
-<a href="ads.html" class="active">📢 Ads</a>
-<a href="ai-brain.html">🧠 Ai Brain</a>
+      <!-- AI -->
+      <a href="ads.html">📢 Ads</a>
+      <a href="ai-brain.html">🧠 Ai Brain</a>
 
-<a href="sidebar.html">📌 Sidebar</a>
-<a href="footer.html">🦶 Footer</a>
+      <!-- LAYOUT -->
+      <a href="sidebar.html">📌 Sidebar</a>
+      <a href="footer.html">🦶 Footer</a>
 
-<a href="system-settings.html">⚙ System-settings</a>
+      <!-- SYSTEM -->
+      <a href="system-settings.html">⚙ System-settings</a>
 
-</nav>
-</aside>
+    </nav>
 
-<!-- =====================================================
-MAIN
-===================================================== -->
+  </aside>
 
-<main class="cms-main">
+  <!-- =======================================================
+  MAIN
+  ======================================================= -->
 
-<!-- =====================================================
-HEADER
-===================================================== -->
+  <main class="cms-main">
 
-<header class="cms-header">
+    <!-- =======================================================
+    HEADER
+    ======================================================= -->
 
-<div>
+    <header class="cms-header">
 
-<h1>
-⚡ Monetization Engine
-</h1>
+      <div class="header-left">
 
-<p class="header-subtitle">
-Professional Download Monetization Management
-</p>
+        <h2>
+          📥 Download Manager
+        </h2>
 
-</div>
+        <div
+          class="download-breadcrumb"
+          id="downloadBreadcrumb"
+        >
 
-<div class="header-actions">
+          All Anime
 
-<button id="refreshAllBtn" class="secondary">
-↻ Refresh
-</button>
+        </div>
 
-<button id="openCreateHostModal">
-+ Create Host
-</button>
+      </div>
 
-</div>
+      <div class="header-actions">
 
-</header>
+        <input
+          type="text"
+          id="searchAnime"
+          placeholder="Search Anime..."
+        >
 
-<!-- =====================================================
-TOP STATS
-===================================================== -->
+        <select id="filterType">
 
-<section class="top-stats-grid">
+          <option value="">
+            All Types
+          </option>
 
-<div class="top-stat-card">
-<h2 id="totalHosts">0</h2>
-<p>Total Hosts</p>
-</div>
+          <option value="anime">
+            Anime
+          </option>
 
-<div class="top-stat-card">
-<h2 id="totalAds">0</h2>
-<p>Total Ads</p>
-</div>
+          <option value="movie">
+            Movie
+          </option>
 
-<div class="top-stat-card">
-<h2 id="totalShortlinks">0</h2>
-<p>Total Shortlinks</p>
-</div>
+          <option value="series">
+            Series
+          </option>
 
-<div class="top-stat-card">
-<h2 id="totalPopups">0</h2>
-<p>Total Popups</p>
-</div>
+          <option value="cartoon">
+            Cartoon
+          </option>
 
-<div class="top-stat-card">
-<h2 id="totalClicks">0</h2>
-<p>Total Clicks</p>
-</div>
+        </select>
 
-</section>
+        <button
+          id="backViewBtn"
+          style="display:none"
+        >
 
-<!-- =====================================================
-TABS
-===================================================== -->
+          ← Back
 
-<section class="tabs-bar">
+        </button>
 
-<button class="tab-btn active" data-tab="hostsTab">
-Hosts
-</button>
+        <button id="openDownloadModal">
 
-<button class="tab-btn" data-tab="adsTab">
-Ads Library
-</button>
+          ➕ Add Download
 
-<button class="tab-btn" data-tab="shortlinksTab">
-Shortlinks
-</button>
+        </button>
 
-<button class="tab-btn" data-tab="popupsTab">
-Popups
-</button>
+      </div>
 
-<button class="tab-btn" data-tab="analyticsTab">
-Analytics
-</button>
+    </header>
 
-</section>
+    <!-- =======================================================
+    CONTENT
+    ======================================================= -->
 
-<!-- =====================================================
-CONTENT
-===================================================== -->
+    <section class="cms-content">
 
-<section class="cms-content">
+      <!-- =========================
+      MAIN VIEW
+      ========================= -->
 
-<!-- =====================================================
-HOSTS TAB
-===================================================== -->
+      <div
+        class="downloads-view"
+        id="downloadsView"
+      ></div>
 
-<div class="tab-content active" id="hostsTab">
+    </section>
 
-<div class="section-header">
-
-<div>
-<h3>⚡ Host Monetization</h3>
-<p>
-Reusable monetization configuration per host
-</p>
-</div>
-
-<div class="section-tools">
-
-<input
-type="text"
-id="hostSearch"
-placeholder="Search host..."
->
-
-<select id="hostFilter">
-
-<option value="">
-All Hosts
-</option>
-
-<option value="knight">
-Knight
-</option>
-
-<option value="normal">
-Normal
-</option>
-
-</select>
+  </main>
 
 </div>
 
-</div>
-
-<div id="hostMonetizationList"
-class="host-grid">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-ADS TAB
-===================================================== -->
-
-<div class="tab-content" id="adsTab">
-
-<div class="section-header">
-
-<div>
-<h3>📢 Ads Library</h3>
-<p>
-Reusable advertisements and redirect scripts
-</p>
-</div>
-
-<button id="openAdModal">
-+ Create Ad
-</button>
-
-</div>
-
-<div class="library-grid" id="adsLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-SHORTLINKS TAB
-===================================================== -->
-
-<div class="tab-content" id="shortlinksTab">
-
-<div class="section-header">
-
-<div>
-<h3>🔗 Shortlinks Library</h3>
-<p>
-Reusable shortlink providers
-</p>
-</div>
-
-<button id="openShortlinkModal">
-+ Create Shortlink
-</button>
-
-</div>
-
-<div class="library-grid" id="shortlinksLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-POPUPS TAB
-===================================================== -->
-
-<div class="tab-content" id="popupsTab">
-
-<div class="section-header">
-
-<div>
-<h3>🪟 Popup Library</h3>
-<p>
-Reusable popup monetization scripts
-</p>
-</div>
-
-<button id="openPopupModal">
-+ Create Popup
-</button>
-
-</div>
-
-<div class="library-grid" id="popupLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-ANALYTICS TAB
-===================================================== -->
-
-<div class="tab-content" id="analyticsTab">
-
-<div class="analytics-layout">
-
-<div class="analytics-card large">
-
-<h3>
-📊 Monetization Overview
-</h3>
-
-<div id="analyticsOverview">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-🔥 Top Performing Hosts
-</h3>
-
-<div id="topHostsList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-📢 Top Ads
-</h3>
-
-<div id="topAdsList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-🔗 Top Shortlinks
-</h3>
-
-<div id="topShortlinksList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<!-- =====================================================
-HOST MODAL
-===================================================== -->
-
-<div class="modal" id="hostModal">
-
-<div class="modal-box large-modal">
-
-<div class="modal-header">
-
-<h3 id="hostModalTitle">
-Create Host
-</h3>
-
-<span class="closeModal">
-✕
-</span>
-
-</div>
-
-<div class="modal-body">
-
-<!-- BASIC -->
-
-<div class="builder-section">
-
-<h4>
-Basic Configuration
-</h4>
-
-<div class="builder-grid">
-
-<input
-type="text"
-id="hostName"
-placeholder="Host Name"
->
-
-<input
-type="text"
-id="hostStorage"
-placeholder="Storage"
->
-
-<select id="hostKnight">
-
-<option value="0">
-Knight : NO
-</option>
-
-<option value="1">
-Knight : YES
-</option>
-
-</select>
-
-<select id="hostMode">
-
-<option value="random">
-Random Rotation
-</option>
-
-<option value="sequence">
-Sequence Rotation
-</option>
-
-<option value="direct">
-Direct
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<!-- ADS -->
-
-<div class="builder-section">
-
-<h4>
-Ads
-</h4>
+<!-- =======================================================
+DOWNLOAD MODAL
+======================================================= -->
 
 <div
-id="hostAdsSelector"
-class="selection-grid"
-></div>
-
-</div>
-
-<!-- SHORTLINKS -->
-
-<div class="builder-section">
-
-<h4>
-Shortlinks
-</h4>
-
-<div
-id="hostShortlinksSelector"
-class="selection-grid"
-></div>
-
-</div>
-
-<!-- POPUPS -->
-
-<div class="builder-section">
-
-<h4>
-Popups
-</h4>
-
-<div
-id="hostPopupsSelector"
-class="selection-grid"
-></div>
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
-
-<button id="saveHostBtn">
-Save Host
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-AD MODAL
-===================================================== -->
-
-<div class="modal" id="adModal">
-
-<div class="modal-box medium-modal">
-
-<div class="modal-header">
-
-<h3 id="adModalTitle">
-Create Ad
-</h3>
-
-<span class="closeModal">
-✕
-</span>
-
-</div>
-
-<div class="modal-body">
-
-<input
-type="text"
-id="adName"
-placeholder="Ad Name"
+  class="modal"
+  id="downloadModal"
 >
 
-<select id="adType">
+  <div class="modal-box large-modal">
 
-<option value="redirect">
-Redirect
-</option>
+    <!-- =======================================================
+    MODAL HEADER
+    ======================================================= -->
 
-<option value="script_url">
-Script URL
-</option>
+    <div class="modal-header">
 
-<option value="popup">
-Popup
-</option>
+      <h3 id="downloadModalTitle">
 
-<option value="banner">
-Banner
-</option>
+        Add Download
 
-</select>
+      </h3>
 
-<textarea
-id="adCode"
-placeholder="URL / Code"
-></textarea>
+      <span id="closeDownloadModal">
 
-<div class="dual-grid">
+        ✕
 
-<input
-type="number"
-id="adDelay"
-placeholder="Delay (ms)"
->
+      </span>
 
-<input
-type="number"
-id="adWeight"
-placeholder="Weight"
->
+    </div>
 
-</div>
+    <!-- =======================================================
+    MODAL BODY
+    ======================================================= -->
 
-</div>
+    <div class="modal-body">
 
-<div class="modal-footer">
+      <!-- =======================================================
+      DOWNLOAD INFO
+      ======================================================= -->
 
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
+      <div class="section-box">
 
-<button id="saveAdBtn">
-Save Ad
-</button>
+        <h4>
+          Download Information
+        </h4>
 
-</div>
+        <div class="form-grid">
 
-</div>
+          <!-- ANIME -->
 
-</div>
+          <select id="animeSelect">
 
-<!-- =====================================================
-SHORTLINK MODAL
-===================================================== -->
+            <option value="">
+              Select Anime
+            </option>
 
-<div class="modal" id="shortlinkModal">
+          </select>
 
-<div class="modal-box medium-modal">
+          <!-- TYPE -->
 
-<div class="modal-header">
+          <select id="contentType">
 
-<h3>
-Create Shortlink
-</h3>
+            <option value="episode">
+              Episode
+            </option>
 
-<span class="closeModal">
-✕
-</span>
+            <option value="season_zip">
+              Season ZIP
+            </option>
 
-</div>
+            <option value="movie">
+              Movie
+            </option>
 
-<div class="modal-body">
+            <option value="series_zip">
+              Series ZIP
+            </option>
 
-<input
-type="text"
-id="shortName"
-placeholder="Shortlink Name"
->
+          </select>
 
-<input
-type="text"
-id="shortBase"
-placeholder="Base URL"
->
+          <!-- SEASON -->
 
-<input
-type="text"
-id="shortApi"
-placeholder="API Key"
->
+          <input
+            id="seasonNumber"
+            placeholder="Season Number"
+          >
 
-</div>
+          <!-- EPISODE -->
 
-<div class="modal-footer">
+          <input
+            id="episodeNumber"
+            placeholder="Episode Number"
+          >
 
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
+          <!-- TITLE -->
 
-<button id="saveShortBtn">
-Save Shortlink
-</button>
+          <input
+            id="episodeTitle"
+            placeholder="Episode Title (Auto Supported)"
+          >
 
-</div>
+        </div>
 
-</div>
+      </div>
 
-</div>
+      <!-- =======================================================
+      HOSTS
+      ======================================================= -->
 
-<!-- =====================================================
-POPUP MODAL
-===================================================== -->
+      <div class="section-box">
 
-<div class="modal" id="popupModal">
+        <div class="hosts-header">
 
-<div class="modal-box medium-modal">
+          <h4>
 
-<div class="modal-header">
+            Download Hosts
 
-<h3>
-Create Popup
-</h3>
+          </h4>
 
-<span class="closeModal">
-✕
-</span>
+          <button id="addHostBtn">
 
-</div>
+            + Add Host
 
-<div class="modal-body">
+          </button>
 
-<input
-type="text"
-id="popupName"
-placeholder="Popup Name"
->
+        </div>
 
-<textarea
-id="popupCode"
-placeholder="Popup Script / URL"
-></textarea>
+        <!-- HOSTS CONTAINER -->
+
+        <div id="hostsContainer"></div>
+
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+    FOOTER
+    ======================================================= -->
+
+    <div class="modal-footer">
+
+      <button id="saveDownloadBtn">
+
+        💾 Save Download
+
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
-<div class="modal-footer">
+<!-- =======================================================
+HOST TEMPLATE
+======================================================= -->
 
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
+<template id="hostTemplate">
 
-<button id="savePopupBtn">
-Save Popup
-</button>
+  <div class="download-host-card">
 
-</div>
+    <!-- =======================================================
+    TOP
+    ======================================================= -->
 
-</div>
+    <div class="host-top">
 
-</div>
+      <!-- LEFT -->
 
-<!-- =====================================================
-TOAST
-===================================================== -->
+      <div class="host-left">
 
-<div id="toastContainer"></div>
+        <select class="host-select">
+
+          <option value="">
+            Select Host
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- RIGHT -->
+
+      <div class="host-right">
+
+        <button class="remove-host">
+
+          Remove
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+    HOST INFO
+    ======================================================= -->
+
+    <div class="host-info-box">
+
+      <!-- STORAGE -->
+
+      <div class="host-info-item">
+
+        <small>
+          Storage
+        </small>
+
+        <span class="display-storage">
+
+          --
+
+        </span>
+
+      </div>
+
+      <!-- KNIGHT -->
+
+      <div class="host-info-item">
+
+        <small>
+          Knight
+        </small>
+
+        <span class="display-knight-status">
+
+          --
+
+        </span>
+
+      </div>
+
+      <!-- MODE -->
+
+      <div class="host-info-item">
+
+        <small>
+          Rotation
+        </small>
+
+        <span class="display-mode">
+
+          --
+
+        </span>
+
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+    ACTIVE MONETIZATION
+    ======================================================= -->
+
+    <div class="active-monetization">
+
+      <!-- ADS -->
+
+      <div class="active-box">
+
+        <h5>
+          Ads
+        </h5>
+
+        <div class="active-ads-list"></div>
+
+      </div>
+
+      <!-- SHORTLINKS -->
+
+      <div class="active-box">
+
+        <h5>
+          Shortlinks
+        </h5>
+
+        <div class="active-shortlinks-list"></div>
+
+      </div>
+
+      <!-- POPUPS -->
+
+      <div class="active-box">
+
+        <h5>
+          Popups
+        </h5>
+
+        <div class="active-popups-list"></div>
+
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+    LINKS
+    ======================================================= -->
+
+    <div class="download-links-box">
+
+      <!-- HEADER -->
+
+      <div class="links-header">
+
+        <h5>
+
+          Download Links
+
+        </h5>
+
+        <button class="addLinkBtn">
+
+          + Add Link
+
+        </button>
+
+      </div>
+
+      <!-- LINKS -->
+
+      <div class="linksContainer"></div>
+
+    </div>
+
+  </div>
+
+</template>
+
+<!-- =======================================================
+LINK TEMPLATE
+======================================================= -->
+
+<template id="linkTemplate">
+
+  <div class="download-link-row">
+
+    <!-- QUALITY -->
+
+    <select class="quality-select">
+
+      <option value="">
+        Select Quality
+      </option>
+
+      <option value="360p">
+        360p
+      </option>
+
+      <option value="480p">
+        480p
+      </option>
+
+      <option value="720p">
+        720p
+      </option>
+
+      <option value="1080p">
+        1080p
+      </option>
+
+      <option value="2160p">
+        4K
+      </option>
+
+      <option value="ZIP">
+        ZIP
+      </option>
+
+      <option value="RAW">
+        RAW
+      </option>
+
+    </select>
+
+    <!-- LINK -->
+
+    <input
+      type="text"
+      class="download-link"
+      placeholder="Final Download Link"
+    >
+
+    <!-- REMOVE -->
+
+    <button class="remove-link">
+
+      ✕
+
+    </button>
+
+  </div>
+
+</template>
+
+<!-- =======================================================
+ANIME CARD TEMPLATE
+======================================================= -->
+
+<template id="animeCardTemplate">
+
+  <div class="anime-card">
+
+    <!-- POSTER -->
+
+    <div class="anime-poster">
+
+      <img
+        class="anime-image"
+        src=""
+        alt=""
+      >
+
+    </div>
+
+    <!-- META -->
+
+    <div class="anime-meta">
+
+      <h3 class="anime-title"></h3>
+
+      <small class="anime-type"></small>
+
+    </div>
+
+  </div>
+
+</template>
+
+<!-- =======================================================
+SEASON CARD TEMPLATE
+======================================================= -->
+
+<template id="seasonCardTemplate">
+
+  <div class="season-card">
+
+    <h3 class="season-title"></h3>
+
+    <small class="season-count"></small>
+
+  </div>
+
+</template>
+
+<!-- =======================================================
+EPISODE CARD TEMPLATE
+======================================================= -->
+
+<template id="episodeCardTemplate">
+
+  <div class="episode-card">
+
+    <!-- LEFT -->
+
+    <div class="episode-left">
+
+      <span class="episode-number"></span>
+
+      <h4 class="episode-title"></h4>
+
+    </div>
+
+    <!-- RIGHT -->
+
+    <div class="episode-right">
+
+      <span class="host-count"></span>
+
+    </div>
+
+  </div>
+
+</template>
+
+<!-- =======================================================
+HOST DISPLAY TEMPLATE
+======================================================= -->
+
+<template id="hostDisplayTemplate">
+
+  <div class="host-display-card">
+
+    <!-- =======================================================
+    TOP
+    ======================================================= -->
+
+    <div class="host-display-top">
+
+      <!-- LEFT -->
+
+      <div>
+
+        <h3 class="display-host-name"></h3>
+
+        <small class="display-storage"></small>
+
+      </div>
+
+      <!-- RIGHT -->
+
+      <div class="host-actions">
+
+        <button class="edit-host-btn">
+
+          EDIT
+
+        </button>
+
+        <button class="delete-host-btn">
+
+          DELETE
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+    KNIGHT
+    ======================================================= -->
+
+    <div class="display-knight"></div>
+
+    <!-- =======================================================
+    ADS
+    ======================================================= -->
+
+    <div class="display-section">
+
+      <h5>
+        Ads
+      </h5>
+
+      <div class="display-ads"></div>
+
+    </div>
+
+    <!-- =======================================================
+    SHORTLINKS
+    ======================================================= -->
+
+    <div class="display-section">
+
+      <h5>
+        Shortlinks
+      </h5>
+
+      <div class="display-shortlinks"></div>
+
+    </div>
+
+    <!-- =======================================================
+    POPUPS
+    ======================================================= -->
+
+    <div class="display-section">
+
+      <h5>
+        Popups
+      </h5>
+
+      <div class="display-popups"></div>
+
+    </div>
+
+    <!-- =======================================================
+    MODE
+    ======================================================= -->
+
+    <div class="display-section">
+
+      <h5>
+        Mode
+      </h5>
+
+      <div class="display-mode"></div>
+
+    </div>
+
+    <!-- =======================================================
+    LINKS
+    ======================================================= -->
+
+    <div class="display-section">
+
+      <h5>
+        Download Links
+      </h5>
+
+      <div class="display-links"></div>
+
+    </div>
+
+  </div>
+
+</template>
 
 </body>
-  <script>
+ 
+<script>
 
 /* =========================================================
-⚡ ANIMEHUNT MONETIZATION ENGINE
-PRODUCTION SCRIPT V4
+   ⚡ ANIMEHUNT DOWNLOAD MANAGER
+   PRODUCTION DOWNLOAD ENGINE
+   PART 1 — FOUNDATION
+========================================================= */
+
+/* =========================================================
+   API
 ========================================================= */
 
 const API =
 "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 
 const TOKEN =
-localStorage.getItem("AUTH_TOKEN")
+localStorage.getItem(
+  "AUTH_TOKEN"
+)
 
 /* =========================================================
-STATE
+   DOM
+========================================================= */
+
+/* =========================
+   MAIN
+========================= */
+
+const downloadsView =
+document.getElementById(
+  "downloadsView"
+)
+
+const downloadBreadcrumb =
+document.getElementById(
+  "downloadBreadcrumb"
+)
+
+const searchAnime =
+document.getElementById(
+  "searchAnime"
+)
+
+const filterType =
+document.getElementById(
+  "filterType"
+)
+
+const backViewBtn =
+document.getElementById(
+  "backViewBtn"
+)
+
+/* =========================
+   MODAL
+========================= */
+
+const downloadModal =
+document.getElementById(
+  "downloadModal"
+)
+
+const openDownloadModal =
+document.getElementById(
+  "openDownloadModal"
+)
+
+const closeDownloadModal =
+document.getElementById(
+  "closeDownloadModal"
+)
+
+const saveDownloadBtn =
+document.getElementById(
+  "saveDownloadBtn"
+)
+
+const downloadModalTitle =
+document.getElementById(
+  "downloadModalTitle"
+)
+
+/* =========================
+   FORM
+========================= */
+
+const animeSelect =
+document.getElementById(
+  "animeSelect"
+)
+
+const contentType =
+document.getElementById(
+  "contentType"
+)
+
+const seasonNumber =
+document.getElementById(
+  "seasonNumber"
+)
+
+const episodeNumber =
+document.getElementById(
+  "episodeNumber"
+)
+
+const episodeTitle =
+document.getElementById(
+  "episodeTitle"
+)
+
+const hostsContainer =
+document.getElementById(
+  "hostsContainer"
+)
+
+const addHostBtn =
+document.getElementById(
+  "addHostBtn"
+)
+
+/* =========================
+   TEMPLATES
+========================= */
+
+const animeCardTemplate =
+document.getElementById(
+  "animeCardTemplate"
+)
+
+const seasonCardTemplate =
+document.getElementById(
+  "seasonCardTemplate"
+)
+
+const episodeCardTemplate =
+document.getElementById(
+  "episodeCardTemplate"
+)
+
+const hostDisplayTemplate =
+document.getElementById(
+  "hostDisplayTemplate"
+)
+
+const hostTemplate =
+document.getElementById(
+  "hostTemplate"
+)
+
+const linkTemplate =
+document.getElementById(
+  "linkTemplate"
+)
+
+/* =========================================================
+   STATE
 ========================================================= */
 
 const STATE = {
 
-  ads:[],
-  shortlinks:[],
-  popups:[],
+  anime:[],
+
   hosts:[],
 
-  editing:{
-    ad:null,
-    shortlink:null,
-    popup:null,
-    host:null
-  }
+  downloads:[],
+
+  filteredAnime:[],
+
+  currentAnime:null,
+
+  currentSeason:null,
+
+  currentEpisode:null,
+
+  currentView:"anime",
+
+  editingEntry:null,
+
+  loading:false
 
 }
 
 /* =========================================================
-DOM
+   CACHE
 ========================================================= */
 
-const DOM = {
+const CACHE = {
 
-  tabs:
-  document.querySelectorAll(".tab-btn"),
+  animeMap:{},
 
-  tabContents:
-  document.querySelectorAll(".tab-content"),
+  hostMap:{},
 
-  modals:
-  document.querySelectorAll(".modal"),
-
-  closeButtons:
-  document.querySelectorAll(".closeModal"),
-
-  toastContainer:
-  document.getElementById("toastContainer"),
-
-  /* HOSTS */
-
-  hostList:
-  document.getElementById("hostMonetizationList"),
-
-  hostSearch:
-  document.getElementById("hostSearch"),
-
-  hostFilter:
-  document.getElementById("hostFilter"),
-
-  /* ADS */
-
-  adsLibraryList:
-  document.getElementById("adsLibraryList"),
-
-  /* SHORTLINKS */
-
-  shortlinksLibraryList:
-  document.getElementById("shortlinksLibraryList"),
-
-  /* POPUPS */
-
-  popupLibraryList:
-  document.getElementById("popupLibraryList"),
-
-  /* STATS */
-
-  totalHosts:
-  document.getElementById("totalHosts"),
-
-  totalAds:
-  document.getElementById("totalAds"),
-
-  totalShortlinks:
-  document.getElementById("totalShortlinks"),
-
-  totalPopups:
-  document.getElementById("totalPopups"),
-
-  totalClicks:
-  document.getElementById("totalClicks")
+  entryMap:{}
 
 }
 
 /* =========================================================
-API
+   API ENGINE
 ========================================================= */
 
 async function api(
-  url,
+
+  endpoint,
   method="GET",
   body=null
+
 ){
 
   try{
 
-    const res =
-    await fetch(url,{
+    const response =
+    await fetch(
 
-      method,
+      API + endpoint,
 
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":
-        "Bearer " + TOKEN
-      },
+      {
 
-      body:
-      body
-      ? JSON.stringify(body)
-      : null
+        method,
 
-    })
+        headers:{
+
+          "Content-Type":
+          "application/json",
+
+          "Authorization":
+          "Bearer " + TOKEN
+
+        },
+
+        body:
+
+        body
+        ? JSON.stringify(body)
+        : null
+
+      }
+
+    )
 
     const json =
-    await res.json()
+    await response.json()
 
-    if(!res.ok){
+    if(!response.ok){
 
-      throw new Error(
-        json.error || "API Error"
+      console.error(json)
+
+      notify(
+
+        json.message ||
+        "Request Failed",
+
+        "error"
+
       )
+
+      return null
 
     }
 
@@ -2459,47 +1941,63 @@ async function api(
 
   }catch(err){
 
-    toast(
-      "error",
-      "Request Failed",
-      err.message
+    console.error(err)
+
+    notify(
+
+      "Network Error",
+      "error"
+
     )
 
-    throw err
+    return null
 
   }
 
 }
 
 /* =========================================================
-TOAST
+   NOTIFICATION
 ========================================================= */
 
-function toast(
-  type,
-  title,
-  msg
+function notify(
+
+  message="Done",
+  type="success"
+
 ){
 
   const div =
   document.createElement("div")
 
-  div.className =
-  `toast ${type}`
+  div.style.position = "fixed"
+  div.style.right = "20px"
+  div.style.bottom = "20px"
+  div.style.zIndex = "999999"
+  div.style.padding = "14px 18px"
+  div.style.borderRadius = "12px"
+  div.style.fontSize = "13px"
+  div.style.fontWeight = "700"
+  div.style.backdropFilter =
+  "blur(12px)"
 
-  div.innerHTML = `
+  div.style.background =
 
-    <div class="toast-title">
-      ${title}
-    </div>
+    type === "error"
+    ? "#ff3b3b"
+    : "#16a34a"
 
-    <div class="toast-msg">
-      ${msg}
-    </div>
+  div.style.color = "#fff"
 
-  `
+  div.innerText = message
 
-  DOM.toastContainer.appendChild(div)
+  document.body.appendChild(div)
+
+  setTimeout(()=>{
+
+    div.style.opacity = "0"
+
+  },2500)
 
   setTimeout(()=>{
 
@@ -2510,629 +2008,63 @@ function toast(
 }
 
 /* =========================================================
-MODALS
+   LOADER
 ========================================================= */
 
-function openModal(id){
+function setLoading(
 
-  const modal =
-  document.getElementById(id)
+  value=true
 
-  if(modal){
-
-    modal.style.display = "flex"
-
-  }
-
-}
-
-function closeModal(modal){
-
-  modal.style.display = "none"
-
-}
-
-/* =========================================================
-TABS
-========================================================= */
-
-DOM.tabs.forEach(btn=>{
-
-  btn.onclick = ()=>{
-
-    DOM.tabs.forEach(x=>{
-
-      x.classList.remove("active")
-
-    })
-
-    DOM.tabContents.forEach(x=>{
-
-      x.classList.remove("active")
-
-    })
-
-    btn.classList.add("active")
-
-    document
-    .getElementById(
-      btn.dataset.tab
-    )
-    .classList
-    .add("active")
-
-  }
-
-})
-
-/* =========================================================
-MODAL CLOSE
-========================================================= */
-
-DOM.closeButtons.forEach(btn=>{
-
-  btn.onclick = ()=>{
-
-    closeModal(
-      btn.closest(".modal")
-    )
-
-  }
-
-})
-
-window.onclick = e=>{
-
-  if(
-    e.target.classList.contains("modal")
-  ){
-
-    closeModal(e.target)
-
-  }
-
-}
-
-/* =========================================================
-LOADERS
-========================================================= */
-
-async function init(){
-
-  renderLoading()
-
-  await Promise.all([
-
-    loadAds(),
-    loadShortlinks(),
-    loadPopups(),
-    loadHosts()
-
-  ])
-
-  renderAnalytics()
-
-}
-
-init()
-
-/* =========================================================
-LOADING UI
-========================================================= */
-
-function renderLoading(){
-
-  DOM.hostList.innerHTML =
-  Array(4).fill(`
-    <div class="loading-card"></div>
-  `).join("")
-
-}
-
-/* =========================================================
-LOAD ADS
-========================================================= */
-
-async function loadAds(){
-
-  const data =
-  await api(
-    `${API}/ads-library`
-  )
-
-  STATE.ads =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderAds()
-
-}
-
-/* =========================================================
-LOAD SHORTLINKS
-========================================================= */
-
-async function loadShortlinks(){
-
-  const data =
-  await api(
-    `${API}/shortlinks-library`
-  )
-
-  STATE.shortlinks =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderShortlinks()
-
-}
-
-/* =========================================================
-LOAD POPUPS
-========================================================= */
-
-async function loadPopups(){
-
-  const data =
-  await api(
-    `${API}/popup-library`
-  )
-
-  STATE.popups =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderPopups()
-
-}
-
-/* =========================================================
-LOAD HOSTS
-========================================================= */
-
-async function loadHosts(){
-
-  const data =
-  await api(
-    `${API}/host-monetization`
-  )
-
-  STATE.hosts =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderHosts()
-
-}
-
-/* =========================================================
-RENDER ADS
-========================================================= */
-
-function renderAds(){
-
-  if(!STATE.ads.length){
-
-    DOM.adsLibraryList.innerHTML = `
-
-      <div class="empty-state">
-
-        <h3>No Ads Found</h3>
-
-        <p>
-          Create your first ad library item
-        </p>
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  DOM.adsLibraryList.innerHTML =
-  STATE.ads.map(ad=>`
-
-    <div class="library-card">
-
-      <div class="library-card-top">
-
-        <div class="library-card-title">
-          ${escapeHtml(ad.name)}
-        </div>
-
-        <div class="library-card-sub">
-          ${escapeHtml(ad.type)}
-        </div>
-
-      </div>
-
-      <div class="library-card-body">
-
-        <div class="library-meta">
-          <span>Weight</span>
-          <span>${ad.weight || 1}</span>
-        </div>
-
-        <div class="library-meta">
-          <span>Delay</span>
-          <span>${ad.delay || 0}ms</span>
-        </div>
-
-      </div>
-
-      <div class="library-card-footer">
-
-        <button
-          onclick="editAd('${ad.id}')"
-        >
-          Edit
-        </button>
-
-        <button
-          class="danger"
-          onclick="deleteAd('${ad.id}')"
-        >
-          Delete
-        </button>
-
-      </div>
-
-    </div>
-
-  `).join("")
-
-}
-
-/* =========================================================
-RENDER SHORTLINKS
-========================================================= */
-
-function renderShortlinks(){
-
-  if(!STATE.shortlinks.length){
-
-    DOM.shortlinksLibraryList.innerHTML = `
-
-      <div class="empty-state">
-
-        <h3>No Shortlinks</h3>
-
-        <p>
-          Create reusable shortlinks
-        </p>
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  DOM.shortlinksLibraryList.innerHTML =
-  STATE.shortlinks.map(short=>`
-
-    <div class="library-card">
-
-      <div class="library-card-top">
-
-        <div class="library-card-title">
-          ${escapeHtml(short.name)}
-        </div>
-
-        <div class="library-card-sub">
-          Shortlink Provider
-        </div>
-
-      </div>
-
-      <div class="library-card-body">
-
-        <div class="library-meta">
-          <span>Base URL</span>
-          <span>
-            ${truncate(short.base_url)}
-          </span>
-        </div>
-
-      </div>
-
-      <div class="library-card-footer">
-
-        <button
-          onclick="editShortlink('${short.id}')"
-        >
-          Edit
-        </button>
-
-        <button
-          class="danger"
-          onclick="deleteShortlink('${short.id}')"
-        >
-          Delete
-        </button>
-
-      </div>
-
-    </div>
-
-  `).join("")
-
-}
-
-/* =========================================================
-RENDER POPUPS
-========================================================= */
-
-function renderPopups(){
-
-  if(!STATE.popups.length){
-
-    DOM.popupLibraryList.innerHTML = `
-
-      <div class="empty-state">
-
-        <h3>No Popups</h3>
-
-        <p>
-          Create popup monetization scripts
-        </p>
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  DOM.popupLibraryList.innerHTML =
-  STATE.popups.map(popup=>`
-
-    <div class="library-card">
-
-      <div class="library-card-top">
-
-        <div class="library-card-title">
-          ${escapeHtml(popup.name)}
-        </div>
-
-        <div class="library-card-sub">
-          Popup Script
-        </div>
-
-      </div>
-
-      <div class="library-card-body">
-
-        <div class="library-meta">
-          <span>Status</span>
-          <span>ACTIVE</span>
-        </div>
-
-      </div>
-
-      <div class="library-card-footer">
-
-        <button
-          onclick="editPopup('${popup.id}')"
-        >
-          Edit
-        </button>
-
-        <button
-          class="danger"
-          onclick="deletePopup('${popup.id}')"
-        >
-          Delete
-        </button>
-
-      </div>
-
-    </div>
-
-  `).join("")
-
-}
-
-/* =========================================================
-RENDER HOSTS
-========================================================= */
-
-function renderHosts(){
-
-  let hosts =
-  [...STATE.hosts]
-
-  const search =
-  DOM.hostSearch?.value
-  ?.toLowerCase()
-  ?.trim()
-
-  const filter =
-  DOM.hostFilter?.value
-
-  if(search){
-
-    hosts =
-    hosts.filter(host=>
-
-      host.host
-      .toLowerCase()
-      .includes(search)
-
-    )
-
-  }
-
-  if(filter === "knight"){
-
-    hosts =
-    hosts.filter(
-      x=>x.knight
-    )
-
-  }
-
-  if(filter === "normal"){
-
-    hosts =
-    hosts.filter(
-      x=>!x.knight
-    )
-
-  }
-
-  if(!hosts.length){
-
-    DOM.hostList.innerHTML = `
-
-      <div class="empty-state">
-
-        <h3>No Hosts Found</h3>
-
-        <p>
-          Create monetization hosts
-        </p>
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  DOM.hostList.innerHTML =
-  hosts.map(host=>`
-
-    <div class="host-card">
-
-      <div class="host-card-top">
-
-        <div class="host-card-header">
-
-          <div>
-
-            <div class="host-name">
-              ${escapeHtml(host.host)}
-            </div>
-
-            <div class="host-storage">
-              Storage :
-              ${escapeHtml(host.storage || "Unknown")}
-            </div>
-
-          </div>
-
-          <div class="host-status">
-
-            <span>
-              Knight :
-              ${host.knight ? "YES" : "NO"}
-            </span>
-
-            <span>
-              ${escapeHtml(host.mode || "random")}
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="host-body">
-
-        ${renderHostBlock(
-          "Ads",
-          host.ads
-        )}
-
-        ${renderHostBlock(
-          "Shortlinks",
-          host.shortlinks
-        )}
-
-        ${renderHostBlock(
-          "Popups",
-          host.popups
-        )}
-
-      </div>
-
-      <div class="host-card-footer">
-
-        <button
-          onclick="editHost('${host.id}')"
-        >
-          Edit
-        </button>
-
-        <button
-          class="danger"
-          onclick="deleteHost('${host.id}')"
-        >
-          Delete
-        </button>
-
-      </div>
-
-    </div>
-
-  `).join("")
-
-}
-
-/* =========================================================
-HOST BLOCK
-========================================================= */
-
-function renderHostBlock(
-  title,
-  items
 ){
 
-  return `
+  STATE.loading = value
 
-    <div class="host-block">
+  if(value){
 
-      <h5>
-        ${title}
-      </h5>
+    downloadsView.innerHTML = `
 
-      <div class="tag-list">
+      <div
+        style="
+          grid-column:1/-1;
+          padding:100px 20px;
+          text-align:center;
+          color:#888;
+        "
+      >
 
-        ${
-          items?.length
-          ? items.map(item=>`
-
-            <div class="tag">
-
-              ${
-                escapeHtml(
-                  item.name || item
-                )
-              }
-
-            </div>
-
-          `).join("")
-          :
-          `
-          <div class="tag empty-tag">
-            NONE
-          </div>
-          `
-        }
+        Loading...
 
       </div>
+
+    `
+
+  }
+
+}
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+function renderEmpty(
+
+  text="No Data Found"
+
+){
+
+  downloadsView.innerHTML = `
+
+    <div
+      style="
+        grid-column:1/-1;
+        padding:100px 20px;
+        text-align:center;
+        color:#777;
+        font-size:14px;
+      "
+    >
+
+      ${text}
 
     </div>
 
@@ -3141,227 +2073,3512 @@ function renderHostBlock(
 }
 
 /* =========================================================
-ANALYTICS
+   HELPERS
 ========================================================= */
 
-function renderAnalytics(){
+function sanitize(
 
-  DOM.totalHosts.innerText =
-  STATE.hosts.length
+  value=""
 
-  DOM.totalAds.innerText =
-  STATE.ads.length
-
-  DOM.totalShortlinks.innerText =
-  STATE.shortlinks.length
-
-  DOM.totalPopups.innerText =
-  STATE.popups.length
-
-  DOM.totalClicks.innerText =
-  STATE.hosts.reduce((acc,host)=>{
-
-    return acc +
-    Number(host.clicks || 0)
-
-  },0)
-
-}
-
-/* =========================================================
-SEARCH
-========================================================= */
-
-DOM.hostSearch?.addEventListener(
-  "input",
-  renderHosts
-)
-
-DOM.hostFilter?.addEventListener(
-  "change",
-  renderHosts
-)
-
-/* =========================================================
-UTILS
-========================================================= */
-
-function truncate(
-  text="",
-  len=30
 ){
 
-  return text.length > len
-  ? text.slice(0,len) + "..."
-  : text
+  return String(value)
+  .trim()
 
 }
 
-function escapeHtml(text=""){
+function slugify(
 
-  return text
-  .replaceAll("&","&amp;")
-  .replaceAll("<","&lt;")
-  .replaceAll(">","&gt;")
-  .replaceAll('"',"&quot;")
-  .replaceAll("'","&#039;")
+  value=""
 
-}
-
-/* =========================================================
-OPEN MODALS
-========================================================= */
-
-document
-.getElementById("openAdModal")
-.onclick = ()=>{
-
-  STATE.editing.ad = null
-
-  resetAdForm()
-
-  openModal("adModal")
-
-}
-
-document
-.getElementById("openShortlinkModal")
-.onclick = ()=>{
-
-  STATE.editing.shortlink = null
-
-  resetShortlinkForm()
-
-  openModal("shortlinkModal")
-
-}
-
-document
-.getElementById("openPopupModal")
-.onclick = ()=>{
-
-  STATE.editing.popup = null
-
-  resetPopupForm()
-
-  openModal("popupModal")
-
-}
-
-document
-.getElementById("openCreateHostModal")
-.onclick = ()=>{
-
-  STATE.editing.host = null
-
-  resetHostForm()
-
-  renderSelectors()
-
-  openModal("hostModal")
-
-}
-
-/* =========================================================
-RESET FORMS
-========================================================= */
-
-function resetAdForm(){
-
-  document.getElementById("adName").value = ""
-  document.getElementById("adType").value = "redirect"
-  document.getElementById("adCode").value = ""
-  document.getElementById("adDelay").value = ""
-  document.getElementById("adWeight").value = ""
-
-}
-
-function resetShortlinkForm(){
-
-  document.getElementById("shortName").value = ""
-  document.getElementById("shortBase").value = ""
-  document.getElementById("shortApi").value = ""
-
-}
-
-function resetPopupForm(){
-
-  document.getElementById("popupName").value = ""
-  document.getElementById("popupCode").value = ""
-
-}
-
-function resetHostForm(){
-
-  document.getElementById("hostName").value = ""
-  document.getElementById("hostStorage").value = ""
-  document.getElementById("hostKnight").value = "0"
-  document.getElementById("hostMode").value = "random"
-
-}
-
-/* =========================================================
-SELECTIONS
-========================================================= */
-
-function renderSelectors(){
-
-  renderSelectionGroup(
-    "hostAdsSelector",
-    STATE.ads
-  )
-
-  renderSelectionGroup(
-    "hostShortlinksSelector",
-    STATE.shortlinks
-  )
-
-  renderSelectionGroup(
-    "hostPopupsSelector",
-    STATE.popups
-  )
-
-}
-
-function renderSelectionGroup(
-  containerId,
-  items
 ){
 
-  const el =
-  document.getElementById(containerId)
+  return String(value)
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g,"-")
+  .replace(/[^\w\-]+/g,"")
 
-  el.innerHTML =
-  items.map(item=>`
+}
 
-    <div
-      class="selection-item"
-      data-id="${item.id}"
-    >
+function numberValue(
 
-      <div class="selection-check"></div>
+  value,
+  fallback=0
 
-      <h5>
-        ${escapeHtml(item.name)}
-      </h5>
+){
 
-    </div>
+  const n =
+  Number(value)
 
-  `).join("")
+  return Number.isFinite(n)
+  ? n
+  : fallback
 
-  el
-  .querySelectorAll(".selection-item")
-  .forEach(item=>{
+}
 
-    item.onclick = ()=>{
+/* =========================================================
+   CACHE BUILDERS
+========================================================= */
 
-      item.classList.toggle("active")
+function buildCaches(){
 
-    }
+  /* =========================
+     ANIME MAP
+  ========================= */
+
+  CACHE.animeMap = {}
+
+  STATE.anime.forEach(anime=>{
+
+    CACHE.animeMap[
+      anime.id
+    ] = anime
+
+  })
+
+  /* =========================
+     HOST MAP
+  ========================= */
+
+  CACHE.hostMap = {}
+
+  STATE.hosts.forEach(host=>{
+
+    CACHE.hostMap[
+      host.id
+    ] = host
+
+    CACHE.hostMap[
+      host.host
+    ] = host
+
+  })
+
+  /* =========================
+     ENTRY MAP
+  ========================= */
+
+  CACHE.entryMap = {}
+
+  STATE.downloads.forEach(entry=>{
+
+    CACHE.entryMap[
+      entry.id
+    ] = entry
 
   })
 
 }
 
-   </script>    
-</html>
+/* =========================================================
+   BREADCRUMB
+========================================================= */
+
+function updateBreadcrumb(){
+
+  let text =
+  "All Anime"
+
+  if(
+    STATE.currentAnime
+  ){
+
+    text =
+    STATE.currentAnime.title
+
+    if(
+      STATE.currentSeason
+    ){
+
+      text +=
+      ` / Season ${STATE.currentSeason}`
+
+    }
+
+    if(
+      STATE.currentEpisode
+    ){
+
+      text +=
+      ` / Episode ${STATE.currentEpisode}`
+
+    }
+
+  }
+
+  downloadBreadcrumb.innerText =
+  text
+
+}
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+function updateBackButton(){
+
+  backViewBtn.style.display =
+
+    STATE.currentView === "anime"
+    ? "none"
+    : "inline-flex"
+
+}
+
+/* =========================================================
+   RESET VIEW
+========================================================= */
+
+function resetView(){
+
+  STATE.currentAnime = null
+
+  STATE.currentSeason = null
+
+  STATE.currentEpisode = null
+
+  STATE.currentView = "anime"
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+}
+
+/* =========================================================
+   RESET MODAL
+========================================================= */
+
+function resetModal(){
+
+  downloadModalTitle.innerText =
+  "Add Download"
+
+  STATE.editingEntry = null
+
+  animeSelect.value = ""
+
+  contentType.value =
+  "episode"
+
+  seasonNumber.value = ""
+
+  episodeNumber.value = ""
+
+  episodeTitle.value = ""
+
+  hostsContainer.innerHTML = ""
+
+}
+
+/* =========================================================
+   OPEN MODAL
+========================================================= */
+
+function openModal(){
+
+  downloadModal.style.display =
+  "flex"
+
+}
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+function closeModal(){
+
+  downloadModal.style.display =
+  "none"
+
+}
+
+/* =========================================================
+   FETCH ANIME
+========================================================= */
+
+async function fetchAnime(){
+
+  const data =
+  await api(
+    "/anime-list"
+  )
+
+  STATE.anime =
+
+    Array.isArray(data)
+    ? data
+    : []
+
+}
+
+/* =========================================================
+   FETCH HOSTS
+========================================================= */
+
+async function fetchHosts(){
+
+  const data =
+  await api(
+    "/host-monetization"
+  )
+
+  STATE.hosts =
+
+    Array.isArray(data)
+    ? data
+    : []
+
+}
+
+/* =========================================================
+   FETCH DOWNLOADS
+========================================================= */
+
+async function fetchDownloads(){
+
+  const data =
+  await api(
+    "/downloads-v2"
+  )
+
+  STATE.downloads =
+
+    Array.isArray(data)
+    ? data
+    : []
+
+}
+
+/* =========================================================
+   BOOTSTRAP
+========================================================= */
+
+async function bootstrap(){
+
+  setLoading(true)
+
+  await Promise.all([
+
+    fetchAnime(),
+    fetchHosts(),
+    fetchDownloads()
+
+  ])
+
+  buildCaches()
+
+  STATE.filteredAnime =
+  [...STATE.anime]
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+  renderAnimeSelect()
+
+  renderAnimeGrid()
+
+}
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+/* =========================
+   OPEN MODAL
+========================= */
+
+openDownloadModal.onclick = ()=>{
+
+  resetModal()
+
+  openModal()
+
+}
+
+/* =========================
+   CLOSE MODAL
+========================= */
+
+closeDownloadModal.onclick = ()=>{
+
+  closeModal()
+
+}
+
+/* =========================
+   BACK
+========================= */
+
+backViewBtn.onclick = ()=>{
+
+  resetView()
+
+  renderAnimeGrid()
+
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+bootstrap()
+
+/* =========================================================
+   ⚡ PART 2
+   ANIME GRID ENGINE
+========================================================= */
+
+/* =========================================================
+   RENDER ANIME SELECT
+========================================================= */
+
+function renderAnimeSelect(){
+
+  animeSelect.innerHTML = `
+
+    <option value="">
+      Select Anime
+    </option>
+
+  `
+
+  STATE.anime.forEach(anime=>{
+
+    animeSelect.innerHTML += `
+
+      <option value="${anime.id}">
+
+        ${anime.title}
+
+      </option>
+
+    `
+
+  })
+
+}
+
+/* =========================================================
+   GET DOWNLOAD COUNT
+========================================================= */
+
+function getAnimeDownloadCount(
+
+  animeId
+
+){
+
+  return STATE.downloads.filter(entry=>{
+
+    return entry.anime_id === animeId
+
+  }).length
+
+}
+
+/* =========================================================
+   FILTER ANIME
+========================================================= */
+
+function filterAnimeList(){
+
+  const search =
+  sanitize(
+    searchAnime.value
+  )
+  .toLowerCase()
+
+  const type =
+  sanitize(
+    filterType.value
+  )
+  .toLowerCase()
+
+  STATE.filteredAnime =
+
+    STATE.anime.filter(anime=>{
+
+      const title =
+      sanitize(
+        anime.title
+      )
+      .toLowerCase()
+
+      const animeType =
+      sanitize(
+        anime.type
+      )
+      .toLowerCase()
+
+      const matchSearch =
+
+        !search ||
+        title.includes(search)
+
+      const matchType =
+
+        !type ||
+        animeType === type
+
+      return (
+        matchSearch &&
+        matchType
+      )
+
+    })
+
+  renderAnimeGrid()
+
+}
+
+/* =========================================================
+   SORT ANIME
+========================================================= */
+
+function sortAnimeList(
+
+  list=[]
+
+){
+
+  return [...list].sort((a,b)=>{
+
+    return sanitize(a.title)
+    .localeCompare(
+      sanitize(b.title)
+    )
+
+  })
+
+}
+
+/* =========================================================
+   RENDER ANIME GRID
+========================================================= */
+
+function renderAnimeGrid(){
+
+  STATE.currentView =
+  "anime"
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+  downloadsView.innerHTML = ""
+
+  if(
+    !STATE.filteredAnime.length
+  ){
+
+    renderEmpty(
+      "No Anime Found"
+    )
+
+    return
+
+  }
+
+  const sortedAnime =
+  sortAnimeList(
+    STATE.filteredAnime
+  )
+
+  const fragment =
+  document.createDocumentFragment()
+
+  sortedAnime.forEach(anime=>{
+
+    const clone =
+
+      animeCardTemplate
+      .content
+      .cloneNode(true)
+
+    /* =========================
+       ELEMENTS
+    ========================= */
+
+    const card =
+    clone.querySelector(
+      ".anime-card"
+    )
+
+    const image =
+    clone.querySelector(
+      ".anime-image"
+    )
+
+    const title =
+    clone.querySelector(
+      ".anime-title"
+    )
+
+    const type =
+    clone.querySelector(
+      ".anime-type"
+    )
+
+    /* =========================
+       DOWNLOAD COUNT
+    ========================= */
+
+    const totalDownloads =
+    getAnimeDownloadCount(
+      anime.id
+    )
+
+    /* =========================
+       DATA
+    ========================= */
+
+    image.src =
+    anime.poster || ""
+
+    image.loading =
+    "lazy"
+
+    image.alt =
+    anime.title || ""
+
+    title.innerText =
+    anime.title || "Untitled"
+
+    type.innerText =
+
+      `${anime.type || "anime"} • ${totalDownloads} Downloads`
+
+    /* =========================
+       IMAGE FALLBACK
+    ========================= */
+
+    image.onerror = ()=>{
+
+      image.src =
+      "https://placehold.co/600x900?text=No+Poster"
+
+    }
+
+    /* =========================
+       CLICK
+    ========================= */
+
+    card.onclick = ()=>{
+
+      openAnimeStructure(
+        anime.id
+      )
+
+    }
+
+    fragment.appendChild(clone)
+
+  })
+
+  downloadsView.appendChild(
+    fragment
+  )
+
+}
+
+/* =========================================================
+   OPEN ANIME STRUCTURE
+========================================================= */
+
+function openAnimeStructure(
+
+  animeId
+
+){
+
+  const anime =
+  CACHE.animeMap[
+    animeId
+  ]
+
+  if(!anime){
+
+    notify(
+      "Anime Not Found",
+      "error"
+    )
+
+    return
+
+  }
+
+  STATE.currentAnime =
+  anime
+
+  STATE.currentSeason =
+  null
+
+  STATE.currentEpisode =
+  null
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+  renderAnimeStructure(
+    animeId
+  )
+
+}
+
+/* =========================================================
+   GET ANIME ENTRIES
+========================================================= */
+
+function getAnimeEntries(
+
+  animeId
+
+){
+
+  return STATE.downloads.filter(entry=>{
+
+    return (
+      entry.anime_id === animeId
+    )
+
+  })
+
+}
+
+/* =========================================================
+   GROUP SEASONS
+========================================================= */
+
+function groupAnimeSeasons(
+
+  entries=[]
+
+){
+
+  const grouped = {}
+
+  entries.forEach(entry=>{
+
+    /* =========================
+       MOVIES
+    ========================= */
+
+    if(
+      entry.content_type === "movie"
+    ){
+
+      if(!grouped.movies){
+
+        grouped.movies = []
+
+      }
+
+      grouped.movies.push(entry)
+
+      return
+
+    }
+
+    /* =========================
+       SERIES ZIP
+    ========================= */
+
+    if(
+      entry.content_type ===
+      "series_zip"
+    ){
+
+      if(!grouped.series_zip){
+
+        grouped.series_zip = []
+
+      }
+
+      grouped.series_zip.push(entry)
+
+      return
+
+    }
+
+    /* =========================
+       SEASON
+    ========================= */
+
+    const season =
+
+      numberValue(
+        entry.season,
+        1
+      )
+
+    if(
+      !grouped[season]
+    ){
+
+      grouped[season] = {
+
+        episodes:[],
+        zips:[]
+
+      }
+
+    }
+
+    /* =========================
+       ZIP
+    ========================= */
+
+    if(
+      entry.content_type ===
+      "season_zip"
+    ){
+
+      grouped[
+        season
+      ].zips.push(entry)
+
+    }
+
+    /* =========================
+       EPISODES
+    ========================= */
+
+    else{
+
+      grouped[
+        season
+      ].episodes.push(entry)
+
+    }
+
+  })
+
+  return grouped
+
+}
+
+/* =========================================================
+   RENDER ANIME STRUCTURE
+========================================================= */
+
+function renderAnimeStructure(
+
+  animeId
+
+){
+
+  downloadsView.innerHTML = ""
+
+  const entries =
+  getAnimeEntries(
+    animeId
+  )
+
+  if(!entries.length){
+
+    renderEmpty(
+      "No Downloads Found"
+    )
+
+    return
+
+  }
+
+  const grouped =
+  groupAnimeSeasons(
+    entries
+  )
+
+  const fragment =
+  document.createDocumentFragment()
+
+  /* =======================================================
+     MOVIES
+  ======================================================= */
+
+  if(grouped.movies){
+
+    grouped.movies.forEach(movie=>{
+
+      const clone =
+
+        seasonCardTemplate
+        .content
+        .cloneNode(true)
+
+      clone.querySelector(
+        ".season-title"
+      ).innerText =
+
+        movie.episode_title ||
+        "Movie"
+
+      clone.querySelector(
+        ".season-count"
+      ).innerText =
+
+        `${movie.hosts?.length || 0} Hosts`
+
+      const card =
+      clone.querySelector(
+        ".season-card"
+      )
+
+      card.onclick = ()=>{
+
+        openEpisodeView(
+          movie
+        )
+
+      }
+
+      fragment.appendChild(
+        clone
+      )
+
+    })
+
+  }
+
+  /* =======================================================
+     SERIES ZIP
+  ======================================================= */
+
+  if(grouped.series_zip){
+
+    grouped.series_zip.forEach(zip=>{
+
+      const clone =
+
+        seasonCardTemplate
+        .content
+        .cloneNode(true)
+
+      clone.querySelector(
+        ".season-title"
+      ).innerText =
+
+        "Full Series ZIP"
+
+      clone.querySelector(
+        ".season-count"
+      ).innerText =
+
+        `${zip.hosts?.length || 0} Hosts`
+
+      const card =
+      clone.querySelector(
+        ".season-card"
+      )
+
+      card.onclick = ()=>{
+
+        openEpisodeView(
+          zip
+        )
+
+      }
+
+      fragment.appendChild(
+        clone
+      )
+
+    })
+
+  }
+
+  /* =======================================================
+     SEASONS
+  ======================================================= */
+
+  Object.keys(grouped)
+
+  .filter(key=>{
+
+    return (
+      key !== "movies" &&
+      key !== "series_zip"
+    )
+
+  })
+
+  .sort((a,b)=>{
+
+    return Number(a) - Number(b)
+
+  })
+
+  .forEach(season=>{
+
+    const data =
+    grouped[season]
+
+    const total =
+
+      data.episodes.length +
+      data.zips.length
+
+    const clone =
+
+      seasonCardTemplate
+      .content
+      .cloneNode(true)
+
+    clone.querySelector(
+      ".season-title"
+    ).innerText =
+
+      `Season ${season}`
+
+    clone.querySelector(
+      ".season-count"
+    ).innerText =
+
+      `${total} Downloads`
+
+    const card =
+    clone.querySelector(
+      ".season-card"
+    )
+
+    card.onclick = ()=>{
+
+      openSeasonView(
+        Number(season),
+        data
+      )
+
+    }
+
+    fragment.appendChild(
+      clone
+    )
+
+  })
+
+  downloadsView.appendChild(
+    fragment
+  )
+
+}
+
+/* =========================================================
+   SEARCH EVENT
+========================================================= */
+
+searchAnime.addEventListener(
+
+  "input",
+
+  ()=>{
+
+    if(
+      STATE.currentView !==
+      "anime"
+    ) return
+
+    filterAnimeList()
+
+  }
+
+)
+
+/* =========================================================
+   FILTER EVENT
+========================================================= */
+
+filterType.addEventListener(
+
+  "change",
+
+  ()=>{
+
+    if(
+      STATE.currentView !==
+      "anime"
+    ) return
+
+    filterAnimeList()
+
+  }
+
+)
+
+
+/* =========================================================
+   ⚡ PART 3
+   SEASON + EPISODE ENGINE
+========================================================= */
+
+/* =========================================================
+   OPEN SEASON VIEW
+========================================================= */
+
+function openSeasonView(
+
+  season,
+  seasonData
+
+){
+
+  STATE.currentSeason =
+  season
+
+  STATE.currentEpisode =
+  null
+
+  STATE.currentView =
+  "season"
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+  renderSeasonEpisodes(
+    season,
+    seasonData
+  )
+
+}
+
+/* =========================================================
+   SORT EPISODES
+========================================================= */
+
+function sortEpisodes(
+
+  list=[]
+
+){
+
+  return [...list].sort((a,b)=>{
+
+    return (
+      numberValue(a.episode) -
+      numberValue(b.episode)
+    )
+
+  })
+
+}
+
+/* =========================================================
+   RENDER SEASON EPISODES
+========================================================= */
+
+function renderSeasonEpisodes(
+
+  season,
+  seasonData
+
+){
+
+  downloadsView.innerHTML = ""
+
+  const fragment =
+  document.createDocumentFragment()
+
+  /* =======================================================
+     SEASON ZIP
+  ======================================================= */
+
+  if(
+    seasonData.zips?.length
+  ){
+
+    seasonData.zips.forEach(zip=>{
+
+      const clone =
+
+        episodeCardTemplate
+        .content
+        .cloneNode(true)
+
+      clone.querySelector(
+        ".episode-number"
+      ).innerText =
+
+        "ZIP"
+
+      clone.querySelector(
+        ".episode-title"
+      ).innerText =
+
+        zip.episode_title ||
+        `Season ${season} ZIP`
+
+      clone.querySelector(
+        ".host-count"
+      ).innerText =
+
+        `${zip.hosts?.length || 0} Hosts`
+
+      const card =
+      clone.querySelector(
+        ".episode-card"
+      )
+
+      card.onclick = ()=>{
+
+        openEpisodeView(
+          zip
+        )
+
+      }
+
+      fragment.appendChild(
+        clone
+      )
+
+    })
+
+  }
+
+  /* =======================================================
+     EPISODES
+  ======================================================= */
+
+  const sortedEpisodes =
+  sortEpisodes(
+    seasonData.episodes
+  )
+
+  sortedEpisodes.forEach(entry=>{
+
+    const clone =
+
+      episodeCardTemplate
+      .content
+      .cloneNode(true)
+
+    clone.querySelector(
+      ".episode-number"
+    ).innerText =
+
+      `EP ${entry.episode || "?"}`
+
+    clone.querySelector(
+      ".episode-title"
+    ).innerText =
+
+      entry.episode_title ||
+      `Episode ${entry.episode}`
+
+    clone.querySelector(
+      ".host-count"
+    ).innerText =
+
+      `${entry.hosts?.length || 0} Hosts`
+
+    const card =
+    clone.querySelector(
+      ".episode-card"
+    )
+
+    card.onclick = ()=>{
+
+      openEpisodeView(
+        entry
+      )
+
+    }
+
+    fragment.appendChild(
+      clone
+    )
+
+  })
+
+  downloadsView.appendChild(
+    fragment
+  )
+
+}
+
+/* =========================================================
+   OPEN EPISODE VIEW
+========================================================= */
+
+function openEpisodeView(
+
+  entry
+
+){
+
+  STATE.currentEpisode =
+
+    entry.episode ||
+    entry.episode_title ||
+    "download"
+
+  STATE.currentView =
+  "episode"
+
+  updateBreadcrumb()
+
+  updateBackButton()
+
+  renderHostCards(
+    entry
+  )
+
+}
+
+/* =========================================================
+   RENDER HOST CARDS
+========================================================= */
+
+function renderHostCards(
+
+  entry
+
+){
+
+  downloadsView.innerHTML = ""
+
+  if(
+    !entry.hosts?.length
+  ){
+
+    renderEmpty(
+      "No Hosts Found"
+    )
+
+    return
+
+  }
+
+  const fragment =
+  document.createDocumentFragment()
+
+  entry.hosts.forEach(host=>{
+
+    const clone =
+
+      hostDisplayTemplate
+      .content
+      .cloneNode(true)
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const hostName =
+    clone.querySelector(
+      ".display-host-name"
+    )
+
+    const storage =
+    clone.querySelector(
+      ".display-storage"
+    )
+
+    const knight =
+    clone.querySelector(
+      ".display-knight"
+    )
+
+    const adsBox =
+    clone.querySelector(
+      ".display-ads"
+    )
+
+    const shortBox =
+    clone.querySelector(
+      ".display-shortlinks"
+    )
+
+    const popupBox =
+    clone.querySelector(
+      ".display-popups"
+    )
+
+    const modeBox =
+    clone.querySelector(
+      ".display-mode"
+    )
+
+    const linksBox =
+    clone.querySelector(
+      ".display-links"
+    )
+
+    const editBtn =
+    clone.querySelector(
+      ".edit-host-btn"
+    )
+
+    const deleteBtn =
+    clone.querySelector(
+      ".delete-host-btn"
+    )
+
+    /* =====================================================
+       HOST INFO
+    ===================================================== */
+
+    hostName.innerText =
+
+      host.host ||
+      "Unknown Host"
+
+    storage.innerText =
+
+      `Storage : ${host.storage || "Unknown"}`
+
+    knight.innerText =
+
+      `Knight : ${host.knight ? "YES" : "NO"}`
+
+    modeBox.innerText =
+
+      host.mode ||
+      "random"
+
+    /* =====================================================
+       ADS
+    ===================================================== */
+
+    adsBox.innerHTML = ""
+
+    if(
+      host.ads?.length
+    ){
+
+      host.ads.forEach(ad=>{
+
+        adsBox.innerHTML += `
+
+          <div>
+
+            ${ad.name || "Ad"}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      adsBox.innerHTML = `
+
+        <div class="empty-tag">
+
+          OFF
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       SHORTLINKS
+    ===================================================== */
+
+    shortBox.innerHTML = ""
+
+    if(
+      host.shortlinks?.length
+    ){
+
+      host.shortlinks.forEach(short=>{
+
+        shortBox.innerHTML += `
+
+          <div>
+
+            ${short.name || "Shortlink"}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      shortBox.innerHTML = `
+
+        <div class="empty-tag">
+
+          NONE
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       POPUPS
+    ===================================================== */
+
+    popupBox.innerHTML = ""
+
+    if(
+      host.popups?.length
+    ){
+
+      host.popups.forEach(popup=>{
+
+        popupBox.innerHTML += `
+
+          <div>
+
+            ${popup.name || "Popup"}
+
+          </div>
+
+        `
+
+      })
+
+    }else{
+
+      popupBox.innerHTML = `
+
+        <div class="empty-tag">
+
+          NONE
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       LINKS
+    ===================================================== */
+
+    linksBox.innerHTML = ""
+
+    if(
+      host.links?.length
+    ){
+
+      host.links.forEach(link=>{
+
+        /* =========================
+           KNIGHT
+        ========================= */
+
+        if(host.knight){
+
+          linksBox.innerHTML += `
+
+            <div>
+
+              ${link.quality || "LINK"}
+
+            </div>
+
+          `
+
+        }
+
+        /* =========================
+           NORMAL
+        ========================= */
+
+        else{
+
+          linksBox.innerHTML += `
+
+            <div>
+
+              DIRECT
+
+            </div>
+
+          `
+
+        }
+
+      })
+
+    }else{
+
+      linksBox.innerHTML = `
+
+        <div class="empty-tag">
+
+          No Links
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       EDIT
+    ===================================================== */
+
+    editBtn.onclick = ()=>{
+
+      editDownloadEntry(
+        entry,
+        host
+      )
+
+    }
+
+    /* =====================================================
+       DELETE
+    ===================================================== */
+
+    deleteBtn.onclick = ()=>{
+
+      deleteHostEntry(
+        entry.id,
+        host.id
+      )
+
+    }
+
+    fragment.appendChild(
+      clone
+    )
+
+  })
+
+  downloadsView.appendChild(
+    fragment
+  )
+
+}
+
+/* =========================================================
+   BACK NAVIGATION ENGINE
+========================================================= */
+
+backViewBtn.onclick = ()=>{
+
+  /* =======================================================
+     EPISODE -> SEASON
+  ======================================================= */
+
+  if(
+    STATE.currentView ===
+    "episode"
+  ){
+
+    STATE.currentEpisode =
+    null
+
+    STATE.currentView =
+    "season"
+
+    updateBreadcrumb()
+
+    updateBackButton()
+
+    const entries =
+    getAnimeEntries(
+      STATE.currentAnime.id
+    )
+
+    const grouped =
+    groupAnimeSeasons(
+      entries
+    )
+
+    renderSeasonEpisodes(
+
+      STATE.currentSeason,
+
+      grouped[
+        STATE.currentSeason
+      ]
+
+    )
+
+    return
+
+  }
+
+  /* =======================================================
+     SEASON -> ANIME
+  ======================================================= */
+
+  if(
+    STATE.currentView ===
+    "season"
+  ){
+
+    STATE.currentSeason =
+    null
+
+    STATE.currentView =
+    "anime-structure"
+
+    updateBreadcrumb()
+
+    updateBackButton()
+
+    renderAnimeStructure(
+      STATE.currentAnime.id
+    )
+
+    return
+
+  }
+
+  /* =======================================================
+     ANIME -> GRID
+  ======================================================= */
+
+  resetView()
+
+  renderAnimeGrid()
+
+}
+
+
+/* =========================================================
+   ⚡ PART 4
+   ADD DOWNLOAD MODAL ENGINE
+========================================================= */
+
+/* =========================================================
+   OPEN ADD MODAL
+========================================================= */
+
+openDownloadModal.onclick = ()=>{
+
+  resetModal()
+
+  addHostCard()
+
+  openModal()
+
+}
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+closeDownloadModal.onclick = ()=>{
+
+  closeModal()
+
+}
+
+/* =========================================================
+   OUTSIDE CLICK CLOSE
+========================================================= */
+
+downloadModal.onclick = e=>{
+
+  if(
+    e.target === downloadModal
+  ){
+
+    closeModal()
+
+  }
+
+}
+
+/* =========================================================
+   ESC CLOSE
+========================================================= */
+
+window.addEventListener(
+
+  "keydown",
+
+  e=>{
+
+    if(
+      e.key === "Escape"
+    ){
+
+      closeModal()
+
+    }
+
+  }
+
+)
+
+/* =========================================================
+   ADD HOST BUTTON
+========================================================= */
+
+addHostBtn.onclick = ()=>{
+
+  addHostCard()
+
+}
+
+/* =========================================================
+   ADD HOST CARD
+========================================================= */
+
+function addHostCard(
+
+  data=null
+
+){
+
+  const clone =
+
+    hostTemplate
+    .content
+    .cloneNode(true)
+
+  const card =
+  clone.querySelector(
+    ".download-host-card"
+  )
+
+  /* =====================================================
+     ELEMENTS
+  ===================================================== */
+
+  const hostSelect =
+  clone.querySelector(
+    ".host-select"
+  )
+
+  const removeBtn =
+  clone.querySelector(
+    ".remove-host"
+  )
+
+  const addLinkBtn =
+  clone.querySelector(
+    ".addLinkBtn"
+  )
+
+  const linksContainer =
+  clone.querySelector(
+    ".linksContainer"
+  )
+
+  /* =====================================================
+     HOST OPTIONS
+  ===================================================== */
+
+  hostSelect.innerHTML = `
+
+    <option value="">
+      Select Host
+    </option>
+
+  `
+
+  STATE.hosts.forEach(host=>{
+
+    hostSelect.innerHTML += `
+
+      <option value="${host.host}">
+
+        ${host.host}
+
+      </option>
+
+    `
+
+  })
+
+  /* =====================================================
+     AUTO SELECT
+  ===================================================== */
+
+  if(data?.host){
+
+    hostSelect.value =
+    data.host
+
+  }
+
+  /* =====================================================
+     HOST CHANGE
+  ===================================================== */
+
+  hostSelect.onchange = ()=>{
+
+    const selected =
+    CACHE.hostMap[
+      hostSelect.value
+    ]
+
+    if(!selected){
+
+      resetHostCard(card)
+
+      return
+
+    }
+
+    /* =========================
+       AUTO FILL
+    ========================= */
+
+    renderHostInfo(
+      card,
+      selected
+    )
+
+    /* =========================
+       RESET LINKS
+    ========================= */
+
+    linksContainer.innerHTML =
+    ""
+
+    /* =========================
+       KNIGHT
+    ========================= */
+
+    addLinkRow(
+
+      linksContainer,
+      selected.knight
+
+    )
+
+  }
+
+  /* =====================================================
+     REMOVE HOST
+  ===================================================== */
+
+  removeBtn.onclick = ()=>{
+
+    card.remove()
+
+  }
+
+  /* =====================================================
+     ADD LINK
+  ===================================================== */
+
+  addLinkBtn.onclick = ()=>{
+
+    const selected =
+    CACHE.hostMap[
+      hostSelect.value
+    ]
+
+    addLinkRow(
+
+      linksContainer,
+      selected?.knight
+
+    )
+
+  }
+
+  /* =====================================================
+     AUTO LOAD
+  ===================================================== */
+
+  if(data?.host){
+
+    const selected =
+    CACHE.hostMap[
+      data.host
+    ]
+
+    if(selected){
+
+      renderHostInfo(
+        card,
+        selected
+      )
+
+      /* =======================
+         LINKS
+      ======================= */
+
+      linksContainer.innerHTML =
+      ""
+
+      if(
+        data.links?.length
+      ){
+
+        data.links.forEach(link=>{
+
+          addLinkRow(
+
+            linksContainer,
+            selected.knight,
+            link
+
+          )
+
+        })
+
+      }else{
+
+        addLinkRow(
+
+          linksContainer,
+          selected.knight
+
+        )
+
+      }
+
+    }
+
+  }
+
+  hostsContainer.appendChild(
+    clone
+  )
+
+}
+
+/* =========================================================
+   RESET HOST CARD
+========================================================= */
+
+function resetHostCard(
+
+  card
+
+){
+
+  /* STORAGE */
+
+  card.querySelector(
+    ".display-storage"
+  ).innerText = "--"
+
+  /* KNIGHT */
+
+  const knight =
+  card.querySelector(
+    ".display-knight-status"
+  )
+
+  knight.innerText = "--"
+
+  knight.className =
+  "display-knight-status"
+
+  /* MODE */
+
+  card.querySelector(
+    ".display-mode"
+  ).innerText = "--"
+
+  /* ADS */
+
+  card.querySelector(
+    ".active-ads-list"
+  ).innerHTML = ""
+
+  /* SHORTLINKS */
+
+  card.querySelector(
+    ".active-shortlinks-list"
+  ).innerHTML = ""
+
+  /* POPUPS */
+
+  card.querySelector(
+    ".active-popups-list"
+  ).innerHTML = ""
+
+}
+
+/* =========================================================
+   RENDER HOST INFO
+========================================================= */
+
+function renderHostInfo(
+
+  card,
+  host
+
+){
+
+  /* =====================================================
+     STORAGE
+  ===================================================== */
+
+  card.querySelector(
+    ".display-storage"
+  ).innerText =
+
+    host.storage ||
+    "Unknown"
+
+  /* =====================================================
+     KNIGHT
+  ===================================================== */
+
+  const knight =
+  card.querySelector(
+    ".display-knight-status"
+  )
+
+  knight.innerText =
+
+    host.knight
+    ? "YES"
+    : "NO"
+
+  knight.className =
+
+    host.knight
+    ? "display-knight-status yes"
+    : "display-knight-status no"
+
+  /* =====================================================
+     MODE
+  ===================================================== */
+
+  card.querySelector(
+    ".display-mode"
+  ).innerText =
+
+    host.mode ||
+    "random"
+
+  /* =====================================================
+     ADS
+  ===================================================== */
+
+  const adsBox =
+  card.querySelector(
+    ".active-ads-list"
+  )
+
+  adsBox.innerHTML = ""
+
+  if(host.ads?.length){
+
+    host.ads.forEach(ad=>{
+
+      adsBox.innerHTML += `
+
+        <div>
+
+          ${ad.name || ad}
+
+        </div>
+
+      `
+
+    })
+
+  }else{
+
+    adsBox.innerHTML = `
+
+      <div class="empty-tag">
+
+        OFF
+
+      </div>
+
+    `
+
+  }
+
+  /* =====================================================
+     SHORTLINKS
+  ===================================================== */
+
+  const shortBox =
+  card.querySelector(
+    ".active-shortlinks-list"
+  )
+
+  shortBox.innerHTML = ""
+
+  if(host.shortlinks?.length){
+
+    host.shortlinks.forEach(short=>{
+
+      shortBox.innerHTML += `
+
+        <div>
+
+          ${short.name || short}
+
+        </div>
+
+      `
+
+    })
+
+  }else{
+
+    shortBox.innerHTML = `
+
+      <div class="empty-tag">
+
+        NONE
+
+      </div>
+
+    `
+
+  }
+
+  /* =====================================================
+     POPUPS
+  ===================================================== */
+
+  const popupBox =
+  card.querySelector(
+    ".active-popups-list"
+  )
+
+  popupBox.innerHTML = ""
+
+  if(host.popups?.length){
+
+    host.popups.forEach(popup=>{
+
+      popupBox.innerHTML += `
+
+        <div>
+
+          ${popup.name || popup}
+
+        </div>
+
+      `
+
+    })
+
+  }else{
+
+    popupBox.innerHTML = `
+
+      <div class="empty-tag">
+
+        NONE
+
+      </div>
+
+    `
+
+  }
+
+}
+
+/* =========================================================
+   ADD LINK ROW
+========================================================= */
+
+function addLinkRow(
+
+  container,
+  isKnight=false,
+  data=null
+
+){
+
+  const clone =
+
+    linkTemplate
+    .content
+    .cloneNode(true)
+
+  const row =
+  clone.querySelector(
+    ".download-link-row"
+  )
+
+  const quality =
+  clone.querySelector(
+    ".quality-select"
+  )
+
+  const link =
+  clone.querySelector(
+    ".download-link"
+  )
+
+  const remove =
+  clone.querySelector(
+    ".remove-link"
+  )
+
+  /* =====================================================
+     NORMAL HOST
+  ===================================================== */
+
+  if(!isKnight){
+
+    quality.style.display =
+    "none"
+
+    row.style.gridTemplateColumns =
+    "1fr 70px"
+
+  }
+
+  /* =====================================================
+     AUTO DATA
+  ===================================================== */
+
+  if(data){
+
+    if(data.quality){
+
+      quality.value =
+      data.quality
+
+    }
+
+    link.value =
+    data.link || ""
+
+  }
+
+  /* =====================================================
+     REMOVE
+  ===================================================== */
+
+  remove.onclick = ()=>{
+
+    row.remove()
+
+  }
+
+  container.appendChild(
+    clone
+  )
+
+}
+
+/* =========================================================
+   CONTENT TYPE AUTO LOGIC
+========================================================= */
+
+contentType.onchange = ()=>{
+
+  const type =
+  contentType.value
+
+  /* =====================================================
+     MOVIE
+  ===================================================== */
+
+  if(type === "movie"){
+
+    seasonNumber.disabled =
+    true
+
+    episodeNumber.disabled =
+    true
+
+    episodeTitle.placeholder =
+    "Movie Title"
+
+    return
+
+  }
+
+  /* =====================================================
+     SERIES ZIP
+  ===================================================== */
+
+  if(type === "series_zip"){
+
+    seasonNumber.disabled =
+    true
+
+    episodeNumber.disabled =
+    true
+
+    episodeTitle.placeholder =
+    "Series ZIP Title"
+
+    return
+
+  }
+
+  /* =====================================================
+     SEASON ZIP
+  ===================================================== */
+
+  if(type === "season_zip"){
+
+    seasonNumber.disabled =
+    false
+
+    episodeNumber.disabled =
+    true
+
+    episodeTitle.placeholder =
+    "Season ZIP Title"
+
+    return
+
+  }
+
+  /* =====================================================
+     NORMAL EPISODE
+  ===================================================== */
+
+  seasonNumber.disabled =
+  false
+
+  episodeNumber.disabled =
+  false
+
+  episodeTitle.placeholder =
+  "Episode Title"
+
+}
+
+/* =========================================================
+   ⚡ PART 5
+   SAVE + EDIT + DELETE ENGINE
+========================================================= */
+
+/* =========================================================
+   VALIDATE DOWNLOAD FORM
+========================================================= */
+
+function validateDownloadForm(){
+
+  /* =====================================================
+     ANIME
+  ===================================================== */
+
+  if(!animeSelect.value){
+
+    notify(
+      "Select Anime",
+      "error"
+    )
+
+    return false
+
+  }
+
+  /* =====================================================
+     HOSTS
+  ===================================================== */
+
+  const hostCards =
+
+    document.querySelectorAll(
+      ".download-host-card"
+    )
+
+  if(!hostCards.length){
+
+    notify(
+      "Add At Least One Host",
+      "error"
+    )
+
+    return false
+
+  }
+
+  /* =====================================================
+     HOST VALIDATION
+  ===================================================== */
+
+  let valid = true
+
+  hostCards.forEach(card=>{
+
+    const host =
+    card.querySelector(
+      ".host-select"
+    ).value
+
+    if(!host){
+
+      valid = false
+
+    }
+
+    const rows =
+    card.querySelectorAll(
+      ".download-link-row"
+    )
+
+    if(!rows.length){
+
+      valid = false
+
+    }
+
+    rows.forEach(row=>{
+
+      const url =
+      sanitize(
+
+        row.querySelector(
+          ".download-link"
+        ).value
+
+      )
+
+      if(!url){
+
+        valid = false
+
+      }
+
+    })
+
+  })
+
+  if(!valid){
+
+    notify(
+      "Fill All Host Data",
+      "error"
+    )
+
+    return false
+
+  }
+
+  return true
+
+}
+
+/* =========================================================
+   BUILD HOST PAYLOAD
+========================================================= */
+
+function buildHostsPayload(){
+
+  const hosts = []
+
+  document
+  .querySelectorAll(
+    ".download-host-card"
+  )
+  .forEach(card=>{
+
+    const hostName =
+
+      card.querySelector(
+        ".host-select"
+      ).value
+
+    if(!hostName) return
+
+    const hostData =
+    CACHE.hostMap[
+      hostName
+    ]
+
+    const links = []
+
+    card
+    .querySelectorAll(
+      ".download-link-row"
+    )
+    .forEach(row=>{
+
+      const quality =
+      row.querySelector(
+        ".quality-select"
+      )?.value || null
+
+      const link =
+      sanitize(
+
+        row.querySelector(
+          ".download-link"
+        ).value
+
+      )
+
+      if(!link) return
+
+      links.push({
+
+        quality:
+
+          hostData?.knight
+          ? quality
+          : null,
+
+        link
+
+      })
+
+    })
+
+    hosts.push({
+
+      host:
+      hostName,
+
+      links
+
+    })
+
+  })
+
+  return hosts
+
+}
+
+/* =========================================================
+   BUILD DOWNLOAD PAYLOAD
+========================================================= */
+
+function buildDownloadPayload(){
+
+  return {
+
+    anime_id:
+    animeSelect.value,
+
+    content_type:
+    contentType.value,
+
+    season:
+    sanitize(
+      seasonNumber.value
+    ) || null,
+
+    episode:
+    sanitize(
+      episodeNumber.value
+    ) || null,
+
+    episode_title:
+    sanitize(
+      episodeTitle.value
+    ) || null,
+
+    hosts:
+    buildHostsPayload()
+
+  }
+
+}
+
+/* =========================================================
+   SAVE DOWNLOAD
+========================================================= */
+
+saveDownloadBtn.onclick =
+async ()=>{
+
+  /* =====================================================
+     VALIDATE
+  ===================================================== */
+
+  const valid =
+  validateDownloadForm()
+
+  if(!valid) return
+
+  /* =====================================================
+     PAYLOAD
+  ===================================================== */
+
+  const payload =
+  buildDownloadPayload()
+
+  /* =====================================================
+     BUTTON LOADING
+  ===================================================== */
+
+  saveDownloadBtn.disabled =
+  true
+
+  saveDownloadBtn.innerText =
+  "Saving..."
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  let response = null
+
+  if(
+    STATE.editingEntry
+  ){
+
+    response =
+    await api(
+
+      `/downloads-v2/${STATE.editingEntry.id}`,
+
+      "PUT",
+
+      payload
+
+    )
+
+  }
+
+  /* =====================================================
+     NEW
+  ===================================================== */
+
+  else{
+
+    response =
+    await api(
+
+      "/downloads-v2",
+
+      "POST",
+
+      payload
+
+    )
+
+  }
+
+  /* =====================================================
+     COMPLETE
+  ===================================================== */
+
+  saveDownloadBtn.disabled =
+  false
+
+  saveDownloadBtn.innerText =
+  "💾 Save Download"
+
+  if(!response) return
+
+  notify(
+    "Download Saved"
+  )
+
+  closeModal()
+
+  await refreshDownloads()
+
+}
+
+/* =========================================================
+   REFRESH DOWNLOADS
+========================================================= */
+
+async function refreshDownloads(){
+
+  await fetchDownloads()
+
+  buildCaches()
+
+  STATE.filteredAnime =
+  [...STATE.anime]
+
+  /* =====================================================
+     CURRENT VIEW
+  ===================================================== */
+
+  if(
+    STATE.currentView ===
+    "anime"
+  ){
+
+    renderAnimeGrid()
+
+    return
+
+  }
+
+  /* =====================================================
+     ANIME STRUCTURE
+  ===================================================== */
+
+  if(
+    STATE.currentAnime
+  ){
+
+    renderAnimeStructure(
+      STATE.currentAnime.id
+    )
+
+  }
+
+}
+
+/* =========================================================
+   EDIT DOWNLOAD ENTRY
+========================================================= */
+
+function editDownloadEntry(
+
+  entry
+
+){
+
+  /* =====================================================
+     RESET
+  ===================================================== */
+
+  resetModal()
+
+  STATE.editingEntry =
+  entry
+
+  downloadModalTitle.innerText =
+  "Edit Download"
+
+  /* =====================================================
+     ENTRY DATA
+  ===================================================== */
+
+  animeSelect.value =
+  entry.anime_id
+
+  contentType.value =
+  entry.content_type ||
+  "episode"
+
+  seasonNumber.value =
+  entry.season || ""
+
+  episodeNumber.value =
+  entry.episode || ""
+
+  episodeTitle.value =
+  entry.episode_title || ""
+
+  /* =====================================================
+     CONTENT TYPE LOGIC
+  ===================================================== */
+
+  contentType.onchange()
+
+  /* =====================================================
+     HOSTS
+  ===================================================== */
+
+  hostsContainer.innerHTML =
+  ""
+
+  if(entry.hosts?.length){
+
+    entry.hosts.forEach(host=>{
+
+      addHostCard({
+
+        host:
+        host.host,
+
+        links:
+        host.links || []
+
+      })
+
+    })
+
+  }else{
+
+    addHostCard()
+
+  }
+
+  openModal()
+
+}
+
+/* =========================================================
+   DELETE HOST ENTRY
+========================================================= */
+
+async function deleteHostEntry(
+
+  entryId,
+  hostId
+
+){
+
+  const ok =
+  confirm(
+
+    "Delete This Host?"
+
+  )
+
+  if(!ok) return
+
+  const response =
+  await api(
+
+    `/downloads-v2/${entryId}/host/${hostId}`,
+
+    "DELETE"
+
+  )
+
+  if(!response) return
+
+  notify(
+    "Host Deleted"
+  )
+
+  await refreshDownloads()
+
+}
+
+/* =========================================================
+   DELETE DOWNLOAD ENTRY
+========================================================= */
+
+async function deleteDownloadEntry(
+
+  entryId
+
+){
+
+  const ok =
+  confirm(
+
+    "Delete Entire Download?"
+
+  )
+
+  if(!ok) return
+
+  const response =
+  await api(
+
+    `/downloads-v2/${entryId}`,
+
+    "DELETE"
+
+  )
+
+  if(!response) return
+
+  notify(
+    "Download Deleted"
+  )
+
+  await refreshDownloads()
+
+}
+
+/* =========================================================
+   AUTO EPISODE TITLE
+========================================================= */
+
+episodeNumber.addEventListener(
+
+  "input",
+
+  ()=>{
+
+    /* =========================
+       ONLY EPISODE
+    ========================= */
+
+    if(
+      contentType.value !==
+      "episode"
+    ) return
+
+    /* =========================
+       EXISTING TITLE
+    ========================= */
+
+    if(
+      sanitize(
+        episodeTitle.value
+      )
+    ) return
+
+    const ep =
+    sanitize(
+      episodeNumber.value
+    )
+
+    if(!ep) return
+
+    episodeTitle.value =
+    `Episode ${ep}`
+
+  }
+
+)
+
+/* =========================================================
+   AUTO CONTENT LOGIC INIT
+========================================================= */
+
+contentType.onchange()
+
+     
+
+/* =========================================================
+   ⚡ PART 6
+   FINAL UX + SECURITY + PERFORMANCE ENGINE
+========================================================= */
+
+/* =========================================================
+   SECURE HTML
+========================================================= */
+
+function escapeHtml(
+
+  unsafe=""
+
+){
+
+  return String(unsafe)
+
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;")
+
+}
+
+/* =========================================================
+   URL VALIDATION
+========================================================= */
+
+function isValidUrl(
+
+  url=""
+
+){
+
+  try{
+
+    new URL(url)
+
+    return true
+
+  }catch{
+
+    return false
+
+  }
+
+}
+
+/* =========================================================
+   DUPLICATE HOST CHECK
+========================================================= */
+
+function validateDuplicateHosts(){
+
+  const selected = []
+
+  let duplicate = false
+
+  document
+  .querySelectorAll(
+    ".host-select"
+  )
+  .forEach(select=>{
+
+    const value =
+    sanitize(select.value)
+
+    if(!value) return
+
+    if(selected.includes(value)){
+
+      duplicate = true
+
+    }
+
+    selected.push(value)
+
+  })
+
+  return !duplicate
+
+}
+
+/* =========================================================
+   DUPLICATE QUALITY CHECK
+========================================================= */
+
+function validateDuplicateQualities(){
+
+  let valid = true
+
+  document
+  .querySelectorAll(
+    ".download-host-card"
+  )
+  .forEach(card=>{
+
+    const host =
+    card.querySelector(
+      ".host-select"
+    ).value
+
+    const hostData =
+    CACHE.hostMap[
+      host
+    ]
+
+    if(
+      !hostData?.knight
+    ) return
+
+    const used = []
+
+    card
+    .querySelectorAll(
+      ".quality-select"
+    )
+    .forEach(select=>{
+
+      const q =
+      sanitize(
+        select.value
+      )
+
+      if(!q) return
+
+      if(
+        used.includes(q)
+      ){
+
+        valid = false
+
+      }
+
+      used.push(q)
+
+    })
+
+  })
+
+  return valid
+
+}
+
+/* =========================================================
+   EXTENDED VALIDATION
+========================================================= */
+
+const oldValidate =
+validateDownloadForm
+
+validateDownloadForm =
+function(){
+
+  const base =
+  oldValidate()
+
+  if(!base){
+
+    return false
+
+  }
+
+  /* =====================================================
+     DUP HOST
+  ===================================================== */
+
+  if(
+    !validateDuplicateHosts()
+  ){
+
+    notify(
+      "Duplicate Hosts Not Allowed",
+      "error"
+    )
+
+    return false
+
+  }
+
+  /* =====================================================
+     DUP QUALITY
+  ===================================================== */
+
+  if(
+    !validateDuplicateQualities()
+  ){
+
+    notify(
+      "Duplicate Qualities Found",
+      "error"
+    )
+
+    return false
+
+  }
+
+  /* =====================================================
+     URL CHECK
+  ===================================================== */
+
+  let invalid = false
+
+  document
+  .querySelectorAll(
+    ".download-link"
+  )
+  .forEach(input=>{
+
+    const url =
+    sanitize(input.value)
+
+    if(
+      !isValidUrl(url)
+    ){
+
+      invalid = true
+
+    }
+
+  })
+
+  if(invalid){
+
+    notify(
+      "Invalid Download URL",
+      "error"
+    )
+
+    return false
+
+  }
+
+  return true
+
+}
+
+/* =========================================================
+   PREVENT DOUBLE SAVE
+========================================================= */
+
+let SAVE_LOCK = false
+
+const oldSaveHandler =
+saveDownloadBtn.onclick
+
+saveDownloadBtn.onclick =
+async ()=>{
+
+  if(SAVE_LOCK){
+
+    return
+
+  }
+
+  SAVE_LOCK = true
+
+  try{
+
+    await oldSaveHandler()
+
+  }finally{
+
+    setTimeout(()=>{
+
+      SAVE_LOCK = false
+
+    },1000)
+
+  }
+
+}
+
+/* =========================================================
+   MODAL ANIMATION
+========================================================= */
+
+function openModal(){
+
+  downloadModal.style.display =
+  "flex"
+
+  requestAnimationFrame(()=>{
+
+    downloadModal.style.opacity =
+    "1"
+
+  })
+
+}
+
+function closeModal(){
+
+  downloadModal.style.opacity =
+  "0"
+
+  setTimeout(()=>{
+
+    downloadModal.style.display =
+    "none"
+
+  },180)
+
+}
+
+/* =========================================================
+   SKELETON LOADER
+========================================================= */
+
+function renderSkeletonGrid(){
+
+  downloadsView.innerHTML = ""
+
+  for(let i=0;i<8;i++){
+
+    downloadsView.innerHTML += `
+
+      <div
+        style="
+          height:320px;
+          border-radius:18px;
+          background:#101728;
+          border:1px solid #1a2035;
+          animation:pulse 1.2s infinite;
+        "
+      ></div>
+
+    `
+
+  }
+
+}
+
+/* =========================================================
+   PERFORMANCE RENDER
+========================================================= */
+
+function safeAppend(
+
+  container,
+  fragment
+
+){
+
+  requestAnimationFrame(()=>{
+
+    container.appendChild(
+      fragment
+    )
+
+  })
+
+}
+
+/* =========================================================
+   SEARCH DEBOUNCE
+========================================================= */
+
+let SEARCH_TIMER = null
+
+searchAnime.addEventListener(
+
+  "input",
+
+  ()=>{
+
+    clearTimeout(
+      SEARCH_TIMER
+    )
+
+    SEARCH_TIMER =
+    setTimeout(()=>{
+
+      filterAnimeList()
+
+    },250)
+
+  }
+
+)
+
+/* =========================================================
+   IMAGE LAZY FALLBACK
+========================================================= */
+
+document.addEventListener(
+
+  "error",
+
+  e=>{
+
+    const target =
+    e.target
+
+    if(
+      target.tagName === "IMG"
+    ){
+
+      target.src =
+      "https://placehold.co/600x900?text=Anime"
+
+    }
+
+  },
+
+  true
+
+)
+
+/* =========================================================
+   AUTO SCROLL TOP
+========================================================= */
+
+function scrollTopSmooth(){
+
+  window.scrollTo({
+
+    top:0,
+    behavior:"smooth"
+
+  })
+
+}
+
+/* =========================================================
+   VIEW PATCH
+========================================================= */
+
+const oldAnimeStructure =
+renderAnimeStructure
+
+renderAnimeStructure =
+function(animeId){
+
+  scrollTopSmooth()
+
+  oldAnimeStructure(animeId)
+
+}
+
+const oldSeasonRender =
+renderSeasonEpisodes
+
+renderSeasonEpisodes =
+function(season,data){
+
+  scrollTopSmooth()
+
+  oldSeasonRender(
+    season,
+    data
+  )
+
+}
+
+const oldHostRender =
+renderHostCards
+
+renderHostCards =
+function(entry){
+
+  scrollTopSmooth()
+
+  oldHostRender(entry)
+
+}
+
+/* =========================================================
+   MEMORY CLEANUP
+========================================================= */
+
+window.addEventListener(
+
+  "beforeunload",
+
+  ()=>{
+
+    STATE.anime = []
+    STATE.hosts = []
+    STATE.downloads = []
+
+    STATE.filteredAnime = []
+
+    CACHE.animeMap = {}
+    CACHE.hostMap = {}
+    CACHE.entryMap = {}
+
+  }
+
+)
+
+/* =========================================================
+   GLOBAL ERROR HANDLER
+========================================================= */
+
+window.addEventListener(
+
+  "unhandledrejection",
+
+  e=>{
+
+    console.error(e.reason)
+
+  }
+
+)
+
+window.addEventListener(
+
+  "error",
+
+  e=>{
+
+    console.error(e.error)
+
+  }
+
+)
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+document
+.querySelectorAll("button")
+.forEach(btn=>{
+
+  btn.setAttribute(
+    "tabindex",
+    "0"
+  )
+
+})
+
+/* =========================================================
+   FINAL BOOT PATCH
+========================================================= */
+
+const oldBootstrap =
+bootstrap
+
+bootstrap =
+async function(){
+
+  renderSkeletonGrid()
+
+  await oldBootstrap()
+
+  notify(
+    "Download Manager Ready"
+  )
+
+}
+
+/* =========================================================
+   START FINAL
+========================================================= */
+
+bootstrap()
+
+      </script>
