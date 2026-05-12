@@ -4,7 +4,9 @@
 <title>Download CMS – AnimeHunt</title>
 
 <style>
- /* =======================================================
+ 
+  
+  /* =======================================================
 GLOBAL
 ======================================================= */
 
@@ -13,11 +15,13 @@ GLOBAL
   padding:0;
   box-sizing:border-box;
   font-family:system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
   background:#060a14;
   color:#fff;
+  overflow-x:hidden;
 }
 
 button,
@@ -25,10 +29,39 @@ input,
 select,
 textarea{
   outline:none;
+  font-family:inherit;
 }
 
 button{
   cursor:pointer;
+  transition:.2s;
+}
+
+button:hover{
+  transform:translateY(-1px);
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+/* =======================================================
+SCROLLBAR
+======================================================= */
+
+::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#1f2742;
+  border-radius:20px;
+}
+
+::-webkit-scrollbar-track{
+  background:#060a14;
 }
 
 /* =======================================================
@@ -41,9 +74,10 @@ LAYOUT
 }
 
 .cms-sidebar{
-  width:230px;
+  width:240px;
   background:#070b16;
   border-right:1px solid #1a2035;
+  flex-shrink:0;
 }
 
 .cms-main{
@@ -51,6 +85,7 @@ LAYOUT
   display:flex;
   flex-direction:column;
   min-width:0;
+  background:#0b0f1a;
 }
 
 /* =======================================================
@@ -58,9 +93,10 @@ SIDEBAR
 ======================================================= */
 
 .brand{
-  padding:16px;
-  font-size:20px;
+  padding:18px;
+  font-size:22px;
   font-weight:700;
+  border-bottom:1px solid #1a2035;
 }
 
 .brand b{
@@ -69,27 +105,34 @@ SIDEBAR
 
 .brand small{
   display:block;
-  font-size:11px;
   color:#777;
+  font-size:11px;
   margin-top:4px;
 }
 
 .cms-menu{
   display:flex;
   flex-direction:column;
+  padding:10px;
 }
 
 .cms-menu a{
-  padding:11px 18px;
+  display:block;
+  padding:12px 14px;
   color:#ccc;
   text-decoration:none;
-  transition:.2s;
+  border-radius:10px;
   font-size:14px;
+  transition:.2s;
 }
 
-.cms-menu a:hover,
+.cms-menu a:hover{
+  background:#11182c;
+  color:#ffcc00;
+}
+
 .cms-menu a.active{
-  background:#0e1424;
+  background:#141d35;
   color:#ffcc00;
 }
 
@@ -98,10 +141,10 @@ HEADER
 ======================================================= */
 
 .cms-header{
-  min-height:70px;
+  min-height:75px;
   border-bottom:1px solid #1a2035;
   background:#070b16;
-  padding:14px 20px;
+  padding:16px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -112,16 +155,17 @@ HEADER
 .header-left{
   display:flex;
   flex-direction:column;
-  gap:5px;
+  gap:6px;
 }
 
 .header-left h2{
-  font-size:22px;
+  font-size:24px;
+  font-weight:700;
 }
 
 .download-breadcrumb{
-  font-size:12px;
   color:#888;
+  font-size:12px;
 }
 
 .header-actions{
@@ -133,23 +177,30 @@ HEADER
 
 .header-actions input,
 .header-actions select{
-  height:40px;
+  height:42px;
+  min-width:180px;
   background:#0e1424;
   border:1px solid #1a2035;
   color:#fff;
-  border-radius:8px;
-  padding:0 12px;
-  min-width:160px;
+  border-radius:10px;
+  padding:0 14px;
+  font-size:13px;
+}
+
+.header-actions input:focus,
+.header-actions select:focus{
+  border-color:#ffcc00;
 }
 
 .header-actions button{
-  height:40px;
+  height:42px;
   border:none;
-  border-radius:8px;
-  padding:0 16px;
+  border-radius:10px;
+  padding:0 18px;
   background:#ffcc00;
   color:#000;
   font-weight:700;
+  font-size:13px;
 }
 
 /* =======================================================
@@ -157,8 +208,8 @@ CONTENT
 ======================================================= */
 
 .cms-content{
-  padding:20px;
   flex:1;
+  padding:20px;
 }
 
 /* =======================================================
@@ -178,15 +229,15 @@ ANIME CARD
 .anime-card{
   background:#0b0f1a;
   border:1px solid #1a2035;
-  border-radius:14px;
+  border-radius:16px;
   overflow:hidden;
   cursor:pointer;
   transition:.25s;
 }
 
 .anime-card:hover{
-  transform:translateY(-4px);
   border-color:#ffcc00;
+  transform:translateY(-4px);
 }
 
 .anime-poster{
@@ -200,11 +251,10 @@ ANIME CARD
   width:100%;
   height:100%;
   object-fit:cover;
-  display:block;
 }
 
 .anime-meta{
-  padding:12px;
+  padding:14px;
 }
 
 .anime-title{
@@ -225,8 +275,8 @@ SEASON CARD
 .season-card{
   background:#0b0f1a;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:20px;
+  border-radius:16px;
+  padding:22px;
   cursor:pointer;
   transition:.2s;
 }
@@ -243,6 +293,7 @@ SEASON CARD
 
 .season-count{
   color:#888;
+  font-size:12px;
 }
 
 /* =======================================================
@@ -252,8 +303,8 @@ EPISODE CARD
 .episode-card{
   background:#0b0f1a;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:16px;
+  border-radius:16px;
+  padding:18px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -282,11 +333,12 @@ EPISODE CARD
 }
 
 .host-count{
-  background:#1a2035;
+  background:#141d35;
   color:#ffcc00;
-  padding:6px 10px;
+  padding:7px 12px;
   border-radius:20px;
   font-size:11px;
+  font-weight:700;
 }
 
 /* =======================================================
@@ -296,23 +348,23 @@ HOST DISPLAY CARD
 .host-display-card{
   background:#0b0f1a;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:20px;
+  border-radius:16px;
+  padding:22px;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:20px;
 }
 
 .host-display-top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:flex-start;
   gap:20px;
 }
 
 .display-host-name{
-  font-size:20px;
-  margin-bottom:6px;
+  font-size:22px;
+  margin-bottom:8px;
 }
 
 .display-storage{
@@ -327,8 +379,8 @@ HOST DISPLAY CARD
 
 .host-actions button{
   border:none;
-  border-radius:8px;
-  padding:8px 14px;
+  border-radius:10px;
+  padding:9px 14px;
   font-size:12px;
   font-weight:700;
 }
@@ -346,11 +398,12 @@ HOST DISPLAY CARD
 .display-knight{
   display:inline-flex;
   width:max-content;
-  background:#1a2035;
+  background:#141d35;
   color:#ffcc00;
-  padding:7px 12px;
-  border-radius:20px;
+  padding:7px 14px;
+  border-radius:999px;
   font-size:12px;
+  font-weight:700;
 }
 
 .display-section{
@@ -417,7 +470,7 @@ MODAL
 }
 
 .modal-header{
-  height:65px;
+  min-height:70px;
   background:#0e1424;
   border-bottom:1px solid #1a2035;
   display:flex;
@@ -427,11 +480,11 @@ MODAL
 }
 
 .modal-header h3{
-  font-size:18px;
+  font-size:19px;
 }
 
 .modal-header span{
-  font-size:22px;
+  font-size:24px;
   cursor:pointer;
 }
 
@@ -444,7 +497,7 @@ MODAL
 }
 
 .modal-footer{
-  height:70px;
+  min-height:75px;
   border-top:1px solid #1a2035;
   background:#0e1424;
   display:flex;
@@ -457,8 +510,8 @@ MODAL
   background:#ffcc00;
   color:#000;
   border:none;
-  border-radius:10px;
-  padding:12px 20px;
+  border-radius:12px;
+  padding:13px 20px;
   font-weight:700;
 }
 
@@ -469,13 +522,14 @@ SECTION BOX
 .section-box{
   background:#0e1424;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:18px;
+  border-radius:16px;
+  padding:20px;
 }
 
 .section-box h4{
-  margin-bottom:16px;
+  margin-bottom:18px;
   color:#ffcc00;
+  font-size:15px;
 }
 
 /* =======================================================
@@ -490,12 +544,18 @@ FORM GRID
 
 .form-grid input,
 .form-grid select{
-  height:44px;
+  height:46px;
   background:#070b16;
   border:1px solid #1a2035;
   color:#fff;
   border-radius:10px;
-  padding:0 12px;
+  padding:0 14px;
+  font-size:13px;
+}
+
+.form-grid input:focus,
+.form-grid select:focus{
+  border-color:#ffcc00;
 }
 
 /* =======================================================
@@ -507,6 +567,7 @@ HOSTS
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
+  gap:20px;
 }
 
 .hosts-header button{
@@ -525,138 +586,144 @@ HOSTS
 }
 
 /* =======================================================
-HOST CARD
+DOWNLOAD HOST CARD
 ======================================================= */
 
 .download-host-card{
   border:1px solid #1a2035;
   background:#070b16;
-  border-radius:16px;
-  padding:18px;
+  border-radius:18px;
+  padding:20px;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:20px;
 }
 
 .host-top{
   display:flex;
   justify-content:space-between;
+  align-items:flex-start;
   gap:20px;
 }
 
 .host-left{
   flex:1;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
 }
 
-.host-left select,
-.host-left input{
-  height:44px;
+.host-left select{
+  width:100%;
+  height:48px;
   background:#0e1424;
   border:1px solid #1a2035;
   color:#fff;
-  border-radius:10px;
-  padding:0 12px;
+  border-radius:12px;
+  padding:0 14px;
+  font-size:13px;
+}
+
+.host-left select:focus{
+  border-color:#ffcc00;
+}
+
+.host-right{
+  display:flex;
+  align-items:center;
 }
 
 .remove-host{
   background:#ff3b3b;
   border:none;
   color:#fff;
-  border-radius:10px;
-  padding:10px 16px;
+  border-radius:12px;
+  padding:12px 18px;
   font-weight:700;
+  font-size:12px;
 }
 
 /* =======================================================
-STORAGE
+HOST INFO
 ======================================================= */
 
-.storage-row{
+.host-info-box{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
 }
 
-.storage-row select,
-.storage-row input{
-  height:44px;
-  background:#0e1424;
-  border:1px solid #1a2035;
-  color:#fff;
-  border-radius:10px;
-  padding:0 12px;
-}
-
-/* =======================================================
-FLAGS
-======================================================= */
-
-.host-flags{
-  display:flex;
-  gap:30px;
-  flex-wrap:wrap;
-}
-
-.host-flags label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:13px;
-  color:#ddd;
-}
-
-/* =======================================================
-MONETIZATION
-======================================================= */
-
-.monetization-wrapper{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:16px;
-}
-
-.monetization-box{
+.host-info-item{
   background:#0e1424;
   border:1px solid #1a2035;
   border-radius:14px;
   padding:14px;
-  min-height:170px;
-}
-
-.monetization-box h5{
-  margin-bottom:12px;
-  color:#ffcc00;
-}
-
-.ads-container,
-.shortlinks-container,
-.popups-container{
   display:flex;
   flex-direction:column;
   gap:8px;
 }
 
-.ads-container label,
-.shortlinks-container label,
-.popups-container label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:12px;
-  color:#ddd;
+.host-info-item small{
+  color:#888;
+  font-size:11px;
+  text-transform:uppercase;
 }
 
-.rotation-mode{
-  width:100%;
-  height:42px;
-  background:#070b16;
-  border:1px solid #1a2035;
+.host-info-item span{
   color:#fff;
+  font-size:14px;
+  font-weight:700;
+}
+
+.display-knight-status.yes{
+  color:#2ecc71;
+}
+
+.display-knight-status.no{
+  color:#ff4d4d;
+}
+
+.display-mode{
+  color:#ffcc00 !important;
+}
+
+/* =======================================================
+ACTIVE MONETIZATION
+======================================================= */
+
+.active-monetization{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+
+.active-box{
+  background:#0e1424;
+  border:1px solid #1a2035;
+  border-radius:16px;
+  padding:16px;
+  min-height:130px;
+}
+
+.active-box h5{
+  color:#ffcc00;
+  margin-bottom:14px;
+  font-size:13px;
+}
+
+.active-ads-list,
+.active-shortlinks-list,
+.active-popups-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.active-ads-list div,
+.active-shortlinks-list div,
+.active-popups-list div{
+  background:#141b30;
+  border:1px solid #1f2742;
   border-radius:10px;
-  padding:0 12px;
+  padding:8px 12px;
+  font-size:12px;
 }
 
 /* =======================================================
@@ -666,8 +733,8 @@ LINKS
 .download-links-box{
   background:#0e1424;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:16px;
+  border-radius:16px;
+  padding:18px;
 }
 
 .links-header{
@@ -675,10 +742,12 @@ LINKS
   justify-content:space-between;
   align-items:center;
   margin-bottom:16px;
+  gap:14px;
 }
 
 .links-header h5{
   color:#ffcc00;
+  font-size:14px;
 }
 
 .links-header button{
@@ -696,6 +765,10 @@ LINKS
   gap:10px;
 }
 
+/* =======================================================
+DOWNLOAD LINK ROW
+======================================================= */
+
 .download-link-row{
   display:grid;
   grid-template-columns:180px 1fr 70px;
@@ -704,12 +777,18 @@ LINKS
 
 .download-link-row select,
 .download-link-row input{
-  height:44px;
+  height:46px;
   background:#070b16;
   border:1px solid #1a2035;
   color:#fff;
   border-radius:10px;
   padding:0 12px;
+  font-size:13px;
+}
+
+.download-link-row select:focus,
+.download-link-row input:focus{
+  border-color:#ffcc00;
 }
 
 .remove-link{
@@ -718,6 +797,17 @@ LINKS
   border-radius:10px;
   color:#fff;
   font-weight:700;
+  font-size:14px;
+}
+
+/* =======================================================
+EMPTY TAG
+======================================================= */
+
+.empty-tag{
+  background:#101522 !important;
+  border-style:dashed !important;
+  color:#666 !important;
 }
 
 /* =======================================================
@@ -734,8 +824,12 @@ RESPONSIVE
     grid-template-columns:repeat(3,1fr);
   }
 
-  .monetization-wrapper{
-    grid-template-columns:repeat(2,1fr);
+}
+
+@media(max-width:1100px){
+
+  .active-monetization{
+    grid-template-columns:1fr;
   }
 
 }
@@ -750,12 +844,7 @@ RESPONSIVE
     grid-template-columns:1fr;
   }
 
-  .host-left,
-  .storage-row{
-    grid-template-columns:1fr;
-  }
-
-  .monetization-wrapper{
+  .host-info-box{
     grid-template-columns:1fr;
   }
 
@@ -765,10 +854,14 @@ RESPONSIVE
 
 }
 
-@media(max-width:600px){
+@media(max-width:700px){
 
-  .downloads-view{
-    grid-template-columns:1fr;
+  .cms-app{
+    flex-direction:column;
+  }
+
+  .cms-sidebar{
+    width:100%;
   }
 
   .cms-header{
@@ -786,7 +879,42 @@ RESPONSIVE
     width:100%;
   }
 
-    }
+  .host-top{
+    flex-direction:column;
+  }
+
+  .host-right{
+    width:100%;
+  }
+
+  .remove-host{
+    width:100%;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .downloads-view{
+    grid-template-columns:1fr;
+  }
+
+  .links-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .links-header button{
+    width:100%;
+  }
+
+}
+
+
+
+  
+  
+
 
 </style>
 </head>
@@ -1070,229 +1198,171 @@ FOOTER
 </div>
 </div>
 
-<!-- =======================================
-HOST TEMPLATE
-======================================= -->
-
 <template id="hostTemplate">
 
 <div class="download-host-card">
 
-<!-- =========================
-TOP
-========================= -->
+  <!-- ========================= -->
+  <!-- HOST HEADER -->
+  <!-- ========================= -->
 
-<div class="host-top">
+  <div class="host-top">
 
-<div class="host-left">
+    <div class="host-left">
 
-  <select class="host-select">
+      <!-- HOST -->
 
-    <option value="">
-      Select Host
-    </option>
+      <select class="host-select">
 
-  </select>
+        <option value="">
+          Select Host
+        </option>
 
-  <input
-    class="custom-host"
-    placeholder="Custom Host"
-  >
+      </select>
 
-</div>
+    </div>
 
-<div class="host-right">
+    <div class="host-right">
 
-  <button class="remove-host">
+      <button class="remove-host">
 
-    Remove
+        Remove
 
-  </button>
+      </button>
 
-</div>
+    </div>
 
-</div>
+  </div>
 
-<!-- =========================
-STORAGE
-========================= -->
+  <!-- ========================= -->
+  <!-- AUTO HOST INFO -->
+  <!-- ========================= -->
 
-<div class="storage-row">
+  <div class="host-info-box">
 
-<select class="storage-select">
+    <div class="host-info-item">
 
-  <option value="">
-    Select Storage
-  </option>
+      <small>Storage</small>
 
-</select>
+      <span class="display-storage">
 
-<input
-  class="custom-storage"
-  placeholder="Custom Storage"
->
+        --
 
-</div>
+      </span>
 
-<!-- =========================
-FLAGS
-========================= -->
+    </div>
 
-<div class="host-flags">
+    <div class="host-info-item">
 
-<label>
+      <small>Knight</small>
 
-<input
-  type="checkbox"
-  class="is-knight"
->
+      <span class="display-knight-status">
 
-Knight Mode
+        --
 
-</label>
+      </span>
 
-<label>
+    </div>
 
-<input
-  type="checkbox"
-  class="direct-download"
->
+    <div class="host-info-item">
 
-Direct Download
+      <small>Mode</small>
 
-</label>
+      <span class="display-mode">
 
-</div>
+        --
 
-<!-- =========================
-MONETIZATION
-========================= -->
+      </span>
 
-<div class="monetization-wrapper">
+    </div>
 
-<!-- ADS -->
+  </div>
 
-<div class="monetization-box">
+  <!-- ========================= -->
+  <!-- ACTIVE MONETIZATION -->
+  <!-- ========================= -->
 
-<h5>
+  <div class="active-monetization">
 
-Ads
+    <!-- ADS -->
 
-</h5>
+    <div class="active-box">
 
-<div class="ads-container">
+      <h5>Ads</h5>
 
-<!-- JS -->
+      <div class="active-ads-list">
 
-</div>
+        <!-- AUTO -->
 
-</div>
+      </div>
 
-<!-- SHORTLINKS -->
+    </div>
 
-<div class="monetization-box">
+    <!-- SHORTLINKS -->
 
-<h5>
+    <div class="active-box">
 
-Shortlinks
+      <h5>Shortlinks</h5>
 
-</h5>
+      <div class="active-shortlinks-list">
 
-<div class="shortlinks-container">
+        <!-- AUTO -->
 
-<!-- JS -->
+      </div>
 
-</div>
+    </div>
 
-</div>
+    <!-- POPUPS -->
 
-<!-- POPUPS -->
+    <div class="active-box">
 
-<div class="monetization-box">
+      <h5>Popups</h5>
 
-<h5>
+      <div class="active-popups-list">
 
-Popup Scripts
+        <!-- AUTO -->
 
-</h5>
+      </div>
 
-<div class="popups-container">
+    </div>
 
-<!-- JS -->
+  </div>
 
-</div>
+  <!-- ========================= -->
+  <!-- DOWNLOAD LINKS -->
+  <!-- ========================= -->
 
-</div>
+  <div class="download-links-box">
 
-<!-- MODE -->
+    <div class="links-header">
 
-<div class="monetization-box">
+      <h5>
 
-<h5>
+        Download Links
 
-Mode
+      </h5>
 
-</h5>
+      <button class="addLinkBtn">
 
-<select class="rotation-mode">
+        + Add Link
 
-<option value="random">
+      </button>
 
-Random Rotation
+    </div>
 
-</option>
+    <div class="linksContainer">
 
-<option value="sequence">
+      <!-- JS -->
 
-Sequence Rotation
+    </div>
 
-</option>
-
-<option value="direct">
-
-Direct Open
-
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<!-- =========================
-LINKS
-========================= -->
-
-<div class="download-links-box">
-
-<div class="links-header">
-
-<h5>
-
-Download Links
-
-</h5>
-
-<button class="addLinkBtn">
-
-+ Add Link
-
-</button>
-
-</div>
-
-<div class="linksContainer">
-
-<!-- JS -->
-
-</div>
-
-</div>
+  </div>
 
 </div>
 
 </template>
+
+
 
 <!-- =======================================
 LINK TEMPLATE
