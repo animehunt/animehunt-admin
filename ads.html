@@ -6,64 +6,103 @@
 
 <style>
 
-/* =========================================
+/* =======================================================
 RESET
-========================================= */
+======================================================= */
 
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:system-ui;
+  font-family:system-ui,sans-serif;
   -webkit-tap-highlight-color:transparent;
 }
 
+html,
 body{
-  background:#0b0f1a;
+  background:#070b16;
   color:#fff;
   overflow-x:hidden;
 }
 
-/* =========================================
+button,
+input,
+select,
+textarea{
+  font-family:inherit;
+  outline:none;
+}
+
+button{
+  cursor:pointer;
+  transition:.2s;
+  border:none;
+}
+
+button:hover{
+  transform:translateY(-1px);
+}
+
+a{
+  text-decoration:none;
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+/* =======================================================
+SCROLLBAR
+======================================================= */
+
+::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#1f2742;
+  border-radius:20px;
+}
+
+::-webkit-scrollbar-track{
+  background:#070b16;
+}
+
+/* =======================================================
 LAYOUT
-========================================= */
+======================================================= */
 
 .cms-app{
   display:flex;
   min-height:100vh;
 }
 
-/* =========================================
-SIDEBAR
-========================================= */
-
 .cms-sidebar{
-  width:260px;
-  background:#0b0f1a;
-  padding:20px;
-  position:relative;
+  width:240px;
+  background:#060912;
+  border-right:1px solid #1a2035;
   flex-shrink:0;
 }
 
-.cms-sidebar::after{
-  content:"";
-  position:absolute;
-  top:0;
-  right:0;
-  width:1px;
-  height:100%;
-  background:#1a2035;
+.cms-main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  background:#0b0f1a;
 }
 
-.cms-sidebar,
-.cms-main{
-  transform:translateZ(0);
-}
+/* =======================================================
+SIDEBAR
+======================================================= */
 
 .brand{
+  padding:18px;
+  border-bottom:1px solid #1a2035;
   font-size:22px;
   font-weight:700;
-  margin-bottom:24px;
 }
 
 .brand b{
@@ -72,97 +111,76 @@ SIDEBAR
 
 .brand small{
   display:block;
-  color:#666;
-  font-size:11px;
   margin-top:4px;
+  font-size:11px;
+  color:#777;
 }
-
-/* =========================================
-MENU
-========================================= */
 
 .cms-menu{
   display:flex;
   flex-direction:column;
-  gap:4px;
+  padding:10px;
 }
 
 .cms-menu a{
   display:block;
-  padding:11px 12px;
-  border-radius:8px;
-  color:#ccc;
-  text-decoration:none;
+  padding:12px 14px;
+  border-radius:12px;
+  color:#c8c8c8;
   font-size:14px;
   transition:.2s;
 }
 
 .cms-menu a:hover{
-  background:#1a2035;
+  background:#11182c;
   color:#ffcc00;
 }
 
 .cms-menu a.active{
-  background:#1a2035;
+  background:#141d35;
   color:#ffcc00;
 }
 
-.cms-menu a:focus,
-.cms-menu a:active,
-.cms-menu a:visited{
-  outline:none !important;
-  box-shadow:none !important;
-}
-
-/* =========================================
-MAIN
-========================================= */
-
-.cms-main{
-  flex:1;
-  background:#0e1424;
-  min-width:0;
-}
-
-/* =========================================
+/* =======================================================
 HEADER
-========================================= */
+======================================================= */
 
 .cms-header{
-  height:65px;
-  padding:0 24px;
+  min-height:72px;
+  background:#060912;
   border-bottom:1px solid #1a2035;
+  padding:0 22px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-}
-
-.cms-header h1,
-.cms-header h2,
-.cms-header h3{
-  font-size:20px;
-}
-
-/* =========================================
-CONTENT
-========================================= */
-
-.cms-content{
-  padding:20px;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:20px;
 }
 
-/* =========================================
-CARDS
-========================================= */
+.cms-header div:first-child{
+  font-size:20px;
+  font-weight:700;
+}
+
+/* =======================================================
+CONTENT
+======================================================= */
+
+.cms-content{
+  padding:22px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+}
+
+/* =======================================================
+CARD
+======================================================= */
 
 .card{
-  background:#0b0f1a;
+  background:#0d1322;
   border:1px solid #1a2035;
-  border-radius:14px;
-  padding:18px;
+  border-radius:22px;
+  padding:22px;
   overflow:hidden;
 }
 
@@ -172,39 +190,44 @@ CARDS
 
 .card h3{
   color:#ffcc00;
-  margin-bottom:14px;
-  font-size:18px;
+  font-size:20px;
+  margin-bottom:18px;
 }
 
 .card h4{
-  margin:12px 0 10px;
   font-size:14px;
-  color:#ccc;
+  margin-bottom:14px;
+  color:#d0d0d0;
 }
 
 .card hr{
   border:none;
   border-top:1px solid #1a2035;
-  margin:16px 0;
+  margin:22px 0;
 }
 
-/* =========================================
-INPUTS
-========================================= */
+/* =======================================================
+FORM
+======================================================= */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:14px;
+}
 
 input,
 select,
 textarea{
   width:100%;
-  background:#11162a;
+  background:#070b16;
   border:1px solid #1f2742;
   color:#fff;
-  border-radius:8px;
-  padding:11px 12px;
-  margin-bottom:12px;
-  outline:none;
-  transition:.2s;
+  border-radius:14px;
+  padding:13px 14px;
   font-size:13px;
+  transition:.2s;
 }
 
 input:focus,
@@ -213,35 +236,27 @@ textarea:focus{
   border-color:#ffcc00;
 }
 
-textarea{
-  resize:vertical;
-  min-height:100px;
-}
-
 input::placeholder,
 textarea::placeholder{
-  color:#777;
+  color:#666;
 }
 
-/* =========================================
+textarea{
+  resize:vertical;
+  min-height:130px;
+}
+
+/* =======================================================
 BUTTONS
-========================================= */
+======================================================= */
 
 button{
-  border:none;
   background:#ffcc00;
   color:#000;
-  padding:10px 16px;
-  border-radius:8px;
-  cursor:pointer;
+  padding:12px 18px;
+  border-radius:14px;
   font-weight:700;
-  transition:.2s;
   font-size:13px;
-}
-
-button:hover{
-  transform:translateY(-1px);
-  opacity:.95;
 }
 
 button.secondary{
@@ -250,70 +265,103 @@ button.secondary{
 }
 
 button.danger{
-  background:#ff4d4d;
+  background:#ff4343;
   color:#fff;
 }
 
-/* =========================================
-FLEX
-========================================= */
+/* =======================================================
+ACTIONS
+======================================================= */
 
-.flex{
-  display:flex;
-  gap:10px;
-}
-
-/* =========================================
-LIBRARY ITEMS
-========================================= */
-
-.library-item{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:10px;
-
+.actions-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
   gap:12px;
-}
-
-.library-item b{
-  display:block;
-  margin-bottom:4px;
-}
-
-.library-item small{
-  color:#777;
-  font-size:11px;
+  flex-wrap:wrap;
 }
 
 .actions{
   display:flex;
+  align-items:center;
   gap:8px;
 }
 
 .actions button{
-  padding:7px 12px;
-  font-size:11px;
+  padding:9px 14px;
+  font-size:12px;
 }
 
-/* =========================================
-HOST MONETIZATION
-========================================= */
+/* =======================================================
+LIBRARY ITEM
+======================================================= */
+
+.library-item{
+  background:#070b16;
+  border:1px solid #1a2035;
+  border-radius:18px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.library-left{
+  min-width:0;
+}
+
+.library-name{
+  display:block;
+  font-size:15px;
+  margin-bottom:5px;
+  word-break:break-word;
+}
+
+.library-meta{
+  color:#888;
+  font-size:11px;
+  word-break:break-word;
+}
+
+/* =======================================================
+HOST HEADER
+======================================================= */
+
+.host-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+}
+
+.host-header p{
+  color:#777;
+  font-size:12px;
+  margin-top:6px;
+}
+
+/* =======================================================
+HOST LIST
+======================================================= */
 
 #hostMonetizationList{
-  display:grid;
-  gap:18px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
+/* =======================================================
+HOST CARD
+======================================================= */
+
 .host-card{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:14px;
-  padding:18px;
+  background:#070b16;
+  border:1px solid #1a2035;
+  border-radius:22px;
+  padding:22px;
 }
 
 .host-top{
@@ -321,15 +369,15 @@ HOST MONETIZATION
   justify-content:space-between;
   align-items:flex-start;
   gap:20px;
-  margin-bottom:20px;
+  margin-bottom:24px;
 }
 
-.host-top h2{
-  font-size:22px;
-  margin-bottom:6px;
+.host-name{
+  font-size:24px;
+  margin-bottom:8px;
 }
 
-.host-top p{
+.host-storage{
   color:#888;
   font-size:13px;
 }
@@ -341,75 +389,81 @@ HOST MONETIZATION
 }
 
 .host-badges span{
-  background:#1a2035;
+  background:#141d35;
+  border:1px solid #1f2742;
   color:#ffcc00;
-  padding:7px 10px;
+  padding:8px 14px;
   border-radius:999px;
   font-size:11px;
   font-weight:700;
 }
 
+/* =======================================================
+HOST SECTION
+======================================================= */
+
 .host-section{
-  margin-top:18px;
-  padding-top:18px;
-  border-top:1px solid #1f2742;
+  margin-top:20px;
+  padding-top:20px;
+  border-top:1px solid #1a2035;
 }
 
 .host-section h4{
   margin-bottom:14px;
-  color:#ffcc00;
-  font-size:14px;
 }
 
-.host-section label{
+/* =======================================================
+HOST TAGS
+======================================================= */
+
+.host-tags{
   display:flex;
-  align-items:center;
+  flex-wrap:wrap;
   gap:10px;
-  margin-bottom:10px;
-  font-size:13px;
-  color:#ddd;
-  cursor:pointer;
 }
 
-.host-section input[type="checkbox"]{
-  width:16px;
-  height:16px;
-  margin:0;
-  accent-color:#ffcc00;
+.host-tags div{
+  background:#141b30;
+  border:1px solid #1f2742;
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:12px;
+  color:#fff;
 }
 
-.rotationMode{
-  max-width:260px;
-}
+/* =======================================================
+HOST ACTIONS
+======================================================= */
 
 .host-actions{
   display:flex;
-  gap:10px;
-  margin-top:22px;
+  gap:12px;
+  margin-top:24px;
+  flex-wrap:wrap;
 }
 
-/* =========================================
+/* =======================================================
 ANALYTICS
-========================================= */
+======================================================= */
 
 .analytics-grid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:16px;
+  gap:18px;
 }
 
 .analytic-box{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:12px;
-  padding:20px;
+  background:#070b16;
+  border:1px solid #1a2035;
+  border-radius:20px;
+  padding:24px;
   text-align:center;
 }
 
 .analytic-box h2{
   color:#ffcc00;
-  font-size:30px;
-  margin-bottom:8px;
+  font-size:34px;
+  margin-bottom:10px;
 }
 
 .analytic-box p{
@@ -417,78 +471,167 @@ ANALYTICS
   font-size:13px;
 }
 
-/* =========================================
-TABLE
-========================================= */
+/* =======================================================
+MODAL
+======================================================= */
 
-table{
-  width:100%;
-  border-collapse:collapse;
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:9999;
 }
 
-th,
-td{
-  padding:14px 10px;
-  border-bottom:1px solid #1f2742;
-  text-align:left;
+.modal-box{
+  background:#0b0f1a;
+  border:1px solid #1a2035;
+  border-radius:26px;
+  overflow:hidden;
+}
+
+.large-modal{
+  width:1100px;
+  max-width:100%;
+  max-height:95vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.modal-header{
+  min-height:74px;
+  background:#060912;
+  border-bottom:1px solid #1a2035;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+}
+
+.modal-header h3{
+  font-size:20px;
+}
+
+.modal-header span{
+  font-size:24px;
+  cursor:pointer;
+}
+
+.modal-body{
+  padding:22px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.modal-footer{
+  min-height:80px;
+  background:#060912;
+  border-top:1px solid #1a2035;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding:0 22px;
+}
+
+/* =======================================================
+SECTION BOX
+======================================================= */
+
+.section-box{
+  background:#0e1424;
+  border:1px solid #1a2035;
+  border-radius:20px;
+  padding:22px;
+}
+
+.section-box h4{
+  color:#ffcc00;
+  margin-bottom:18px;
+}
+
+/* =======================================================
+SELECTION GRID
+======================================================= */
+
+.selection-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+
+/* =======================================================
+SELECT ITEM
+======================================================= */
+
+.select-item{
+  background:#070b16;
+  border:1px solid #1a2035;
+  border-radius:18px;
+  padding:16px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.select-item:hover{
+  border-color:#ffcc00;
+}
+
+.select-item input{
+  width:18px;
+  height:18px;
+  margin-top:2px;
+  accent-color:#ffcc00;
+}
+
+.select-item-content{
+  flex:1;
+}
+
+.select-item-content b{
+  display:block;
+  margin-bottom:6px;
+  font-size:14px;
+}
+
+.select-item-content small{
+  color:#777;
+  font-size:11px;
+}
+
+/* =======================================================
+EMPTY STATE
+======================================================= */
+
+.empty-box{
+  background:#070b16;
+  border:1px dashed #1f2742;
+  border-radius:18px;
+  padding:30px;
+  text-align:center;
+  color:#666;
   font-size:13px;
 }
 
-th{
-  color:#888;
-  font-weight:600;
-}
-
-/* =========================================
-STATUS
-========================================= */
-
-.status.on{
-  color:#2ecc71;
-}
-
-.status.off{
-  color:#ff4d4d;
-}
-
-/* =========================================
-TOGGLE
-========================================= */
-
-.toggle{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.toggle input{
-  width:18px;
-  height:18px;
-  margin:0;
-}
-
-/* =========================================
-SCROLLBAR
-========================================= */
-
-::-webkit-scrollbar{
-  width:8px;
-  height:8px;
-}
-
-::-webkit-scrollbar-thumb{
-  background:#1f2742;
-  border-radius:10px;
-}
-
-::-webkit-scrollbar-track{
-  background:#0b0f1a;
-}
-
-/* =========================================
+/* =======================================================
 RESPONSIVE
-========================================= */
+======================================================= */
+
+@media(max-width:1300px){
+
+  .selection-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
 
 @media(max-width:1100px){
 
@@ -502,7 +645,19 @@ RESPONSIVE
 
 }
 
-@media(max-width:800px){
+@media(max-width:900px){
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .selection-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:700px){
 
   .cms-app{
     flex-direction:column;
@@ -512,1195 +667,79 @@ RESPONSIVE
     width:100%;
   }
 
+  .cms-header{
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    padding:18px;
+  }
+
   .host-top{
     flex-direction:column;
+  }
+
+  .host-actions{
+    flex-direction:column;
+  }
+
+  .host-actions button{
+    width:100%;
   }
 
   .analytics-grid{
     grid-template-columns:1fr;
   }
 
-  .flex{
-    flex-direction:column;
-  }
-
-}
-  /* =========================================================
-PRODUCTION UI EXTENSIONS
-========================================================= */
-
-/* =========================================================
-HEADER
-========================================================= */
-
-.header-subtitle{
-  color:#888;
-  font-size:13px;
-  margin-top:6px;
-}
-
-/* =========================================================
-TOP STATS
-========================================================= */
-
-.top-stats-grid{
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:18px;
-  padding:20px;
-  padding-bottom:0;
-}
-
-.top-stat-card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:18px;
-  padding:22px;
-  position:relative;
-  overflow:hidden;
-}
-
-.top-stat-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.08),
-    transparent
-  );
-  pointer-events:none;
-}
-
-.top-stat-card h2{
-  color:#ffcc00;
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.top-stat-card p{
-  color:#888;
-  font-size:13px;
-}
-
-/* =========================================================
-TABS
-========================================================= */
-
-.tabs-bar{
-  display:flex;
-  gap:12px;
-  padding:20px;
-  padding-bottom:0;
-  flex-wrap:wrap;
-}
-
-.tab-btn{
-  height:46px;
-  border:none;
-  background:#11162a;
-  border:1px solid #1f2742;
-  color:#ccc;
-  border-radius:12px;
-  padding:0 18px;
-  font-size:13px;
-  font-weight:700;
-  transition:.2s;
-}
-
-.tab-btn:hover{
-  border-color:#ffcc00;
-  color:#ffcc00;
-}
-
-.tab-btn.active{
-  background:#ffcc00;
-  color:#000;
-  border-color:#ffcc00;
-}
-
-.tab-content{
-  display:none;
-}
-
-.tab-content.active{
-  display:block;
-}
-
-/* =========================================================
-SECTION HEADER
-========================================================= */
-
-.section-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:24px;
-  flex-wrap:wrap;
-}
-
-.section-header h3{
-  font-size:24px;
-  margin-bottom:6px;
-}
-
-.section-header p{
-  color:#888;
-  font-size:13px;
-}
-
-.section-tools{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.section-tools input,
-.section-tools select{
-  width:220px;
-  height:44px;
-}
-
-/* =========================================================
-HOST GRID
-========================================================= */
-
-.host-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:20px;
-}
-
-/* =========================================================
-PRODUCTION HOST CARD
-========================================================= */
-
-.host-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:22px;
-  overflow:hidden;
-  position:relative;
-}
-
-.host-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.04),
-    transparent
-  );
-  pointer-events:none;
-}
-
-.host-card-top{
-  padding:24px;
-  border-bottom:1px solid #1f2742;
-}
-
-.host-card-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:18px;
-}
-
-.host-name{
-  font-size:24px;
-  margin-bottom:8px;
-}
-
-.host-storage{
-  color:#888;
-  font-size:13px;
-}
-
-.host-status{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.host-status span{
-  background:#141d35;
-  border:1px solid #1f2742;
-  color:#ffcc00;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-}
-
-.host-body{
-  padding:24px;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-
-.host-block h5{
-  margin-bottom:12px;
-  color:#ffcc00;
-  font-size:13px;
-}
-
-.tag-list{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.tag{
-  background:#141b30;
-  border:1px solid #1f2742;
-  border-radius:10px;
-  padding:8px 12px;
-  font-size:12px;
-}
-
-.empty-tag{
-  opacity:.5;
-  border-style:dashed;
-}
-
-.host-card-footer{
-  display:flex;
-  gap:12px;
-  padding:24px;
-  border-top:1px solid #1f2742;
-}
-
-.host-card-footer button{
-  flex:1;
-  height:44px;
-}
-
-/* =========================================================
-LIBRARY GRID
-========================================================= */
-
-.library-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:20px;
-}
-
-/* =========================================================
-LIBRARY CARD
-========================================================= */
-
-.library-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:20px;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-
-.library-card-top{
-  padding:22px;
-  border-bottom:1px solid #1f2742;
-}
-
-.library-card-title{
-  font-size:18px;
-  margin-bottom:10px;
-}
-
-.library-card-sub{
-  color:#888;
-  font-size:12px;
-}
-
-.library-card-body{
-  padding:22px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  flex:1;
-}
-
-.library-meta{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  font-size:12px;
-  color:#999;
-}
-
-.library-card-footer{
-  padding:22px;
-  border-top:1px solid #1f2742;
-  display:flex;
-  gap:10px;
-}
-
-.library-card-footer button{
-  flex:1;
-  height:42px;
-}
-
-/* =========================================================
-ANALYTICS
-========================================================= */
-
-.analytics-layout{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:20px;
-}
-
-.analytics-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:20px;
-  padding:24px;
-}
-
-.analytics-card.large{
-  grid-column:1/-1;
-}
-
-.analytics-card h3{
-  margin-bottom:20px;
-  color:#ffcc00;
-}
-
-.analytics-list{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.analytics-item{
-  background:#141b30;
-  border:1px solid #1f2742;
-  border-radius:14px;
-  padding:14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-}
-
-.analytics-item strong{
-  font-size:14px;
-}
-
-.analytics-item span{
-  color:#ffcc00;
-  font-size:13px;
-  font-weight:700;
-}
-
-/* =========================================================
-MODAL
-========================================================= */
-
-.medium-modal{
-  width:650px;
-  max-width:100%;
-}
-
-.large-modal{
-  width:1200px;
-  max-width:100%;
-}
-
-.modal{
-  backdrop-filter:blur(6px);
-}
-
-.modal-box{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  box-shadow:
-  0 30px 80px rgba(0,0,0,.45);
-}
-
-.modal-body{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
-
-.builder-section{
-  background:#0e1424;
-  border:1px solid #1f2742;
-  border-radius:18px;
-  padding:20px;
-}
-
-.builder-section h4{
-  color:#ffcc00;
-  margin-bottom:18px;
-}
-
-.builder-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:14px;
-}
-
-.builder-grid input,
-.builder-grid select{
-  height:48px;
-}
-
-.dual-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px;
-}
-
-/* =========================================================
-SELECTION GRID
-========================================================= */
-
-.selection-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
-}
-
-.selection-item{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:16px;
-  padding:16px;
-  cursor:pointer;
-  transition:.2s;
-  position:relative;
-}
-
-.selection-item:hover{
-  border-color:#ffcc00;
-}
-
-.selection-item.active{
-  border-color:#ffcc00;
-  background:
-  linear-gradient(
-    135deg,
-    rgba(255,204,0,.08),
-    #11162a
-  );
-}
-
-.selection-item h5{
-  margin-bottom:8px;
-  font-size:14px;
-}
-
-.selection-item p{
-  color:#888;
-  font-size:12px;
-}
-
-.selection-check{
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#1f2742;
-}
-
-.selection-item.active
-.selection-check{
-  background:#ffcc00;
-}
-
-/* =========================================================
-TOAST
-========================================================= */
-
-#toastContainer{
-  position:fixed;
-  top:20px;
-  right:20px;
-  z-index:999999;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.toast{
-  min-width:300px;
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-left:4px solid #ffcc00;
-  border-radius:14px;
-  padding:16px;
-  animation:toastIn .25s ease;
-}
-
-.toast.success{
-  border-left-color:#2ecc71;
-}
-
-.toast.error{
-  border-left-color:#ff4d4d;
-}
-
-.toast-title{
-  font-size:14px;
-  margin-bottom:6px;
-}
-
-.toast-msg{
-  color:#888;
-  font-size:12px;
-}
-
-@keyframes toastIn{
-  from{
-    opacity:0;
-    transform:translateX(40px);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
-}
-
-/* =========================================================
-EMPTY STATE
-========================================================= */
-
-.empty-state{
-  background:#0b0f1a;
-  border:1px dashed #1f2742;
-  border-radius:20px;
-  padding:60px 20px;
-  text-align:center;
-}
-
-.empty-state h3{
-  margin-bottom:12px;
-}
-
-.empty-state p{
-  color:#777;
-  font-size:13px;
-}
-
-/* =========================================================
-LOADING STATE
-========================================================= */
-
-.loading-card{
-  height:220px;
-  border-radius:20px;
-  background:
-  linear-gradient(
-    90deg,
-    #0b0f1a,
-    #141b30,
-    #0b0f1a
-  );
-  background-size:300% 100%;
-  animation:loading 1.2s infinite linear;
-}
-
-@keyframes loading{
-  0%{
-    background-position:0% 0%;
-  }
-  100%{
-    background-position:300% 0%;
-  }
-}
-
-/* =========================================================
-RESPONSIVE
-========================================================= */
-
-@media(max-width:1400px){
-
-  .library-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:1200px){
-
-  .host-grid{
-    grid-template-columns:1fr;
-  }
-
-  .builder-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .selection-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:900px){
-
-  .top-stats-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .analytics-layout{
-    grid-template-columns:1fr;
-  }
-
-  .library-grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media(max-width:700px){
-
-  .tabs-bar{
-    overflow:auto;
-    flex-wrap:nowrap;
-  }
-
-  .tab-btn{
-    white-space:nowrap;
-  }
-
-  .builder-grid{
-    grid-template-columns:1fr;
-  }
-
-  .selection-grid{
-    grid-template-columns:1fr;
-  }
-
-  .dual-grid{
-    grid-template-columns:1fr;
-  }
-
-  .top-stats-grid{
-    grid-template-columns:1fr;
-  }
-
-  .section-header{
+  .actions-row{
     flex-direction:column;
     align-items:stretch;
   }
 
-  .section-tools{
-    width:100%;
-  }
-
-  .section-tools input,
-  .section-tools select{
+  .actions-row button{
     width:100%;
   }
 
 }
-  /* =========================================================
-   PRODUCTION UI ENGINE
-========================================================= */
 
-/* =========================
-   TOP TOOLBAR
-========================= */
+@media(max-width:600px){
 
-.top-toolbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:20px;
-  flex-wrap:wrap;
-}
-
-.toolbar-left{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
-}
-
-.toolbar-right{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.search-box{
-  width:320px;
-  max-width:100%;
-  position:relative;
-}
-
-.search-box input{
-  margin:0;
-  padding-left:42px;
-}
-
-.search-icon{
-  position:absolute;
-  top:50%;
-  left:14px;
-  transform:translateY(-50%);
-  opacity:.5;
-  font-size:14px;
-}
-
-.filter-select{
-  width:180px;
-  margin:0;
-}
-
-.primary-btn{
-  height:44px;
-  border:none;
-  border-radius:12px;
-  background:#ffcc00;
-  color:#000;
-  padding:0 18px;
-  font-size:13px;
-  font-weight:700;
-}
-
-.secondary-btn{
-  height:44px;
-  border:none;
-  border-radius:12px;
-  background:#1a2035;
-  color:#fff;
-  padding:0 18px;
-  font-size:13px;
-  font-weight:700;
-}
-
-/* =========================
-   STATS
-========================= */
-
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:18px;
-  margin-bottom:20px;
-}
-
-.stat-card{
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:18px;
-  padding:20px;
-  position:relative;
-  overflow:hidden;
-}
-
-.stat-card::after{
-  content:"";
-  position:absolute;
-  top:-30px;
-  right:-30px;
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:rgba(255,204,0,.06);
-}
-
-.stat-label{
-  color:#888;
-  font-size:12px;
-  margin-bottom:10px;
-}
-
-.stat-value{
-  font-size:34px;
-  font-weight:800;
-  color:#ffcc00;
-}
-
-.stat-sub{
-  margin-top:10px;
-  color:#666;
-  font-size:11px;
-}
-
-/* =========================
-   SECTION HEADER
-========================= */
-
-.section-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  margin-bottom:18px;
-  flex-wrap:wrap;
-}
-
-.section-header-left{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-.section-header-left h3{
-  margin:0;
-}
-
-.section-header-left p{
-  color:#777;
-  font-size:12px;
-}
-
-.section-header-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-/* =========================
-   EMPTY STATE
-========================= */
-
-.empty-state{
-  background:#0f1528;
-  border:1px dashed #2a355c;
-  border-radius:16px;
-  padding:40px 20px;
-  text-align:center;
-}
-
-.empty-state h4{
-  margin-bottom:10px;
-  color:#ffcc00;
-}
-
-.empty-state p{
-  color:#777;
-  font-size:13px;
-}
-
-/* =========================
-   TOASTS
-========================= */
-
-.toast-container{
-  position:fixed;
-  top:20px;
-  right:20px;
-  z-index:999999;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.toast{
-  min-width:300px;
-  max-width:420px;
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-left:5px solid #ffcc00;
-  border-radius:14px;
-  padding:16px;
-  animation:toastSlide .25s ease;
-  box-shadow:0 10px 40px rgba(0,0,0,.4);
-}
-
-.toast.success{
-  border-left-color:#2ecc71;
-}
-
-.toast.error{
-  border-left-color:#ff4d4d;
-}
-
-.toast-title{
-  font-weight:700;
-  margin-bottom:6px;
-}
-
-.toast-message{
-  color:#aaa;
-  font-size:13px;
-}
-
-@keyframes toastSlide{
-
-  from{
-    opacity:0;
-    transform:translateX(40px);
-  }
-
-  to{
-    opacity:1;
-    transform:none;
-  }
-
-}
-
-/* =========================
-   LOADER
-========================= */
-
-.loader-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  z-index:999999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-}
-
-.loader-box{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  border:5px solid rgba(255,255,255,.08);
-  border-top-color:#ffcc00;
-  animation:spin .8s linear infinite;
-}
-
-@keyframes spin{
-
-  to{
-    transform:rotate(360deg);
-  }
-
-}
-
-/* =========================
-   MODAL ENGINE
-========================= */
-
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  z-index:999999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.modal-window{
-  width:900px;
-  max-width:100%;
-  max-height:95vh;
-  overflow:hidden;
-  background:#0b0f1a;
-  border:1px solid #1f2742;
-  border-radius:22px;
-  display:flex;
-  flex-direction:column;
-}
-
-.modal-top{
-  min-height:72px;
-  border-bottom:1px solid #1f2742;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 24px;
-}
-
-.modal-top h2{
-  font-size:20px;
-}
-
-.modal-close{
-  width:40px;
-  height:40px;
-  border-radius:10px;
-  border:none;
-  background:#141d35;
-  color:#fff;
-  font-size:18px;
-}
-
-.modal-body{
-  padding:24px;
-  overflow:auto;
-}
-
-.modal-footer{
-  min-height:80px;
-  border-top:1px solid #1f2742;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:12px;
-  padding:0 24px;
-}
-
-/* =========================
-   MULTISELECT
-========================= */
-
-.multi-select{
-  background:#11162a;
-  border:1px solid #1f2742;
-  border-radius:14px;
-  overflow:hidden;
-}
-
-.multi-select-header{
-  padding:14px 16px;
-  border-bottom:1px solid #1f2742;
-  color:#ffcc00;
-  font-size:13px;
-  font-weight:700;
-}
-
-.multi-select-body{
-  max-height:260px;
-  overflow:auto;
-}
-
-.multi-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:14px 16px;
-  border-bottom:1px solid #1a2035;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.multi-item:hover{
-  background:#141d35;
-}
-
-.multi-item:last-child{
-  border-bottom:none;
-}
-
-.multi-item input{
-  width:18px;
-  height:18px;
-  margin:0;
-  accent-color:#ffcc00;
-}
-
-.multi-item label{
-  flex:1;
-  cursor:pointer;
-  font-size:13px;
-}
-
-/* =========================
-   HOST MODAL GRID
-========================= */
-
-.host-form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:20px;
-}
-
-.host-form-section{
-  background:#0f1528;
-  border:1px solid #1f2742;
-  border-radius:18px;
-  padding:20px;
-}
-
-.host-form-section h4{
-  margin-bottom:18px;
-  color:#ffcc00;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media(max-width:1100px){
-
-  .stats-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .host-form-grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media(max-width:700px){
-
-  .stats-grid{
-    grid-template-columns:1fr;
-  }
-
-  .top-toolbar{
+  .library-item{
     flex-direction:column;
-    align-items:stretch;
+    align-items:flex-start;
   }
 
-  .toolbar-left,
-  .toolbar-right{
+  .actions{
     width:100%;
   }
 
-  .search-box{
-    width:100%;
-  }
-
-  .filter-select{
-    width:100%;
-  }
-
-  .primary-btn,
-  .secondary-btn{
-    width:100%;
+  .actions button{
+    flex:1;
   }
 
 }
+  
+  
+  
+
 
 </style>
 </head>
 
+
+
+
+
+
+
+
+
 <body>
-
-  <!-- =====================================================
-TOASTS
-===================================================== -->
-
-<div
-class="toast-container"
-id="toastContainer"
-></div>
-
-<!-- =====================================================
-LOADER
-===================================================== -->
-
-<div
-class="loader-overlay"
-id="loaderOverlay"
->
-
-<div class="loader-box"></div>
-
-</div>
 
 <div class="cms-app">
 
-<!-- =====================================================
+<!-- =======================================================
 SIDEBAR
-===================================================== -->
+======================================================= -->
 
 <aside class="cms-sidebar">
 
@@ -1741,600 +780,349 @@ SIDEBAR
 </nav>
 </aside>
 
-<!-- =====================================================
+<!-- =======================================================
 MAIN
-===================================================== -->
+======================================================= -->
 
 <main class="cms-main">
 
-<!-- =====================================================
+<!-- =======================================================
 HEADER
-===================================================== -->
+======================================================= -->
 
 <header class="cms-header">
 
 <div>
-
-<h1>
-⚡ Monetization Engine
-</h1>
-
-<p class="header-subtitle">
-Professional Download Monetization Management
-</p>
-
+🔥 Monetization Engine
 </div>
 
-<div class="header-actions">
-
-<button id="refreshAllBtn" class="secondary">
-↻ Refresh
-</button>
-
-<button id="openCreateHostModal">
-+ Create Host
-</button>
-
+<div>
+Admin
 </div>
 
 </header>
 
-<!-- =====================================================
-TOP STATS
-===================================================== -->
-
-<section class="top-stats-grid">
-
-<div class="top-stat-card">
-<h2 id="totalHosts">0</h2>
-<p>Total Hosts</p>
-</div>
-
-<div class="top-stat-card">
-<h2 id="totalAds">0</h2>
-<p>Total Ads</p>
-</div>
-
-<div class="top-stat-card">
-<h2 id="totalShortlinks">0</h2>
-<p>Total Shortlinks</p>
-</div>
-
-<div class="top-stat-card">
-<h2 id="totalPopups">0</h2>
-<p>Total Popups</p>
-</div>
-
-<div class="top-stat-card">
-<h2 id="totalClicks">0</h2>
-<p>Total Clicks</p>
-</div>
-
-</section>
-
-<!-- =====================================================
-TABS
-===================================================== -->
-
-<section class="tabs-bar">
-
-<button class="tab-btn active" data-tab="hostsTab">
-Hosts
-</button>
-
-<button class="tab-btn" data-tab="adsTab">
-Ads Library
-</button>
-
-<button class="tab-btn" data-tab="shortlinksTab">
-Shortlinks
-</button>
-
-<button class="tab-btn" data-tab="popupsTab">
-Popups
-</button>
-
-<button class="tab-btn" data-tab="analyticsTab">
-Analytics
-</button>
-
-</section>
-
-<!-- =====================================================
+<!-- =======================================================
 CONTENT
-===================================================== -->
+======================================================= -->
 
 <section class="cms-content">
 
+<!-- =======================================================
+ADS LIBRARY
+======================================================= -->
 
-  <!-- =====================================================
-PRODUCTION TOOLBAR
-===================================================== -->
+<div class="card">
 
-<div class="top-toolbar">
+<h3>
+📢 Ads Library
+</h3>
 
-<!-- LEFT -->
-
-<div class="toolbar-left">
-
-<div class="search-box">
-
-<span class="search-icon">
-🔍
-</span>
+<div class="form-grid">
 
 <input
 type="text"
-id="globalSearch"
-placeholder="Search ads, hosts, shortlinks..."
+id="adName"
+placeholder="Ad Name"
 >
 
-</div>
+<select id="adType">
 
-<select
-id="globalFilter"
-class="filter-select"
->
-
-<option value="">
-All Types
+<option value="redirect">
+Redirect
 </option>
 
-<option value="ads">
-Ads
+<option value="script">
+Script
 </option>
 
-<option value="shortlinks">
-Shortlinks
+<option value="popup">
+Popup
 </option>
 
-<option value="popups">
-Popups
-</option>
-
-<option value="hosts">
-Hosts
+<option value="banner">
+Banner
 </option>
 
 </select>
 
-</div>
-
-<!-- RIGHT -->
-
-<div class="toolbar-right">
-
-<button
-class="secondary-btn"
-id="refreshEverythingBtn"
+<input
+type="number"
+id="adWeight"
+placeholder="Weight"
+value="1"
 >
 
-🔄 Refresh
+<input
+type="number"
+id="adDelay"
+placeholder="Delay (ms)"
+value="1500"
+>
+
+</div>
+
+<textarea
+id="adCode"
+placeholder="Ad Script / Redirect URL"
+></textarea>
+
+<div class="actions-row">
+
+<button id="saveAdBtn">
+
+💾 Save Ad
 
 </button>
 
 <button
-class="primary-btn"
-id="openHostModalBtn"
+id="cancelAdEdit"
+class="secondary"
+style="display:none"
 >
 
-➕ Create Host
+Cancel Edit
 
 </button>
 
 </div>
 
+<hr>
+
+<h4>
+Saved Ads
+</h4>
+
+<div id="adsLibraryList">
+
+<!-- AUTO -->
+
 </div>
 
-<!-- =====================================================
-LIVE STATS
-===================================================== -->
-
-<div class="stats-grid">
-
-<!-- HOSTS -->
-
-<div class="stat-card">
-
-<div class="stat-label">
-Total Hosts
 </div>
 
-<div
-class="stat-value"
-id="liveHostsCount"
+<!-- =======================================================
+SHORTLINKS
+======================================================= -->
+
+<div class="card">
+
+<h3>
+🔗 Shortlinks Library
+</h3>
+
+<div class="form-grid">
+
+<input
+type="text"
+id="shortName"
+placeholder="Shortlink Name"
 >
-0
-</div>
 
-<div class="stat-sub">
-Active monetization hosts
-</div>
-
-</div>
-
-<!-- ADS -->
-
-<div class="stat-card">
-
-<div class="stat-label">
-Ads Library
-</div>
-
-<div
-class="stat-value"
-id="liveAdsCount"
+<input
+type="text"
+id="shortBase"
+placeholder="Base URL"
 >
-0
-</div>
 
-<div class="stat-sub">
-Reusable ads
-</div>
-
-</div>
-
-<!-- SHORTLINKS -->
-
-<div class="stat-card">
-
-<div class="stat-label">
-Shortlinks
-</div>
-
-<div
-class="stat-value"
-id="liveShortlinksCount"
+<input
+type="text"
+id="shortApi"
+placeholder="API Key"
 >
-0
-</div>
-
-<div class="stat-sub">
-Reusable shortlinks
-</div>
 
 </div>
 
-<!-- CLICKS -->
+<div class="actions-row">
 
-<div class="stat-card">
+<button id="saveShortBtn">
 
-<div class="stat-label">
-Total Clicks
-</div>
+💾 Save Shortlink
 
-<div
-class="stat-value"
-id="liveClicksCount"
+</button>
+
+<button
+id="cancelShortEdit"
+class="secondary"
+style="display:none"
 >
-0
-</div>
 
-<div class="stat-sub">
-Tracked monetization clicks
-</div>
+Cancel Edit
+
+</button>
 
 </div>
 
+<hr>
+
+<h4>
+Saved Shortlinks
+</h4>
+
+<div id="shortLibraryList">
+
+<!-- AUTO -->
+
 </div>
 
-<!-- =====================================================
-HOSTS TAB
-===================================================== -->
+</div>
 
-<div class="tab-content active" id="hostsTab">
+<!-- =======================================================
+POPUPS
+======================================================= -->
 
-<div class="section-header">
+<div class="card">
+
+<h3>
+🪟 Popup Library
+</h3>
+
+<input
+type="text"
+id="popupName"
+placeholder="Popup Name"
+>
+
+<textarea
+id="popupCode"
+placeholder="Popup Script"
+></textarea>
+
+<div class="actions-row">
+
+<button id="savePopupBtn">
+
+💾 Save Popup
+
+</button>
+
+<button
+id="cancelPopupEdit"
+class="secondary"
+style="display:none"
+>
+
+Cancel Edit
+
+</button>
+
+</div>
+
+<hr>
+
+<h4>
+Saved Popups
+</h4>
+
+<div id="popupLibraryList">
+
+<!-- AUTO -->
+
+</div>
+
+</div>
+
+<!-- =======================================================
+HOST MONETIZATION
+======================================================= -->
+
+<div class="card table">
+
+<div class="host-header">
 
 <div>
-<div class="section-header">
-
-<div class="section-header-left">
 
 <h3>
 ⚡ Host Monetization
 </h3>
 
 <p>
-Production host monetization manager
+Reusable Monetization Per Host
 </p>
 
 </div>
 
-<div class="section-header-right">
+<button id="openHostModal">
 
-<button
-class="secondary-btn"
-id="reloadHostsBtn"
->
-
-Reload
-
-</button>
-
-<button
-class="primary-btn"
-id="createHostBtn"
->
-
-➕ New Host
+➕ Create Host Config
 
 </button>
 
 </div>
 
-</div>
-<p>
-Reusable monetization configuration per host
-</p>
-</div>
+<div id="hostMonetizationList">
 
-<div class="section-tools">
-
-<input
-type="text"
-id="hostSearch"
-placeholder="Search host..."
->
-
-<select id="hostFilter">
-
-<option value="">
-All Hosts
-</option>
-
-<option value="knight">
-Knight
-</option>
-
-<option value="normal">
-Normal
-</option>
-
-</select>
+<!-- AUTO -->
 
 </div>
 
 </div>
 
-<div id="hostMonetizationList"
-class="host-grid">
+<!-- =======================================================
+ANALYTICS
+======================================================= -->
 
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-ADS TAB
-===================================================== -->
-
-<div class="tab-content" id="adsTab">
-
-<div class="section-header">
-
-<div>
-<div class="section-header">
-
-<div class="section-header-left">
+<div class="card table">
 
 <h3>
-📢 Ads Library
+📊 Monetization Analytics
 </h3>
 
+<div class="analytics-grid">
+
+<div class="analytic-box">
+
+<h2 id="totalHosts">
+
+0
+
+</h2>
+
 <p>
-Reusable monetization ads engine
+Total Hosts
 </p>
 
 </div>
 
-<div class="section-header-right">
+<div class="analytic-box">
 
-<button
-class="secondary-btn"
-id="reloadAdsBtn"
->
+<h2 id="totalAds">
 
-Reload
+0
 
-</button>
-
-</div>
-
-</div>
-<p>
-Reusable advertisements and redirect scripts
-</p>
-</div>
-
-<button id="openAdModal">
-+ Create Ad
-</button>
-
-</div>
-
-<div class="library-grid" id="adsLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-SHORTLINKS TAB
-===================================================== -->
-
-<div class="tab-content" id="shortlinksTab">
-
-<div class="section-header">
-
-<div>
-<div class="section-header">
-
-<div class="section-header-left">
-
-<h3>
-🔗 Shortlinks Library
-</h3>
+</h2>
 
 <p>
-Reusable shortlink monetization providers
+Ads
 </p>
 
 </div>
 
-<div class="section-header-right">
+<div class="analytic-box">
 
-<button
-class="secondary-btn"
-id="reloadShortlinksBtn"
->
+<h2 id="totalShortlinks">
 
-Reload
+0
 
-</button>
-
-</div>
-
-</div>
-<p>
-Reusable shortlink providers
-</p>
-</div>
-
-<button id="openShortlinkModal">
-+ Create Shortlink
-</button>
-
-</div>
-
-<div class="library-grid" id="shortlinksLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-POPUPS TAB
-===================================================== -->
-
-<div class="tab-content" id="popupsTab">
-
-<div class="section-header">
-
-<div>
-<div class="section-header">
-
-<div class="section-header-left">
-
-<h3>
-🪟 Popup Scripts
-</h3>
+</h2>
 
 <p>
-Reusable popup scripts library
+Shortlinks
 </p>
 
 </div>
 
-<div class="section-header-right">
+<div class="analytic-box">
 
-<button
-class="secondary-btn"
-id="reloadPopupsBtn"
->
+<h2 id="totalClicks">
 
-Reload
+0
 
-</button>
+</h2>
 
-</div>
-
-</div>
 <p>
-Reusable popup monetization scripts
+Final Downloads
 </p>
-</div>
-
-<button id="openPopupModal">
-+ Create Popup
-</button>
-
-</div>
-
-<div class="library-grid" id="popupLibraryList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<!-- =====================================================
-ANALYTICS TAB
-===================================================== -->
-
-<div class="tab-content" id="analyticsTab">
-
-<div class="analytics-layout">
-
-<div class="analytics-card large">
-
-<h3>
-📊 Monetization Overview
-</h3>
-
-<div id="analyticsOverview">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-🔥 Top Performing Hosts
-</h3>
-
-<div id="topHostsList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-📢 Top Ads
-</h3>
-
-<div id="topAdsList">
-
-<!-- JS -->
-
-</div>
-
-</div>
-
-<div class="analytics-card">
-
-<h3>
-🔗 Top Shortlinks
-</h3>
-
-<div id="topShortlinksList">
-
-<!-- JS -->
-
-</div>
 
 </div>
 
@@ -2348,37 +1136,54 @@ ANALYTICS TAB
 
 </div>
 
-<!-- =====================================================
+<!-- =======================================================
 HOST MODAL
-===================================================== -->
+======================================================= -->
 
-<div class="modal" id="hostModal">
+<div
+class="modal"
+id="hostModal"
+>
 
 <div class="modal-box large-modal">
+
+<!-- ========================= -->
+<!-- HEADER -->
+<!-- ========================= -->
 
 <div class="modal-header">
 
 <h3 id="hostModalTitle">
-Create Host
+
+Create Host Monetization
+
 </h3>
 
-<span class="closeModal">
+<span id="closeHostModal">
+
 ✕
+
 </span>
 
 </div>
 
+<!-- ========================= -->
+<!-- BODY -->
+<!-- ========================= -->
+
 <div class="modal-body">
 
-<!-- BASIC -->
+<!-- =======================================================
+HOST INFO
+======================================================= -->
 
-<div class="builder-section">
+<div class="section-box">
 
 <h4>
-Basic Configuration
+Host Information
 </h4>
 
-<div class="builder-grid">
+<div class="form-grid">
 
 <input
 type="text"
@@ -2407,11 +1212,11 @@ Knight : YES
 <select id="hostMode">
 
 <option value="random">
-Random Rotation
+Random
 </option>
 
 <option value="sequence">
-Sequence Rotation
+Sequence
 </option>
 
 <option value="direct">
@@ -2419,6 +1224,183 @@ Direct
 </option>
 
 </select>
+
+</div>
+
+</div>
+
+<!-- =======================================================
+ADS SELECT
+======================================================= -->
+
+<div class="section-box">
+
+<h4>
+Ads
+</h4>
+
+<div
+class="selection-grid"
+id="hostAdsList"
+>
+
+<!-- AUTO -->
+
+</div>
+
+</div>
+
+<!-- =======================================================
+SHORTLINKS SELECT
+======================================================= -->
+
+<div class="section-box">
+
+<h4>
+Shortlinks
+</h4>
+
+<div
+class="selection-grid"
+id="hostShortlinksList"
+>
+
+<!-- AUTO -->
+
+</div>
+
+</div>
+
+<!-- =======================================================
+POPUPS SELECT
+======================================================= -->
+
+<div class="section-box">
+
+<h4>
+Popups
+</h4>
+
+<div
+class="selection-grid"
+id="hostPopupsList"
+>
+
+<!-- AUTO -->
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ========================= -->
+<!-- FOOTER -->
+<!-- ========================= -->
+
+<div class="modal-footer">
+
+<button id="saveHostBtn">
+
+💾 Save Host Config
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =======================================================
+TEMPLATES
+======================================================= -->
+
+<!-- =========================
+LIBRARY ITEM
+========================= -->
+
+<template id="libraryItemTemplate">
+
+<div class="library-item">
+
+<div class="library-left">
+
+<b class="library-name">
+
+NAME
+
+</b>
+
+<small class="library-meta">
+
+META
+
+</small>
+
+</div>
+
+<div class="actions">
+
+<button class="edit-btn">
+
+Edit
+
+</button>
+
+<button class="danger delete-btn">
+
+Delete
+
+</button>
+
+</div>
+
+</div>
+
+</template>
+
+<!-- =========================
+HOST CARD
+========================= -->
+
+<template id="hostCardTemplate">
+
+<div class="host-card">
+
+<!-- TOP -->
+
+<div class="host-top">
+
+<div>
+
+<h2 class="host-name">
+
+Host
+
+</h2>
+
+<p class="host-storage">
+
+Storage : --
+
+</p>
+
+</div>
+
+<div class="host-badges">
+
+<span class="host-knight">
+
+Knight : NO
+
+</span>
+
+<span class="host-mode">
+
+Random
+
+</span>
 
 </div>
 
@@ -2426,475 +1408,65 @@ Direct
 
 <!-- ADS -->
 
-<div class="builder-section">
+<div class="host-section">
 
 <h4>
 Ads
 </h4>
 
-<div
-id="hostAdsSelector"
-class="selection-grid"
-></div>
+<div class="host-tags ads-tags">
+
+<!-- AUTO -->
+
+</div>
 
 </div>
 
 <!-- SHORTLINKS -->
 
-<div class="builder-section">
+<div class="host-section">
 
 <h4>
 Shortlinks
 </h4>
 
-<div
-id="hostShortlinksSelector"
-class="selection-grid"
-></div>
+<div class="host-tags short-tags">
+
+<!-- AUTO -->
+
+</div>
 
 </div>
 
 <!-- POPUPS -->
 
-<div class="builder-section">
+<div class="host-section">
 
 <h4>
 Popups
 </h4>
 
-<div
-id="hostPopupsSelector"
-class="selection-grid"
-></div>
+<div class="host-tags popup-tags">
+
+<!-- AUTO -->
 
 </div>
 
 </div>
 
-<div class="modal-footer">
+<!-- ACTIONS -->
 
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
+<div class="host-actions">
 
-<button id="saveHostBtn">
-Save Host
-</button>
+<button class="edit-host-btn">
 
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-AD MODAL
-===================================================== -->
-
-<div class="modal" id="adModal">
-
-<div class="modal-box medium-modal">
-
-<div class="modal-header">
-
-<h3 id="adModalTitle">
-Create Ad
-</h3>
-
-<span class="closeModal">
-✕
-</span>
-
-</div>
-
-<div class="modal-body">
-
-<input
-type="text"
-id="adName"
-placeholder="Ad Name"
->
-
-<select id="adType">
-
-<option value="redirect">
-Redirect
-</option>
-
-<option value="script_url">
-Script URL
-</option>
-
-<option value="popup">
-Popup
-</option>
-
-<option value="banner">
-Banner
-</option>
-
-</select>
-
-<textarea
-id="adCode"
-placeholder="URL / Code"
-></textarea>
-
-<div class="dual-grid">
-
-<input
-type="number"
-id="adDelay"
-placeholder="Delay (ms)"
->
-
-<input
-type="number"
-id="adWeight"
-placeholder="Weight"
->
-
-</div>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
-
-<button id="saveAdBtn">
-Save Ad
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-SHORTLINK MODAL
-===================================================== -->
-
-<div class="modal" id="shortlinkModal">
-
-<div class="modal-box medium-modal">
-
-<div class="modal-header">
-
-<h3>
-Create Shortlink
-</h3>
-
-<span class="closeModal">
-✕
-</span>
-
-</div>
-
-<div class="modal-body">
-
-<input
-type="text"
-id="shortName"
-placeholder="Shortlink Name"
->
-
-<input
-type="text"
-id="shortBase"
-placeholder="Base URL"
->
-
-<input
-type="text"
-id="shortApi"
-placeholder="API Key"
->
-
-</div>
-
-<div class="modal-footer">
-
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
-
-<button id="saveShortBtn">
-Save Shortlink
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-POPUP MODAL
-===================================================== -->
-
-<div class="modal" id="popupModal">
-
-<div class="modal-box medium-modal">
-
-<div class="modal-header">
-
-<h3>
-Create Popup
-</h3>
-
-<span class="closeModal">
-✕
-</span>
-
-</div>
-
-<div class="modal-body">
-
-<input
-type="text"
-id="popupName"
-placeholder="Popup Name"
->
-
-<textarea
-id="popupCode"
-placeholder="Popup Script / URL"
-></textarea>
-
-</div>
-
-<div class="modal-footer">
-
-<button
-class="secondary closeModal"
->
-Cancel
-</button>
-
-<button id="savePopupBtn">
-Save Popup
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =====================================================
-TOAST
-===================================================== -->
-
-<div id="toastContainer"></div>
-
-  <!-- =====================================================
-HOST MODAL
-===================================================== -->
-
-<div
-class="modal-overlay"
-id="hostModal"
->
-
-<div class="modal-window">
-
-<!-- HEADER -->
-
-<div class="modal-top">
-
-<h2 id="hostModalTitle">
-
-Create Host
-
-</h2>
-
-<button
-class="modal-close"
-id="closeHostModal"
->
-
-✕
+Edit
 
 </button>
 
-</div>
+<button class="danger delete-host-btn">
 
-<!-- BODY -->
-
-<div class="modal-body">
-
-<div class="host-form-grid">
-
-<!-- LEFT -->
-
-<div class="host-form-section">
-
-<h4>
-Host Information
-</h4>
-
-<input
-type="text"
-id="hostNameInput"
-placeholder="Host Name"
->
-
-<input
-type="text"
-id="hostStorageInput"
-placeholder="Storage Provider"
->
-
-<select id="hostModeInput">
-
-<option value="random">
-Random Rotation
-</option>
-
-<option value="sequence">
-Sequence Rotation
-</option>
-
-<option value="direct">
-Direct
-</option>
-
-</select>
-
-<div class="toggle">
-
-<input
-type="checkbox"
-id="hostKnightInput"
->
-
-<label for="hostKnightInput">
-
-Knight Host
-
-</label>
-
-</div>
-
-</div>
-
-<!-- RIGHT -->
-
-<div class="host-form-section">
-
-<h4>
-Ads
-</h4>
-
-<div
-class="multi-select"
-id="hostAdsSelector"
->
-
-<div class="multi-select-header">
-
-Select Ads
-
-</div>
-
-<div
-class="multi-select-body"
-id="hostAdsItems"
-></div>
-
-</div>
-
-</div>
-
-<!-- LEFT -->
-
-<div class="host-form-section">
-
-<h4>
-Shortlinks
-</h4>
-
-<div
-class="multi-select"
-id="hostShortlinksSelector"
->
-
-<div class="multi-select-header">
-
-Select Shortlinks
-
-</div>
-
-<div
-class="multi-select-body"
-id="hostShortlinksItems"
-></div>
-
-</div>
-
-</div>
-
-<!-- RIGHT -->
-
-<div class="host-form-section">
-
-<h4>
-Popups
-</h4>
-
-<div
-class="multi-select"
-id="hostPopupsSelector"
->
-
-<div class="multi-select-header">
-
-Select Popups
-
-</div>
-
-<div
-class="multi-select-body"
-id="hostPopupsItems"
-></div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- FOOTER -->
-
-<div class="modal-footer">
-
-<button
-class="secondary-btn"
-id="cancelHostModal"
->
-
-Cancel
-
-</button>
-
-<button
-class="primary-btn"
-id="saveHostModalBtn"
->
-
-Save Host
+Delete
 
 </button>
 
@@ -2902,15 +1474,2338 @@ Save Host
 
 </div>
 
-</div>
+</template>
 
 </body>
 <script>
 
+/* =========================================================
+   ⚡ ANIMEHUNT ADS MANAGER
+   PART 1 — CORE SYSTEM
+========================================================= */
+
+/* =========================================================
+   API
+========================================================= */
+
+const API =
+"https://animehunt-backend.animehunt715.workers.dev/api/admin"
+
+const TOKEN =
+localStorage.getItem("AUTH_TOKEN")
+
+/* =========================================================
+   DOM
+========================================================= */
+
+/* =========================
+ADS
+========================= */
+
+const adName =
+document.getElementById("adName")
+
+const adType =
+document.getElementById("adType")
+
+const adWeight =
+document.getElementById("adWeight")
+
+const adDelay =
+document.getElementById("adDelay")
+
+const adCode =
+document.getElementById("adCode")
+
+const saveAdBtn =
+document.getElementById("saveAdBtn")
+
+const cancelAdEdit =
+document.getElementById("cancelAdEdit")
+
+const adsLibraryList =
+document.getElementById("adsLibraryList")
+
+/* =========================
+SHORTLINKS
+========================= */
+
+const shortName =
+document.getElementById("shortName")
+
+const shortBase =
+document.getElementById("shortBase")
+
+const shortApi =
+document.getElementById("shortApi")
+
+const saveShortBtn =
+document.getElementById("saveShortBtn")
+
+const cancelShortEdit =
+document.getElementById("cancelShortEdit")
+
+const shortLibraryList =
+document.getElementById("shortLibraryList")
+
+/* =========================
+POPUPS
+========================= */
+
+const popupName =
+document.getElementById("popupName")
+
+const popupCode =
+document.getElementById("popupCode")
+
+const savePopupBtn =
+document.getElementById("savePopupBtn")
+
+const cancelPopupEdit =
+document.getElementById("cancelPopupEdit")
+
+const popupLibraryList =
+document.getElementById("popupLibraryList")
+
+/* =========================
+HOSTS
+========================= */
+
+const hostModal =
+document.getElementById("hostModal")
+
+const hostModalTitle =
+document.getElementById("hostModalTitle")
+
+const openHostModal =
+document.getElementById("openHostModal")
+
+const closeHostModal =
+document.getElementById("closeHostModal")
+
+const saveHostBtn =
+document.getElementById("saveHostBtn")
+
+const hostMonetizationList =
+document.getElementById("hostMonetizationList")
+
+/* HOST FORM */
+
+const hostName =
+document.getElementById("hostName")
+
+const hostStorage =
+document.getElementById("hostStorage")
+
+const hostKnight =
+document.getElementById("hostKnight")
+
+const hostMode =
+document.getElementById("hostMode")
+
+const hostAdsList =
+document.getElementById("hostAdsList")
+
+const hostShortlinksList =
+document.getElementById("hostShortlinksList")
+
+const hostPopupsList =
+document.getElementById("hostPopupsList")
+
+/* =========================
+ANALYTICS
+========================= */
+
+const totalHosts =
+document.getElementById("totalHosts")
+
+const totalAds =
+document.getElementById("totalAds")
+
+const totalShortlinks =
+document.getElementById("totalShortlinks")
+
+const totalClicks =
+document.getElementById("totalClicks")
+
+/* =========================================================
+TEMPLATES
+========================================================= */
+
+const libraryItemTemplate =
+document.getElementById("libraryItemTemplate")
+
+const hostCardTemplate =
+document.getElementById("hostCardTemplate")
+
+/* =========================================================
+STATE
+========================================================= */
+
+let ADS = []
+
+let SHORTLINKS = []
+
+let POPUPS = []
+
+let HOSTS = []
+
+/* =========================================================
+EDIT STATE
+========================================================= */
+
+let editingAdId = null
+
+let editingShortId = null
+
+let editingPopupId = null
+
+let editingHostId = null
+
+/* =========================================================
+API HELPER
+========================================================= */
+
+async function api(
+  url,
+  method = "GET",
+  body = null
+){
+
+  try{
+
+    const response =
+    await fetch(url,{
+
+      method,
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":
+        "Bearer " + TOKEN
+      },
+
+      body:
+      body
+      ? JSON.stringify(body)
+      : null
+
+    })
+
+    const json =
+    await response.json()
+
+    if(!response.ok){
+
+      console.error(json)
+
+      showToast(
+        json?.error ||
+        "API Error",
+        "error"
+      )
+
+      return null
+
+    }
+
+    return json
+
+  }catch(error){
+
+    console.error(error)
+
+    showToast(
+      "Network Error",
+      "error"
+    )
+
+    return null
+
+  }
+
+}
+
+/* =========================================================
+TOAST
+========================================================= */
+
+function showToast(
+  message,
+  type="success"
+){
+
+  const toast =
+  document.createElement("div")
+
+  toast.className =
+  `cms-toast ${type}`
+
+  toast.innerText =
+  message
+
+  toast.style.position =
+  "fixed"
+
+  toast.style.right =
+  "20px"
+
+  toast.style.bottom =
+  "20px"
+
+  toast.style.padding =
+  "14px 18px"
+
+  toast.style.borderRadius =
+  "12px"
+
+  toast.style.zIndex =
+  "999999"
+
+  toast.style.fontSize =
+  "13px"
+
+  toast.style.fontWeight =
+  "700"
+
+  toast.style.background =
+
+    type === "error"
+    ? "#ff3b3b"
+    : "#2ecc71"
+
+  toast.style.color =
+  "#fff"
+
+  document.body.appendChild(
+    toast
+  )
+
+  setTimeout(()=>{
+
+    toast.remove()
+
+  },2500)
+
+}
+
+/* =========================================================
+MODAL
+========================================================= */
+
+function openModal(){
+
+  hostModal.style.display =
+  "flex"
+
+}
+
+function closeModal(){
+
+  hostModal.style.display =
+  "none"
+
+}
+
+/* =========================================================
+RESET HOST FORM
+========================================================= */
+
+function resetHostForm(){
+
+  editingHostId = null
+
+  hostModalTitle.innerText =
+  "Create Host Monetization"
+
+  hostName.value = ""
+
+  hostStorage.value = ""
+
+  hostKnight.value = "0"
+
+  hostMode.value = "random"
+
+  hostAdsList.innerHTML = ""
+
+  hostShortlinksList.innerHTML = ""
+
+  hostPopupsList.innerHTML = ""
+
+}
+
+/* =========================================================
+RESET ADS FORM
+========================================================= */
+
+function resetAdForm(){
+
+  editingAdId = null
+
+  adName.value = ""
+
+  adType.value = "redirect"
+
+  adWeight.value = 1
+
+  adDelay.value = 1500
+
+  adCode.value = ""
+
+  cancelAdEdit.style.display =
+  "none"
+
+}
+
+/* =========================================================
+RESET SHORT FORM
+========================================================= */
+
+function resetShortForm(){
+
+  editingShortId = null
+
+  shortName.value = ""
+
+  shortBase.value = ""
+
+  shortApi.value = ""
+
+  cancelShortEdit.style.display =
+  "none"
+
+}
+
+/* =========================================================
+RESET POPUP FORM
+========================================================= */
+
+function resetPopupForm(){
+
+  editingPopupId = null
+
+  popupName.value = ""
+
+  popupCode.value = ""
+
+  cancelPopupEdit.style.display =
+  "none"
+
+}
+
+/* =========================================================
+UTILS
+========================================================= */
+
+function createTag(text){
+
+  const div =
+  document.createElement("div")
+
+  div.innerText = text
+
+  return div
+
+}
+
+function checkedValues(container){
+
+  return [
+    ...container.querySelectorAll(
+      "input:checked"
+    )
+  ].map(x=>x.value)
+
+}
+
+/* =========================================================
+RENDER CHECKBOX LIST
+========================================================= */
+
+function renderSelectionList(
+  container,
+  list,
+  selected=[]
+){
+
+  container.innerHTML = ""
+
+  if(!list.length){
+
+    container.innerHTML = `
+      <div class="empty-tag">
+        Empty
+      </div>
+    `
+
+    return
+
+  }
+
+  list.forEach(item=>{
+
+    const label =
+    document.createElement("label")
+
+    label.className =
+    "selection-item"
+
+    label.innerHTML = `
+
+      <input
+        type="checkbox"
+        value="${item.id}"
+        ${
+          selected.includes(item.id)
+          ? "checked"
+          : ""
+        }
+      >
+
+      <span>
+        ${item.name}
+      </span>
+
+    `
+
+    container.appendChild(label)
+
+  })
+
+}
+
+/* =========================================================
+EVENTS
+========================================================= */
+
+openHostModal.onclick = ()=>{
+
+  resetHostForm()
+
+  renderSelectionList(
+    hostAdsList,
+    ADS
+  )
+
+  renderSelectionList(
+    hostShortlinksList,
+    SHORTLINKS
+  )
+
+  renderSelectionList(
+    hostPopupsList,
+    POPUPS
+  )
+
+  openModal()
+
+}
+
+closeHostModal.onclick =
+closeModal
+
+cancelAdEdit.onclick =
+resetAdForm
+
+cancelShortEdit.onclick =
+resetShortForm
+
+cancelPopupEdit.onclick =
+resetPopupForm
+
+window.onclick = (e)=>{
+
+  if(
+    e.target === hostModal
+  ){
+
+    closeModal()
+
+  }
+
+}
+
+/* =========================================================
+INIT
+========================================================= */
+
+async function init(){
+
+  console.log(
+    "AnimeHunt Ads Manager Initialized"
+  )
+
+}
+
+init()
 
 
 
-        
+/* =========================================================
+   ⚡ PART 2 — ADS LIBRARY
+========================================================= */
+
+/* =========================================================
+   LOAD ADS
+========================================================= */
+
+async function loadAds(){
+
+  const data =
+  await api(
+    `${API}/ads-library`
+  )
+
+  ADS =
+  Array.isArray(data)
+  ? data
+  : []
+
+  renderAds()
+
+}
+
+/* =========================================================
+   RENDER ADS
+========================================================= */
+
+function renderAds(){
+
+  adsLibraryList.innerHTML = ""
+
+  if(!ADS.length){
+
+    adsLibraryList.innerHTML = `
+
+      <div class="empty-tag">
+
+        No Ads Found
+
+      </div>
+
+    `
+
+    return
+
+  }
+
+  ADS.forEach(ad=>{
+
+    const clone =
+    libraryItemTemplate
+    .content
+    .cloneNode(true)
+
+    /* =========================
+       DOM
+    ========================= */
+
+    const item =
+    clone.querySelector(
+      ".library-item"
+    )
+
+    const name =
+    clone.querySelector(
+      ".library-name"
+    )
+
+    const meta =
+    clone.querySelector(
+      ".library-meta"
+    )
+
+    const editBtn =
+    clone.querySelector(
+      ".edit-btn"
+    )
+
+    const deleteBtn =
+    clone.querySelector(
+      ".delete-btn"
+    )
+
+    /* =========================
+       DATA
+    ========================= */
+
+    name.innerText =
+    ad.name
+
+    meta.innerText =
+
+      `${ad.type}
+      • Weight ${ad.weight || 1}
+      • Delay ${ad.delay || 0}ms`
+
+    /* =========================
+       EDIT
+    ========================= */
+
+    editBtn.onclick = ()=>{
+
+      editAd(ad.id)
+
+    }
+
+    /* =========================
+       DELETE
+    ========================= */
+
+    deleteBtn.onclick = ()=>{
+
+      deleteAd(ad.id)
+
+    }
+
+    adsLibraryList.appendChild(
+      clone
+    )
+
+  })
+
+}
+
+/* =========================================================
+   SAVE AD
+========================================================= */
+
+saveAdBtn.onclick =
+async ()=>{
+
+  const payload = {
+
+    name:
+    adName.value.trim(),
+
+    type:
+    adType.value,
+
+    weight:
+    Number(
+      adWeight.value || 1
+    ),
+
+    delay:
+    Number(
+      adDelay.value || 0
+    ),
+
+    code:
+    adCode.value.trim()
+
+  }
+
+  /* =========================
+     VALIDATION
+  ========================= */
+
+  if(
+    !payload.name ||
+    !payload.code
+  ){
+
+    showToast(
+      "Fill Required Fields",
+      "error"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     UPDATE
+  ===================================================== */
+
+  if(editingAdId){
+
+    const res =
+    await api(
+
+      `${API}/ads-library/${editingAdId}`,
+
+      "PUT",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Ad Updated"
+    )
+
+  }
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  else{
+
+    const res =
+    await api(
+
+      `${API}/ads-library`,
+
+      "POST",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Ad Created"
+    )
+
+  }
+
+  /* =========================
+     RESET
+  ========================= */
+
+  resetAdForm()
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadAds()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   EDIT AD
+========================================================= */
+
+function editAd(id){
+
+  const ad =
+  ADS.find(
+    x=>x.id === id
+  )
+
+  if(!ad) return
+
+  editingAdId =
+  ad.id
+
+  adName.value =
+  ad.name || ""
+
+  adType.value =
+  ad.type || "redirect"
+
+  adWeight.value =
+  ad.weight || 1
+
+  adDelay.value =
+  ad.delay || 0
+
+  adCode.value =
+  ad.code || ""
+
+  cancelAdEdit.style.display =
+  "inline-flex"
+
+  window.scrollTo({
+
+    top:0,
+    behavior:"smooth"
+
+  })
+
+}
+
+/* =========================================================
+   DELETE AD
+========================================================= */
+
+async function deleteAd(id){
+
+  const confirmDelete =
+  confirm(
+    "Delete this ad?"
+  )
+
+  if(!confirmDelete){
+
+    return
+
+  }
+
+  const res =
+  await api(
+
+    `${API}/ads-library/${id}`,
+
+    "DELETE"
+
+  )
+
+  if(!res){
+
+    return
+
+  }
+
+  showToast(
+    "Ad Deleted"
+  )
+
+  /* =========================
+     CLEAN EDIT STATE
+  ========================= */
+
+  if(editingAdId === id){
+
+    resetAdForm()
+
+  }
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadAds()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   INIT ADS
+========================================================= */
+
+async function initAds(){
+
+  await loadAds()
+
+}
+
+/* =========================================================
+   ⚡ PART 3 — SHORTLINKS LIBRARY
+========================================================= */
+
+/* =========================================================
+   LOAD SHORTLINKS
+========================================================= */
+
+async function loadShortlinks(){
+
+  const data =
+  await api(
+    `${API}/shortlinks-library`
+  )
+
+  SHORTLINKS =
+  Array.isArray(data)
+  ? data
+  : []
+
+  renderShortlinks()
+
+}
+
+/* =========================================================
+   RENDER SHORTLINKS
+========================================================= */
+
+function renderShortlinks(){
+
+  shortLibraryList.innerHTML = ""
+
+  if(!SHORTLINKS.length){
+
+    shortLibraryList.innerHTML = `
+
+      <div class="empty-tag">
+
+        No Shortlinks Found
+
+      </div>
+
+    `
+
+    return
+
+  }
+
+  SHORTLINKS.forEach(short=>{
+
+    const clone =
+    libraryItemTemplate
+    .content
+    .cloneNode(true)
+
+    /* =========================
+       DOM
+    ========================= */
+
+    const name =
+    clone.querySelector(
+      ".library-name"
+    )
+
+    const meta =
+    clone.querySelector(
+      ".library-meta"
+    )
+
+    const editBtn =
+    clone.querySelector(
+      ".edit-btn"
+    )
+
+    const deleteBtn =
+    clone.querySelector(
+      ".delete-btn"
+    )
+
+    /* =========================
+       DATA
+    ========================= */
+
+    name.innerText =
+    short.name
+
+    meta.innerText =
+
+      short.base_url ||
+      "No URL"
+
+    /* =========================
+       EDIT
+    ========================= */
+
+    editBtn.onclick = ()=>{
+
+      editShortlink(short.id)
+
+    }
+
+    /* =========================
+       DELETE
+    ========================= */
+
+    deleteBtn.onclick = ()=>{
+
+      deleteShortlink(short.id)
+
+    }
+
+    shortLibraryList.appendChild(
+      clone
+    )
+
+  })
+
+}
+
+/* =========================================================
+   SAVE SHORTLINK
+========================================================= */
+
+saveShortBtn.onclick =
+async ()=>{
+
+  const payload = {
+
+    name:
+    shortName.value.trim(),
+
+    base_url:
+    shortBase.value.trim(),
+
+    api_key:
+    shortApi.value.trim()
+
+  }
+
+  /* =========================
+     VALIDATION
+  ========================= */
+
+  if(
+    !payload.name ||
+    !payload.base_url
+  ){
+
+    showToast(
+      "Fill Required Fields",
+      "error"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     UPDATE
+  ===================================================== */
+
+  if(editingShortId){
+
+    const res =
+    await api(
+
+      `${API}/shortlinks-library/${editingShortId}`,
+
+      "PUT",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Shortlink Updated"
+    )
+
+  }
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  else{
+
+    const res =
+    await api(
+
+      `${API}/shortlinks-library`,
+
+      "POST",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Shortlink Created"
+    )
+
+  }
+
+  /* =========================
+     RESET
+  ========================= */
+
+  resetShortForm()
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadShortlinks()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   EDIT SHORTLINK
+========================================================= */
+
+function editShortlink(id){
+
+  const short =
+  SHORTLINKS.find(
+    x=>x.id === id
+  )
+
+  if(!short) return
+
+  editingShortId =
+  short.id
+
+  shortName.value =
+  short.name || ""
+
+  shortBase.value =
+  short.base_url || ""
+
+  shortApi.value =
+  short.api_key || ""
+
+  cancelShortEdit.style.display =
+  "inline-flex"
+
+  window.scrollTo({
+
+    top:0,
+    behavior:"smooth"
+
+  })
+
+}
+
+/* =========================================================
+   DELETE SHORTLINK
+========================================================= */
+
+async function deleteShortlink(id){
+
+  const confirmDelete =
+  confirm(
+    "Delete this shortlink?"
+  )
+
+  if(!confirmDelete){
+
+    return
+
+  }
+
+  const res =
+  await api(
+
+    `${API}/shortlinks-library/${id}`,
+
+    "DELETE"
+
+  )
+
+  if(!res){
+
+    return
+
+  }
+
+  showToast(
+    "Shortlink Deleted"
+  )
+
+  /* =========================
+     CLEAN EDIT STATE
+  ========================= */
+
+  if(editingShortId === id){
+
+    resetShortForm()
+
+  }
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadShortlinks()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   INIT SHORTLINKS
+========================================================= */
+
+async function initShortlinks(){
+
+  await loadShortlinks()
+
+}
+
+/* =========================================================
+   ⚡ PART 4 — POPUP LIBRARY
+========================================================= */
+
+/* =========================================================
+   LOAD POPUPS
+========================================================= */
+
+async function loadPopups(){
+
+  const data =
+  await api(
+    `${API}/popup-library`
+  )
+
+  POPUPS =
+  Array.isArray(data)
+  ? data
+  : []
+
+  renderPopups()
+
+}
+
+/* =========================================================
+   RENDER POPUPS
+========================================================= */
+
+function renderPopups(){
+
+  popupLibraryList.innerHTML = ""
+
+  if(!POPUPS.length){
+
+    popupLibraryList.innerHTML = `
+
+      <div class="empty-tag">
+
+        No Popups Found
+
+      </div>
+
+    `
+
+    return
+
+  }
+
+  POPUPS.forEach(popup=>{
+
+    const clone =
+    libraryItemTemplate
+    .content
+    .cloneNode(true)
+
+    /* =========================
+       DOM
+    ========================= */
+
+    const name =
+    clone.querySelector(
+      ".library-name"
+    )
+
+    const meta =
+    clone.querySelector(
+      ".library-meta"
+    )
+
+    const editBtn =
+    clone.querySelector(
+      ".edit-btn"
+    )
+
+    const deleteBtn =
+    clone.querySelector(
+      ".delete-btn"
+    )
+
+    /* =========================
+       DATA
+    ========================= */
+
+    name.innerText =
+    popup.name
+
+    meta.innerText =
+    "Popup Script"
+
+    /* =========================
+       EDIT
+    ========================= */
+
+    editBtn.onclick = ()=>{
+
+      editPopup(popup.id)
+
+    }
+
+    /* =========================
+       DELETE
+    ========================= */
+
+    deleteBtn.onclick = ()=>{
+
+      deletePopup(popup.id)
+
+    }
+
+    popupLibraryList.appendChild(
+      clone
+    )
+
+  })
+
+}
+
+/* =========================================================
+   SAVE POPUP
+========================================================= */
+
+savePopupBtn.onclick =
+async ()=>{
+
+  const payload = {
+
+    name:
+    popupName.value.trim(),
+
+    script:
+    popupCode.value.trim()
+
+  }
+
+  /* =========================
+     VALIDATION
+  ========================= */
+
+  if(
+    !payload.name ||
+    !payload.script
+  ){
+
+    showToast(
+      "Fill Required Fields",
+      "error"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     UPDATE
+  ===================================================== */
+
+  if(editingPopupId){
+
+    const res =
+    await api(
+
+      `${API}/popup-library/${editingPopupId}`,
+
+      "PUT",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Popup Updated"
+    )
+
+  }
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  else{
+
+    const res =
+    await api(
+
+      `${API}/popup-library`,
+
+      "POST",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Popup Created"
+    )
+
+  }
+
+  /* =========================
+     RESET
+  ========================= */
+
+  resetPopupForm()
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadPopups()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   EDIT POPUP
+========================================================= */
+
+function editPopup(id){
+
+  const popup =
+  POPUPS.find(
+    x=>x.id === id
+  )
+
+  if(!popup) return
+
+  editingPopupId =
+  popup.id
+
+  popupName.value =
+  popup.name || ""
+
+  popupCode.value =
+  popup.script || ""
+
+  cancelPopupEdit.style.display =
+  "inline-flex"
+
+  window.scrollTo({
+
+    top:0,
+    behavior:"smooth"
+
+  })
+
+}
+
+/* =========================================================
+   DELETE POPUP
+========================================================= */
+
+async function deletePopup(id){
+
+  const confirmDelete =
+  confirm(
+    "Delete this popup?"
+  )
+
+  if(!confirmDelete){
+
+    return
+
+  }
+
+  const res =
+  await api(
+
+    `${API}/popup-library/${id}`,
+
+    "DELETE"
+
+  )
+
+  if(!res){
+
+    return
+
+  }
+
+  showToast(
+    "Popup Deleted"
+  )
+
+  /* =========================
+     CLEAN EDIT STATE
+  ========================= */
+
+  if(editingPopupId === id){
+
+    resetPopupForm()
+
+  }
+
+  /* =========================
+     RELOAD
+  ========================= */
+
+  await loadPopups()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   INIT POPUPS
+========================================================= */
+
+async function initPopups(){
+
+  await loadPopups()
+
+}
+
+/* =========================================================
+   ⚡ PART 5 — HOST MONETIZATION
+========================================================= */
+
+/* =========================================================
+   LOAD HOSTS
+========================================================= */
+
+async function loadHosts(){
+
+  const data =
+  await api(
+    `${API}/host-monetization`
+  )
+
+  HOSTS =
+  Array.isArray(data)
+  ? data
+  : []
+
+  renderHosts()
+
+}
+
+/* =========================================================
+   RENDER HOSTS
+========================================================= */
+
+function renderHosts(){
+
+  hostMonetizationList.innerHTML = ""
+
+  if(!HOSTS.length){
+
+    hostMonetizationList.innerHTML = `
+
+      <div class="empty-tag">
+
+        No Host Configurations Found
+
+      </div>
+
+    `
+
+    return
+
+  }
+
+  HOSTS.forEach(host=>{
+
+    const clone =
+    hostCardTemplate
+    .content
+    .cloneNode(true)
+
+    /* =====================================================
+       DOM
+    ===================================================== */
+
+    const card =
+    clone.querySelector(
+      ".host-card"
+    )
+
+    const hostNameEl =
+    clone.querySelector(
+      ".host-name"
+    )
+
+    const hostStorageEl =
+    clone.querySelector(
+      ".host-storage"
+    )
+
+    const hostKnightEl =
+    clone.querySelector(
+      ".host-knight"
+    )
+
+    const hostModeEl =
+    clone.querySelector(
+      ".host-mode"
+    )
+
+    const adsTags =
+    clone.querySelector(
+      ".ads-tags"
+    )
+
+    const shortTags =
+    clone.querySelector(
+      ".short-tags"
+    )
+
+    const popupTags =
+    clone.querySelector(
+      ".popup-tags"
+    )
+
+    const editBtn =
+    clone.querySelector(
+      ".edit-host-btn"
+    )
+
+    const deleteBtn =
+    clone.querySelector(
+      ".delete-host-btn"
+    )
+
+    /* =====================================================
+       DATA
+    ===================================================== */
+
+    hostNameEl.innerText =
+    host.host
+
+    hostStorageEl.innerText =
+
+      `Storage : ${
+        host.storage || "Unknown"
+      }`
+
+    hostKnightEl.innerText =
+
+      `Knight : ${
+        host.knight
+        ? "YES"
+        : "NO"
+      }`
+
+    hostModeEl.innerText =
+
+      (
+        host.mode || "random"
+      ).toUpperCase()
+
+    /* =====================================================
+       ADS
+    ===================================================== */
+
+    adsTags.innerHTML = ""
+
+    if(host.ads?.length){
+
+      host.ads.forEach(ad=>{
+
+        adsTags.appendChild(
+          createTag(
+            ad.name || ad
+          )
+        )
+
+      })
+
+    }else{
+
+      adsTags.innerHTML = `
+
+        <div class="empty-tag">
+
+          OFF
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       SHORTLINKS
+    ===================================================== */
+
+    shortTags.innerHTML = ""
+
+    if(host.shortlinks?.length){
+
+      host.shortlinks.forEach(short=>{
+
+        shortTags.appendChild(
+          createTag(
+            short.name || short
+          )
+        )
+
+      })
+
+    }else{
+
+      shortTags.innerHTML = `
+
+        <div class="empty-tag">
+
+          NONE
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       POPUPS
+    ===================================================== */
+
+    popupTags.innerHTML = ""
+
+    if(host.popups?.length){
+
+      host.popups.forEach(popup=>{
+
+        popupTags.appendChild(
+          createTag(
+            popup.name || popup
+          )
+        )
+
+      })
+
+    }else{
+
+      popupTags.innerHTML = `
+
+        <div class="empty-tag">
+
+          NONE
+
+        </div>
+
+      `
+
+    }
+
+    /* =====================================================
+       EDIT
+    ===================================================== */
+
+    editBtn.onclick = ()=>{
+
+      editHost(host.id)
+
+    }
+
+    /* =====================================================
+       DELETE
+    ===================================================== */
+
+    deleteBtn.onclick = ()=>{
+
+      deleteHost(host.id)
+
+    }
+
+    hostMonetizationList.appendChild(
+      clone
+    )
+
+  })
+
+}
+
+/* =========================================================
+   SAVE HOST
+========================================================= */
+
+saveHostBtn.onclick =
+async ()=>{
+
+  const payload = {
+
+    host:
+    hostName.value.trim(),
+
+    storage:
+    hostStorage.value.trim(),
+
+    knight:
+    Number(hostKnight.value),
+
+    mode:
+    hostMode.value,
+
+    ads:
+    checkedValues(
+      hostAdsList
+    ),
+
+    shortlinks:
+    checkedValues(
+      hostShortlinksList
+    ),
+
+    popups:
+    checkedValues(
+      hostPopupsList
+    )
+
+  }
+
+  /* =====================================================
+     VALIDATION
+  ===================================================== */
+
+  if(!payload.host){
+
+    showToast(
+      "Host Name Required",
+      "error"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     UPDATE
+  ===================================================== */
+
+  if(editingHostId){
+
+    const res =
+    await api(
+
+      `${API}/host-monetization/${editingHostId}`,
+
+      "PUT",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Host Updated"
+    )
+
+  }
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  else{
+
+    const res =
+    await api(
+
+      `${API}/host-monetization`,
+
+      "POST",
+
+      payload
+
+    )
+
+    if(!res) return
+
+    showToast(
+      "Host Created"
+    )
+
+  }
+
+  /* =====================================================
+     RESET
+  ===================================================== */
+
+  resetHostForm()
+
+  closeModal()
+
+  /* =====================================================
+     RELOAD
+  ===================================================== */
+
+  await loadHosts()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   EDIT HOST
+========================================================= */
+
+function editHost(id){
+
+  const host =
+  HOSTS.find(
+    x=>x.id === id
+  )
+
+  if(!host){
+
+    return
+
+  }
+
+  editingHostId =
+  host.id
+
+  hostModalTitle.innerText =
+  "Edit Host Monetization"
+
+  /* =====================================================
+     FIELDS
+  ===================================================== */
+
+  hostName.value =
+  host.host || ""
+
+  hostStorage.value =
+  host.storage || ""
+
+  hostKnight.value =
+
+    host.knight
+    ? "1"
+    : "0"
+
+  hostMode.value =
+  host.mode || "random"
+
+  /* =====================================================
+     CHECKBOXES
+  ===================================================== */
+
+  renderSelectionList(
+
+    hostAdsList,
+
+    ADS,
+
+    host.ads?.map(
+      x=>x.id || x
+    ) || []
+
+  )
+
+  renderSelectionList(
+
+    hostShortlinksList,
+
+    SHORTLINKS,
+
+    host.shortlinks?.map(
+      x=>x.id || x
+    ) || []
+
+  )
+
+  renderSelectionList(
+
+    hostPopupsList,
+
+    POPUPS,
+
+    host.popups?.map(
+      x=>x.id || x
+    ) || []
+
+  )
+
+  openModal()
+
+}
+
+/* =========================================================
+   DELETE HOST
+========================================================= */
+
+async function deleteHost(id){
+
+  const confirmDelete =
+  confirm(
+    "Delete this host configuration?"
+  )
+
+  if(!confirmDelete){
+
+    return
+
+  }
+
+  const res =
+  await api(
+
+    `${API}/host-monetization/${id}`,
+
+    "DELETE"
+
+  )
+
+  if(!res){
+
+    return
+
+  }
+
+  showToast(
+    "Host Deleted"
+  )
+
+  /* =====================================================
+     CLEAN EDIT STATE
+  ===================================================== */
+
+  if(editingHostId === id){
+
+    resetHostForm()
+
+  }
+
+  /* =====================================================
+     RELOAD
+  ===================================================== */
+
+  await loadHosts()
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   INIT HOSTS
+========================================================= */
+
+async function initHosts(){
+
+  await loadHosts()
+
+}
+
+/* =========================================================
+   ⚡ PART 6 — ANALYTICS + FINAL INIT
+========================================================= */
+
+/* =========================================================
+   RENDER ANALYTICS
+========================================================= */
+
+function renderAnalytics(){
+
+  /* =========================
+     TOTAL HOSTS
+  ========================= */
+
+  totalHosts.innerText =
+  HOSTS.length || 0
+
+  /* =========================
+     TOTAL ADS
+  ========================= */
+
+  totalAds.innerText =
+  ADS.length || 0
+
+  /* =========================
+     TOTAL SHORTLINKS
+  ========================= */
+
+  totalShortlinks.innerText =
+  SHORTLINKS.length || 0
+
+  /* =========================
+     TOTAL DOWNLOADS
+  ========================= */
+
+  totalClicks.innerText =
+
+    HOSTS.reduce((acc,host)=>{
+
+      return (
+        acc +
+        Number(
+          host.clicks || 0
+        )
+      )
+
+    },0)
+
+}
+
+/* =========================================================
+   RELOAD EVERYTHING
+========================================================= */
+
+async function reloadAll(){
+
+  await Promise.all([
+
+    loadAds(),
+
+    loadShortlinks(),
+
+    loadPopups(),
+
+    loadHosts()
+
+  ])
+
+  renderAnalytics()
+
+}
+
+/* =========================================================
+   ESC CLOSE
+========================================================= */
+
+window.addEventListener(
+
+  "keydown",
+
+  (e)=>{
+
+    if(
+      e.key === "Escape"
+    ){
+
+      closeModal()
+
+    }
+
+  }
+
+)
+
+/* =========================================================
+   AUTO RESET ON CLOSE
+========================================================= */
+
+function cleanupModal(){
+
+  resetHostForm()
+
+}
+
+/* =========================================================
+   MODAL CLOSE PATCH
+========================================================= */
+
+const oldCloseModal =
+closeModal
+
+closeModal = ()=>{
+
+  oldCloseModal()
+
+  cleanupModal()
+
+}
+
+/* =========================================================
+   AUTO REFRESH SELECTIONS
+========================================================= */
+
+async function refreshSelections(){
+
+  renderSelectionList(
+    hostAdsList,
+    ADS
+  )
+
+  renderSelectionList(
+    hostShortlinksList,
+    SHORTLINKS
+  )
+
+  renderSelectionList(
+    hostPopupsList,
+    POPUPS
+  )
+
+}
+
+/* =========================================================
+   SAFE NUMBER
+========================================================= */
+
+function safeNumber(v){
+
+  return Number(v || 0)
+
+}
+
+/* =========================================================
+   FORMAT MODE
+========================================================= */
+
+function formatMode(mode){
+
+  if(!mode){
+
+    return "RANDOM"
+
+  }
+
+  return mode
+  .toUpperCase()
+
+}
+
+/* =========================================================
+   EMPTY CHECK
+========================================================= */
+
+function isEmpty(v){
+
+  return (
+    !v ||
+    !String(v).trim()
+  )
+
+}
+
+/* =========================================================
+   BUTTON LOADER
+========================================================= */
+
+function buttonLoading(
+  button,
+  state=true,
+  text="Please Wait..."
+){
+
+  if(state){
+
+    button.dataset.oldText =
+    button.innerHTML
+
+    button.innerHTML =
+    text
+
+    button.disabled = true
+
+    button.style.opacity =
+    ".7"
+
+  }else{
+
+    button.innerHTML =
+    button.dataset.oldText
+
+    button.disabled = false
+
+    button.style.opacity =
+    "1"
+
+  }
+
+}
+
+/* =========================================================
+   FINAL INIT
+========================================================= */
+
+async function init(){
+
+  console.log(
+    "AnimeHunt Monetization Engine Started"
+  )
+
+  await reloadAll()
+
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+init()
+
+
 </script>
   
 
