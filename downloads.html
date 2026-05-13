@@ -5,7 +5,6 @@
 
 <style>
  
-  
   /* =======================================================
 GLOBAL
 ======================================================= */
@@ -908,8 +907,9 @@ RESPONSIVE
     width:100%;
   }
 
-}
-
+   }
+  
+  
 
 
   
@@ -923,770 +923,706 @@ RESPONSIVE
 
 <div class="cms-app">
 
-  <!-- =======================================================
-  SIDEBAR
-  ======================================================= -->
+<!-- ======================================================
+SIDEBAR
+====================================================== -->
 
-  <aside class="cms-sidebar">
+<aside class="cms-sidebar">
 
-    <div class="brand">
-      <span>Anime</span><b>Hunt</b>
-      <small>CMS</small>
-    </div>
-
-    <nav class="cms-menu">
-
-      <!-- CORE -->
-      <a href="dashboard.html">🏠 Dashboard</a>
-      <a href="anime.html">🎬 Anime</a>
-      <a href="episodes.html">📺 Episodes</a>
-      <a href="categories.html">🗂 Catagorys</a>
-      <a href="banners.html">🖼 Banners</a>
-      <a href="homepage.html">🏠 Homepage</a>
-
-      <!-- CONTENT -->
-      <a href="downloads.html" class="active">📥 Downloads</a>
-      <a href="servers.html">🌐 Servers</a>
-      <a href="player.html">🎞 Player</a>
-      <a href="search.html">🔍 Search</a>
-
-      <!-- DATA -->
-      <a href="seo.html">📈 Seo</a>
-      <a href="analytics.html">📊 Analytics</a>
-      <a href="performance.html">⚡ Performance</a>
-
-      <!-- SECURITY -->
-      <a href="security.html">🔐 Security</a>
-      <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-      <!-- AI -->
-      <a href="ads.html">📢 Ads</a>
-      <a href="ai-brain.html">🧠 Ai Brain</a>
-
-      <!-- LAYOUT -->
-      <a href="sidebar.html">📌 Sidebar</a>
-      <a href="footer.html">🦶 Footer</a>
-
-      <!-- SYSTEM -->
-      <a href="system-settings.html">⚙ System-settings</a>
-
-    </nav>
-
-  </aside>
-
-  <!-- =======================================================
-  MAIN
-  ======================================================= -->
-
-  <main class="cms-main">
-
-    <!-- =======================================================
-    HEADER
-    ======================================================= -->
-
-    <header class="cms-header">
-
-      <div class="header-left">
-
-        <h2>
-          📥 Download Manager
-        </h2>
-
-        <div
-          class="download-breadcrumb"
-          id="downloadBreadcrumb"
-        >
-
-          All Anime
-
-        </div>
-
-      </div>
-
-      <div class="header-actions">
-
-        <input
-          type="text"
-          id="searchAnime"
-          placeholder="Search Anime..."
-        >
-
-        <select id="filterType">
-
-          <option value="">
-            All Types
-          </option>
-
-          <option value="anime">
-            Anime
-          </option>
-
-          <option value="movie">
-            Movie
-          </option>
-
-          <option value="series">
-            Series
-          </option>
-
-          <option value="cartoon">
-            Cartoon
-          </option>
-
-        </select>
-
-        <button
-          id="backViewBtn"
-          style="display:none"
-        >
-
-          ← Back
-
-        </button>
-
-        <button id="openDownloadModal">
-
-          ➕ Add Download
-
-        </button>
-
-      </div>
-
-    </header>
-
-    <!-- =======================================================
-    CONTENT
-    ======================================================= -->
-
-    <section class="cms-content">
-
-      <!-- =========================
-      MAIN VIEW
-      ========================= -->
-
-      <div
-        class="downloads-view"
-        id="downloadsView"
-      ></div>
-
-    </section>
-
-  </main>
-
+<div class="brand">
+<span>Anime</span><b>Hunt</b>
+<small>CMS</small>
 </div>
 
-<!-- =======================================================
-DOWNLOAD MODAL
-======================================================= -->
+<nav class="cms-menu">
+
+<a href="dashboard.html">🏠 Dashboard</a>
+<a href="anime.html">🎬 Anime</a>
+<a href="episodes.html">📺 Episodes</a>
+<a href="categories.html">🗂 Catagorys</a>
+<a href="banners.html">🖼 Banners</a>
+<a href="homepage.html">🏠 Homepage</a>
+
+<a href="downloads.html" class="active">📥 Downloads</a>
+<a href="servers.html">🌐 Servers</a>
+<a href="player.html">🎞 Player</a>
+<a href="search.html">🔍 Search</a>
+
+<a href="seo.html">📈 Seo</a>
+<a href="analytics.html">📊 Analytics</a>
+<a href="performance.html">⚡ Performance</a>
+
+<a href="security.html">🔐 Security</a>
+<a href="deploy-backup.html">🚀 Deploy-backup</a>
+
+<a href="ads.html">📢 Ads</a>
+<a href="ai-brain.html">🧠 Ai Brain</a>
+
+<a href="sidebar.html">📌 Sidebar</a>
+<a href="footer.html">🦶 Footer</a>
+
+<a href="system-settings.html">⚙ System-settings</a>
+
+</nav>
+</aside>
+
+<!-- ======================================================
+MAIN
+====================================================== -->
+
+<main class="cms-main">
+
+<!-- ======================================================
+HEADER
+====================================================== -->
+
+<header class="cms-header">
+
+<div class="header-left">
+
+<h2>
+📥 Download Manager
+</h2>
 
 <div
-  class="modal"
-  id="downloadModal"
+class="download-breadcrumb"
+id="breadcrumb"
 >
 
-  <div class="modal-box large-modal">
-
-    <!-- =======================================================
-    MODAL HEADER
-    ======================================================= -->
-
-    <div class="modal-header">
-
-      <h3 id="downloadModalTitle">
-
-        Add Download
-
-      </h3>
-
-      <span id="closeDownloadModal">
-
-        ✕
-
-      </span>
-
-    </div>
-
-    <!-- =======================================================
-    MODAL BODY
-    ======================================================= -->
-
-    <div class="modal-body">
-
-      <!-- =======================================================
-      DOWNLOAD INFO
-      ======================================================= -->
-
-      <div class="section-box">
-
-        <h4>
-          Download Information
-        </h4>
-
-        <div class="form-grid">
-
-          <!-- ANIME -->
-
-          <select id="animeSelect">
-
-            <option value="">
-              Select Anime
-            </option>
-
-          </select>
-
-          <!-- TYPE -->
-
-          <select id="contentType">
-
-            <option value="episode">
-              Episode
-            </option>
-
-            <option value="season_zip">
-              Season ZIP
-            </option>
-
-            <option value="movie">
-              Movie
-            </option>
-
-            <option value="series_zip">
-              Series ZIP
-            </option>
-
-          </select>
-
-          <!-- SEASON -->
-
-          <input
-            id="seasonNumber"
-            placeholder="Season Number"
-          >
-
-          <!-- EPISODE -->
-
-          <input
-            id="episodeNumber"
-            placeholder="Episode Number"
-          >
-
-          <!-- TITLE -->
-
-          <input
-            id="episodeTitle"
-            placeholder="Episode Title (Auto Supported)"
-          >
-
-        </div>
-
-      </div>
-
-      <!-- =======================================================
-      HOSTS
-      ======================================================= -->
-
-      <div class="section-box">
-
-        <div class="hosts-header">
-
-          <h4>
-
-            Download Hosts
-
-          </h4>
-
-          <button id="addHostBtn">
-
-            + Add Host
-
-          </button>
-
-        </div>
-
-        <!-- HOSTS CONTAINER -->
-
-        <div id="hostsContainer"></div>
-
-      </div>
-
-    </div>
-
-    <!-- =======================================================
-    FOOTER
-    ======================================================= -->
-
-    <div class="modal-footer">
-
-      <button id="saveDownloadBtn">
-
-        💾 Save Download
-
-      </button>
-
-    </div>
-
-  </div>
+All Anime
 
 </div>
 
-<!-- =======================================================
+</div>
+
+<div class="header-actions">
+
+<input
+id="searchAnime"
+type="text"
+placeholder="Search Anime"
+>
+
+<select id="filterType">
+
+<option value="">
+All Types
+</option>
+
+<option value="anime">
+Anime
+</option>
+
+<option value="movie">
+Movie
+</option>
+
+<option value="series">
+Series
+</option>
+
+<option value="cartoon">
+Cartoon
+</option>
+
+</select>
+
+<button
+id="backBtn"
+style="display:none"
+>
+
+← Back
+
+</button>
+
+<button id="openAddModal">
+
+➕ Add Download
+
+</button>
+
+</div>
+
+</header>
+
+<!-- ======================================================
+CONTENT
+====================================================== -->
+
+<section class="cms-content">
+
+<div
+id="downloadsView"
+class="downloads-view"
+></div>
+
+</section>
+
+</main>
+</div>
+
+<!-- ======================================================
+ADD DOWNLOAD MODAL
+====================================================== -->
+
+<div
+class="modal"
+id="downloadModal"
+>
+
+<div class="modal-box large-modal">
+
+<!-- =========================
+HEADER
+========================= -->
+
+<div class="modal-header">
+
+<h3 id="modalTitle">
+Add Download
+</h3>
+
+<span id="closeModal">
+✕
+</span>
+
+</div>
+
+<!-- =========================
+BODY
+========================= -->
+
+<div class="modal-body">
+
+<!-- ======================================================
+ANIME INFO
+====================================================== -->
+
+<div class="section-box">
+
+<h4>
+Anime Information
+</h4>
+
+<div class="form-grid">
+
+<!-- =========================
+ANIME
+========================= -->
+
+<select id="animeSelect">
+
+<option value="">
+Select Anime
+</option>
+
+</select>
+
+<!-- =========================
+CONTENT TYPE
+========================= -->
+
+<select id="contentType">
+
+<option value="episode">
+Episode
+</option>
+
+<option value="season_zip">
+Season ZIP
+</option>
+
+<option value="movie">
+Movie
+</option>
+
+<option value="series_zip">
+Series ZIP
+</option>
+
+</select>
+
+<!-- =========================
+SEASON
+========================= -->
+
+<input
+id="seasonNumber"
+placeholder="Season Number"
+>
+
+<!-- =========================
+EPISODE
+========================= -->
+
+<input
+id="episodeNumber"
+placeholder="Episode Number"
+>
+
+<!-- =========================
+TITLE
+========================= -->
+
+<input
+id="episodeTitle"
+placeholder="Episode Title"
+readonly
+>
+
+</div>
+
+</div>
+
+<!-- ======================================================
+HOSTS SECTION
+====================================================== -->
+
+<div class="section-box">
+
+<div class="hosts-header">
+
+<h4>
+Hosts
+</h4>
+
+<button id="addHostBtn">
++ Add Host
+</button>
+
+</div>
+
+<div id="hostsContainer"></div>
+
+</div>
+
+</div>
+
+<!-- =========================
+FOOTER
+========================= -->
+
+<div class="modal-footer">
+
+<button id="saveDownloadBtn">
+💾 Save Download
+</button>
+
+</div>
+
+</div>
+</div>
+
+<!-- ======================================================
 HOST TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="hostTemplate">
 
-  <div class="download-host-card">
+<div class="download-host-card">
 
-    <!-- =======================================================
-    TOP
-    ======================================================= -->
+<!-- ======================================================
+TOP
+====================================================== -->
 
-    <div class="host-top">
+<div class="host-top">
 
-      <!-- LEFT -->
+<div class="host-left">
 
-      <div class="host-left">
+<select class="host-select">
 
-        <select class="host-select">
+<option value="">
+Select Host
+</option>
 
-          <option value="">
-            Select Host
-          </option>
+</select>
 
-        </select>
+</div>
 
-      </div>
+<div class="host-right">
 
-      <!-- RIGHT -->
+<button class="remove-host">
+Remove
+</button>
 
-      <div class="host-right">
+</div>
 
-        <button class="remove-host">
+</div>
 
-          Remove
+<!-- ======================================================
+HOST INFO
+====================================================== -->
 
-        </button>
+<div class="host-info-box">
 
-      </div>
+<!-- STORAGE -->
 
-    </div>
+<div class="host-info-item">
 
-    <!-- =======================================================
-    HOST INFO
-    ======================================================= -->
+<small>
+Storage
+</small>
 
-    <div class="host-info-box">
+<span class="display-storage">
+--
+</span>
 
-      <!-- STORAGE -->
+</div>
 
-      <div class="host-info-item">
+<!-- KNIGHT -->
 
-        <small>
-          Storage
-        </small>
+<div class="host-info-item">
 
-        <span class="display-storage">
+<small>
+Knight
+</small>
 
-          --
+<span class="display-knight-status">
+--
+</span>
 
-        </span>
+</div>
 
-      </div>
+<!-- MODE -->
 
-      <!-- KNIGHT -->
+<div class="host-info-item">
 
-      <div class="host-info-item">
+<small>
+Mode
+</small>
 
-        <small>
-          Knight
-        </small>
+<span class="display-mode">
+--
+</span>
 
-        <span class="display-knight-status">
+</div>
 
-          --
+</div>
 
-        </span>
+<!-- ======================================================
+ACTIVE MONETIZATION
+====================================================== -->
 
-      </div>
+<div class="active-monetization">
 
-      <!-- MODE -->
+<!-- ADS -->
 
-      <div class="host-info-item">
+<div class="active-box">
 
-        <small>
-          Rotation
-        </small>
+<h5>
+Ads
+</h5>
 
-        <span class="display-mode">
+<div class="active-ads-list">
 
-          --
+<div class="empty-tag">
+OFF
+</div>
 
-        </span>
+</div>
 
-      </div>
+</div>
 
-    </div>
+<!-- SHORTLINKS -->
 
-    <!-- =======================================================
-    ACTIVE MONETIZATION
-    ======================================================= -->
+<div class="active-box">
 
-    <div class="active-monetization">
+<h5>
+Shortlinks
+</h5>
 
-      <!-- ADS -->
+<div class="active-shortlinks-list">
 
-      <div class="active-box">
+<div class="empty-tag">
+NONE
+</div>
 
-        <h5>
-          Ads
-        </h5>
+</div>
 
-        <div class="active-ads-list"></div>
+</div>
 
-      </div>
+<!-- POPUPS -->
 
-      <!-- SHORTLINKS -->
+<div class="active-box">
 
-      <div class="active-box">
+<h5>
+Popups
+</h5>
 
-        <h5>
-          Shortlinks
-        </h5>
+<div class="active-popups-list">
 
-        <div class="active-shortlinks-list"></div>
+<div class="empty-tag">
+NONE
+</div>
 
-      </div>
+</div>
 
-      <!-- POPUPS -->
+</div>
 
-      <div class="active-box">
+</div>
 
-        <h5>
-          Popups
-        </h5>
+<!-- ======================================================
+LINKS
+====================================================== -->
 
-        <div class="active-popups-list"></div>
+<div class="download-links-box">
 
-      </div>
+<div class="links-header">
 
-    </div>
+<h5>
+Download Links
+</h5>
 
-    <!-- =======================================================
-    LINKS
-    ======================================================= -->
+<button class="addLinkBtn">
++ Add Link
+</button>
 
-    <div class="download-links-box">
+</div>
 
-      <!-- HEADER -->
+<div class="linksContainer"></div>
 
-      <div class="links-header">
+</div>
 
-        <h5>
-
-          Download Links
-
-        </h5>
-
-        <button class="addLinkBtn">
-
-          + Add Link
-
-        </button>
-
-      </div>
-
-      <!-- LINKS -->
-
-      <div class="linksContainer"></div>
-
-    </div>
-
-  </div>
+</div>
 
 </template>
 
-<!-- =======================================================
+<!-- ======================================================
 LINK TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="linkTemplate">
 
-  <div class="download-link-row">
+<div class="download-link-row">
 
-    <!-- QUALITY -->
+<!-- QUALITY -->
 
-    <select class="quality-select">
+<select class="quality-select">
 
-      <option value="">
-        Select Quality
-      </option>
+<option value="">
+Select Quality
+</option>
 
-      <option value="360p">
-        360p
-      </option>
+<option value="480p">
+480p
+</option>
 
-      <option value="480p">
-        480p
-      </option>
+<option value="720p">
+720p
+</option>
 
-      <option value="720p">
-        720p
-      </option>
+<option value="1080p">
+1080p
+</option>
 
-      <option value="1080p">
-        1080p
-      </option>
+<option value="4K">
+4K
+</option>
 
-      <option value="2160p">
-        4K
-      </option>
+<option value="ZIP">
+ZIP
+</option>
 
-      <option value="ZIP">
-        ZIP
-      </option>
+<option value="RAW">
+RAW
+</option>
 
-      <option value="RAW">
-        RAW
-      </option>
+</select>
 
-    </select>
+<!-- LINK -->
 
-    <!-- LINK -->
+<input
+class="download-link"
+placeholder="Download Link"
+>
 
-    <input
-      type="text"
-      class="download-link"
-      placeholder="Final Download Link"
-    >
+<!-- REMOVE -->
 
-    <!-- REMOVE -->
+<button class="remove-link">
+✕
+</button>
 
-    <button class="remove-link">
-
-      ✕
-
-    </button>
-
-  </div>
+</div>
 
 </template>
 
-<!-- =======================================================
+<!-- ======================================================
 ANIME CARD TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="animeCardTemplate">
 
-  <div class="anime-card">
+<div class="anime-card">
 
-    <!-- POSTER -->
+<div class="anime-poster">
 
-    <div class="anime-poster">
+<img class="anime-image">
 
-      <img
-        class="anime-image"
-        src=""
-        alt=""
-      >
+</div>
 
-    </div>
+<div class="anime-meta">
 
-    <!-- META -->
+<h3 class="anime-title"></h3>
 
-    <div class="anime-meta">
+<small class="anime-type"></small>
 
-      <h3 class="anime-title"></h3>
+</div>
 
-      <small class="anime-type"></small>
-
-    </div>
-
-  </div>
+</div>
 
 </template>
 
-<!-- =======================================================
+<!-- ======================================================
 SEASON CARD TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="seasonCardTemplate">
 
-  <div class="season-card">
+<div class="season-card">
 
-    <h3 class="season-title"></h3>
+<h3 class="season-title"></h3>
 
-    <small class="season-count"></small>
+<small class="season-count"></small>
 
-  </div>
+</div>
 
 </template>
 
-<!-- =======================================================
+<!-- ======================================================
 EPISODE CARD TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="episodeCardTemplate">
 
-  <div class="episode-card">
+<div class="episode-card">
 
-    <!-- LEFT -->
+<div class="episode-left">
 
-    <div class="episode-left">
+<span class="episode-number"></span>
 
-      <span class="episode-number"></span>
+<h4 class="episode-title"></h4>
 
-      <h4 class="episode-title"></h4>
+</div>
 
-    </div>
+<div class="episode-right">
 
-    <!-- RIGHT -->
+<span class="host-count"></span>
 
-    <div class="episode-right">
+</div>
 
-      <span class="host-count"></span>
-
-    </div>
-
-  </div>
+</div>
 
 </template>
 
-<!-- =======================================================
+<!-- ======================================================
 HOST DISPLAY TEMPLATE
-======================================================= -->
+====================================================== -->
 
 <template id="hostDisplayTemplate">
 
-  <div class="host-display-card">
+<div class="host-display-card">
 
-    <!-- =======================================================
-    TOP
-    ======================================================= -->
+<!-- TOP -->
 
-    <div class="host-display-top">
+<div class="host-display-top">
 
-      <!-- LEFT -->
+<div>
 
-      <div>
+<h3 class="display-host-name"></h3>
 
-        <h3 class="display-host-name"></h3>
+<small class="display-storage"></small>
 
-        <small class="display-storage"></small>
+</div>
 
-      </div>
+<div class="host-actions">
 
-      <!-- RIGHT -->
+<button class="edit-host-btn">
+EDIT
+</button>
 
-      <div class="host-actions">
+<button class="delete-host-btn">
+DELETE
+</button>
 
-        <button class="edit-host-btn">
+</div>
 
-          EDIT
+</div>
 
-        </button>
+<!-- KNIGHT -->
 
-        <button class="delete-host-btn">
+<div class="display-knight"></div>
 
-          DELETE
+<!-- ADS -->
 
-        </button>
+<div class="display-section">
 
-      </div>
+<h5>
+Ads
+</h5>
 
-    </div>
+<div class="display-ads"></div>
 
-    <!-- =======================================================
-    KNIGHT
-    ======================================================= -->
+</div>
 
-    <div class="display-knight"></div>
+<!-- SHORTLINKS -->
 
-    <!-- =======================================================
-    ADS
-    ======================================================= -->
+<div class="display-section">
 
-    <div class="display-section">
+<h5>
+Shortlinks
+</h5>
 
-      <h5>
-        Ads
-      </h5>
+<div class="display-shortlinks"></div>
 
-      <div class="display-ads"></div>
+</div>
 
-    </div>
+<!-- POPUPS -->
 
-    <!-- =======================================================
-    SHORTLINKS
-    ======================================================= -->
+<div class="display-section">
 
-    <div class="display-section">
+<h5>
+Popup Scripts
+</h5>
 
-      <h5>
-        Shortlinks
-      </h5>
+<div class="display-popups"></div>
 
-      <div class="display-shortlinks"></div>
+</div>
 
-    </div>
+<!-- MODE -->
 
-    <!-- =======================================================
-    POPUPS
-    ======================================================= -->
+<div class="display-section">
 
-    <div class="display-section">
+<h5>
+Mode
+</h5>
 
-      <h5>
-        Popups
-      </h5>
+<div class="display-mode"></div>
 
-      <div class="display-popups"></div>
+</div>
 
-    </div>
+<!-- LINKS -->
 
-    <!-- =======================================================
-    MODE
-    ======================================================= -->
+<div class="display-section">
 
-    <div class="display-section">
+<h5>
+Links
+</h5>
 
-      <h5>
-        Mode
-      </h5>
+<div class="display-links"></div>
 
-      <div class="display-mode"></div>
+</div>
 
-    </div>
-
-    <!-- =======================================================
-    LINKS
-    ======================================================= -->
-
-    <div class="display-section">
-
-      <h5>
-        Download Links
-      </h5>
-
-      <div class="display-links"></div>
-
-    </div>
-
-  </div>
+</div>
 
 </template>
 
 </body>
- 
-<script>
 
-/* =========================================================
-   ⚡ ANIMEHUNT DOWNLOAD MANAGER
-   PRODUCTION DOWNLOAD ENGINE
-   PART 1 — FOUNDATION
-========================================================= */
-
-/* =========================================================
-   API
+ <script>
+ /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 1 — CORE + STATE + LOADERS
 ========================================================= */
 
 const API =
@@ -1701,18 +1637,19 @@ localStorage.getItem(
    DOM
 ========================================================= */
 
-/* =========================
-   MAIN
-========================= */
-
 const downloadsView =
 document.getElementById(
   "downloadsView"
 )
 
-const downloadBreadcrumb =
+const breadcrumb =
 document.getElementById(
-  "downloadBreadcrumb"
+  "breadcrumb"
+)
+
+const backBtn =
+document.getElementById(
+  "backBtn"
 )
 
 const searchAnime =
@@ -1725,11 +1662,6 @@ document.getElementById(
   "filterType"
 )
 
-const backViewBtn =
-document.getElementById(
-  "backViewBtn"
-)
-
 /* =========================
    MODAL
 ========================= */
@@ -1739,24 +1671,19 @@ document.getElementById(
   "downloadModal"
 )
 
-const openDownloadModal =
+const openAddModal =
 document.getElementById(
-  "openDownloadModal"
+  "openAddModal"
 )
 
-const closeDownloadModal =
+const closeModal =
 document.getElementById(
-  "closeDownloadModal"
+  "closeModal"
 )
 
 const saveDownloadBtn =
 document.getElementById(
   "saveDownloadBtn"
-)
-
-const downloadModalTitle =
-document.getElementById(
-  "downloadModalTitle"
 )
 
 /* =========================
@@ -1788,14 +1715,14 @@ document.getElementById(
   "episodeTitle"
 )
 
-const hostsContainer =
-document.getElementById(
-  "hostsContainer"
-)
-
 const addHostBtn =
 document.getElementById(
   "addHostBtn"
+)
+
+const hostsContainer =
+document.getElementById(
+  "hostsContainer"
 )
 
 /* =========================
@@ -1836,102 +1763,63 @@ document.getElementById(
    STATE
 ========================================================= */
 
-const STATE = {
+let ANIME = []
 
-  anime:[],
+let DOWNLOADS = []
 
-  hosts:[],
+let HOSTS = []
 
-  downloads:[],
+let CURRENT_VIEW = "anime"
 
-  filteredAnime:[],
+let CURRENT_ANIME = null
 
-  currentAnime:null,
-
-  currentSeason:null,
-
-  currentEpisode:null,
-
-  currentView:"anime",
-
-  editingEntry:null,
-
-  loading:false
-
-}
+let CURRENT_SEASON = null
 
 /* =========================================================
-   CACHE
-========================================================= */
-
-const CACHE = {
-
-  animeMap:{},
-
-  hostMap:{},
-
-  entryMap:{}
-
-}
-
-/* =========================================================
-   API ENGINE
+   API
 ========================================================= */
 
 async function api(
 
-  endpoint,
+  url,
+
   method="GET",
+
   body=null
 
 ){
 
   try{
 
-    const response =
-    await fetch(
+    const res =
+    await fetch(url,{
 
-      API + endpoint,
+      method,
 
-      {
+      headers:{
 
-        method,
+        "Content-Type":
+        "application/json",
 
-        headers:{
+        "Authorization":
+        "Bearer " + TOKEN
 
-          "Content-Type":
-          "application/json",
+      },
 
-          "Authorization":
-          "Bearer " + TOKEN
+      body:
 
-        },
+      body
+      ? JSON.stringify(body)
+      : null
 
-        body:
-
-        body
-        ? JSON.stringify(body)
-        : null
-
-      }
-
-    )
+    })
 
     const json =
-    await response.json()
+    await res.json()
 
-    if(!response.ok){
+    if(!res.ok){
 
       console.error(json)
-
-      notify(
-
-        json.message ||
-        "Request Failed",
-
-        "error"
-
-      )
 
       return null
 
@@ -1943,13 +1831,6 @@ async function api(
 
     console.error(err)
 
-    notify(
-
-      "Network Error",
-      "error"
-
-    )
-
     return null
 
   }
@@ -1957,482 +1838,85 @@ async function api(
 }
 
 /* =========================================================
-   NOTIFICATION
+   INIT
 ========================================================= */
 
-function notify(
-
-  message="Done",
-  type="success"
-
-){
-
-  const div =
-  document.createElement("div")
-
-  div.style.position = "fixed"
-  div.style.right = "20px"
-  div.style.bottom = "20px"
-  div.style.zIndex = "999999"
-  div.style.padding = "14px 18px"
-  div.style.borderRadius = "12px"
-  div.style.fontSize = "13px"
-  div.style.fontWeight = "700"
-  div.style.backdropFilter =
-  "blur(12px)"
-
-  div.style.background =
-
-    type === "error"
-    ? "#ff3b3b"
-    : "#16a34a"
-
-  div.style.color = "#fff"
-
-  div.innerText = message
-
-  document.body.appendChild(div)
-
-  setTimeout(()=>{
-
-    div.style.opacity = "0"
-
-  },2500)
-
-  setTimeout(()=>{
-
-    div.remove()
-
-  },3000)
-
-}
-
-/* =========================================================
-   LOADER
-========================================================= */
-
-function setLoading(
-
-  value=true
-
-){
-
-  STATE.loading = value
-
-  if(value){
-
-    downloadsView.innerHTML = `
-
-      <div
-        style="
-          grid-column:1/-1;
-          padding:100px 20px;
-          text-align:center;
-          color:#888;
-        "
-      >
-
-        Loading...
-
-      </div>
-
-    `
-
-  }
-
-}
-
-/* =========================================================
-   EMPTY
-========================================================= */
-
-function renderEmpty(
-
-  text="No Data Found"
-
-){
-
-  downloadsView.innerHTML = `
-
-    <div
-      style="
-        grid-column:1/-1;
-        padding:100px 20px;
-        text-align:center;
-        color:#777;
-        font-size:14px;
-      "
-    >
-
-      ${text}
-
-    </div>
-
-  `
-
-}
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function sanitize(
-
-  value=""
-
-){
-
-  return String(value)
-  .trim()
-
-}
-
-function slugify(
-
-  value=""
-
-){
-
-  return String(value)
-  .toLowerCase()
-  .trim()
-  .replace(/\s+/g,"-")
-  .replace(/[^\w\-]+/g,"")
-
-}
-
-function numberValue(
-
-  value,
-  fallback=0
-
-){
-
-  const n =
-  Number(value)
-
-  return Number.isFinite(n)
-  ? n
-  : fallback
-
-}
-
-/* =========================================================
-   CACHE BUILDERS
-========================================================= */
-
-function buildCaches(){
-
-  /* =========================
-     ANIME MAP
-  ========================= */
-
-  CACHE.animeMap = {}
-
-  STATE.anime.forEach(anime=>{
-
-    CACHE.animeMap[
-      anime.id
-    ] = anime
-
-  })
-
-  /* =========================
-     HOST MAP
-  ========================= */
-
-  CACHE.hostMap = {}
-
-  STATE.hosts.forEach(host=>{
-
-    CACHE.hostMap[
-      host.id
-    ] = host
-
-    CACHE.hostMap[
-      host.host
-    ] = host
-
-  })
-
-  /* =========================
-     ENTRY MAP
-  ========================= */
-
-  CACHE.entryMap = {}
-
-  STATE.downloads.forEach(entry=>{
-
-    CACHE.entryMap[
-      entry.id
-    ] = entry
-
-  })
-
-}
-
-/* =========================================================
-   BREADCRUMB
-========================================================= */
-
-function updateBreadcrumb(){
-
-  let text =
-  "All Anime"
-
-  if(
-    STATE.currentAnime
-  ){
-
-    text =
-    STATE.currentAnime.title
-
-    if(
-      STATE.currentSeason
-    ){
-
-      text +=
-      ` / Season ${STATE.currentSeason}`
-
-    }
-
-    if(
-      STATE.currentEpisode
-    ){
-
-      text +=
-      ` / Episode ${STATE.currentEpisode}`
-
-    }
-
-  }
-
-  downloadBreadcrumb.innerText =
-  text
-
-}
-
-/* =========================================================
-   BACK BUTTON
-========================================================= */
-
-function updateBackButton(){
-
-  backViewBtn.style.display =
-
-    STATE.currentView === "anime"
-    ? "none"
-    : "inline-flex"
-
-}
-
-/* =========================================================
-   RESET VIEW
-========================================================= */
-
-function resetView(){
-
-  STATE.currentAnime = null
-
-  STATE.currentSeason = null
-
-  STATE.currentEpisode = null
-
-  STATE.currentView = "anime"
-
-  updateBreadcrumb()
-
-  updateBackButton()
-
-}
-
-/* =========================================================
-   RESET MODAL
-========================================================= */
-
-function resetModal(){
-
-  downloadModalTitle.innerText =
-  "Add Download"
-
-  STATE.editingEntry = null
-
-  animeSelect.value = ""
-
-  contentType.value =
-  "episode"
-
-  seasonNumber.value = ""
-
-  episodeNumber.value = ""
-
-  episodeTitle.value = ""
-
-  hostsContainer.innerHTML = ""
-
-}
-
-/* =========================================================
-   OPEN MODAL
-========================================================= */
-
-function openModal(){
-
-  downloadModal.style.display =
-  "flex"
-
-}
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-function closeModal(){
-
-  downloadModal.style.display =
-  "none"
-
-}
-
-/* =========================================================
-   FETCH ANIME
-========================================================= */
-
-async function fetchAnime(){
-
-  const data =
-  await api(
-    "/anime-list"
-  )
-
-  STATE.anime =
-
-    Array.isArray(data)
-    ? data
-    : []
-
-}
-
-/* =========================================================
-   FETCH HOSTS
-========================================================= */
-
-async function fetchHosts(){
-
-  const data =
-  await api(
-    "/host-monetization"
-  )
-
-  STATE.hosts =
-
-    Array.isArray(data)
-    ? data
-    : []
-
-}
-
-/* =========================================================
-   FETCH DOWNLOADS
-========================================================= */
-
-async function fetchDownloads(){
-
-  const data =
-  await api(
-    "/downloads-v2"
-  )
-
-  STATE.downloads =
-
-    Array.isArray(data)
-    ? data
-    : []
-
-}
-
-/* =========================================================
-   BOOTSTRAP
-========================================================= */
-
-async function bootstrap(){
-
-  setLoading(true)
+async function init(){
 
   await Promise.all([
 
-    fetchAnime(),
-    fetchHosts(),
-    fetchDownloads()
+    loadAnime(),
+
+    loadHosts(),
+
+    loadDownloads()
 
   ])
 
-  buildCaches()
+  renderAnimeGrid()
 
-  STATE.filteredAnime =
-  [...STATE.anime]
+}
 
-  updateBreadcrumb()
+init()
 
-  updateBackButton()
+/* =========================================================
+   LOAD ANIME
+========================================================= */
+
+async function loadAnime(){
+
+  const data =
+  await api(
+    `${API}/anime-list`
+  )
+
+  ANIME =
+  Array.isArray(data)
+  ? data
+  : []
 
   renderAnimeSelect()
 
-  renderAnimeGrid()
-
 }
 
 /* =========================================================
-   EVENTS
+   LOAD HOSTS
 ========================================================= */
 
-/* =========================
-   OPEN MODAL
-========================= */
+async function loadHosts(){
 
-openDownloadModal.onclick = ()=>{
+  const data =
+  await api(
+    `${API}/host-monetization`
+  )
 
-  resetModal()
-
-  openModal()
-
-}
-
-/* =========================
-   CLOSE MODAL
-========================= */
-
-closeDownloadModal.onclick = ()=>{
-
-  closeModal()
-
-}
-
-/* =========================
-   BACK
-========================= */
-
-backViewBtn.onclick = ()=>{
-
-  resetView()
-
-  renderAnimeGrid()
+  HOSTS =
+  Array.isArray(data)
+  ? data
+  : []
 
 }
 
 /* =========================================================
-   START
+   LOAD DOWNLOADS
 ========================================================= */
 
-bootstrap()
+async function loadDownloads(){
+
+  const data =
+  await api(
+    `${API}/downloads-v2`
+  )
+
+  DOWNLOADS =
+  Array.isArray(data)
+  ? data
+  : []
+
+}
 
 /* =========================================================
-   ⚡ PART 2
-   ANIME GRID ENGINE
-========================================================= */
-
-/* =========================================================
-   RENDER ANIME SELECT
+   ANIME SELECT
 ========================================================= */
 
 function renderAnimeSelect(){
@@ -2445,7 +1929,7 @@ function renderAnimeSelect(){
 
   `
 
-  STATE.anime.forEach(anime=>{
+  ANIME.forEach(anime=>{
 
     animeSelect.innerHTML += `
 
@@ -2462,98 +1946,58 @@ function renderAnimeSelect(){
 }
 
 /* =========================================================
-   GET DOWNLOAD COUNT
+   HELPERS
 ========================================================= */
 
-function getAnimeDownloadCount(
+function resetModal(){
 
-  animeId
+  animeSelect.value = ""
 
-){
+  contentType.value =
+  "episode"
 
-  return STATE.downloads.filter(entry=>{
+  seasonNumber.value = ""
 
-    return entry.anime_id === animeId
+  episodeNumber.value = ""
 
-  }).length
+  episodeTitle.value = ""
+
+  hostsContainer.innerHTML = ""
 
 }
 
-/* =========================================================
-   FILTER ANIME
-========================================================= */
+function showBack(){
 
-function filterAnimeList(){
+  backBtn.style.display =
+  "inline-flex"
 
-  const search =
-  sanitize(
-    searchAnime.value
+}
+
+function hideBack(){
+
+  backBtn.style.display =
+  "none"
+
+}
+
+function setBreadcrumb(text){
+
+  breadcrumb.innerText =
+  text
+
+}
+
+function getAnime(id){
+
+  return ANIME.find(
+    x=>x.id===id
   )
-  .toLowerCase()
-
-  const type =
-  sanitize(
-    filterType.value
-  )
-  .toLowerCase()
-
-  STATE.filteredAnime =
-
-    STATE.anime.filter(anime=>{
-
-      const title =
-      sanitize(
-        anime.title
-      )
-      .toLowerCase()
-
-      const animeType =
-      sanitize(
-        anime.type
-      )
-      .toLowerCase()
-
-      const matchSearch =
-
-        !search ||
-        title.includes(search)
-
-      const matchType =
-
-        !type ||
-        animeType === type
-
-      return (
-        matchSearch &&
-        matchType
-      )
-
-    })
-
-  renderAnimeGrid()
 
 }
-
-/* =========================================================
-   SORT ANIME
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 2 — ANIME GRID + SEARCH + FILTER
 ========================================================= */
-
-function sortAnimeList(
-
-  list=[]
-
-){
-
-  return [...list].sort((a,b)=>{
-
-    return sanitize(a.title)
-    .localeCompare(
-      sanitize(b.title)
-    )
-
-  })
-
-}
 
 /* =========================================================
    RENDER ANIME GRID
@@ -2561,36 +2005,120 @@ function sortAnimeList(
 
 function renderAnimeGrid(){
 
-  STATE.currentView =
+  CURRENT_VIEW =
   "anime"
 
-  updateBreadcrumb()
+  CURRENT_ANIME = null
 
-  updateBackButton()
+  CURRENT_SEASON = null
 
   downloadsView.innerHTML = ""
 
-  if(
-    !STATE.filteredAnime.length
-  ){
+  hideBack()
 
-    renderEmpty(
-      "No Anime Found"
-    )
+  setBreadcrumb(
+    "All Anime"
+  )
+
+  /* =====================================================
+     FILTERS
+  ===================================================== */
+
+  const keyword =
+
+    searchAnime.value
+    .trim()
+    .toLowerCase()
+
+  const type =
+  filterType.value
+
+  let filtered =
+  [...ANIME]
+
+  /* =========================
+     SEARCH
+  ========================= */
+
+  if(keyword){
+
+    filtered =
+    filtered.filter(anime=>{
+
+      return (
+
+        anime.title
+        ?.toLowerCase()
+        .includes(keyword)
+
+      )
+
+    })
+
+  }
+
+  /* =========================
+     TYPE
+  ========================= */
+
+  if(type){
+
+    filtered =
+    filtered.filter(anime=>{
+
+      return (
+
+        anime.type === type
+
+      )
+
+    })
+
+  }
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
+  if(!filtered.length){
+
+    downloadsView.innerHTML = `
+
+      <p>
+
+        No Anime Found
+
+      </p>
+
+    `
 
     return
 
   }
 
-  const sortedAnime =
-  sortAnimeList(
-    STATE.filteredAnime
-  )
+  /* =====================================================
+     GRID
+  ===================================================== */
 
-  const fragment =
-  document.createDocumentFragment()
+  filtered.forEach(anime=>{
 
-  sortedAnime.forEach(anime=>{
+    /* =========================
+       DOWNLOAD COUNT
+    ========================= */
+
+    const totalDownloads =
+
+      DOWNLOADS.filter(item=>{
+
+        return (
+          item.anime_id === anime.id
+        )
+
+      }).length
+
+    /* =========================
+       TEMPLATE
+    ========================= */
 
     const clone =
 
@@ -2599,7 +2127,39 @@ function renderAnimeGrid(){
       .cloneNode(true)
 
     /* =========================
-       ELEMENTS
+       IMAGE
+    ========================= */
+
+    clone.querySelector(
+      ".anime-image"
+    ).src =
+
+      anime.poster ||
+
+      "https://placehold.co/600x900?text=Anime"
+
+    /* =========================
+       TITLE
+    ========================= */
+
+    clone.querySelector(
+      ".anime-title"
+    ).innerText =
+
+      anime.title
+
+    /* =========================
+       TYPE
+    ========================= */
+
+    clone.querySelector(
+      ".anime-type"
+    ).innerText =
+
+      `${anime.type || "anime"} • ${totalDownloads} Downloads`
+
+    /* =========================
+       CARD
     ========================= */
 
     const card =
@@ -2607,179 +2167,205 @@ function renderAnimeGrid(){
       ".anime-card"
     )
 
-    const image =
-    clone.querySelector(
-      ".anime-image"
-    )
-
-    const title =
-    clone.querySelector(
-      ".anime-title"
-    )
-
-    const type =
-    clone.querySelector(
-      ".anime-type"
-    )
-
-    /* =========================
-       DOWNLOAD COUNT
-    ========================= */
-
-    const totalDownloads =
-    getAnimeDownloadCount(
-      anime.id
-    )
-
-    /* =========================
-       DATA
-    ========================= */
-
-    image.src =
-    anime.poster || ""
-
-    image.loading =
-    "lazy"
-
-    image.alt =
-    anime.title || ""
-
-    title.innerText =
-    anime.title || "Untitled"
-
-    type.innerText =
-
-      `${anime.type || "anime"} • ${totalDownloads} Downloads`
-
-    /* =========================
-       IMAGE FALLBACK
-    ========================= */
-
-    image.onerror = ()=>{
-
-      image.src =
-      "https://placehold.co/600x900?text=No+Poster"
-
-    }
-
-    /* =========================
-       CLICK
-    ========================= */
-
     card.onclick = ()=>{
 
-      openAnimeStructure(
+      renderSeasonView(
         anime.id
       )
 
     }
 
-    fragment.appendChild(clone)
+    downloadsView.appendChild(
+      clone
+    )
 
   })
-
-  downloadsView.appendChild(
-    fragment
-  )
 
 }
 
 /* =========================================================
-   OPEN ANIME STRUCTURE
+   SEARCH
 ========================================================= */
 
-function openAnimeStructure(
+searchAnime.oninput = ()=>{
 
-  animeId
+  renderAnimeGrid()
 
-){
+}
 
-  const anime =
-  CACHE.animeMap[
-    animeId
-  ]
+/* =========================================================
+   FILTER
+========================================================= */
 
-  if(!anime){
+filterType.onchange = ()=>{
 
-    notify(
-      "Anime Not Found",
-      "error"
+  renderAnimeGrid()
+
+}
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+backBtn.onclick = ()=>{
+
+  /* =========================
+     FROM SEASON
+  ========================= */
+
+  if(
+    CURRENT_VIEW === "season"
+  ){
+
+    renderAnimeGrid()
+
+    return
+
+  }
+
+  /* =========================
+     FROM EPISODE
+  ========================= */
+
+  if(
+    CURRENT_VIEW === "episode"
+  ){
+
+    renderSeasonView(
+      CURRENT_ANIME
     )
 
     return
 
   }
 
-  STATE.currentAnime =
-  anime
+  /* =========================
+     FROM HOSTS
+  ========================= */
 
-  STATE.currentSeason =
-  null
+  if(
+    CURRENT_VIEW === "hosts"
+  ){
 
-  STATE.currentEpisode =
-  null
+    renderEpisodeView(
 
-  updateBreadcrumb()
+      CURRENT_ANIME,
 
-  updateBackButton()
+      CURRENT_SEASON
 
-  renderAnimeStructure(
-    animeId
-  )
-
-}
-
-/* =========================================================
-   GET ANIME ENTRIES
-========================================================= */
-
-function getAnimeEntries(
-
-  animeId
-
-){
-
-  return STATE.downloads.filter(entry=>{
-
-    return (
-      entry.anime_id === animeId
     )
 
-  })
+  }
 
 }
-
+  
 /* =========================================================
-   GROUP SEASONS
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 3 — SEASON VIEW + EPISODE VIEW
 ========================================================= */
 
-function groupAnimeSeasons(
+/* =========================================================
+   RENDER SEASONS
+========================================================= */
 
-  entries=[]
-
+function renderSeasonView(
+  animeId
 ){
 
-  const grouped = {}
+  CURRENT_VIEW =
+  "season"
 
-  entries.forEach(entry=>{
+  CURRENT_ANIME =
+  animeId
+
+  CURRENT_SEASON = null
+
+  downloadsView.innerHTML = ""
+
+  showBack()
+
+  /* =====================================================
+     ANIME
+  ===================================================== */
+
+  const anime =
+  getAnime(animeId)
+
+  if(!anime){
+
+    downloadsView.innerHTML = `
+
+      <p>
+        Anime not found
+      </p>
+
+    `
+
+    return
+
+  }
+
+  /* =====================================================
+     BREADCRUMB
+  ===================================================== */
+
+  setBreadcrumb(
+
+    anime.title
+
+  )
+
+  /* =====================================================
+     DOWNLOADS
+  ===================================================== */
+
+  const animeDownloads =
+
+    DOWNLOADS.filter(item=>{
+
+      return (
+        item.anime_id === animeId
+      )
+
+    })
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
+  if(!animeDownloads.length){
+
+    downloadsView.innerHTML = `
+
+      <p>
+        No Downloads Found
+      </p>
+
+    `
+
+    return
+
+  }
+
+  /* =====================================================
+     GROUP
+  ===================================================== */
+
+  const seasons = {}
+
+  animeDownloads.forEach(item=>{
+
+    let key = ""
 
     /* =========================
-       MOVIES
+       MOVIE
     ========================= */
 
     if(
-      entry.content_type === "movie"
+      item.content_type === "movie"
     ){
 
-      if(!grouped.movies){
-
-        grouped.movies = []
-
-      }
-
-      grouped.movies.push(entry)
-
-      return
+      key = "Movies"
 
     }
 
@@ -2787,240 +2373,57 @@ function groupAnimeSeasons(
        SERIES ZIP
     ========================= */
 
-    if(
-      entry.content_type ===
-      "series_zip"
+    else if(
+      item.content_type === "series_zip"
     ){
 
-      if(!grouped.series_zip){
-
-        grouped.series_zip = []
-
-      }
-
-      grouped.series_zip.push(entry)
-
-      return
+      key = "Series ZIP"
 
     }
 
     /* =========================
-       SEASON
+       SEASON ZIP
     ========================= */
 
-    const season =
-
-      numberValue(
-        entry.season,
-        1
-      )
-
-    if(
-      !grouped[season]
+    else if(
+      item.content_type === "season_zip"
     ){
 
-      grouped[season] = {
-
-        episodes:[],
-        zips:[]
-
-      }
+      key =
+      `Season ${item.season} ZIP`
 
     }
 
     /* =========================
-       ZIP
-    ========================= */
-
-    if(
-      entry.content_type ===
-      "season_zip"
-    ){
-
-      grouped[
-        season
-      ].zips.push(entry)
-
-    }
-
-    /* =========================
-       EPISODES
+       EPISODE
     ========================= */
 
     else{
 
-      grouped[
-        season
-      ].episodes.push(entry)
+      key =
+      `Season ${item.season || 1}`
 
     }
 
-  })
+    if(!seasons[key]){
 
-  return grouped
+      seasons[key] = []
 
-}
+    }
 
-/* =========================================================
-   RENDER ANIME STRUCTURE
-========================================================= */
-
-function renderAnimeStructure(
-
-  animeId
-
-){
-
-  downloadsView.innerHTML = ""
-
-  const entries =
-  getAnimeEntries(
-    animeId
-  )
-
-  if(!entries.length){
-
-    renderEmpty(
-      "No Downloads Found"
-    )
-
-    return
-
-  }
-
-  const grouped =
-  groupAnimeSeasons(
-    entries
-  )
-
-  const fragment =
-  document.createDocumentFragment()
-
-  /* =======================================================
-     MOVIES
-  ======================================================= */
-
-  if(grouped.movies){
-
-    grouped.movies.forEach(movie=>{
-
-      const clone =
-
-        seasonCardTemplate
-        .content
-        .cloneNode(true)
-
-      clone.querySelector(
-        ".season-title"
-      ).innerText =
-
-        movie.episode_title ||
-        "Movie"
-
-      clone.querySelector(
-        ".season-count"
-      ).innerText =
-
-        `${movie.hosts?.length || 0} Hosts`
-
-      const card =
-      clone.querySelector(
-        ".season-card"
-      )
-
-      card.onclick = ()=>{
-
-        openEpisodeView(
-          movie
-        )
-
-      }
-
-      fragment.appendChild(
-        clone
-      )
-
-    })
-
-  }
-
-  /* =======================================================
-     SERIES ZIP
-  ======================================================= */
-
-  if(grouped.series_zip){
-
-    grouped.series_zip.forEach(zip=>{
-
-      const clone =
-
-        seasonCardTemplate
-        .content
-        .cloneNode(true)
-
-      clone.querySelector(
-        ".season-title"
-      ).innerText =
-
-        "Full Series ZIP"
-
-      clone.querySelector(
-        ".season-count"
-      ).innerText =
-
-        `${zip.hosts?.length || 0} Hosts`
-
-      const card =
-      clone.querySelector(
-        ".season-card"
-      )
-
-      card.onclick = ()=>{
-
-        openEpisodeView(
-          zip
-        )
-
-      }
-
-      fragment.appendChild(
-        clone
-      )
-
-    })
-
-  }
-
-  /* =======================================================
-     SEASONS
-  ======================================================= */
-
-  Object.keys(grouped)
-
-  .filter(key=>{
-
-    return (
-      key !== "movies" &&
-      key !== "series_zip"
-    )
+    seasons[key].push(item)
 
   })
 
-  .sort((a,b)=>{
+  /* =====================================================
+     CARDS
+  ===================================================== */
 
-    return Number(a) - Number(b)
+  Object.keys(seasons)
+  .forEach(key=>{
 
-  })
-
-  .forEach(season=>{
-
-    const data =
-    grouped[season]
-
-    const total =
-
-      data.episodes.length +
-      data.zips.length
+    const items =
+    seasons[key]
 
     const clone =
 
@@ -3028,17 +2431,27 @@ function renderAnimeStructure(
       .content
       .cloneNode(true)
 
+    /* =========================
+       TITLE
+    ========================= */
+
     clone.querySelector(
       ".season-title"
-    ).innerText =
+    ).innerText = key
 
-      `Season ${season}`
+    /* =========================
+       COUNT
+    ========================= */
 
     clone.querySelector(
       ".season-count"
     ).innerText =
 
-      `${total} Downloads`
+      `${items.length} Downloads`
+
+    /* =========================
+       CARD
+    ========================= */
 
     const card =
     clone.querySelector(
@@ -3047,207 +2460,199 @@ function renderAnimeStructure(
 
     card.onclick = ()=>{
 
-      openSeasonView(
-        Number(season),
-        data
+      renderEpisodeView(
+
+        animeId,
+
+        key
+
       )
 
     }
 
-    fragment.appendChild(
+    downloadsView.appendChild(
       clone
     )
 
   })
 
-  downloadsView.appendChild(
-    fragment
-  )
-
 }
 
 /* =========================================================
-   SEARCH EVENT
+   RENDER EPISODES
 ========================================================= */
 
-searchAnime.addEventListener(
+function renderEpisodeView(
 
-  "input",
+  animeId,
 
-  ()=>{
-
-    if(
-      STATE.currentView !==
-      "anime"
-    ) return
-
-    filterAnimeList()
-
-  }
-
-)
-
-/* =========================================================
-   FILTER EVENT
-========================================================= */
-
-filterType.addEventListener(
-
-  "change",
-
-  ()=>{
-
-    if(
-      STATE.currentView !==
-      "anime"
-    ) return
-
-    filterAnimeList()
-
-  }
-
-)
-
-
-/* =========================================================
-   ⚡ PART 3
-   SEASON + EPISODE ENGINE
-========================================================= */
-
-/* =========================================================
-   OPEN SEASON VIEW
-========================================================= */
-
-function openSeasonView(
-
-  season,
-  seasonData
+  seasonKey
 
 ){
 
-  STATE.currentSeason =
-  season
+  CURRENT_VIEW =
+  "episode"
 
-  STATE.currentEpisode =
-  null
+  CURRENT_ANIME =
+  animeId
 
-  STATE.currentView =
-  "season"
-
-  updateBreadcrumb()
-
-  updateBackButton()
-
-  renderSeasonEpisodes(
-    season,
-    seasonData
-  )
-
-}
-
-/* =========================================================
-   SORT EPISODES
-========================================================= */
-
-function sortEpisodes(
-
-  list=[]
-
-){
-
-  return [...list].sort((a,b)=>{
-
-    return (
-      numberValue(a.episode) -
-      numberValue(b.episode)
-    )
-
-  })
-
-}
-
-/* =========================================================
-   RENDER SEASON EPISODES
-========================================================= */
-
-function renderSeasonEpisodes(
-
-  season,
-  seasonData
-
-){
+  CURRENT_SEASON =
+  seasonKey
 
   downloadsView.innerHTML = ""
 
-  const fragment =
-  document.createDocumentFragment()
+  showBack()
 
-  /* =======================================================
-     SEASON ZIP
-  ======================================================= */
+  /* =====================================================
+     ANIME
+  ===================================================== */
 
-  if(
-    seasonData.zips?.length
-  ){
+  const anime =
+  getAnime(animeId)
 
-    seasonData.zips.forEach(zip=>{
+  if(!anime){
 
-      const clone =
+    return
 
-        episodeCardTemplate
-        .content
-        .cloneNode(true)
+  }
 
-      clone.querySelector(
-        ".episode-number"
-      ).innerText =
+  /* =====================================================
+     BREADCRUMB
+  ===================================================== */
 
-        "ZIP"
+  setBreadcrumb(
 
-      clone.querySelector(
-        ".episode-title"
-      ).innerText =
+    `${anime.title} / ${seasonKey}`
 
-        zip.episode_title ||
-        `Season ${season} ZIP`
+  )
 
-      clone.querySelector(
-        ".host-count"
-      ).innerText =
+  /* =====================================================
+     FILTER DOWNLOADS
+  ===================================================== */
 
-        `${zip.hosts?.length || 0} Hosts`
+  let list =
 
-      const card =
-      clone.querySelector(
-        ".episode-card"
-      )
+    DOWNLOADS.filter(item=>{
 
-      card.onclick = ()=>{
+      /* =========================
+         MOVIES
+      ========================= */
 
-        openEpisodeView(
-          zip
+      if(
+        seasonKey === "Movies"
+      ){
+
+        return (
+
+          item.anime_id === animeId &&
+
+          item.content_type === "movie"
+
         )
 
       }
 
-      fragment.appendChild(
-        clone
+      /* =========================
+         SERIES ZIP
+      ========================= */
+
+      if(
+        seasonKey === "Series ZIP"
+      ){
+
+        return (
+
+          item.anime_id === animeId &&
+
+          item.content_type === "series_zip"
+
+        )
+
+      }
+
+      /* =========================
+         SEASON ZIP
+      ========================= */
+
+      if(
+        seasonKey.includes("ZIP")
+      ){
+
+        return (
+
+          item.anime_id === animeId &&
+
+          item.content_type === "season_zip"
+
+        )
+
+      }
+
+      /* =========================
+         NORMAL
+      ========================= */
+
+      const seasonNumber =
+
+        Number(
+
+          seasonKey
+          .replace("Season","")
+          .trim()
+
+        )
+
+      return (
+
+        item.anime_id === animeId &&
+
+        Number(item.season) === seasonNumber &&
+
+        item.content_type === "episode"
+
       )
 
     })
 
+  /* =====================================================
+     SORT
+  ===================================================== */
+
+  list.sort((a,b)=>{
+
+    return (
+
+      Number(a.episode || 0) -
+
+      Number(b.episode || 0)
+
+    )
+
+  })
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
+  if(!list.length){
+
+    downloadsView.innerHTML = `
+
+      <p>
+        No Episodes Found
+      </p>
+
+    `
+
+    return
+
   }
 
-  /* =======================================================
-     EPISODES
-  ======================================================= */
+  /* =====================================================
+     CARDS
+  ===================================================== */
 
-  const sortedEpisodes =
-  sortEpisodes(
-    seasonData.episodes
-  )
-
-  sortedEpisodes.forEach(entry=>{
+  list.forEach(item=>{
 
     const clone =
 
@@ -3255,24 +2660,59 @@ function renderSeasonEpisodes(
       .content
       .cloneNode(true)
 
+    /* =========================
+       NUMBER
+    ========================= */
+
     clone.querySelector(
       ".episode-number"
     ).innerText =
 
-      `EP ${entry.episode || "?"}`
+      item.content_type === "movie"
+
+      ? "MOVIE"
+
+      :
+
+      item.content_type === "series_zip"
+
+      ? "SERIES ZIP"
+
+      :
+
+      item.content_type === "season_zip"
+
+      ? "SEASON ZIP"
+
+      :
+
+      `EP ${item.episode || "?"}`
+
+    /* =========================
+       TITLE
+    ========================= */
 
     clone.querySelector(
       ".episode-title"
     ).innerText =
 
-      entry.episode_title ||
-      `Episode ${entry.episode}`
+      item.episode_title ||
+
+      anime.title
+
+    /* =========================
+       HOSTS
+    ========================= */
 
     clone.querySelector(
       ".host-count"
     ).innerText =
 
-      `${entry.hosts?.length || 0} Hosts`
+      `${item.hosts?.length || 0} Hosts`
+
+    /* =========================
+       CARD
+    ========================= */
 
     const card =
     clone.querySelector(
@@ -3281,81 +2721,81 @@ function renderSeasonEpisodes(
 
     card.onclick = ()=>{
 
-      openEpisodeView(
-        entry
-      )
+      renderHostView(item)
 
     }
 
-    fragment.appendChild(
+    downloadsView.appendChild(
       clone
     )
 
   })
 
-  downloadsView.appendChild(
-    fragment
-  )
-
 }
-
-/* =========================================================
-   OPEN EPISODE VIEW
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 4 — HOST VIEW
 ========================================================= */
 
-function openEpisodeView(
-
-  entry
-
-){
-
-  STATE.currentEpisode =
-
-    entry.episode ||
-    entry.episode_title ||
-    "download"
-
-  STATE.currentView =
-  "episode"
-
-  updateBreadcrumb()
-
-  updateBackButton()
-
-  renderHostCards(
-    entry
-  )
-
-}
-
 /* =========================================================
-   RENDER HOST CARDS
+   RENDER HOST VIEW
 ========================================================= */
 
-function renderHostCards(
+function renderHostView(item){
 
-  entry
-
-){
+  CURRENT_VIEW =
+  "hosts"
 
   downloadsView.innerHTML = ""
 
+  showBack()
+
+  /* =====================================================
+     ANIME
+  ===================================================== */
+
+  const anime =
+  getAnime(
+    item.anime_id
+  )
+
+  /* =====================================================
+     BREADCRUMB
+  ===================================================== */
+
+  setBreadcrumb(
+
+    `${anime?.title || "Anime"} / ${item.episode_title || "Downloads"}`
+
+  )
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
   if(
-    !entry.hosts?.length
+    !item.hosts?.length
   ){
 
-    renderEmpty(
-      "No Hosts Found"
-    )
+    downloadsView.innerHTML = `
+
+      <p>
+
+        No Hosts Found
+
+      </p>
+
+    `
 
     return
 
   }
 
-  const fragment =
-  document.createDocumentFragment()
+  /* =====================================================
+     HOST LOOP
+  ===================================================== */
 
-  entry.hosts.forEach(host=>{
+  item.hosts.forEach(host=>{
 
     const clone =
 
@@ -3363,91 +2803,58 @@ function renderHostCards(
       .content
       .cloneNode(true)
 
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
+    /* ===================================================
+       HOST NAME
+    =================================================== */
 
-    const hostName =
     clone.querySelector(
       ".display-host-name"
-    )
+    ).innerText =
 
-    const storage =
+      host.host
+
+    /* ===================================================
+       STORAGE
+    =================================================== */
+
     clone.querySelector(
       ".display-storage"
-    )
+    ).innerText =
 
-    const knight =
+      `Storage : ${host.storage || "Unknown"}`
+
+    /* ===================================================
+       KNIGHT
+    =================================================== */
+
     clone.querySelector(
       ".display-knight"
-    )
+    ).innerText =
+
+      `Knight : ${host.knight ? "YES" : "NO"}`
+
+    /* ===================================================
+       MODE
+    =================================================== */
+
+    clone.querySelector(
+      ".display-mode"
+    ).innerText =
+
+      host.mode || "random"
+
+    /* ===================================================
+       ADS
+    =================================================== */
 
     const adsBox =
     clone.querySelector(
       ".display-ads"
     )
 
-    const shortBox =
-    clone.querySelector(
-      ".display-shortlinks"
-    )
-
-    const popupBox =
-    clone.querySelector(
-      ".display-popups"
-    )
-
-    const modeBox =
-    clone.querySelector(
-      ".display-mode"
-    )
-
-    const linksBox =
-    clone.querySelector(
-      ".display-links"
-    )
-
-    const editBtn =
-    clone.querySelector(
-      ".edit-host-btn"
-    )
-
-    const deleteBtn =
-    clone.querySelector(
-      ".delete-host-btn"
-    )
-
-    /* =====================================================
-       HOST INFO
-    ===================================================== */
-
-    hostName.innerText =
-
-      host.host ||
-      "Unknown Host"
-
-    storage.innerText =
-
-      `Storage : ${host.storage || "Unknown"}`
-
-    knight.innerText =
-
-      `Knight : ${host.knight ? "YES" : "NO"}`
-
-    modeBox.innerText =
-
-      host.mode ||
-      "random"
-
-    /* =====================================================
-       ADS
-    ===================================================== */
-
     adsBox.innerHTML = ""
 
-    if(
-      host.ads?.length
-    ){
+    if(host.ads?.length){
 
       host.ads.forEach(ad=>{
 
@@ -3455,7 +2862,7 @@ function renderHostCards(
 
           <div>
 
-            ${ad.name || "Ad"}
+            ${ad.name || ad}
 
           </div>
 
@@ -3477,15 +2884,18 @@ function renderHostCards(
 
     }
 
-    /* =====================================================
+    /* ===================================================
        SHORTLINKS
-    ===================================================== */
+    =================================================== */
+
+    const shortBox =
+    clone.querySelector(
+      ".display-shortlinks"
+    )
 
     shortBox.innerHTML = ""
 
-    if(
-      host.shortlinks?.length
-    ){
+    if(host.shortlinks?.length){
 
       host.shortlinks.forEach(short=>{
 
@@ -3493,7 +2903,7 @@ function renderHostCards(
 
           <div>
 
-            ${short.name || "Shortlink"}
+            ${short.name || short}
 
           </div>
 
@@ -3515,15 +2925,18 @@ function renderHostCards(
 
     }
 
-    /* =====================================================
+    /* ===================================================
        POPUPS
-    ===================================================== */
+    =================================================== */
+
+    const popupBox =
+    clone.querySelector(
+      ".display-popups"
+    )
 
     popupBox.innerHTML = ""
 
-    if(
-      host.popups?.length
-    ){
+    if(host.popups?.length){
 
       host.popups.forEach(popup=>{
 
@@ -3531,7 +2944,7 @@ function renderHostCards(
 
           <div>
 
-            ${popup.name || "Popup"}
+            ${popup.name || popup}
 
           </div>
 
@@ -3553,57 +2966,24 @@ function renderHostCards(
 
     }
 
-    /* =====================================================
+    /* ===================================================
        LINKS
-    ===================================================== */
+    =================================================== */
+
+    const linksBox =
+    clone.querySelector(
+      ".display-links"
+    )
 
     linksBox.innerHTML = ""
 
+    /* =========================
+       NO LINKS
+    ========================= */
+
     if(
-      host.links?.length
+      !host.links?.length
     ){
-
-      host.links.forEach(link=>{
-
-        /* =========================
-           KNIGHT
-        ========================= */
-
-        if(host.knight){
-
-          linksBox.innerHTML += `
-
-            <div>
-
-              ${link.quality || "LINK"}
-
-            </div>
-
-          `
-
-        }
-
-        /* =========================
-           NORMAL
-        ========================= */
-
-        else{
-
-          linksBox.innerHTML += `
-
-            <div>
-
-              DIRECT
-
-            </div>
-
-          `
-
-        }
-
-      })
-
-    }else{
 
       linksBox.innerHTML = `
 
@@ -3617,147 +2997,121 @@ function renderHostCards(
 
     }
 
-    /* =====================================================
+    /* =========================
+       LINK LOOP
+    ========================= */
+
+    host.links?.forEach(link=>{
+
+      linksBox.innerHTML += `
+
+        <div>
+
+          ${
+            host.knight
+            ? (
+                link.quality ||
+                "QUALITY"
+              )
+            : "DIRECT LINK"
+          }
+
+        </div>
+
+      `
+
+    })
+
+    /* ===================================================
        EDIT
-    ===================================================== */
+    =================================================== */
 
-    editBtn.onclick = ()=>{
+    clone.querySelector(
+      ".edit-host-btn"
+    ).onclick = ()=>{
 
-      editDownloadEntry(
-        entry,
-        host
+      alert(
+        "Edit Coming Next"
       )
 
     }
 
-    /* =====================================================
+    /* ===================================================
        DELETE
-    ===================================================== */
+    =================================================== */
 
-    deleteBtn.onclick = ()=>{
+    clone.querySelector(
+      ".delete-host-btn"
+    ).onclick = ()=>{
 
-      deleteHostEntry(
-        entry.id,
+      deleteDownloadHost(
         host.id
       )
 
     }
 
-    fragment.appendChild(
+    /* ===================================================
+       APPEND
+    =================================================== */
+
+    downloadsView.appendChild(
       clone
     )
 
   })
 
-  downloadsView.appendChild(
-    fragment
+}
+
+/* =========================================================
+   DELETE HOST
+========================================================= */
+
+async function deleteDownloadHost(
+  hostId
+){
+
+  const ok =
+  confirm(
+    "Delete Host?"
   )
 
-}
+  if(!ok) return
 
-/* =========================================================
-   BACK NAVIGATION ENGINE
-========================================================= */
+  const res =
+  await api(
 
-backViewBtn.onclick = ()=>{
+    `${API}/download-host/${hostId}`,
 
-  /* =======================================================
-     EPISODE -> SEASON
-  ======================================================= */
+    "DELETE"
 
-  if(
-    STATE.currentView ===
-    "episode"
-  ){
+  )
 
-    STATE.currentEpisode =
-    null
+  if(res){
 
-    STATE.currentView =
-    "season"
+    await loadDownloads()
 
-    updateBreadcrumb()
-
-    updateBackButton()
-
-    const entries =
-    getAnimeEntries(
-      STATE.currentAnime.id
-    )
-
-    const grouped =
-    groupAnimeSeasons(
-      entries
-    )
-
-    renderSeasonEpisodes(
-
-      STATE.currentSeason,
-
-      grouped[
-        STATE.currentSeason
-      ]
-
-    )
-
-    return
+    renderAnimeGrid()
 
   }
 
-  /* =======================================================
-     SEASON -> ANIME
-  ======================================================= */
-
-  if(
-    STATE.currentView ===
-    "season"
-  ){
-
-    STATE.currentSeason =
-    null
-
-    STATE.currentView =
-    "anime-structure"
-
-    updateBreadcrumb()
-
-    updateBackButton()
-
-    renderAnimeStructure(
-      STATE.currentAnime.id
-    )
-
-    return
-
-  }
-
-  /* =======================================================
-     ANIME -> GRID
-  ======================================================= */
-
-  resetView()
-
-  renderAnimeGrid()
-
 }
-
-
-/* =========================================================
-   ⚡ PART 4
-   ADD DOWNLOAD MODAL ENGINE
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 5 — MODAL + HOST SYSTEM
 ========================================================= */
 
 /* =========================================================
-   OPEN ADD MODAL
+   OPEN MODAL
 ========================================================= */
 
-openDownloadModal.onclick = ()=>{
+openAddModal.onclick = ()=>{
 
   resetModal()
 
-  addHostCard()
+  downloadModal.style.display =
+  "flex"
 
-  openModal()
+  addHost()
 
 }
 
@@ -3765,49 +3119,83 @@ openDownloadModal.onclick = ()=>{
    CLOSE MODAL
 ========================================================= */
 
-closeDownloadModal.onclick = ()=>{
+closeModal.onclick = ()=>{
 
-  closeModal()
+  downloadModal.style.display =
+  "none"
 
 }
 
 /* =========================================================
-   OUTSIDE CLICK CLOSE
+   CLOSE OUTSIDE
 ========================================================= */
 
-downloadModal.onclick = e=>{
+downloadModal.onclick = (e)=>{
 
   if(
     e.target === downloadModal
   ){
 
-    closeModal()
+    downloadModal.style.display =
+    "none"
 
   }
 
 }
 
 /* =========================================================
-   ESC CLOSE
+   AUTO TITLE
 ========================================================= */
 
-window.addEventListener(
+episodeNumber.oninput = ()=>{
 
-  "keydown",
+  autoEpisodeTitle()
 
-  e=>{
+}
 
-    if(
-      e.key === "Escape"
-    ){
+animeSelect.onchange = ()=>{
 
-      closeModal()
+  autoEpisodeTitle()
 
-    }
+}
+
+function autoEpisodeTitle(){
+
+  const animeId =
+  animeSelect.value
+
+  const ep =
+  episodeNumber.value
+
+  const anime =
+  getAnime(animeId)
+
+  if(!anime){
+
+    episodeTitle.value = ""
+
+    return
 
   }
 
-)
+  /* =====================================================
+     AUTO TITLE
+  ===================================================== */
+
+  if(ep){
+
+    episodeTitle.value =
+
+      `Episode ${ep}`
+
+  }else{
+
+    episodeTitle.value =
+    anime.title
+
+  }
+
+}
 
 /* =========================================================
    ADD HOST BUTTON
@@ -3815,19 +3203,15 @@ window.addEventListener(
 
 addHostBtn.onclick = ()=>{
 
-  addHostCard()
+  addHost()
 
 }
 
 /* =========================================================
-   ADD HOST CARD
+   ADD HOST
 ========================================================= */
 
-function addHostCard(
-
-  data=null
-
-){
+function addHost(){
 
   const clone =
 
@@ -3839,10 +3223,6 @@ function addHostCard(
   clone.querySelector(
     ".download-host-card"
   )
-
-  /* =====================================================
-     ELEMENTS
-  ===================================================== */
 
   const hostSelect =
   clone.querySelector(
@@ -3876,7 +3256,7 @@ function addHostCard(
 
   `
 
-  STATE.hosts.forEach(host=>{
+  HOSTS.forEach(host=>{
 
     hostSelect.innerHTML += `
 
@@ -3891,42 +3271,36 @@ function addHostCard(
   })
 
   /* =====================================================
-     AUTO SELECT
-  ===================================================== */
-
-  if(data?.host){
-
-    hostSelect.value =
-    data.host
-
-  }
-
-  /* =====================================================
      HOST CHANGE
   ===================================================== */
 
   hostSelect.onchange = ()=>{
 
-    const selected =
-    CACHE.hostMap[
-      hostSelect.value
-    ]
+    const hostName =
+    hostSelect.value
 
-    if(!selected){
+    const host =
+    HOSTS.find(item=>{
 
-      resetHostCard(card)
+      return (
+        item.host === hostName
+      )
+
+    })
+
+    if(!host){
 
       return
 
     }
 
     /* =========================
-       AUTO FILL
+       AUTO INFO
     ========================= */
 
     renderHostInfo(
       card,
-      selected
+      host
     )
 
     /* =========================
@@ -3937,13 +3311,14 @@ function addHostCard(
     ""
 
     /* =========================
-       KNIGHT
+       DEFAULT LINK
     ========================= */
 
-    addLinkRow(
+    addLink(
 
       linksContainer,
-      selected.knight
+
+      host.knight
 
     )
 
@@ -3965,75 +3340,31 @@ function addHostCard(
 
   addLinkBtn.onclick = ()=>{
 
-    const selected =
-    CACHE.hostMap[
-      hostSelect.value
-    ]
+    const hostName =
+    hostSelect.value
 
-    addLinkRow(
+    const host =
+    HOSTS.find(item=>{
+
+      return (
+        item.host === hostName
+      )
+
+    })
+
+    addLink(
 
       linksContainer,
-      selected?.knight
+
+      host?.knight
 
     )
 
   }
 
   /* =====================================================
-     AUTO LOAD
+     APPEND
   ===================================================== */
-
-  if(data?.host){
-
-    const selected =
-    CACHE.hostMap[
-      data.host
-    ]
-
-    if(selected){
-
-      renderHostInfo(
-        card,
-        selected
-      )
-
-      /* =======================
-         LINKS
-      ======================= */
-
-      linksContainer.innerHTML =
-      ""
-
-      if(
-        data.links?.length
-      ){
-
-        data.links.forEach(link=>{
-
-          addLinkRow(
-
-            linksContainer,
-            selected.knight,
-            link
-
-          )
-
-        })
-
-      }else{
-
-        addLinkRow(
-
-          linksContainer,
-          selected.knight
-
-        )
-
-      }
-
-    }
-
-  }
 
   hostsContainer.appendChild(
     clone
@@ -4042,66 +3373,13 @@ function addHostCard(
 }
 
 /* =========================================================
-   RESET HOST CARD
-========================================================= */
-
-function resetHostCard(
-
-  card
-
-){
-
-  /* STORAGE */
-
-  card.querySelector(
-    ".display-storage"
-  ).innerText = "--"
-
-  /* KNIGHT */
-
-  const knight =
-  card.querySelector(
-    ".display-knight-status"
-  )
-
-  knight.innerText = "--"
-
-  knight.className =
-  "display-knight-status"
-
-  /* MODE */
-
-  card.querySelector(
-    ".display-mode"
-  ).innerText = "--"
-
-  /* ADS */
-
-  card.querySelector(
-    ".active-ads-list"
-  ).innerHTML = ""
-
-  /* SHORTLINKS */
-
-  card.querySelector(
-    ".active-shortlinks-list"
-  ).innerHTML = ""
-
-  /* POPUPS */
-
-  card.querySelector(
-    ".active-popups-list"
-  ).innerHTML = ""
-
-}
-
-/* =========================================================
-   RENDER HOST INFO
+   HOST INFO
 ========================================================= */
 
 function renderHostInfo(
 
   card,
+
   host
 
 ){
@@ -4121,21 +3399,23 @@ function renderHostInfo(
      KNIGHT
   ===================================================== */
 
-  const knight =
+  const knightBox =
   card.querySelector(
     ".display-knight-status"
   )
 
-  knight.innerText =
+  knightBox.innerText =
 
     host.knight
     ? "YES"
     : "NO"
 
-  knight.className =
+  knightBox.className =
 
     host.knight
+
     ? "display-knight-status yes"
+
     : "display-knight-status no"
 
   /* =====================================================
@@ -4273,16 +3553,20 @@ function renderHostInfo(
   }
 
 }
-
-/* =========================================================
-   ADD LINK ROW
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 6 — LINK SYSTEM + SAVE DOWNLOAD
 ========================================================= */
 
-function addLinkRow(
+/* =========================================================
+   ADD LINK
+========================================================= */
+
+function addLink(
 
   container,
-  isKnight=false,
-  data=null
+
+  isKnight=false
 
 ){
 
@@ -4302,18 +3586,13 @@ function addLinkRow(
     ".quality-select"
   )
 
-  const link =
-  clone.querySelector(
-    ".download-link"
-  )
-
-  const remove =
+  const removeBtn =
   clone.querySelector(
     ".remove-link"
   )
 
   /* =====================================================
-     NORMAL HOST
+     NON KNIGHT
   ===================================================== */
 
   if(!isKnight){
@@ -4327,20 +3606,12 @@ function addLinkRow(
   }
 
   /* =====================================================
-     AUTO DATA
+     KNIGHT REQUIRED
   ===================================================== */
 
-  if(data){
+  else{
 
-    if(data.quality){
-
-      quality.value =
-      data.quality
-
-    }
-
-    link.value =
-    data.link || ""
+    quality.required = true
 
   }
 
@@ -4348,11 +3619,15 @@ function addLinkRow(
      REMOVE
   ===================================================== */
 
-  remove.onclick = ()=>{
+  removeBtn.onclick = ()=>{
 
     row.remove()
 
   }
+
+  /* =====================================================
+     APPEND
+  ===================================================== */
 
   container.appendChild(
     clone
@@ -4361,10 +3636,315 @@ function addLinkRow(
 }
 
 /* =========================================================
-   CONTENT TYPE AUTO LOGIC
+   SAVE DOWNLOAD
+========================================================= */
+
+saveDownloadBtn.onclick =
+async ()=>{
+
+  /* =====================================================
+     FORM VALUES
+  ===================================================== */
+
+  const animeId =
+  animeSelect.value
+
+  const type =
+  contentType.value
+
+  const season =
+  seasonNumber.value.trim()
+
+  const episode =
+  episodeNumber.value.trim()
+
+  const title =
+  episodeTitle.value.trim()
+
+  /* =====================================================
+     VALIDATION
+  ===================================================== */
+
+  if(!animeId){
+
+    alert(
+      "Select Anime"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     PAYLOAD
+  ===================================================== */
+
+  const payload = {
+
+    anime_id:
+    animeId,
+
+    content_type:
+    type,
+
+    season:
+    season || null,
+
+    episode:
+    episode || null,
+
+    episode_title:
+    title || null,
+
+    hosts:[]
+
+  }
+
+  /* =====================================================
+     HOSTS
+  ===================================================== */
+
+  const hostCards =
+
+    document.querySelectorAll(
+      ".download-host-card"
+    )
+
+  /* =========================
+     EMPTY
+  ========================= */
+
+  if(!hostCards.length){
+
+    alert(
+      "Add Host"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     LOOP HOSTS
+  ===================================================== */
+
+  hostCards.forEach(card=>{
+
+    const hostName =
+
+      card.querySelector(
+        ".host-select"
+      ).value
+
+    if(!hostName){
+
+      return
+
+    }
+
+    /* =========================
+       HOST DATA
+    ========================= */
+
+    const hostData =
+    HOSTS.find(host=>{
+
+      return (
+        host.host === hostName
+      )
+
+    })
+
+    /* =========================
+       LINKS
+    ========================= */
+
+    const links = []
+
+    card
+    .querySelectorAll(
+      ".download-link-row"
+    )
+    .forEach(row=>{
+
+      const quality =
+
+        row.querySelector(
+          ".quality-select"
+        )?.value || null
+
+      const link =
+
+        row.querySelector(
+          ".download-link"
+        ).value
+        .trim()
+
+      /* =======================
+         EMPTY
+      ======================= */
+
+      if(!link){
+
+        return
+
+      }
+
+      /* =======================
+         KNIGHT VALIDATION
+      ======================= */
+
+      if(
+        hostData?.knight &&
+        !quality
+      ){
+
+        return
+
+      }
+
+      links.push({
+
+        quality:
+
+        hostData?.knight
+
+        ? quality
+
+        : null,
+
+        link
+
+      })
+
+    })
+
+    /* =========================
+       EMPTY LINKS
+    ========================= */
+
+    if(!links.length){
+
+      return
+
+    }
+
+    /* =========================
+       PUSH HOST
+    ========================= */
+
+    payload.hosts.push({
+
+      host:
+      hostName,
+
+      links
+
+    })
+
+  })
+
+  /* =====================================================
+     FINAL VALIDATION
+  ===================================================== */
+
+  if(
+    !payload.hosts.length
+  ){
+
+    alert(
+      "Add Valid Download Links"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     SAVE
+  ===================================================== */
+
+  saveDownloadBtn.disabled =
+  true
+
+  saveDownloadBtn.innerText =
+  "Saving..."
+
+  const res =
+  await api(
+
+    `${API}/downloads-v2`,
+
+    "POST",
+
+    payload
+
+  )
+
+  /* =====================================================
+     SUCCESS
+  ===================================================== */
+
+  if(res){
+
+    alert(
+      "Download Saved"
+    )
+
+    downloadModal.style.display =
+    "none"
+
+    resetModal()
+
+    await loadDownloads()
+
+    renderAnimeGrid()
+
+  }
+
+  /* =====================================================
+     FAILED
+  ===================================================== */
+
+  else{
+
+    alert(
+      "Failed To Save"
+    )
+
+  }
+
+  /* =====================================================
+     RESET BUTTON
+  ===================================================== */
+
+  saveDownloadBtn.disabled =
+  false
+
+  saveDownloadBtn.innerText =
+  "💾 Save Download"
+
+}
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 7 — AUTO RULES + TYPE ENGINE
+========================================================= */
+
+/* =========================================================
+   CONTENT TYPE CHANGE
 ========================================================= */
 
 contentType.onchange = ()=>{
+
+  handleContentType()
+
+}
+
+/* =========================================================
+   HANDLE CONTENT TYPE
+========================================================= */
+
+function handleContentType(){
 
   const type =
   contentType.value
@@ -4375,6 +3955,10 @@ contentType.onchange = ()=>{
 
   if(type === "movie"){
 
+    seasonNumber.value = ""
+
+    episodeNumber.value = ""
+
     seasonNumber.disabled =
     true
 
@@ -4383,6 +3967,8 @@ contentType.onchange = ()=>{
 
     episodeTitle.placeholder =
     "Movie Title"
+
+    autoEpisodeTitle()
 
     return
 
@@ -4394,6 +3980,10 @@ contentType.onchange = ()=>{
 
   if(type === "series_zip"){
 
+    seasonNumber.value = ""
+
+    episodeNumber.value = ""
+
     seasonNumber.disabled =
     true
 
@@ -4401,7 +3991,9 @@ contentType.onchange = ()=>{
     true
 
     episodeTitle.placeholder =
-    "Series ZIP Title"
+    "Series ZIP"
+
+    autoEpisodeTitle()
 
     return
 
@@ -4419,8 +4011,12 @@ contentType.onchange = ()=>{
     episodeNumber.disabled =
     true
 
+    episodeNumber.value = ""
+
     episodeTitle.placeholder =
-    "Season ZIP Title"
+    "Season ZIP"
+
+    autoEpisodeTitle()
 
     return
 
@@ -4439,31 +4035,704 @@ contentType.onchange = ()=>{
   episodeTitle.placeholder =
   "Episode Title"
 
+  autoEpisodeTitle()
+
 }
 
 /* =========================================================
-   ⚡ PART 5
-   SAVE + EDIT + DELETE ENGINE
+   AUTO TITLE
+========================================================= */
+
+seasonNumber.oninput = ()=>{
+
+  autoEpisodeTitle()
+
+}
+
+episodeNumber.oninput = ()=>{
+
+  autoEpisodeTitle()
+
+}
+
+animeSelect.onchange = ()=>{
+
+  autoEpisodeTitle()
+
+}
+
+/* =========================================================
+   AUTO TITLE ENGINE
+========================================================= */
+
+function autoEpisodeTitle(){
+
+  const animeId =
+  animeSelect.value
+
+  const anime =
+  getAnime(animeId)
+
+  const type =
+  contentType.value
+
+  const season =
+  seasonNumber.value.trim()
+
+  const episode =
+  episodeNumber.value.trim()
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
+  if(!anime){
+
+    episodeTitle.value = ""
+
+    return
+
+  }
+
+  /* =====================================================
+     MOVIE
+  ===================================================== */
+
+  if(type === "movie"){
+
+    episodeTitle.value =
+    anime.title
+
+    return
+
+  }
+
+  /* =====================================================
+     SERIES ZIP
+  ===================================================== */
+
+  if(type === "series_zip"){
+
+    episodeTitle.value =
+
+      `${anime.title} Complete Series`
+
+    return
+
+  }
+
+  /* =====================================================
+     SEASON ZIP
+  ===================================================== */
+
+  if(type === "season_zip"){
+
+    if(season){
+
+      episodeTitle.value =
+
+        `${anime.title} Season ${season} ZIP`
+
+    }else{
+
+      episodeTitle.value =
+
+        `${anime.title} Season ZIP`
+
+    }
+
+    return
+
+  }
+
+  /* =====================================================
+     NORMAL EPISODE
+  ===================================================== */
+
+  if(episode){
+
+    episodeTitle.value =
+
+      `Episode ${episode}`
+
+  }else{
+
+    episodeTitle.value =
+    anime.title
+
+  }
+
+}
+
+/* =========================================================
+   DEFAULT STATE
+========================================================= */
+
+handleContentType()
+
+/* =========================================================
+   PREVENT DUPLICATE HOST
+========================================================= */
+
+document.addEventListener(
+  "change",
+  e=>{
+
+    if(
+      !e.target.classList.contains(
+        "host-select"
+      )
+    ){
+
+      return
+
+    }
+
+    const selected = []
+
+    document
+    .querySelectorAll(
+      ".host-select"
+    )
+    .forEach(select=>{
+
+      if(select.value){
+
+        selected.push(
+          select.value
+        )
+
+      }
+
+    })
+
+    const duplicates =
+
+      selected.filter(
+        (item,index)=>{
+
+          return (
+            selected.indexOf(item)
+            !== index
+          )
+
+        }
+      )
+
+    if(duplicates.length){
+
+      alert(
+        "Duplicate Host Not Allowed"
+      )
+
+      e.target.value = ""
+
+    }
+
+  }
+)
+
+/* =========================================================
+   ESC CLOSE
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key === "Escape"
+    ){
+
+      downloadModal.style.display =
+      "none"
+
+    }
+
+  }
+)
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 8 — EDIT SYSTEM + DELETE SYSTEM
 ========================================================= */
 
 /* =========================================================
-   VALIDATE DOWNLOAD FORM
+   EDIT STATE
 ========================================================= */
 
-function validateDownloadForm(){
+let EDIT_MODE = false
+
+let EDIT_ENTRY_ID = null
+
+/* =========================================================
+   OPEN EDIT
+========================================================= */
+
+async function openEditDownload(
+  item
+){
 
   /* =====================================================
-     ANIME
+     RESET
   ===================================================== */
 
-  if(!animeSelect.value){
+  resetModal()
 
-    notify(
-      "Select Anime",
-      "error"
+  EDIT_MODE = true
+
+  EDIT_ENTRY_ID =
+  item.id
+
+  /* =====================================================
+     TITLE
+  ===================================================== */
+
+  document.getElementById(
+    "modalTitle"
+  ).innerText =
+
+    "Edit Download"
+
+  /* =====================================================
+     FORM
+  ===================================================== */
+
+  animeSelect.value =
+  item.anime_id
+
+  contentType.value =
+  item.content_type ||
+  "episode"
+
+  seasonNumber.value =
+  item.season || ""
+
+  episodeNumber.value =
+  item.episode || ""
+
+  episodeTitle.value =
+  item.episode_title || ""
+
+  /* =====================================================
+     TYPE RULES
+  ===================================================== */
+
+  handleContentType()
+
+  /* =====================================================
+     RESET HOSTS
+  ===================================================== */
+
+  hostsContainer.innerHTML =
+  ""
+
+  /* =====================================================
+     HOSTS
+  ===================================================== */
+
+  item.hosts.forEach(host=>{
+
+    const clone =
+
+      hostTemplate
+      .content
+      .cloneNode(true)
+
+    const card =
+    clone.querySelector(
+      ".download-host-card"
     )
 
-    return false
+    const hostSelect =
+    clone.querySelector(
+      ".host-select"
+    )
+
+    const removeBtn =
+    clone.querySelector(
+      ".remove-host"
+    )
+
+    const addLinkBtn =
+    clone.querySelector(
+      ".addLinkBtn"
+    )
+
+    const linksContainer =
+    clone.querySelector(
+      ".linksContainer"
+    )
+
+    /* ===================================================
+       HOST OPTIONS
+    =================================================== */
+
+    hostSelect.innerHTML = `
+
+      <option value="">
+        Select Host
+      </option>
+
+    `
+
+    HOSTS.forEach(h=>{
+
+      hostSelect.innerHTML += `
+
+        <option value="${h.host}">
+
+          ${h.host}
+
+        </option>
+
+      `
+
+    })
+
+    /* ===================================================
+       SET HOST
+    =================================================== */
+
+    hostSelect.value =
+    host.host
+
+    /* ===================================================
+       HOST CONFIG
+    =================================================== */
+
+    const hostData =
+    HOSTS.find(h=>{
+
+      return (
+        h.host === host.host
+      )
+
+    })
+
+    if(hostData){
+
+      renderHostInfo(
+        card,
+        hostData
+      )
+
+    }
+
+    /* ===================================================
+       LINKS
+    =================================================== */
+
+    host.links?.forEach(link=>{
+
+      addLink(
+        linksContainer,
+        host.knight
+      )
+
+      const rows =
+      linksContainer.querySelectorAll(
+        ".download-link-row"
+      )
+
+      const last =
+      rows[
+        rows.length - 1
+      ]
+
+      if(!last) return
+
+      /* =======================
+         QUALITY
+      ======================= */
+
+      const quality =
+      last.querySelector(
+        ".quality-select"
+      )
+
+      if(
+        quality &&
+        link.quality
+      ){
+
+        quality.value =
+        link.quality
+
+      }
+
+      /* =======================
+         LINK
+      ======================= */
+
+      last.querySelector(
+        ".download-link"
+      ).value =
+
+        link.link || ""
+
+    })
+
+    /* ===================================================
+       CHANGE HOST
+    =================================================== */
+
+    hostSelect.onchange = ()=>{
+
+      const hostName =
+      hostSelect.value
+
+      const selected =
+      HOSTS.find(h=>{
+
+        return (
+          h.host === hostName
+        )
+
+      })
+
+      if(!selected){
+
+        return
+
+      }
+
+      renderHostInfo(
+        card,
+        selected
+      )
+
+      linksContainer.innerHTML =
+      ""
+
+      addLink(
+
+        linksContainer,
+
+        selected.knight
+
+      )
+
+    }
+
+    /* ===================================================
+       REMOVE HOST
+    =================================================== */
+
+    removeBtn.onclick = ()=>{
+
+      card.remove()
+
+    }
+
+    /* ===================================================
+       ADD LINK
+    =================================================== */
+
+    addLinkBtn.onclick = ()=>{
+
+      const hostName =
+      hostSelect.value
+
+      const selected =
+      HOSTS.find(h=>{
+
+        return (
+          h.host === hostName
+        )
+
+      })
+
+      addLink(
+
+        linksContainer,
+
+        selected?.knight
+
+      )
+
+    }
+
+    /* ===================================================
+       APPEND
+    =================================================== */
+
+    hostsContainer.appendChild(
+      clone
+    )
+
+  })
+
+  /* =====================================================
+     OPEN MODAL
+  ===================================================== */
+
+  downloadModal.style.display =
+  "flex"
+
+}
+
+/* =========================================================
+   EDIT BUTTON BIND
+========================================================= */
+
+function bindEditButtons(){
+
+  document
+  .querySelectorAll(
+    ".edit-host-btn"
+  )
+  .forEach(btn=>{
+
+    btn.onclick = ()=>{
+
+      const id =
+      btn.dataset.id
+
+      const item =
+      DOWNLOADS.find(x=>{
+
+        return (
+          x.id === id
+        )
+
+      })
+
+      if(item){
+
+        openEditDownload(
+          item
+        )
+
+      }
+
+    }
+
+  })
+
+}
+
+/* =========================================================
+   DELETE ENTRY
+========================================================= */
+
+async function deleteEntry(
+  entryId
+){
+
+  const ok =
+  confirm(
+    "Delete Download?"
+  )
+
+  if(!ok){
+
+    return
+
+  }
+
+  const res =
+  await api(
+
+    `${API}/downloads-v2/${entryId}`,
+
+    "DELETE"
+
+  )
+
+  if(res){
+
+    await loadDownloads()
+
+    renderAnimeGrid()
+
+  }
+
+}
+
+/* =========================================================
+   RESET EDIT
+========================================================= */
+
+function resetEditState(){
+
+  EDIT_MODE = false
+
+  EDIT_ENTRY_ID = null
+
+  document.getElementById(
+    "modalTitle"
+  ).innerText =
+
+    "Add Download"
+
+}
+  /* =========================================================
+   ⚡ DOWNLOADS.HTML SCRIPT
+   PART 9 — UPDATE SAVE ENGINE + FINAL FIXES
+========================================================= */
+
+/* =========================================================
+   OVERRIDE SAVE
+========================================================= */
+
+saveDownloadBtn.onclick =
+async ()=>{
+
+  /* =====================================================
+     FORM VALUES
+  ===================================================== */
+
+  const animeId =
+  animeSelect.value
+
+  const type =
+  contentType.value
+
+  const season =
+  seasonNumber.value.trim()
+
+  const episode =
+  episodeNumber.value.trim()
+
+  const title =
+  episodeTitle.value.trim()
+
+  /* =====================================================
+     VALIDATION
+  ===================================================== */
+
+  if(!animeId){
+
+    alert(
+      "Select Anime"
+    )
+
+    return
+
+  }
+
+  /* =====================================================
+     PAYLOAD
+  ===================================================== */
+
+  const payload = {
+
+    anime_id:
+    animeId,
+
+    content_type:
+    type,
+
+    season:
+    season || null,
+
+    episode:
+    episode || null,
+
+    episode_title:
+    title || null,
+
+    hosts:[]
 
   }
 
@@ -4479,94 +4748,19 @@ function validateDownloadForm(){
 
   if(!hostCards.length){
 
-    notify(
-      "Add At Least One Host",
-      "error"
+    alert(
+      "Add Host"
     )
 
-    return false
+    return
 
   }
 
   /* =====================================================
-     HOST VALIDATION
+     LOOP HOSTS
   ===================================================== */
 
-  let valid = true
-
   hostCards.forEach(card=>{
-
-    const host =
-    card.querySelector(
-      ".host-select"
-    ).value
-
-    if(!host){
-
-      valid = false
-
-    }
-
-    const rows =
-    card.querySelectorAll(
-      ".download-link-row"
-    )
-
-    if(!rows.length){
-
-      valid = false
-
-    }
-
-    rows.forEach(row=>{
-
-      const url =
-      sanitize(
-
-        row.querySelector(
-          ".download-link"
-        ).value
-
-      )
-
-      if(!url){
-
-        valid = false
-
-      }
-
-    })
-
-  })
-
-  if(!valid){
-
-    notify(
-      "Fill All Host Data",
-      "error"
-    )
-
-    return false
-
-  }
-
-  return true
-
-}
-
-/* =========================================================
-   BUILD HOST PAYLOAD
-========================================================= */
-
-function buildHostsPayload(){
-
-  const hosts = []
-
-  document
-  .querySelectorAll(
-    ".download-host-card"
-  )
-  .forEach(card=>{
 
     const hostName =
 
@@ -4574,12 +4768,28 @@ function buildHostsPayload(){
         ".host-select"
       ).value
 
-    if(!hostName) return
+    if(!hostName){
+
+      return
+
+    }
+
+    /* =========================
+       HOST DATA
+    ========================= */
 
     const hostData =
-    CACHE.hostMap[
-      hostName
-    ]
+    HOSTS.find(host=>{
+
+      return (
+        host.host === hostName
+      )
+
+    })
+
+    /* =========================
+       LINKS
+    ========================= */
 
     const links = []
 
@@ -4590,28 +4800,46 @@ function buildHostsPayload(){
     .forEach(row=>{
 
       const quality =
-      row.querySelector(
-        ".quality-select"
-      )?.value || null
+
+        row.querySelector(
+          ".quality-select"
+        )?.value || null
 
       const link =
-      sanitize(
 
         row.querySelector(
           ".download-link"
         ).value
+        .trim()
 
-      )
+      if(!link){
 
-      if(!link) return
+        return
+
+      }
+
+      /* =======================
+         KNIGHT
+      ======================= */
+
+      if(
+        hostData?.knight &&
+        !quality
+      ){
+
+        return
+
+      }
 
       links.push({
 
         quality:
 
-          hostData?.knight
-          ? quality
-          : null,
+        hostData?.knight
+
+        ? quality
+
+        : null,
 
         link
 
@@ -4619,7 +4847,17 @@ function buildHostsPayload(){
 
     })
 
-    hosts.push({
+    /* =========================
+       EMPTY LINKS
+    ========================= */
+
+    if(!links.length){
+
+      return
+
+    }
+
+    payload.hosts.push({
 
       host:
       hostName,
@@ -4630,93 +4868,51 @@ function buildHostsPayload(){
 
   })
 
-  return hosts
+  /* =====================================================
+     FINAL VALIDATION
+  ===================================================== */
 
-}
+  if(
+    !payload.hosts.length
+  ){
 
-/* =========================================================
-   BUILD DOWNLOAD PAYLOAD
-========================================================= */
+    alert(
+      "Add Valid Links"
+    )
 
-function buildDownloadPayload(){
-
-  return {
-
-    anime_id:
-    animeSelect.value,
-
-    content_type:
-    contentType.value,
-
-    season:
-    sanitize(
-      seasonNumber.value
-    ) || null,
-
-    episode:
-    sanitize(
-      episodeNumber.value
-    ) || null,
-
-    episode_title:
-    sanitize(
-      episodeTitle.value
-    ) || null,
-
-    hosts:
-    buildHostsPayload()
+    return
 
   }
 
-}
-
-/* =========================================================
-   SAVE DOWNLOAD
-========================================================= */
-
-saveDownloadBtn.onclick =
-async ()=>{
-
   /* =====================================================
-     VALIDATE
-  ===================================================== */
-
-  const valid =
-  validateDownloadForm()
-
-  if(!valid) return
-
-  /* =====================================================
-     PAYLOAD
-  ===================================================== */
-
-  const payload =
-  buildDownloadPayload()
-
-  /* =====================================================
-     BUTTON LOADING
+     BUTTON STATE
   ===================================================== */
 
   saveDownloadBtn.disabled =
   true
 
   saveDownloadBtn.innerText =
-  "Saving..."
+
+    EDIT_MODE
+    ? "Updating..."
+    : "Saving..."
 
   /* =====================================================
-     CREATE
+     API
   ===================================================== */
 
-  let response = null
+  let res = null
 
-  if(
-    STATE.editingEntry
-  ){
+  /* =========================
+     UPDATE
+  ========================= */
 
-    response =
+  if(EDIT_MODE){
+
+    res =
     await api(
 
-      `/downloads-v2/${STATE.editingEntry.id}`,
+      `${API}/downloads-v2/${EDIT_ENTRY_ID}`,
 
       "PUT",
 
@@ -4726,16 +4922,16 @@ async ()=>{
 
   }
 
-  /* =====================================================
-     NEW
-  ===================================================== */
+  /* =========================
+     CREATE
+  ========================= */
 
   else{
 
-    response =
+    res =
     await api(
 
-      "/downloads-v2",
+      `${API}/downloads-v2`,
 
       "POST",
 
@@ -4746,7 +4942,46 @@ async ()=>{
   }
 
   /* =====================================================
-     COMPLETE
+     SUCCESS
+  ===================================================== */
+
+  if(res){
+
+    alert(
+
+      EDIT_MODE
+      ? "Updated"
+      : "Saved"
+
+    )
+
+    downloadModal.style.display =
+    "none"
+
+    resetModal()
+
+    resetEditState()
+
+    await loadDownloads()
+
+    renderAnimeGrid()
+
+  }
+
+  /* =====================================================
+     FAILED
+  ===================================================== */
+
+  else{
+
+    alert(
+      "Operation Failed"
+    )
+
+  }
+
+  /* =====================================================
+     RESET BUTTON
   ===================================================== */
 
   saveDownloadBtn.disabled =
@@ -4755,831 +4990,84 @@ async ()=>{
   saveDownloadBtn.innerText =
   "💾 Save Download"
 
-  if(!response) return
-
-  notify(
-    "Download Saved"
-  )
-
-  closeModal()
-
-  await refreshDownloads()
-
 }
 
 /* =========================================================
-   REFRESH DOWNLOADS
+   RESET MODAL OVERRIDE
 ========================================================= */
 
-async function refreshDownloads(){
+function resetModal(){
 
-  await fetchDownloads()
-
-  buildCaches()
-
-  STATE.filteredAnime =
-  [...STATE.anime]
-
-  /* =====================================================
-     CURRENT VIEW
-  ===================================================== */
-
-  if(
-    STATE.currentView ===
-    "anime"
-  ){
-
-    renderAnimeGrid()
-
-    return
-
-  }
-
-  /* =====================================================
-     ANIME STRUCTURE
-  ===================================================== */
-
-  if(
-    STATE.currentAnime
-  ){
-
-    renderAnimeStructure(
-      STATE.currentAnime.id
-    )
-
-  }
-
-}
-
-/* =========================================================
-   EDIT DOWNLOAD ENTRY
-========================================================= */
-
-function editDownloadEntry(
-
-  entry
-
-){
-
-  /* =====================================================
-     RESET
-  ===================================================== */
-
-  resetModal()
-
-  STATE.editingEntry =
-  entry
-
-  downloadModalTitle.innerText =
-  "Edit Download"
-
-  /* =====================================================
-     ENTRY DATA
-  ===================================================== */
-
-  animeSelect.value =
-  entry.anime_id
+  animeSelect.value = ""
 
   contentType.value =
-  entry.content_type ||
   "episode"
 
-  seasonNumber.value =
-  entry.season || ""
+  seasonNumber.value = ""
 
-  episodeNumber.value =
-  entry.episode || ""
+  episodeNumber.value = ""
 
-  episodeTitle.value =
-  entry.episode_title || ""
-
-  /* =====================================================
-     CONTENT TYPE LOGIC
-  ===================================================== */
-
-  contentType.onchange()
-
-  /* =====================================================
-     HOSTS
-  ===================================================== */
+  episodeTitle.value = ""
 
   hostsContainer.innerHTML =
   ""
 
-  if(entry.hosts?.length){
+  resetEditState()
 
-    entry.hosts.forEach(host=>{
-
-      addHostCard({
-
-        host:
-        host.host,
-
-        links:
-        host.links || []
-
-      })
-
-    })
-
-  }else{
-
-    addHostCard()
-
-  }
-
-  openModal()
+  handleContentType()
 
 }
 
 /* =========================================================
-   DELETE HOST ENTRY
+   DELETE HOST VIEW BUTTONS
 ========================================================= */
 
-async function deleteHostEntry(
-
-  entryId,
-  hostId
-
-){
-
-  const ok =
-  confirm(
-
-    "Delete This Host?"
-
-  )
-
-  if(!ok) return
-
-  const response =
-  await api(
-
-    `/downloads-v2/${entryId}/host/${hostId}`,
-
-    "DELETE"
-
-  )
-
-  if(!response) return
-
-  notify(
-    "Host Deleted"
-  )
-
-  await refreshDownloads()
-
-}
-
-/* =========================================================
-   DELETE DOWNLOAD ENTRY
-========================================================= */
-
-async function deleteDownloadEntry(
-
-  entryId
-
-){
-
-  const ok =
-  confirm(
-
-    "Delete Entire Download?"
-
-  )
-
-  if(!ok) return
-
-  const response =
-  await api(
-
-    `/downloads-v2/${entryId}`,
-
-    "DELETE"
-
-  )
-
-  if(!response) return
-
-  notify(
-    "Download Deleted"
-  )
-
-  await refreshDownloads()
-
-}
-
-/* =========================================================
-   AUTO EPISODE TITLE
-========================================================= */
-
-episodeNumber.addEventListener(
-
-  "input",
-
-  ()=>{
-
-    /* =========================
-       ONLY EPISODE
-    ========================= */
-
-    if(
-      contentType.value !==
-      "episode"
-    ) return
-
-    /* =========================
-       EXISTING TITLE
-    ========================= */
-
-    if(
-      sanitize(
-        episodeTitle.value
-      )
-    ) return
-
-    const ep =
-    sanitize(
-      episodeNumber.value
-    )
-
-    if(!ep) return
-
-    episodeTitle.value =
-    `Episode ${ep}`
-
-  }
-
-)
-
-/* =========================================================
-   AUTO CONTENT LOGIC INIT
-========================================================= */
-
-contentType.onchange()
-
-     
-
-/* =========================================================
-   ⚡ PART 6
-   FINAL UX + SECURITY + PERFORMANCE ENGINE
-========================================================= */
-
-/* =========================================================
-   SECURE HTML
-========================================================= */
-
-function escapeHtml(
-
-  unsafe=""
-
-){
-
-  return String(unsafe)
-
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;")
-
-}
-
-/* =========================================================
-   URL VALIDATION
-========================================================= */
-
-function isValidUrl(
-
-  url=""
-
-){
-
-  try{
-
-    new URL(url)
-
-    return true
-
-  }catch{
-
-    return false
-
-  }
-
-}
-
-/* =========================================================
-   DUPLICATE HOST CHECK
-========================================================= */
-
-function validateDuplicateHosts(){
-
-  const selected = []
-
-  let duplicate = false
+function bindHostActions(){
 
   document
   .querySelectorAll(
-    ".host-select"
+    ".delete-host-btn"
   )
-  .forEach(select=>{
+  .forEach(btn=>{
 
-    const value =
-    sanitize(select.value)
+    btn.onclick = ()=>{
 
-    if(!value) return
+      const id =
+      btn.dataset.id
 
-    if(selected.includes(value)){
+      if(id){
 
-      duplicate = true
-
-    }
-
-    selected.push(value)
-
-  })
-
-  return !duplicate
-
-}
-
-/* =========================================================
-   DUPLICATE QUALITY CHECK
-========================================================= */
-
-function validateDuplicateQualities(){
-
-  let valid = true
-
-  document
-  .querySelectorAll(
-    ".download-host-card"
-  )
-  .forEach(card=>{
-
-    const host =
-    card.querySelector(
-      ".host-select"
-    ).value
-
-    const hostData =
-    CACHE.hostMap[
-      host
-    ]
-
-    if(
-      !hostData?.knight
-    ) return
-
-    const used = []
-
-    card
-    .querySelectorAll(
-      ".quality-select"
-    )
-    .forEach(select=>{
-
-      const q =
-      sanitize(
-        select.value
-      )
-
-      if(!q) return
-
-      if(
-        used.includes(q)
-      ){
-
-        valid = false
+        deleteEntry(id)
 
       }
 
-      used.push(q)
-
-    })
-
-  })
-
-  return valid
-
-}
-
-/* =========================================================
-   EXTENDED VALIDATION
-========================================================= */
-
-const oldValidate =
-validateDownloadForm
-
-validateDownloadForm =
-function(){
-
-  const base =
-  oldValidate()
-
-  if(!base){
-
-    return false
-
-  }
-
-  /* =====================================================
-     DUP HOST
-  ===================================================== */
-
-  if(
-    !validateDuplicateHosts()
-  ){
-
-    notify(
-      "Duplicate Hosts Not Allowed",
-      "error"
-    )
-
-    return false
-
-  }
-
-  /* =====================================================
-     DUP QUALITY
-  ===================================================== */
-
-  if(
-    !validateDuplicateQualities()
-  ){
-
-    notify(
-      "Duplicate Qualities Found",
-      "error"
-    )
-
-    return false
-
-  }
-
-  /* =====================================================
-     URL CHECK
-  ===================================================== */
-
-  let invalid = false
-
-  document
-  .querySelectorAll(
-    ".download-link"
-  )
-  .forEach(input=>{
-
-    const url =
-    sanitize(input.value)
-
-    if(
-      !isValidUrl(url)
-    ){
-
-      invalid = true
-
     }
 
   })
 
-  if(invalid){
-
-    notify(
-      "Invalid Download URL",
-      "error"
-    )
-
-    return false
-
-  }
-
-  return true
-
 }
 
 /* =========================================================
-   PREVENT DOUBLE SAVE
+   WINDOW DEBUG
 ========================================================= */
 
-let SAVE_LOCK = false
+window.DOWNLOADS =
+DOWNLOADS
 
-const oldSaveHandler =
-saveDownloadBtn.onclick
+window.HOSTS =
+HOSTS
 
-saveDownloadBtn.onclick =
-async ()=>{
-
-  if(SAVE_LOCK){
-
-    return
-
-  }
-
-  SAVE_LOCK = true
-
-  try{
-
-    await oldSaveHandler()
-
-  }finally{
-
-    setTimeout(()=>{
-
-      SAVE_LOCK = false
-
-    },1000)
-
-  }
-
-}
+window.ANIME =
+ANIME
 
 /* =========================================================
-   MODAL ANIMATION
+   FINAL INIT FIX
 ========================================================= */
 
-function openModal(){
+setTimeout(()=>{
 
-  downloadModal.style.display =
-  "flex"
+  handleContentType()
 
-  requestAnimationFrame(()=>{
-
-    downloadModal.style.opacity =
-    "1"
-
-  })
-
-}
-
-function closeModal(){
-
-  downloadModal.style.opacity =
-  "0"
-
-  setTimeout(()=>{
-
-    downloadModal.style.display =
-    "none"
-
-  },180)
-
-}
-
-/* =========================================================
-   SKELETON LOADER
-========================================================= */
-
-function renderSkeletonGrid(){
-
-  downloadsView.innerHTML = ""
-
-  for(let i=0;i<8;i++){
-
-    downloadsView.innerHTML += `
-
-      <div
-        style="
-          height:320px;
-          border-radius:18px;
-          background:#101728;
-          border:1px solid #1a2035;
-          animation:pulse 1.2s infinite;
-        "
-      ></div>
-
-    `
-
-  }
-
-}
-
-/* =========================================================
-   PERFORMANCE RENDER
-========================================================= */
-
-function safeAppend(
-
-  container,
-  fragment
-
-){
-
-  requestAnimationFrame(()=>{
-
-    container.appendChild(
-      fragment
-    )
-
-  })
-
-}
-
-/* =========================================================
-   SEARCH DEBOUNCE
-========================================================= */
-
-let SEARCH_TIMER = null
-
-searchAnime.addEventListener(
-
-  "input",
-
-  ()=>{
-
-    clearTimeout(
-      SEARCH_TIMER
-    )
-
-    SEARCH_TIMER =
-    setTimeout(()=>{
-
-      filterAnimeList()
-
-    },250)
-
-  }
-
-)
-
-/* =========================================================
-   IMAGE LAZY FALLBACK
-========================================================= */
-
-document.addEventListener(
-
-  "error",
-
-  e=>{
-
-    const target =
-    e.target
-
-    if(
-      target.tagName === "IMG"
-    ){
-
-      target.src =
-      "https://placehold.co/600x900?text=Anime"
-
-    }
-
-  },
-
-  true
-
-)
-
-/* =========================================================
-   AUTO SCROLL TOP
-========================================================= */
-
-function scrollTopSmooth(){
-
-  window.scrollTo({
-
-    top:0,
-    behavior:"smooth"
-
-  })
-
-}
-
-/* =========================================================
-   VIEW PATCH
-========================================================= */
-
-const oldAnimeStructure =
-renderAnimeStructure
-
-renderAnimeStructure =
-function(animeId){
-
-  scrollTopSmooth()
-
-  oldAnimeStructure(animeId)
-
-}
-
-const oldSeasonRender =
-renderSeasonEpisodes
-
-renderSeasonEpisodes =
-function(season,data){
-
-  scrollTopSmooth()
-
-  oldSeasonRender(
-    season,
-    data
-  )
-
-}
-
-const oldHostRender =
-renderHostCards
-
-renderHostCards =
-function(entry){
-
-  scrollTopSmooth()
-
-  oldHostRender(entry)
-
-}
-
-/* =========================================================
-   MEMORY CLEANUP
-========================================================= */
-
-window.addEventListener(
-
-  "beforeunload",
-
-  ()=>{
-
-    STATE.anime = []
-    STATE.hosts = []
-    STATE.downloads = []
-
-    STATE.filteredAnime = []
-
-    CACHE.animeMap = {}
-    CACHE.hostMap = {}
-    CACHE.entryMap = {}
-
-  }
-
-)
-
-/* =========================================================
-   GLOBAL ERROR HANDLER
-========================================================= */
-
-window.addEventListener(
-
-  "unhandledrejection",
-
-  e=>{
-
-    console.error(e.reason)
-
-  }
-
-)
-
-window.addEventListener(
-
-  "error",
-
-  e=>{
-
-    console.error(e.error)
-
-  }
-
-)
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
-document
-.querySelectorAll("button")
-.forEach(btn=>{
-
-  btn.setAttribute(
-    "tabindex",
-    "0"
-  )
-
-})
-
-/* =========================================================
-   FINAL BOOT PATCH
-========================================================= */
-
-const oldBootstrap =
-bootstrap
-
-bootstrap =
-async function(){
-
-  renderSkeletonGrid()
-
-  await oldBootstrap()
-
-  notify(
-    "Download Manager Ready"
-  )
-
-}
-
-/* =========================================================
-   START FINAL
-========================================================= */
-
-bootstrap()
-
+},100)
       </script>
       </html>
