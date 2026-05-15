@@ -910,7 +910,90 @@ RESPONSIVE
    }
   
   
+.download-modal{
+max-width:1200px;
+width:95%;
+margin:auto;
+border-radius:22px;
+overflow:hidden
+}
 
+.host-card{
+background:#0a1324;
+border:1px solid #1a2948;
+border-radius:18px;
+padding:16px;
+margin-bottom:18px
+}
+
+.host-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:16px
+}
+
+.host-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px
+}
+
+.box{
+background:#08101d;
+border:1px solid #1a2947;
+border-radius:14px;
+padding:14px
+}
+
+.box-title{
+font-size:12px;
+color:#ffcc00;
+margin-bottom:10px;
+font-weight:700
+}
+
+.link-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px
+}
+
+.action-btn{
+background:#ffcc00;
+color:#000;
+border:none;
+padding:10px 14px;
+border-radius:12px;
+font-weight:700;
+cursor:pointer
+}
+
+.remove-btn{
+background:#ff355b;
+color:#fff;
+border:none;
+padding:10px 14px;
+border-radius:12px
+}
+
+.modal-body{
+max-height:75vh;
+overflow:auto
+}
+
+button{
+min-height:44px
+}
+
+@media(max-width:900px){
+
+.host-grid,
+.link-grid{
+grid-template-columns:1fr
+}
+
+}
 
   
   
