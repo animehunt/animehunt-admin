@@ -2,3908 +2,1013 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AnimeHunt CMS – Ads Manager</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ads & Monetization – AnimeHunt CMS</title>
 <style>
-
-/* =======================================================
-RESET
-======================================================= */
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:system-ui,sans-serif;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,
-body{
-  background:#070b16;
-  color:#fff;
-  overflow-x:hidden;
-}
-
-button,
-input,
-select,
-textarea{
-  font-family:inherit;
-  outline:none;
-}
-
-button{
-  cursor:pointer;
-  transition:.2s;
-  border:none;
-}
-
-button:hover{
-  transform:translateY(-1px);
-}
-
-a{
-  text-decoration:none;
-}
-
-img{
-  display:block;
-  max-width:100%;
-}
-
-/* =======================================================
-SCROLLBAR
-======================================================= */
-
-::-webkit-scrollbar{
-  width:8px;
-  height:8px;
-}
-
-::-webkit-scrollbar-thumb{
-  background:#1f2742;
-  border-radius:20px;
-}
-
-::-webkit-scrollbar-track{
-  background:#070b16;
-}
-
-/* =======================================================
-LAYOUT
-======================================================= */
-
-.cms-app{
-  display:flex;
-  min-height:100vh;
-}
-
-.cms-sidebar{
-  width:240px;
-  background:#060912;
-  border-right:1px solid #1a2035;
-  flex-shrink:0;
-}
-
-.cms-main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  background:#0b0f1a;
-}
-
-/* =======================================================
-SIDEBAR
-======================================================= */
-
-.brand{
-  padding:18px;
-  border-bottom:1px solid #1a2035;
-  font-size:22px;
-  font-weight:700;
-}
-
-.brand b{
-  color:#ffcc00;
-}
-
-.brand small{
-  display:block;
-  margin-top:4px;
-  font-size:11px;
-  color:#777;
-}
-
-.cms-menu{
-  display:flex;
-  flex-direction:column;
-  padding:10px;
-}
-
-.cms-menu a{
-  display:block;
-  padding:12px 14px;
-  border-radius:12px;
-  color:#c8c8c8;
-  font-size:14px;
-  transition:.2s;
-}
-
-.cms-menu a:hover{
-  background:#11182c;
-  color:#ffcc00;
-}
-
-.cms-menu a.active{
-  background:#141d35;
-  color:#ffcc00;
-}
-
-/* =======================================================
-HEADER
-======================================================= */
-
-.cms-header{
-  min-height:72px;
-  background:#060912;
-  border-bottom:1px solid #1a2035;
-  padding:0 22px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-}
-
-.cms-header div:first-child{
-  font-size:20px;
-  font-weight:700;
-}
-
-/* =======================================================
-CONTENT
-======================================================= */
-
-.cms-content{
-  padding:22px;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:22px;
-}
-
-/* =======================================================
-CARD
-======================================================= */
-
-.card{
-  background:#0d1322;
-  border:1px solid #1a2035;
-  border-radius:22px;
-  padding:22px;
-  overflow:hidden;
-}
-
-.card.table{
-  grid-column:1/-1;
-}
-
-.card h3{
-  color:#ffcc00;
-  font-size:20px;
-  margin-bottom:18px;
-}
-
-.card h4{
-  font-size:14px;
-  margin-bottom:14px;
-  color:#d0d0d0;
-}
-
-.card hr{
-  border:none;
-  border-top:1px solid #1a2035;
-  margin:22px 0;
-}
-
-/* =======================================================
-FORM
-======================================================= */
-
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:14px;
-}
-
-input,
-select,
-textarea{
-  width:100%;
-  background:#070b16;
-  border:1px solid #1f2742;
-  color:#fff;
-  border-radius:14px;
-  padding:13px 14px;
-  font-size:13px;
-  transition:.2s;
-}
-
-input:focus,
-select:focus,
-textarea:focus{
-  border-color:#ffcc00;
-}
-
-input::placeholder,
-textarea::placeholder{
-  color:#666;
-}
-
-textarea{
-  resize:vertical;
-  min-height:130px;
-}
-
-/* =======================================================
-BUTTONS
-======================================================= */
-
-button{
-  background:#ffcc00;
-  color:#000;
-  padding:12px 18px;
-  border-radius:14px;
-  font-weight:700;
-  font-size:13px;
-}
-
-button.secondary{
-  background:#1a2035;
-  color:#fff;
-}
-
-button.danger{
-  background:#ff4343;
-  color:#fff;
-}
-
-/* =======================================================
-ACTIONS
-======================================================= */
-
-.actions-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.actions button{
-  padding:9px 14px;
-  font-size:12px;
-}
-
-/* =======================================================
-LIBRARY ITEM
-======================================================= */
-
-.library-item{
-  background:#070b16;
-  border:1px solid #1a2035;
-  border-radius:18px;
-  padding:16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:12px;
-}
-
-.library-left{
-  min-width:0;
-}
-
-.library-name{
-  display:block;
-  font-size:15px;
-  margin-bottom:5px;
-  word-break:break-word;
-}
-
-.library-meta{
-  color:#888;
-  font-size:11px;
-  word-break:break-word;
-}
-
-/* =======================================================
-HOST HEADER
-======================================================= */
-
-.host-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-  margin-bottom:24px;
-  flex-wrap:wrap;
-}
-
-.host-header p{
-  color:#777;
-  font-size:12px;
-  margin-top:6px;
-}
-
-/* =======================================================
-HOST LIST
-======================================================= */
-
-#hostMonetizationList{
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
-/* =======================================================
-HOST CARD
-======================================================= */
-
-.host-card{
-  background:#070b16;
-  border:1px solid #1a2035;
-  border-radius:22px;
-  padding:22px;
-}
-
-.host-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:20px;
-  margin-bottom:24px;
-}
-
-.host-name{
-  font-size:24px;
-  margin-bottom:8px;
-}
-
-.host-storage{
-  color:#888;
-  font-size:13px;
-}
-
-.host-badges{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.host-badges span{
-  background:#141d35;
-  border:1px solid #1f2742;
-  color:#ffcc00;
-  padding:8px 14px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-}
-
-/* =======================================================
-HOST SECTION
-======================================================= */
-
-.host-section{
-  margin-top:20px;
-  padding-top:20px;
-  border-top:1px solid #1a2035;
-}
-
-.host-section h4{
-  margin-bottom:14px;
-}
-
-/* =======================================================
-HOST TAGS
-======================================================= */
-
-.host-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.host-tags div{
-  background:#141b30;
-  border:1px solid #1f2742;
-  border-radius:12px;
-  padding:10px 14px;
-  font-size:12px;
-  color:#fff;
-}
-
-/* =======================================================
-HOST ACTIONS
-======================================================= */
-
-.host-actions{
-  display:flex;
-  gap:12px;
-  margin-top:24px;
-  flex-wrap:wrap;
-}
-
-/* =======================================================
-ANALYTICS
-======================================================= */
-
-.analytics-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:18px;
-}
-
-.analytic-box{
-  background:#070b16;
-  border:1px solid #1a2035;
-  border-radius:20px;
-  padding:24px;
-  text-align:center;
-}
-
-.analytic-box h2{
-  color:#ffcc00;
-  font-size:34px;
-  margin-bottom:10px;
-}
-
-.analytic-box p{
-  color:#888;
-  font-size:13px;
-}
-
-/* =======================================================
-MODAL
-======================================================= */
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(4px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:9999;
-}
-
-.modal-box{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:26px;
-  overflow:hidden;
-}
-
-.large-modal{
-  width:1100px;
-  max-width:100%;
-  max-height:95vh;
-  display:flex;
-  flex-direction:column;
-}
-
-.modal-header{
-  min-height:74px;
-  background:#060912;
-  border-bottom:1px solid #1a2035;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 22px;
-}
-
-.modal-header h3{
-  font-size:20px;
-}
-
-.modal-header span{
-  font-size:24px;
-  cursor:pointer;
-}
-
-.modal-body{
-  padding:22px;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-
-.modal-footer{
-  min-height:80px;
-  background:#060912;
-  border-top:1px solid #1a2035;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  padding:0 22px;
-}
-
-/* =======================================================
-SECTION BOX
-======================================================= */
-
-.section-box{
-  background:#0e1424;
-  border:1px solid #1a2035;
-  border-radius:20px;
-  padding:22px;
-}
-
-.section-box h4{
-  color:#ffcc00;
-  margin-bottom:18px;
-}
-
-/* =======================================================
-SELECTION GRID
-======================================================= */
-
-.selection-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
-}
-
-/* =======================================================
-SELECT ITEM
-======================================================= */
-
-.select-item{
-  background:#070b16;
-  border:1px solid #1a2035;
-  border-radius:18px;
-  padding:16px;
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.select-item:hover{
-  border-color:#ffcc00;
-}
-
-.select-item input{
-  width:18px;
-  height:18px;
-  margin-top:2px;
-  accent-color:#ffcc00;
-}
-
-.select-item-content{
-  flex:1;
-}
-
-.select-item-content b{
-  display:block;
-  margin-bottom:6px;
-  font-size:14px;
-}
-
-.select-item-content small{
-  color:#777;
-  font-size:11px;
-}
-
-/* =======================================================
-EMPTY STATE
-======================================================= */
-
-.empty-box{
-  background:#070b16;
-  border:1px dashed #1f2742;
-  border-radius:18px;
-  padding:30px;
-  text-align:center;
-  color:#666;
-  font-size:13px;
-}
-
-/* =======================================================
-RESPONSIVE
-======================================================= */
-
-@media(max-width:1300px){
-
-  .selection-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:1100px){
-
-  .cms-content{
-    grid-template-columns:1fr;
-  }
-
-  .analytics-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media(max-width:900px){
-
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .selection-grid{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media(max-width:700px){
-
-  .cms-app{
-    flex-direction:column;
-  }
-
-  .cms-sidebar{
-    width:100%;
-  }
-
-  .cms-header{
-    flex-direction:column;
-    justify-content:center;
-    align-items:flex-start;
-    padding:18px;
-  }
-
-  .host-top{
-    flex-direction:column;
-  }
-
-  .host-actions{
-    flex-direction:column;
-  }
-
-  .host-actions button{
-    width:100%;
-  }
-
-  .analytics-grid{
-    grid-template-columns:1fr;
-  }
-
-  .actions-row{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .actions-row button{
-    width:100%;
-  }
-
-}
-
-@media(max-width:600px){
-
-  .library-item{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-
-  .actions{
-    width:100%;
-  }
-
-  .actions button{
-    flex:1;
-  }
-
-}
-  
-  .admin-grid{
-display:grid;
-grid-template-columns:repeat(2,minmax(0,1fr));
-gap:18px
-}
-
-.card{
-background:#0b1220;
-border:1px solid #18233d;
-border-radius:18px;
-padding:18px
-}
-
-.card h3{
-font-size:18px;
-margin-bottom:14px
-}
-
-.form-row{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-margin-bottom:12px
-}
-
-input,
-select,
-textarea{
-width:100%;
-background:#060b16;
-border:1px solid #1f2c4d;
-border-radius:12px;
-padding:12px;
-color:#fff;
-font-size:13px
-}
-
-textarea{
-min-height:120px;
-resize:none
-}
-
-.save-btn{
-background:#ffcc00;
-border:none;
-padding:12px 18px;
-border-radius:12px;
-font-weight:700;
-cursor:pointer
-}
-
-.stats-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr));
-gap:14px
-}
-
-.stat-box{
-background:#08101d;
-border:1px solid #172544;
-border-radius:16px;
-padding:20px;
-text-align:center
-}
-
-.stat-box h2{
-font-size:30px;
-color:#ffcc00
-}
-
-.saved-list{
-margin-top:18px;
-display:grid;
-gap:10px
-}
-
-.saved-item{
-background:#08101d;
-border:1px solid #182847;
-border-radius:12px;
-padding:12px;
-display:flex;
-justify-content:space-between;
-align-items:center
-}
-
-@media(max-width:900px){
-
-.admin-grid,
-.form-row{
-grid-template-columns:1fr
-}
-
-.stats-grid{
-grid-template-columns:1fr 1fr
-}
-
-}
-  
-
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{background:#070b16;color:#fff;overflow-x:hidden}
+button,input,select,textarea{font-family:inherit;outline:none}
+button{cursor:pointer;transition:.2s;border:none}
+button:hover{transform:translateY(-1px)}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-thumb{background:#1f2742;border-radius:20px}
+::-webkit-scrollbar-track{background:#070b16}
+
+/* LAYOUT */
+.cms-app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.cms-sidebar{width:240px;background:#060912;border-right:1px solid #1a2035;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:18px;border-bottom:1px solid #1a2035;font-size:20px;font-weight:700}
+.brand b{color:#ffcc00}
+.brand small{display:block;margin-top:4px;font-size:10px;color:#555;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;padding:10px;gap:2px}
+.cms-menu a{display:block;padding:10px 14px;border-radius:10px;color:#aaa;font-size:13px;transition:.2s}
+.cms-menu a:hover,.cms-menu a.active{background:#141d35;color:#ffcc00;padding-left:18px}
+
+/* MAIN */
+.cms-main{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* HEADER */
+.cms-header{min-height:60px;background:#060912;border-bottom:1px solid #1a2035;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-title{font-size:16px;font-weight:700}
+.live-badge{background:#0d2218;border:1px solid #4caf5033;color:#4caf50;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.live-dot{width:6px;height:6px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.header-right{display:flex;align-items:center;gap:10px}
+.last-upd{font-size:11px;color:#555}
+
+/* CONTENT */
+.cms-content{padding:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+
+/* CARD */
+.card{background:#0d1322;border:1px solid #1a2035;border-radius:20px;padding:22px}
+.card.full{grid-column:1/-1}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px}
+.card-head h3{color:#ffcc00;font-size:17px;font-weight:700}
+.card hr{border:none;border-top:1px solid #1a2035;margin:18px 0}
+
+/* FORM */
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.fgrid.g3{grid-template-columns:repeat(3,1fr)}
+input,select,textarea{width:100%;background:#070b16;border:1px solid #1f2742;color:#fff;border-radius:12px;padding:12px 14px;font-size:13px;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:#ffcc00}
+input::placeholder,textarea::placeholder{color:#555}
+textarea{resize:vertical;min-height:110px}
+label.field-label{font-size:11px;color:#777;margin-bottom:5px;display:block;padding-left:2px}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-y{background:#ffcc00;color:#000}
+.btn-g{background:#1a2a1a;color:#4caf50;border:1px solid #4caf5033}
+.btn-r{background:#2a1a1a;color:#f44336;border:1px solid #f4433633}
+.btn-s{background:#1a2035;color:#ccc}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:9px}
+.row-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* TOGGLE SWITCH */
+.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#1a2035;border-radius:20px;cursor:pointer;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#555;border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:#ffcc0022;border:1px solid #ffcc0066}
+.toggle input:checked + .toggle-slider:before{transform:translateX(18px);background:#ffcc00}
+
+/* LIBRARY ITEM */
+.lib-item{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;transition:.2s}
+.lib-item:hover{border-color:#2a3055}
+.lib-item.inactive{opacity:.5}
+.lib-left{min-width:0;flex:1}
+.lib-name{font-size:14px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.lib-meta{color:#666;font-size:11px}
+.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.badge-blue{background:#0d1a2a;color:#2196f3;border:1px solid #2196f322}
+.badge-green{background:#0d2218;color:#4caf50;border:1px solid #4caf5022}
+.badge-orange{background:#2a1a0a;color:#ff9800;border:1px solid #ff980022}
+.badge-yellow{background:#2a2200;color:#ffcc00;border:1px solid #ffcc0022}
+.badge-red{background:#2a0d0d;color:#f44336;border:1px solid #f4433622}
+.badge-gray{background:#1a2035;color:#888}
+
+/* EMPTY STATE */
+.empty-box{background:#070b16;border:1px dashed #1f2742;border-radius:14px;padding:24px;text-align:center;color:#555;font-size:12px}
+
+/* HOST CARD */
+.host-card{background:#070b16;border:1px solid #1a2035;border-radius:18px;padding:20px;margin-bottom:14px;transition:.2s}
+.host-card:hover{border-color:#2a3055}
+.host-card.inactive{opacity:.6}
+.host-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.host-name{font-size:20px;font-weight:700;margin-bottom:5px}
+.host-storage{color:#888;font-size:12px}
+.host-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.host-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.host-section{padding-top:12px;border-top:1px solid #1a2035;margin-top:12px}
+.host-section h5{font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.tag-item{background:#141b30;border:1px solid #1f2742;border-radius:8px;padding:5px 10px;font-size:11px;color:#ccc}
+.host-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* PAGE ADS */
+.page-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.page-slot{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:14px}
+.page-slot-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.page-slot-name{font-size:13px;font-weight:600;color:#fff}
+.page-slot-select{margin-top:8px}
+.page-slot-select select{font-size:12px;padding:8px 10px;border-radius:9px}
+
+/* ANALYTICS GRID */
+.analytics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.stat-box{background:#070b16;border:1px solid #1a2035;border-radius:16px;padding:20px;text-align:center}
+.stat-box h2{color:#ffcc00;font-size:28px;font-weight:800;margin-bottom:6px}
+.stat-box p{color:#888;font-size:12px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.modal.show{display:flex}
+.modal-box{background:#0b0f1a;border:1px solid #1a2035;border-radius:24px;overflow:hidden;width:900px;max-width:100%;max-height:92vh;display:flex;flex-direction:column}
+.modal-header{min-height:70px;background:#060912;border-bottom:1px solid #1a2035;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
+.modal-header h3{font-size:18px;font-weight:700;color:#ffcc00}
+.modal-close{font-size:22px;cursor:pointer;color:#777;line-height:1;padding:4px}
+.modal-close:hover{color:#fff}
+.modal-body{padding:22px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:18px}
+.modal-footer{min-height:72px;background:#060912;border-top:1px solid #1a2035;display:flex;align-items:center;justify-content:flex-end;padding:0 22px;gap:10px;flex-shrink:0}
+
+/* SECTION BOX (modal) */
+.sec-box{background:#0e1424;border:1px solid #1a2035;border-radius:16px;padding:18px}
+.sec-box h4{color:#ffcc00;font-size:13px;margin-bottom:14px;font-weight:700}
+
+/* SELECTION GRID */
+.sel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sel-item{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:13px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:.2s}
+.sel-item:hover{border-color:#2a3055}
+.sel-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:#ffcc00;flex-shrink:0}
+.sel-item b{display:block;font-size:13px;margin-bottom:3px}
+.sel-item small{color:#666;font-size:11px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999}
+.toast{background:#0d1322;border:1px solid #1a2035;border-radius:14px;padding:12px 18px;font-size:13px;min-width:200px;display:flex;align-items:center;gap:10px;animation:slideUp .3s ease;box-shadow:0 8px 24px #00000055}
+.toast.ok{border-color:#4caf5044;color:#4caf50}
+.toast.err{border-color:#f4433644;color:#f44336}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* RESPONSIVE */
+@media(max-width:1200px){.cms-content{grid-template-columns:1fr}.analytics-grid{grid-template-columns:repeat(3,1fr)}.page-slots{grid-template-columns:repeat(2,1fr)}.sel-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.cms-app{flex-direction:column}.cms-sidebar{width:100%;height:auto;position:static}.analytics-grid{grid-template-columns:repeat(2,1fr)}.page-slots{grid-template-columns:1fr}.fgrid,.fgrid.g3{grid-template-columns:1fr}}
 </style>
 </head>
-
-
-
-
-
-
-
-
-
 <body>
 
 <div class="cms-app">
 
-<!-- =======================================================
-SIDEBAR
-======================================================= -->
-
+<!-- SIDEBAR -->
 <aside class="cms-sidebar">
-
-<div class="brand">
-<span>Anime</span><b>Hunt</b>
-<small>CMS</small>
-</div>
-
-<nav class="cms-menu">
-
-<a href="dashboard.html">🏠 Dashboard</a>
-<a href="anime.html">🎬 Anime</a>
-<a href="episodes.html">📺 Episodes</a>
-<a href="categories.html">🗂 Catagorys</a>
-<a href="banners.html">🖼 Banners</a>
-<a href="homepage.html">🏠 Homepage</a>
-
-<a href="downloads.html">📥 Downloads</a>
-<a href="servers.html">🌐 Servers</a>
-<a href="player.html">🎞 Player</a>
-<a href="search.html">🔍 Search</a>
-
-<a href="seo.html">📈 Seo</a>
-<a href="analytics.html">📊 Analytics</a>
-<a href="performance.html">⚡ Performance</a>
-
-<a href="security.html">🔐 Security</a>
-<a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-<a href="ads.html" class="active">📢 Ads</a>
-<a href="ai-brain.html">🧠 Ai Brain</a>
-
-<a href="sidebar.html">📌 Sidebar</a>
-<a href="footer.html">🦶 Footer</a>
-
-<a href="system-settings.html">⚙ System-settings</a>
-
-</nav>
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
+  <nav class="cms-menu">
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Categories</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+    <a href="seo.html">📈 SEO</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
+    <a href="ads.html" class="active">📢 Ads</a>
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+    <a href="system-settings.html">⚙ System Settings</a>
+  </nav>
 </aside>
 
-<!-- =======================================================
-MAIN
-======================================================= -->
-
+<!-- MAIN -->
 <main class="cms-main">
 
-<!-- =======================================================
-HEADER
-======================================================= -->
-
-<header class="cms-header">
-
-<div>
-🔥 Monetization Engine
-</div>
-
-<div>
-Admin
-</div>
-
-</header>
-
-<!-- =======================================================
-CONTENT
-======================================================= -->
-
-<section class="cms-content">
-
-<!-- =======================================================
-ADS LIBRARY
-======================================================= -->
-
-<div class="card">
-
-<h3>
-📢 Ads Library
-</h3>
-
-<div class="form-grid">
-
-<input
-type="text"
-id="adName"
-placeholder="Ad Name"
->
-
-<select id="adType">
-
-<option value="redirect">
-Redirect
-</option>
-
-<option value="script">
-Script
-</option>
-
-<option value="popup">
-Popup
-</option>
-
-<option value="banner">
-Banner
-</option>
-
-</select>
-
-<input
-type="number"
-id="adWeight"
-placeholder="Weight"
-value="1"
->
-
-<input
-type="number"
-id="adDelay"
-placeholder="Delay (ms)"
-value="1500"
->
-
-</div>
-
-<textarea
-id="adCode"
-placeholder="Ad Script / Redirect URL"
-></textarea>
-
-<div class="actions-row">
-
-<button id="saveAdBtn">
-
-💾 Save Ad
-
-</button>
-
-<button
-id="cancelAdEdit"
-class="secondary"
-style="display:none"
->
-
-Cancel Edit
-
-</button>
-
-</div>
-
-<hr>
-
-<h4>
-Saved Ads
-</h4>
-
-<div id="adsLibraryList">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-SHORTLINKS
-======================================================= -->
-
-<div class="card">
-
-<h3>
-🔗 Shortlinks Library
-</h3>
-
-<div class="form-grid">
-
-<input
-type="text"
-id="shortName"
-placeholder="Shortlink Name"
->
-
-<input
-type="text"
-id="shortBase"
-placeholder="Base URL"
->
-
-<input
-type="text"
-id="shortApi"
-placeholder="API Key"
->
-
-</div>
-
-<div class="actions-row">
-
-<button id="saveShortBtn">
-
-💾 Save Shortlink
-
-</button>
-
-<button
-id="cancelShortEdit"
-class="secondary"
-style="display:none"
->
-
-Cancel Edit
-
-</button>
-
-</div>
-
-<hr>
-
-<h4>
-Saved Shortlinks
-</h4>
-
-<div id="shortLibraryList">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-POPUPS
-======================================================= -->
-
-<div class="card">
-
-<h3>
-🪟 Popup Library
-</h3>
-
-<input
-type="text"
-id="popupName"
-placeholder="Popup Name"
->
-
-<textarea
-id="popupCode"
-placeholder="Popup Script"
-></textarea>
-
-<div class="actions-row">
-
-<button id="savePopupBtn">
-
-💾 Save Popup
-
-</button>
-
-<button
-id="cancelPopupEdit"
-class="secondary"
-style="display:none"
->
-
-Cancel Edit
-
-</button>
-
-</div>
-
-<hr>
-
-<h4>
-Saved Popups
-</h4>
-
-<div id="popupLibraryList">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-HOST MONETIZATION
-======================================================= -->
-
-<div class="card table">
-
-<div class="host-header">
-
-<div>
-
-<h3>
-⚡ Host Monetization
-</h3>
-
-<p>
-Reusable Monetization Per Host
-</p>
-
-</div>
-
-<button id="openHostModal">
-
-➕ Create Host Config
-
-</button>
-
-</div>
-
-<div id="hostMonetizationList">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-ANALYTICS
-======================================================= -->
-
-<div class="card table">
-
-<h3>
-📊 Monetization Analytics
-</h3>
-
-<div class="analytics-grid">
-
-<div class="analytic-box">
-
-<h2 id="totalHosts">
-
-0
-
-</h2>
-
-<p>
-Total Hosts
-</p>
-
-</div>
-
-<div class="analytic-box">
-
-<h2 id="totalAds">
-
-0
-
-</h2>
-
-<p>
-Ads
-</p>
-
-</div>
-
-<div class="analytic-box">
-
-<h2 id="totalShortlinks">
-
-0
-
-</h2>
-
-<p>
-Shortlinks
-</p>
-
-</div>
-
-<div class="analytic-box">
-
-<h2 id="totalClicks">
-
-0
-
-</h2>
-
-<p>
-Final Downloads
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<!-- =======================================================
-HOST MODAL
-======================================================= -->
-
-<div
-class="modal"
-id="hostModal"
->
-
-<div class="modal-box large-modal">
-
-<!-- ========================= -->
-<!-- HEADER -->
-<!-- ========================= -->
-
-<div class="modal-header">
-
-<h3 id="hostModalTitle">
-
-Create Host Monetization
-
-</h3>
-
-<span id="closeHostModal">
-
-✕
-
-</span>
-
-</div>
-
-<!-- ========================= -->
-<!-- BODY -->
-<!-- ========================= -->
-
-<div class="modal-body">
-
-<!-- =======================================================
-HOST INFO
-======================================================= -->
-
-<div class="section-box">
-
-<h4>
-Host Information
-</h4>
-
-<div class="form-grid">
-
-<input
-type="text"
-id="hostName"
-placeholder="Host Name"
->
-
-<input
-type="text"
-id="hostStorage"
-placeholder="Storage"
->
-
-<select id="hostKnight">
-
-<option value="0">
-Knight : NO
-</option>
-
-<option value="1">
-Knight : YES
-</option>
-
-</select>
-
-<select id="hostMode">
-
-<option value="random">
-Random
-</option>
-
-<option value="sequence">
-Sequence
-</option>
-
-<option value="direct">
-Direct
-</option>
-
-</select>
-
-</div>
-
-</div>
-
-<!-- =======================================================
-ADS SELECT
-======================================================= -->
-
-<div class="section-box">
-
-<h4>
-Ads
-</h4>
-
-<div
-class="selection-grid"
-id="hostAdsList"
->
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-SHORTLINKS SELECT
-======================================================= -->
-
-<div class="section-box">
-
-<h4>
-Shortlinks
-</h4>
-
-<div
-class="selection-grid"
-id="hostShortlinksList"
->
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- =======================================================
-POPUPS SELECT
-======================================================= -->
-
-<div class="section-box">
-
-<h4>
-Popups
-</h4>
-
-<div
-class="selection-grid"
-id="hostPopupsList"
->
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ========================= -->
-<!-- FOOTER -->
-<!-- ========================= -->
-
-<div class="modal-footer">
-
-<button id="saveHostBtn">
-
-💾 Save Host Config
-
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- =======================================================
-TEMPLATES
-======================================================= -->
-
-<!-- =========================
-LIBRARY ITEM
-========================= -->
-
-<template id="libraryItemTemplate">
-
-<div class="library-item">
-
-<div class="library-left">
-
-<b class="library-name">
-
-NAME
-
-</b>
-
-<small class="library-meta">
-
-META
-
-</small>
-
-</div>
-
-<div class="actions">
-
-<button class="edit-btn">
-
-Edit
-
-</button>
-
-<button class="danger delete-btn">
-
-Delete
-
-</button>
-
-</div>
-
-</div>
-
-</template>
-
-<!-- =========================
-HOST CARD
-========================= -->
-
-<template id="hostCardTemplate">
-
-<div class="host-card">
-
-<!-- TOP -->
-
-<div class="host-top">
-
-<div>
-
-<h2 class="host-name">
-
-Host
-
-</h2>
-
-<p class="host-storage">
-
-Storage : --
-
-</p>
-
-</div>
-
-<div class="host-badges">
-
-<span class="host-knight">
-
-Knight : NO
-
-</span>
-
-<span class="host-mode">
-
-Random
-
-</span>
-
-</div>
-
-</div>
-
-<!-- ADS -->
-
-<div class="host-section">
-
-<h4>
-Ads
-</h4>
-
-<div class="host-tags ads-tags">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- SHORTLINKS -->
-
-<div class="host-section">
-
-<h4>
-Shortlinks
-</h4>
-
-<div class="host-tags short-tags">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- POPUPS -->
-
-<div class="host-section">
-
-<h4>
-Popups
-</h4>
-
-<div class="host-tags popup-tags">
-
-<!-- AUTO -->
-
-</div>
-
-</div>
-
-<!-- ACTIONS -->
-
-<div class="host-actions">
-
-<button class="edit-host-btn">
-
-Edit
-
-</button>
-
-<button class="danger delete-host-btn">
-
-Delete
-
-</button>
-
-</div>
-
-</div>
-
-</template>
-
-</body>
-<script>
-
-/* =========================================================
-   ⚡ ANIMEHUNT ADS MANAGER
-   PART 1 — CORE SYSTEM
-========================================================= */
-
-/* =========================================================
-   API
-========================================================= */
-
-const API =
-"https://animehunt-backend.animehunt715.workers.dev/api/admin"
-
-const TOKEN =
-localStorage.getItem("AUTH_TOKEN")
-
-/* =========================================================
-   DOM
-========================================================= */
-
-/* =========================
-ADS
-========================= */
-
-const adName =
-document.getElementById("adName")
-
-const adType =
-document.getElementById("adType")
-
-const adWeight =
-document.getElementById("adWeight")
-
-const adDelay =
-document.getElementById("adDelay")
-
-const adCode =
-document.getElementById("adCode")
-
-const saveAdBtn =
-document.getElementById("saveAdBtn")
-
-const cancelAdEdit =
-document.getElementById("cancelAdEdit")
-
-const adsLibraryList =
-document.getElementById("adsLibraryList")
-
-/* =========================
-SHORTLINKS
-========================= */
-
-const shortName =
-document.getElementById("shortName")
-
-const shortBase =
-document.getElementById("shortBase")
-
-const shortApi =
-document.getElementById("shortApi")
-
-const saveShortBtn =
-document.getElementById("saveShortBtn")
-
-const cancelShortEdit =
-document.getElementById("cancelShortEdit")
-
-const shortLibraryList =
-document.getElementById("shortLibraryList")
-
-/* =========================
-POPUPS
-========================= */
-
-const popupName =
-document.getElementById("popupName")
-
-const popupCode =
-document.getElementById("popupCode")
-
-const savePopupBtn =
-document.getElementById("savePopupBtn")
-
-const cancelPopupEdit =
-document.getElementById("cancelPopupEdit")
-
-const popupLibraryList =
-document.getElementById("popupLibraryList")
-
-/* =========================
-HOSTS
-========================= */
-
-const hostModal =
-document.getElementById("hostModal")
-
-const hostModalTitle =
-document.getElementById("hostModalTitle")
-
-const openHostModal =
-document.getElementById("openHostModal")
-
-const closeHostModal =
-document.getElementById("closeHostModal")
-
-const saveHostBtn =
-document.getElementById("saveHostBtn")
-
-const hostMonetizationList =
-document.getElementById("hostMonetizationList")
-
-/* HOST FORM */
-
-const hostName =
-document.getElementById("hostName")
-
-const hostStorage =
-document.getElementById("hostStorage")
-
-const hostKnight =
-document.getElementById("hostKnight")
-
-const hostMode =
-document.getElementById("hostMode")
-
-const hostAdsList =
-document.getElementById("hostAdsList")
-
-const hostShortlinksList =
-document.getElementById("hostShortlinksList")
-
-const hostPopupsList =
-document.getElementById("hostPopupsList")
-
-/* =========================
-ANALYTICS
-========================= */
-
-const totalHosts =
-document.getElementById("totalHosts")
-
-const totalAds =
-document.getElementById("totalAds")
-
-const totalShortlinks =
-document.getElementById("totalShortlinks")
-
-const totalClicks =
-document.getElementById("totalClicks")
-
-/* =========================================================
-TEMPLATES
-========================================================= */
-
-const libraryItemTemplate =
-document.getElementById("libraryItemTemplate")
-
-const hostCardTemplate =
-document.getElementById("hostCardTemplate")
-
-/* =========================================================
-STATE
-========================================================= */
-
-let ADS = []
-
-let SHORTLINKS = []
-
-let POPUPS = []
-
-let HOSTS = []
-
-/* =========================================================
-EDIT STATE
-========================================================= */
-
-let editingAdId = null
-
-let editingShortId = null
-
-let editingPopupId = null
-
-let editingHostId = null
-
-/* =========================================================
-API HELPER
-========================================================= */
-
-async function api(
-  url,
-  method = "GET",
-  body = null
-){
-
-  try{
-
-    const response =
-    await fetch(url,{
-
-      method,
-
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":
-        "Bearer " + TOKEN
-      },
-
-      body:
-      body
-      ? JSON.stringify(body)
-      : null
-
-    })
-
-    const json =
-    await response.json()
-
-    if(!response.ok){
-
-      console.error(json)
-
-      showToast(
-        json?.error ||
-        "API Error",
-        "error"
-      )
-
-      return null
-
-    }
-
-    return json
-
-  }catch(error){
-
-    console.error(error)
-
-    showToast(
-      "Network Error",
-      "error"
-    )
-
-    return null
-
-  }
-
-}
-
-/* =========================================================
-TOAST
-========================================================= */
-
-function showToast(
-  message,
-  type="success"
-){
-
-  const toast =
-  document.createElement("div")
-
-  toast.className =
-  `cms-toast ${type}`
-
-  toast.innerText =
-  message
-
-  toast.style.position =
-  "fixed"
-
-  toast.style.right =
-  "20px"
-
-  toast.style.bottom =
-  "20px"
-
-  toast.style.padding =
-  "14px 18px"
-
-  toast.style.borderRadius =
-  "12px"
-
-  toast.style.zIndex =
-  "999999"
-
-  toast.style.fontSize =
-  "13px"
-
-  toast.style.fontWeight =
-  "700"
-
-  toast.style.background =
-
-    type === "error"
-    ? "#ff3b3b"
-    : "#2ecc71"
-
-  toast.style.color =
-  "#fff"
-
-  document.body.appendChild(
-    toast
-  )
-
-  setTimeout(()=>{
-
-    toast.remove()
-
-  },2500)
-
-}
-
-/* =========================================================
-MODAL
-========================================================= */
-
-function openModal(){
-
-  hostModal.style.display =
-  "flex"
-
-}
-
-function closeModal(){
-
-  hostModal.style.display =
-  "none"
-
-}
-
-/* =========================================================
-RESET HOST FORM
-========================================================= */
-
-function resetHostForm(){
-
-  editingHostId = null
-
-  hostModalTitle.innerText =
-  "Create Host Monetization"
-
-  hostName.value = ""
-
-  hostStorage.value = ""
-
-  hostKnight.value = "0"
-
-  hostMode.value = "random"
-
-  hostAdsList.innerHTML = ""
-
-  hostShortlinksList.innerHTML = ""
-
-  hostPopupsList.innerHTML = ""
-
-}
-
-/* =========================================================
-RESET ADS FORM
-========================================================= */
-
-function resetAdForm(){
-
-  editingAdId = null
-
-  adName.value = ""
-
-  adType.value = "redirect"
-
-  adWeight.value = 1
-
-  adDelay.value = 1500
-
-  adCode.value = ""
-
-  cancelAdEdit.style.display =
-  "none"
-
-}
-
-/* =========================================================
-RESET SHORT FORM
-========================================================= */
-
-function resetShortForm(){
-
-  editingShortId = null
-
-  shortName.value = ""
-
-  shortBase.value = ""
-
-  shortApi.value = ""
-
-  cancelShortEdit.style.display =
-  "none"
-
-}
-
-/* =========================================================
-RESET POPUP FORM
-========================================================= */
-
-function resetPopupForm(){
-
-  editingPopupId = null
-
-  popupName.value = ""
-
-  popupCode.value = ""
-
-  cancelPopupEdit.style.display =
-  "none"
-
-}
-
-/* =========================================================
-UTILS
-========================================================= */
-
-function createTag(text){
-
-  const div =
-  document.createElement("div")
-
-  div.innerText = text
-
-  return div
-
-}
-
-function checkedValues(container){
-
-  return [
-    ...container.querySelectorAll(
-      "input:checked"
-    )
-  ].map(x=>x.value)
-
-}
-
-/* =========================================================
-RENDER CHECKBOX LIST
-========================================================= */
-
-function renderSelectionList(
-  container,
-  list,
-  selected=[]
-){
-
-  container.innerHTML = ""
-
-  if(!list.length){
-
-    container.innerHTML = `
-      <div class="empty-tag">
-        Empty
+  <!-- HEADER -->
+  <header class="cms-header">
+    <div class="header-left">
+      <div class="header-title">📢 Ads & Monetization</div>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <div class="header-right">
+      <span class="last-upd" id="lastUpd">—</span>
+      <button class="btn btn-s btn-sm" id="refreshBtn">↻ Refresh</button>
+    </div>
+  </header>
+
+  <section class="cms-content">
+
+    <!-- ===== ADS LIBRARY ===== -->
+    <div class="card">
+      <div class="card-head">
+        <h3>📢 Ads Library</h3>
+        <button class="btn btn-y btn-sm" id="openAdForm">➕ New Ad</button>
       </div>
-    `
 
-    return
+      <!-- Form (hidden by default) -->
+      <div id="adForm" style="display:none;margin-bottom:16px">
+        <div class="fgrid">
+          <div><label class="field-label">Ad Name</label><input id="adName" placeholder="e.g. Adsterra Popup"></div>
+          <div><label class="field-label">Type</label>
+            <select id="adType">
+              <option value="redirect">Redirect</option>
+              <option value="script">Script</option>
+              <option value="popup">Popup</option>
+              <option value="banner">Banner</option>
+            </select>
+          </div>
+          <div><label class="field-label">Weight</label><input id="adWeight" type="number" value="1" min="1"></div>
+          <div><label class="field-label">Delay (ms)</label><input id="adDelay" type="number" value="1500" min="0"></div>
+        </div>
+        <div style="margin-bottom:10px"><label class="field-label">Ad Script / Redirect URL</label><textarea id="adCode" placeholder="https://... or &lt;script&gt;...&lt;/script&gt;" style="min-height:90px"></textarea></div>
+        <div class="row-actions">
+          <button class="btn btn-y" id="saveAdBtn">💾 Save Ad</button>
+          <button class="btn btn-s" id="cancelAdBtn">Cancel</button>
+        </div>
+        <hr>
+      </div>
 
+      <div id="adsLibraryList"><div class="empty-box">No ads saved yet.</div></div>
+    </div>
+
+    <!-- ===== SHORTLINKS LIBRARY ===== -->
+    <div class="card">
+      <div class="card-head">
+        <h3>🔗 Shortlinks Library</h3>
+        <button class="btn btn-y btn-sm" id="openShortForm">➕ New Shortlink</button>
+      </div>
+
+      <div id="shortForm" style="display:none;margin-bottom:16px">
+        <div class="fgrid g3">
+          <div><label class="field-label">Name</label><input id="shortName" placeholder="e.g. cuty.io"></div>
+          <div><label class="field-label">Base URL</label><input id="shortBase" placeholder="https://cuty.io/"></div>
+          <div><label class="field-label">API Key</label><input id="shortApi" placeholder="Optional"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-y" id="saveShortBtn">💾 Save</button>
+          <button class="btn btn-s" id="cancelShortBtn">Cancel</button>
+        </div>
+        <hr>
+      </div>
+
+      <div id="shortLibraryList"><div class="empty-box">No shortlinks saved yet.</div></div>
+    </div>
+
+    <!-- ===== POPUP LIBRARY ===== -->
+    <div class="card">
+      <div class="card-head">
+        <h3>🪟 Popup Library</h3>
+        <button class="btn btn-y btn-sm" id="openPopupForm">➕ New Popup</button>
+      </div>
+
+      <div id="popupForm" style="display:none;margin-bottom:16px">
+        <div style="margin-bottom:10px"><label class="field-label">Popup Name</label><input id="popupName" placeholder="e.g. Adsterra Popup Script"></div>
+        <div style="margin-bottom:10px"><label class="field-label">Popup Script</label><textarea id="popupCode" placeholder="&lt;script type='text/javascript'&gt;...&lt;/script&gt;"></textarea></div>
+        <div class="row-actions">
+          <button class="btn btn-y" id="savePopupBtn">💾 Save</button>
+          <button class="btn btn-s" id="cancelPopupBtn">Cancel</button>
+        </div>
+        <hr>
+      </div>
+
+      <div id="popupLibraryList"><div class="empty-box">No popups saved yet.</div></div>
+    </div>
+
+    <!-- ===== PAGE ADS CONTROL ===== -->
+    <div class="card">
+      <div class="card-head">
+        <h3>🌐 Page Ads Control</h3>
+        <span style="font-size:11px;color:#555">Assign ads to any page — on/off</span>
+      </div>
+      <div class="page-slots" id="pageAdsSlots">
+        <!-- Auto-generated for each page -->
+      </div>
+    </div>
+
+    <!-- ===== HOST MONETIZATION ===== -->
+    <div class="card full">
+      <div class="card-head">
+        <h3>⚡ Host Monetization</h3>
+        <button class="btn btn-y" id="openHostModal">➕ Create Host Config</button>
+      </div>
+      <p style="font-size:12px;color:#555;margin-bottom:20px">Per-host monetization — all episode links of a host share the same ads/shortlinks/popups configuration.</p>
+      <div id="hostMonetizationList"><div class="empty-box">No host configurations yet.</div></div>
+    </div>
+
+    <!-- ===== ANALYTICS ===== -->
+    <div class="card full">
+      <div class="card-head"><h3>📊 Monetization Analytics</h3></div>
+      <div class="analytics-grid">
+        <div class="stat-box"><h2 id="statHosts">0</h2><p>Host Configs</p></div>
+        <div class="stat-box"><h2 id="statAds">0</h2><p>Ads Saved</p></div>
+        <div class="stat-box"><h2 id="statShorts">0</h2><p>Shortlinks</p></div>
+        <div class="stat-box"><h2 id="statPopups">0</h2><p>Popups</p></div>
+        <div class="stat-box"><h2 id="statClicks">0</h2><p>Total Clicks</p></div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE ADS PERFORMANCE ===== -->
+    <div class="card full">
+      <div class="card-head">
+        <h3>📈 Page Ads Performance</h3>
+        <button class="btn btn-r btn-sm" onclick="clearAdsAnalytics()">🗑 Clear Analytics</button>
+      </div>
+      <div id="adsPerformanceTable"><div class="empty-box">Loading analytics...</div></div>
+    </div>
+
+  </section>
+</main>
+</div>
+
+<!-- ===== HOST MODAL ===== -->
+<div class="modal" id="hostModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="hostModalTitle">Create Host Config</h3>
+      <div class="modal-close" id="closeHostModal">✕</div>
+    </div>
+    <div class="modal-body">
+
+      <div class="sec-box">
+        <h4>Host Information</h4>
+        <div class="fgrid">
+          <div><label class="field-label">Host Name</label><input id="hostName" placeholder="e.g. KnightWolf"></div>
+          <div><label class="field-label">Storage</label><input id="hostStorage" placeholder="e.g. Telegram, Mega, GDrive"></div>
+          <div><label class="field-label">Knight Host?</label>
+            <select id="hostKnight">
+              <option value="0">No — Direct Download</option>
+              <option value="1">Yes — Knight Page</option>
+            </select>
+          </div>
+          <div><label class="field-label">Rotation Mode</label>
+            <select id="hostMode">
+              <option value="random">Random</option>
+              <option value="sequence">Sequence (1→2→3→repeat)</option>
+              <option value="direct">Direct (always first)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-box">
+        <h4>📢 Assign Ads</h4>
+        <div class="sel-grid" id="hostAdsList"><div class="empty-box">No ads available.</div></div>
+      </div>
+
+      <div class="sec-box">
+        <h4>🔗 Assign Shortlinks</h4>
+        <div class="sel-grid" id="hostShortlinksList"><div class="empty-box">No shortlinks available.</div></div>
+      </div>
+
+      <div class="sec-box">
+        <h4>🪟 Assign Popups</h4>
+        <div class="sel-grid" id="hostPopupsList"><div class="empty-box">No popups available.</div></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-s" id="cancelHostModal">Cancel</button>
+      <button class="btn btn-y" id="saveHostBtn">💾 Save Config</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============================================================
+  ANIMEHUNT — ADS & MONETIZATION ENGINE
+  File: admin/ads.html
+  Token: ah_token
+============================================================ */
+
+const BASE = "https://animehunt-backend.animehunt715.workers.dev"
+const API  = BASE + "/api/admin"
+const TOKEN_KEY = "ah_token"
+
+function getToken(){ return localStorage.getItem(TOKEN_KEY) }
+if(!getToken()){ location.href="login.html" }
+
+function authHeaders(){
+  return { "Content-Type":"application/json", "Authorization":"Bearer "+getToken() }
+}
+
+/* ── State ── */
+let ADS = [], SHORTLINKS = [], POPUPS = [], HOSTS = []
+let editingAdId=null, editingShortId=null, editingPopupId=null, editingHostId=null
+
+/* ── Page slots config ── */
+const PAGE_SLOTS = [
+  { key:"home",    label:"🏠 Home",    desc:"Homepage banner area" },
+  { key:"details", label:"📄 Details", desc:"Anime detail page" },
+  { key:"watch",   label:"🎬 Watch",   desc:"Video player page" },
+  { key:"search",  label:"🔍 Search",  desc:"Search results page" },
+  { key:"knight",  label:"⚔️ Knight",  desc:"Knight download page" },
+  { key:"all",     label:"🌐 All Pages",desc:"Show on every page" }
+]
+
+/* ── DOM ── */
+const D = id => document.getElementById(id)
+const toastWrap = D("toastWrap")
+
+/* ── Toast ── */
+function toast(msg, type="ok"){
+  const t = document.createElement("div")
+  t.className = `toast ${type}`
+  t.innerHTML = `<span>${type==="ok"?"✅":"❌"}</span><span>${msg}</span>`
+  toastWrap.appendChild(t)
+  setTimeout(()=>t.remove(), 3000)
+}
+
+/* ── API call ── */
+async function api(url, method="GET", body=null){
+  try{
+    const res = await fetch(url,{
+      method,
+      headers: authHeaders(),
+      body: body ? JSON.stringify(body) : null
+    })
+    if(res.status===401){ location.href="login.html"; return null }
+    const json = await res.json().catch(()=>({}))
+    if(!res.ok || json.success===false){
+      toast(json?.message || json?.error || "API Error","err")
+      return null
+    }
+    return json
+  }catch(err){
+    toast(err.message||"Request failed","err")
+    return null
   }
-
-  list.forEach(item=>{
-
-    const label =
-    document.createElement("label")
-
-    label.className =
-    "selection-item"
-
-    label.innerHTML = `
-
-      <input
-        type="checkbox"
-        value="${item.id}"
-        ${
-          selected.includes(item.id)
-          ? "checked"
-          : ""
-        }
-      >
-
-      <span>
-        ${item.name}
-      </span>
-
-    `
-
-    container.appendChild(label)
-
-  })
-
 }
 
-/* =========================================================
-EVENTS
-========================================================= */
-
-openHostModal.onclick = ()=>{
-
-  resetHostForm()
-
-  renderSelectionList(
-    hostAdsList,
-    ADS
-  )
-
-  renderSelectionList(
-    hostShortlinksList,
-    SHORTLINKS
-  )
-
-  renderSelectionList(
-    hostPopupsList,
-    POPUPS
-  )
-
-  openModal()
-
+/* ── Update last updated time ── */
+function updateTime(){
+  const now = new Date()
+  D("lastUpd").textContent = "Updated "+now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
 }
 
-closeHostModal.onclick =
-closeModal
-
-cancelAdEdit.onclick =
-resetAdForm
-
-cancelShortEdit.onclick =
-resetShortForm
-
-cancelPopupEdit.onclick =
-resetPopupForm
-
-window.onclick = (e)=>{
-
-  if(
-    e.target === hostModal
-  ){
-
-    closeModal()
-
-  }
-
+/* ============================================================
+  LOAD ALL
+============================================================ */
+async function reloadAll(){
+  await Promise.all([loadAds(), loadShortlinks(), loadPopups(), loadHosts()])
+  renderAnalytics()
+  renderPageAds()
+  updateTime()
 }
-
-/* =========================================================
-INIT
-========================================================= */
-
-async function init(){
-
-  console.log(
-    "AnimeHunt Ads Manager Initialized"
-  )
-
-}
-
-init()
-
-
-
-/* =========================================================
-   ⚡ PART 2 — ADS LIBRARY
-========================================================= */
-
-/* =========================================================
-   LOAD ADS
-========================================================= */
 
 async function loadAds(){
-
-  const data =
-  await api(
-    `${API}/ads-library`
-  )
-
-  ADS =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderAds()
-
+  const r = await api(`${API}/ads-library`)
+  ADS = Array.isArray(r?.data) ? r.data : []
+  renderAdsList()
+}
+async function loadShortlinks(){
+  const r = await api(`${API}/shortlinks-library`)
+  SHORTLINKS = Array.isArray(r?.data) ? r.data : []
+  renderShortList()
+}
+async function loadPopups(){
+  const r = await api(`${API}/popup-library`)
+  POPUPS = Array.isArray(r?.data) ? r.data : []
+  renderPopupList()
+}
+async function loadHosts(){
+  const r = await api(`${API}/host-monetization`)
+  HOSTS = Array.isArray(r?.data) ? r.data : []
+  renderHostList()
 }
 
-/* =========================================================
-   RENDER ADS
-========================================================= */
+/* ============================================================
+  ADS LIBRARY
+============================================================ */
 
-function renderAds(){
+D("openAdForm").onclick = ()=>{
+  D("adForm").style.display="block"
+  D("openAdForm").style.display="none"
+}
+D("cancelAdBtn").onclick = resetAdForm
 
-  adsLibraryList.innerHTML = ""
-
-  if(!ADS.length){
-
-    adsLibraryList.innerHTML = `
-
-      <div class="empty-tag">
-
-        No Ads Found
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  ADS.forEach(ad=>{
-
-    const clone =
-    libraryItemTemplate
-    .content
-    .cloneNode(true)
-
-    /* =========================
-       DOM
-    ========================= */
-
-    const item =
-    clone.querySelector(
-      ".library-item"
-    )
-
-    const name =
-    clone.querySelector(
-      ".library-name"
-    )
-
-    const meta =
-    clone.querySelector(
-      ".library-meta"
-    )
-
-    const editBtn =
-    clone.querySelector(
-      ".edit-btn"
-    )
-
-    const deleteBtn =
-    clone.querySelector(
-      ".delete-btn"
-    )
-
-    /* =========================
-       DATA
-    ========================= */
-
-    name.innerText =
-    ad.name
-
-    meta.innerText =
-
-      `${ad.type}
-      • Weight ${ad.weight || 1}
-      • Delay ${ad.delay || 0}ms`
-
-    /* =========================
-       EDIT
-    ========================= */
-
-    editBtn.onclick = ()=>{
-
-      editAd(ad.id)
-
-    }
-
-    /* =========================
-       DELETE
-    ========================= */
-
-    deleteBtn.onclick = ()=>{
-
-      deleteAd(ad.id)
-
-    }
-
-    adsLibraryList.appendChild(
-      clone
-    )
-
-  })
-
+function resetAdForm(){
+  editingAdId=null
+  D("adName").value=""
+  D("adType").value="redirect"
+  D("adWeight").value="1"
+  D("adDelay").value="1500"
+  D("adCode").value=""
+  D("saveAdBtn").textContent="💾 Save Ad"
+  D("adForm").style.display="none"
+  D("openAdForm").style.display="inline-flex"
 }
 
-/* =========================================================
-   SAVE AD
-========================================================= */
-
-saveAdBtn.onclick =
-async ()=>{
-
+D("saveAdBtn").onclick = async()=>{
+  const name = D("adName").value.trim()
+  if(!name){ toast("Ad Name is required","err"); return }
   const payload = {
-
-    name:
-    adName.value.trim(),
-
-    type:
-    adType.value,
-
-    weight:
-    Number(
-      adWeight.value || 1
-    ),
-
-    delay:
-    Number(
-      adDelay.value || 0
-    ),
-
-    code:
-    adCode.value.trim()
-
+    name, type: D("adType").value,
+    code: D("adCode").value.trim(),
+    weight: Number(D("adWeight").value)||1,
+    delay: Number(D("adDelay").value)||0,
+    active: 1
   }
-
-  /* =========================
-     VALIDATION
-  ========================= */
-
-  if(
-    !payload.name ||
-    !payload.code
-  ){
-
-    showToast(
-      "Fill Required Fields",
-      "error"
-    )
-
-    return
-
-  }
-
-  /* =====================================================
-     UPDATE
-  ===================================================== */
-
+  let r
   if(editingAdId){
-
-    const res =
-    await api(
-
-      `${API}/ads-library/${editingAdId}`,
-
-      "PUT",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Ad Updated"
-    )
-
+    r = await api(`${API}/ads-library/${editingAdId}`,"PUT",payload)
+    if(r){ toast("Ad updated") }
+  } else {
+    r = await api(`${API}/ads-library`,"POST",payload)
+    if(r){ toast("Ad saved") }
   }
-
-  /* =====================================================
-     CREATE
-  ===================================================== */
-
-  else{
-
-    const res =
-    await api(
-
-      `${API}/ads-library`,
-
-      "POST",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Ad Created"
-    )
-
-  }
-
-  /* =========================
-     RESET
-  ========================= */
-
-  resetAdForm()
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadAds()
-
-  renderAnalytics()
-
+  if(r){ resetAdForm(); await loadAds(); renderAnalytics() }
 }
 
-/* =========================================================
-   EDIT AD
-========================================================= */
+function renderAdsList(){
+  const el = D("adsLibraryList")
+  if(!ADS.length){ el.innerHTML='<div class="empty-box">No ads saved yet.</div>'; return }
+  el.innerHTML = ADS.map(ad=>`
+    <div class="lib-item ${ad.active?'':'inactive'}">
+      <div class="lib-left">
+        <div class="lib-name">
+          <span>${ad.name}</span>
+          <span class="badge badge-blue">${ad.type||'redirect'}</span>
+          <span class="badge badge-gray">w:${ad.weight||1}</span>
+        </div>
+        <div class="lib-meta">${(ad.code||'').slice(0,60)}${(ad.code||'').length>60?'...':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <label class="toggle" title="${ad.active?'Active':'Inactive'}">
+          <input type="checkbox" ${ad.active?'checked':''} onchange="toggleAd('${ad.id}',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-s btn-sm" onclick="editAd('${ad.id}')">✏️</button>
+        <button class="btn btn-r btn-sm" onclick="deleteAd('${ad.id}')">🗑</button>
+      </div>
+    </div>
+  `).join("")
+}
+
+async function toggleAd(id, active){
+  const ad = ADS.find(x=>x.id===id)
+  if(!ad) return
+  await api(`${API}/ads-library/${id}`,"PUT",{...ad, active: active?1:0})
+  await loadAds()
+}
 
 function editAd(id){
-
-  const ad =
-  ADS.find(
-    x=>x.id === id
-  )
-
+  const ad = ADS.find(x=>x.id===id)
   if(!ad) return
-
-  editingAdId =
-  ad.id
-
-  adName.value =
-  ad.name || ""
-
-  adType.value =
-  ad.type || "redirect"
-
-  adWeight.value =
-  ad.weight || 1
-
-  adDelay.value =
-  ad.delay || 0
-
-  adCode.value =
-  ad.code || ""
-
-  cancelAdEdit.style.display =
-  "inline-flex"
-
-  window.scrollTo({
-
-    top:0,
-    behavior:"smooth"
-
-  })
-
+  editingAdId = id
+  D("adName").value = ad.name||""
+  D("adType").value = ad.type||"redirect"
+  D("adWeight").value = ad.weight||1
+  D("adDelay").value = ad.delay||0
+  D("adCode").value = ad.code||""
+  D("saveAdBtn").textContent="💾 Update Ad"
+  D("adForm").style.display="block"
+  D("openAdForm").style.display="none"
+  D("adForm").scrollIntoView({behavior:"smooth"})
 }
-
-/* =========================================================
-   DELETE AD
-========================================================= */
 
 async function deleteAd(id){
-
-  const confirmDelete =
-  confirm(
-    "Delete this ad?"
-  )
-
-  if(!confirmDelete){
-
-    return
-
-  }
-
-  const res =
-  await api(
-
-    `${API}/ads-library/${id}`,
-
-    "DELETE"
-
-  )
-
-  if(!res){
-
-    return
-
-  }
-
-  showToast(
-    "Ad Deleted"
-  )
-
-  /* =========================
-     CLEAN EDIT STATE
-  ========================= */
-
-  if(editingAdId === id){
-
-    resetAdForm()
-
-  }
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadAds()
-
-  renderAnalytics()
-
+  if(!confirm("Delete this ad?")) return
+  const r = await api(`${API}/ads-library/${id}`,"DELETE")
+  if(r){ toast("Ad deleted","ok"); await loadAds(); renderAnalytics() }
 }
 
-/* =========================================================
-   INIT ADS
-========================================================= */
+/* ============================================================
+  SHORTLINKS LIBRARY
+============================================================ */
 
-async function initAds(){
+D("openShortForm").onclick = ()=>{
+  D("shortForm").style.display="block"
+  D("openShortForm").style.display="none"
+}
+D("cancelShortBtn").onclick = resetShortForm
 
-  await loadAds()
-
+function resetShortForm(){
+  editingShortId=null
+  D("shortName").value=""
+  D("shortBase").value=""
+  D("shortApi").value=""
+  D("saveShortBtn").textContent="💾 Save"
+  D("shortForm").style.display="none"
+  D("openShortForm").style.display="inline-flex"
 }
 
-/* =========================================================
-   ⚡ PART 3 — SHORTLINKS LIBRARY
-========================================================= */
-
-/* =========================================================
-   LOAD SHORTLINKS
-========================================================= */
-
-async function loadShortlinks(){
-
-  const data =
-  await api(
-    `${API}/shortlinks-library`
-  )
-
-  SHORTLINKS =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderShortlinks()
-
-}
-
-/* =========================================================
-   RENDER SHORTLINKS
-========================================================= */
-
-function renderShortlinks(){
-
-  shortLibraryList.innerHTML = ""
-
-  if(!SHORTLINKS.length){
-
-    shortLibraryList.innerHTML = `
-
-      <div class="empty-tag">
-
-        No Shortlinks Found
-
-      </div>
-
-    `
-
-    return
-
-  }
-
-  SHORTLINKS.forEach(short=>{
-
-    const clone =
-    libraryItemTemplate
-    .content
-    .cloneNode(true)
-
-    /* =========================
-       DOM
-    ========================= */
-
-    const name =
-    clone.querySelector(
-      ".library-name"
-    )
-
-    const meta =
-    clone.querySelector(
-      ".library-meta"
-    )
-
-    const editBtn =
-    clone.querySelector(
-      ".edit-btn"
-    )
-
-    const deleteBtn =
-    clone.querySelector(
-      ".delete-btn"
-    )
-
-    /* =========================
-       DATA
-    ========================= */
-
-    name.innerText =
-    short.name
-
-    meta.innerText =
-
-      short.base_url ||
-      "No URL"
-
-    /* =========================
-       EDIT
-    ========================= */
-
-    editBtn.onclick = ()=>{
-
-      editShortlink(short.id)
-
-    }
-
-    /* =========================
-       DELETE
-    ========================= */
-
-    deleteBtn.onclick = ()=>{
-
-      deleteShortlink(short.id)
-
-    }
-
-    shortLibraryList.appendChild(
-      clone
-    )
-
-  })
-
-}
-
-/* =========================================================
-   SAVE SHORTLINK
-========================================================= */
-
-saveShortBtn.onclick =
-async ()=>{
-
-  const payload = {
-
-    name:
-    shortName.value.trim(),
-
-    base_url:
-    shortBase.value.trim(),
-
-    api_key:
-    shortApi.value.trim()
-
-  }
-
-  /* =========================
-     VALIDATION
-  ========================= */
-
-  if(
-    !payload.name ||
-    !payload.base_url
-  ){
-
-    showToast(
-      "Fill Required Fields",
-      "error"
-    )
-
-    return
-
-  }
-
-  /* =====================================================
-     UPDATE
-  ===================================================== */
-
+D("saveShortBtn").onclick = async()=>{
+  const name = D("shortName").value.trim()
+  const base = D("shortBase").value.trim()
+  if(!name||!base){ toast("Name and Base URL required","err"); return }
+  const payload = { name, base_url: base, api_key: D("shortApi").value.trim(), active:1 }
+  let r
   if(editingShortId){
-
-    const res =
-    await api(
-
-      `${API}/shortlinks-library/${editingShortId}`,
-
-      "PUT",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Shortlink Updated"
-    )
-
+    r = await api(`${API}/shortlinks-library/${editingShortId}`,"PUT",payload)
+    if(r){ toast("Shortlink updated") }
+  } else {
+    r = await api(`${API}/shortlinks-library`,"POST",payload)
+    if(r){ toast("Shortlink saved") }
   }
-
-  /* =====================================================
-     CREATE
-  ===================================================== */
-
-  else{
-
-    const res =
-    await api(
-
-      `${API}/shortlinks-library`,
-
-      "POST",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Shortlink Created"
-    )
-
-  }
-
-  /* =========================
-     RESET
-  ========================= */
-
-  resetShortForm()
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadShortlinks()
-
-  renderAnalytics()
-
+  if(r){ resetShortForm(); await loadShortlinks(); renderAnalytics() }
 }
 
-/* =========================================================
-   EDIT SHORTLINK
-========================================================= */
-
-function editShortlink(id){
-
-  const short =
-  SHORTLINKS.find(
-    x=>x.id === id
-  )
-
-  if(!short) return
-
-  editingShortId =
-  short.id
-
-  shortName.value =
-  short.name || ""
-
-  shortBase.value =
-  short.base_url || ""
-
-  shortApi.value =
-  short.api_key || ""
-
-  cancelShortEdit.style.display =
-  "inline-flex"
-
-  window.scrollTo({
-
-    top:0,
-    behavior:"smooth"
-
-  })
-
-}
-
-/* =========================================================
-   DELETE SHORTLINK
-========================================================= */
-
-async function deleteShortlink(id){
-
-  const confirmDelete =
-  confirm(
-    "Delete this shortlink?"
-  )
-
-  if(!confirmDelete){
-
-    return
-
-  }
-
-  const res =
-  await api(
-
-    `${API}/shortlinks-library/${id}`,
-
-    "DELETE"
-
-  )
-
-  if(!res){
-
-    return
-
-  }
-
-  showToast(
-    "Shortlink Deleted"
-  )
-
-  /* =========================
-     CLEAN EDIT STATE
-  ========================= */
-
-  if(editingShortId === id){
-
-    resetShortForm()
-
-  }
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadShortlinks()
-
-  renderAnalytics()
-
-}
-
-/* =========================================================
-   INIT SHORTLINKS
-========================================================= */
-
-async function initShortlinks(){
-
-  await loadShortlinks()
-
-}
-
-/* =========================================================
-   ⚡ PART 4 — POPUP LIBRARY
-========================================================= */
-
-/* =========================================================
-   LOAD POPUPS
-========================================================= */
-
-async function loadPopups(){
-
-  const data =
-  await api(
-    `${API}/popup-library`
-  )
-
-  POPUPS =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderPopups()
-
-}
-
-/* =========================================================
-   RENDER POPUPS
-========================================================= */
-
-function renderPopups(){
-
-  popupLibraryList.innerHTML = ""
-
-  if(!POPUPS.length){
-
-    popupLibraryList.innerHTML = `
-
-      <div class="empty-tag">
-
-        No Popups Found
-
+function renderShortList(){
+  const el = D("shortLibraryList")
+  if(!SHORTLINKS.length){ el.innerHTML='<div class="empty-box">No shortlinks saved yet.</div>'; return }
+  el.innerHTML = SHORTLINKS.map(s=>`
+    <div class="lib-item ${s.active?'':'inactive'}">
+      <div class="lib-left">
+        <div class="lib-name"><span>${s.name}</span><span class="badge badge-green">Shortlink</span></div>
+        <div class="lib-meta">${s.base_url||''}</div>
       </div>
-
-    `
-
-    return
-
-  }
-
-  POPUPS.forEach(popup=>{
-
-    const clone =
-    libraryItemTemplate
-    .content
-    .cloneNode(true)
-
-    /* =========================
-       DOM
-    ========================= */
-
-    const name =
-    clone.querySelector(
-      ".library-name"
-    )
-
-    const meta =
-    clone.querySelector(
-      ".library-meta"
-    )
-
-    const editBtn =
-    clone.querySelector(
-      ".edit-btn"
-    )
-
-    const deleteBtn =
-    clone.querySelector(
-      ".delete-btn"
-    )
-
-    /* =========================
-       DATA
-    ========================= */
-
-    name.innerText =
-    popup.name
-
-    meta.innerText =
-    "Popup Script"
-
-    /* =========================
-       EDIT
-    ========================= */
-
-    editBtn.onclick = ()=>{
-
-      editPopup(popup.id)
-
-    }
-
-    /* =========================
-       DELETE
-    ========================= */
-
-    deleteBtn.onclick = ()=>{
-
-      deletePopup(popup.id)
-
-    }
-
-    popupLibraryList.appendChild(
-      clone
-    )
-
-  })
-
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <label class="toggle">
+          <input type="checkbox" ${s.active?'checked':''} onchange="toggleShort('${s.id}',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-s btn-sm" onclick="editShort('${s.id}')">✏️</button>
+        <button class="btn btn-r btn-sm" onclick="deleteShort('${s.id}')">🗑</button>
+      </div>
+    </div>
+  `).join("")
 }
 
-/* =========================================================
-   SAVE POPUP
-========================================================= */
+async function toggleShort(id, active){
+  const s = SHORTLINKS.find(x=>x.id===id)
+  if(!s) return
+  await api(`${API}/shortlinks-library/${id}`,"PUT",{...s, active: active?1:0})
+  await loadShortlinks()
+}
 
-savePopupBtn.onclick =
-async ()=>{
+function editShort(id){
+  const s = SHORTLINKS.find(x=>x.id===id)
+  if(!s) return
+  editingShortId=id
+  D("shortName").value=s.name||""
+   D("shortBase").value=s.base_url||""
+  D("shortApi").value=s.api_key||""
+  D("saveShortBtn").textContent="💾 Update"
+  D("shortForm").style.display="block"
+  D("openShortForm").style.display="none"
+}
 
-  const payload = {
+async function deleteShort(id){
+  if(!confirm("Delete this shortlink?")) return
+  const r = await api(`${API}/shortlinks-library/${id}`,"DELETE")
+  if(r){ toast("Deleted","ok"); await loadShortlinks(); renderAnalytics() }
+}
 
-    name:
-    popupName.value.trim(),
+/* ============================================================
+  POPUP LIBRARY
+============================================================ */
 
-    script:
-    popupCode.value.trim()
+D("openPopupForm").onclick = ()=>{
+  D("popupForm").style.display="block"
+  D("openPopupForm").style.display="none"
+}
+D("cancelPopupBtn").onclick = resetPopupForm
 
-  }
+function resetPopupForm(){
+  editingPopupId=null
+  D("popupName").value=""
+  D("popupCode").value=""
+  D("savePopupBtn").textContent="💾 Save"
+  D("popupForm").style.display="none"
+  D("openPopupForm").style.display="inline-flex"
+}
 
-  /* =========================
-     VALIDATION
-  ========================= */
-
-  if(
-    !payload.name ||
-    !payload.script
-  ){
-
-    showToast(
-      "Fill Required Fields",
-      "error"
-    )
-
-    return
-
-  }
-
-  /* =====================================================
-     UPDATE
-  ===================================================== */
-
+D("savePopupBtn").onclick = async()=>{
+  const name = D("popupName").value.trim()
+  if(!name){ toast("Popup Name required","err"); return }
+  const payload = { name, script: D("popupCode").value.trim(), active:1 }
+  let r
   if(editingPopupId){
-
-    const res =
-    await api(
-
-      `${API}/popup-library/${editingPopupId}`,
-
-      "PUT",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Popup Updated"
-    )
-
+    r = await api(`${API}/popup-library/${editingPopupId}`,"PUT",payload)
+    if(r){ toast("Popup updated") }
+  } else {
+    r = await api(`${API}/popup-library`,"POST",payload)
+    if(r){ toast("Popup saved") }
   }
-
-  /* =====================================================
-     CREATE
-  ===================================================== */
-
-  else{
-
-    const res =
-    await api(
-
-      `${API}/popup-library`,
-
-      "POST",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Popup Created"
-    )
-
-  }
-
-  /* =========================
-     RESET
-  ========================= */
-
-  resetPopupForm()
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadPopups()
-
-  renderAnalytics()
-
+  if(r){ resetPopupForm(); await loadPopups(); renderAnalytics() }
 }
 
-/* =========================================================
-   EDIT POPUP
-========================================================= */
+function renderPopupList(){
+  const el = D("popupLibraryList")
+  if(!POPUPS.length){ el.innerHTML='<div class="empty-box">No popups saved yet.</div>'; return }
+  el.innerHTML = POPUPS.map(p=>`
+    <div class="lib-item ${p.active?'':'inactive'}">
+      <div class="lib-left">
+        <div class="lib-name"><span>${p.name}</span><span class="badge badge-orange">Popup</span></div>
+        <div class="lib-meta">${(p.script||'').slice(0,50)}${(p.script||'').length>50?'...':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <label class="toggle">
+          <input type="checkbox" ${p.active?'checked':''} onchange="togglePopup('${p.id}',this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="btn btn-s btn-sm" onclick="editPopup('${p.id}')">✏️</button>
+        <button class="btn btn-r btn-sm" onclick="deletePopup('${p.id}')">🗑</button>
+      </div>
+    </div>
+  `).join("")
+}
+
+async function togglePopup(id, active){
+  const p = POPUPS.find(x=>x.id===id)
+  if(!p) return
+  await api(`${API}/popup-library/${id}`,"PUT",{...p, active: active?1:0})
+  await loadPopups()
+}
 
 function editPopup(id){
-
-  const popup =
-  POPUPS.find(
-    x=>x.id === id
-  )
-
-  if(!popup) return
-
-  editingPopupId =
-  popup.id
-
-  popupName.value =
-  popup.name || ""
-
-  popupCode.value =
-  popup.script || ""
-
-  cancelPopupEdit.style.display =
-  "inline-flex"
-
-  window.scrollTo({
-
-    top:0,
-    behavior:"smooth"
-
-  })
-
+  const p = POPUPS.find(x=>x.id===id)
+  if(!p) return
+  editingPopupId=id
+  D("popupName").value=p.name||""
+  D("popupCode").value=p.script||""
+  D("savePopupBtn").textContent="💾 Update"
+  D("popupForm").style.display="block"
+  D("openPopupForm").style.display="none"
 }
-
-/* =========================================================
-   DELETE POPUP
-========================================================= */
 
 async function deletePopup(id){
-
-  const confirmDelete =
-  confirm(
-    "Delete this popup?"
-  )
-
-  if(!confirmDelete){
-
-    return
-
-  }
-
-  const res =
-  await api(
-
-    `${API}/popup-library/${id}`,
-
-    "DELETE"
-
-  )
-
-  if(!res){
-
-    return
-
-  }
-
-  showToast(
-    "Popup Deleted"
-  )
-
-  /* =========================
-     CLEAN EDIT STATE
-  ========================= */
-
-  if(editingPopupId === id){
-
-    resetPopupForm()
-
-  }
-
-  /* =========================
-     RELOAD
-  ========================= */
-
-  await loadPopups()
-
-  renderAnalytics()
-
+  if(!confirm("Delete this popup?")) return
+  const r = await api(`${API}/popup-library/${id}`,"DELETE")
+  if(r){ toast("Deleted","ok"); await loadPopups(); renderAnalytics() }
 }
 
-/* =========================================================
-   INIT POPUPS
-========================================================= */
+/* ============================================================
+  PAGE ADS CONTROL
+============================================================ */
 
-async function initPopups(){
+let PAGE_ADS_STATE = {} // { page_key: { enabled, ad_id } }
 
-  await loadPopups()
-
+async function loadPageAdsState(){
+  const r = await api(`${API}/page-ads`)
+  if(r?.data){ r.data.forEach(x=>{ PAGE_ADS_STATE[x.page]=x }) }
 }
 
-/* =========================================================
-   ⚡ PART 5 — HOST MONETIZATION
-========================================================= */
-
-/* =========================================================
-   LOAD HOSTS
-========================================================= */
-
-async function loadHosts(){
-
-  const data =
-  await api(
-    `${API}/host-monetization`
-  )
-
-  HOSTS =
-  Array.isArray(data)
-  ? data
-  : []
-
-  renderHosts()
-
-}
-
-/* =========================================================
-   RENDER HOSTS
-========================================================= */
-
-function renderHosts(){
-
-  hostMonetizationList.innerHTML = ""
-
-  if(!HOSTS.length){
-
-    hostMonetizationList.innerHTML = `
-
-      <div class="empty-tag">
-
-        No Host Configurations Found
-
+function renderPageAds(){
+  const el = D("pageAdsSlots")
+  el.innerHTML = PAGE_SLOTS.map(slot=>{
+    const state = PAGE_ADS_STATE[slot.key]||{}
+    const enabled = state.enabled||false
+    const selectedAd = state.ad_id||""
+    const adsOpts = ADS.map(a=>`<option value="${a.id}" ${selectedAd===a.id?'selected':''}>${a.name}</option>`).join("")
+    return `
+      <div class="page-slot">
+        <div class="page-slot-head">
+          <div>
+            <div class="page-slot-name">${slot.label}</div>
+            <div style="font-size:10px;color:#555;margin-top:2px">${slot.desc}</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" ${enabled?'checked':''} onchange="togglePageAd('${slot.key}',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="page-slot-select">
+          <select onchange="setPageAd('${slot.key}',this.value)" ${!enabled?'disabled':''}>
+            <option value="">— Select Ad —</option>
+            ${adsOpts}
+          </select>
+        </div>
       </div>
-
     `
-
-    return
-
-  }
-
-  HOSTS.forEach(host=>{
-
-    const clone =
-    hostCardTemplate
-    .content
-    .cloneNode(true)
-
-    /* =====================================================
-       DOM
-    ===================================================== */
-
-    const card =
-    clone.querySelector(
-      ".host-card"
-    )
-
-    const hostNameEl =
-    clone.querySelector(
-      ".host-name"
-    )
-
-    const hostStorageEl =
-    clone.querySelector(
-      ".host-storage"
-    )
-
-    const hostKnightEl =
-    clone.querySelector(
-      ".host-knight"
-    )
-
-    const hostModeEl =
-    clone.querySelector(
-      ".host-mode"
-    )
-
-    const adsTags =
-    clone.querySelector(
-      ".ads-tags"
-    )
-
-    const shortTags =
-    clone.querySelector(
-      ".short-tags"
-    )
-
-    const popupTags =
-    clone.querySelector(
-      ".popup-tags"
-    )
-
-    const editBtn =
-    clone.querySelector(
-      ".edit-host-btn"
-    )
-
-    const deleteBtn =
-    clone.querySelector(
-      ".delete-host-btn"
-    )
-
-    /* =====================================================
-       DATA
-    ===================================================== */
-
-    hostNameEl.innerText =
-    host.host
-
-    hostStorageEl.innerText =
-
-      `Storage : ${
-        host.storage || "Unknown"
-      }`
-
-    hostKnightEl.innerText =
-
-      `Knight : ${
-        host.knight
-        ? "YES"
-        : "NO"
-      }`
-
-    hostModeEl.innerText =
-
-      (
-        host.mode || "random"
-      ).toUpperCase()
-
-    /* =====================================================
-       ADS
-    ===================================================== */
-
-    adsTags.innerHTML = ""
-
-    if(host.ads?.length){
-
-      host.ads.forEach(ad=>{
-
-        adsTags.appendChild(
-          createTag(
-            ad.name || ad
-          )
-        )
-
-      })
-
-    }else{
-
-      adsTags.innerHTML = `
-
-        <div class="empty-tag">
-
-          OFF
-
-        </div>
-
-      `
-
-    }
-
-    /* =====================================================
-       SHORTLINKS
-    ===================================================== */
-
-    shortTags.innerHTML = ""
-
-    if(host.shortlinks?.length){
-
-      host.shortlinks.forEach(short=>{
-
-        shortTags.appendChild(
-          createTag(
-            short.name || short
-          )
-        )
-
-      })
-
-    }else{
-
-      shortTags.innerHTML = `
-
-        <div class="empty-tag">
-
-          NONE
-
-        </div>
-
-      `
-
-    }
-
-    /* =====================================================
-       POPUPS
-    ===================================================== */
-
-    popupTags.innerHTML = ""
-
-    if(host.popups?.length){
-
-      host.popups.forEach(popup=>{
-
-        popupTags.appendChild(
-          createTag(
-            popup.name || popup
-          )
-        )
-
-      })
-
-    }else{
-
-      popupTags.innerHTML = `
-
-        <div class="empty-tag">
-
-          NONE
-
-        </div>
-
-      `
-
-    }
-
-    /* =====================================================
-       EDIT
-    ===================================================== */
-
-    editBtn.onclick = ()=>{
-
-      editHost(host.id)
-
-    }
-
-    /* =====================================================
-       DELETE
-    ===================================================== */
-
-    deleteBtn.onclick = ()=>{
-
-      deleteHost(host.id)
-
-    }
-
-    hostMonetizationList.appendChild(
-      clone
-    )
-
-  })
-
+  }).join("")
 }
 
-/* =========================================================
-   SAVE HOST
-========================================================= */
+async function togglePageAd(page, enabled){
+  const state = PAGE_ADS_STATE[page]||{}
+  PAGE_ADS_STATE[page] = {...state, page, enabled}
+  await api(`${API}/page-ads`,"POST",{ page, enabled: enabled?1:0, ad_id: state.ad_id||null })
+  renderPageAds()
+}
 
-saveHostBtn.onclick =
-async ()=>{
+async function setPageAd(page, adId){
+  const state = PAGE_ADS_STATE[page]||{}
+  PAGE_ADS_STATE[page] = {...state, page, ad_id: adId}
+  await api(`${API}/page-ads`,"POST",{ page, enabled: state.enabled?1:0, ad_id: adId||null })
+}
 
+/* ============================================================
+  HOST MONETIZATION
+============================================================ */
+
+function openModal(id){
+  D(id).classList.add("show")
+  document.body.style.overflow="hidden"
+}
+function closeModal(id){
+  D(id).classList.remove("show")
+  document.body.style.overflow=""
+}
+
+D("openHostModal").onclick = ()=>{
+  editingHostId=null
+  D("hostModalTitle").textContent="Create Host Config"
+  D("hostName").value=""
+  D("hostStorage").value=""
+  D("hostKnight").value="0"
+  D("hostMode").value="random"
+  renderSelList(D("hostAdsList"), ADS, [])
+  renderSelList(D("hostShortlinksList"), SHORTLINKS, [])
+  renderSelList(D("hostPopupsList"), POPUPS, [])
+  openModal("hostModal")
+}
+D("closeHostModal").onclick = ()=>closeModal("hostModal")
+D("cancelHostModal").onclick = ()=>closeModal("hostModal")
+D("hostModal").onclick = e=>{ if(e.target===D("hostModal")) closeModal("hostModal") }
+
+function renderSelList(container, items, selected=[]){
+  if(!items.length){ container.innerHTML='<div class="empty-box">None available.</div>'; return }
+  container.innerHTML = items.map(item=>`
+    <label class="sel-item">
+      <input type="checkbox" value="${item.id}" ${selected.includes(item.id)?'checked':''}>
+      <div><b>${item.name}</b><small>${item.type||item.base_url||''}</small></div>
+    </label>
+  `).join("")
+}
+
+function getChecked(container){
+  return [...container.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value)
+}
+
+D("saveHostBtn").onclick = async()=>{
+  const name = D("hostName").value.trim()
+  if(!name){ toast("Host Name required","err"); return }
   const payload = {
-
-    host:
-    hostName.value.trim(),
-
-    storage:
-    hostStorage.value.trim(),
-
-    knight:
-    Number(hostKnight.value),
-
-    mode:
-    hostMode.value,
-
-    ads:
-    checkedValues(
-      hostAdsList
-    ),
-
-    shortlinks:
-    checkedValues(
-      hostShortlinksList
-    ),
-
-    popups:
-    checkedValues(
-      hostPopupsList
-    )
-
+    host: name,
+    storage: D("hostStorage").value.trim(),
+    knight: Number(D("hostKnight").value),
+    mode: D("hostMode").value,
+    ads: getChecked(D("hostAdsList")),
+    shortlinks: getChecked(D("hostShortlinksList")),
+    popups: getChecked(D("hostPopupsList")),
+    active: 1
   }
-
-  /* =====================================================
-     VALIDATION
-  ===================================================== */
-
-  if(!payload.host){
-
-    showToast(
-      "Host Name Required",
-      "error"
-    )
-
-    return
-
-  }
-
-  /* =====================================================
-     UPDATE
-  ===================================================== */
-
+  let r
   if(editingHostId){
-
-    const res =
-    await api(
-
-      `${API}/host-monetization/${editingHostId}`,
-
-      "PUT",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Host Updated"
-    )
-
+    r = await api(`${API}/host-monetization/${editingHostId}`,"PUT",payload)
+    if(r){ toast("Host config updated") }
+  } else {
+    r = await api(`${API}/host-monetization`,"POST",payload)
+    if(r){ toast("Host config created") }
   }
-
-  /* =====================================================
-     CREATE
-  ===================================================== */
-
-  else{
-
-    const res =
-    await api(
-
-      `${API}/host-monetization`,
-
-      "POST",
-
-      payload
-
-    )
-
-    if(!res) return
-
-    showToast(
-      "Host Created"
-    )
-
-  }
-
-  /* =====================================================
-     RESET
-  ===================================================== */
-
-  resetHostForm()
-
-  closeModal()
-
-  /* =====================================================
-     RELOAD
-  ===================================================== */
-
-  await loadHosts()
-
-  renderAnalytics()
-
+  if(r){ closeModal("hostModal"); await loadHosts(); renderAnalytics() }
 }
 
-/* =========================================================
-   EDIT HOST
-========================================================= */
+function renderHostList(){
+  const el = D("hostMonetizationList")
+  if(!HOSTS.length){ el.innerHTML='<div class="empty-box">No host configurations yet. Create one to get started.</div>'; return }
+  el.innerHTML = HOSTS.map(h=>{
+    const adNames = (h.ads||[]).map(id=>ADS.find(x=>x.id===id)?.name||id)
+    const shortNames = (h.shortlinks||[]).map(id=>SHORTLINKS.find(x=>x.id===id)?.name||id)
+    const popupNames = (h.popups||[]).map(id=>POPUPS.find(x=>x.id===id)?.name||id)
+    return `
+      <div class="host-card ${h.active?'':'inactive'}">
+        <div class="host-top">
+          <div>
+            <div class="host-name">${h.host||h.name||'Unnamed'}</div>
+            <div class="host-storage">Storage: ${h.storage||'—'}</div>
+          </div>
+          <div class="host-right">
+            <div class="host-tags">
+              <span class="badge ${h.knight?'badge-yellow':'badge-gray'}">${h.knight?'⚔️ Knight':'📁 Direct'}</span>
+              <span class="badge badge-blue">Mode: ${(h.mode||'random').toUpperCase()}</span>
+              <span class="badge badge-green">Clicks: ${h.clicks||0}</span>
+            </div>
+            <label class="toggle" title="Active/Inactive">
+              <input type="checkbox" ${h.active?'checked':''} onchange="toggleHost('${h.id}',this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        ${adNames.length ? `<div class="host-section"><h5>📢 Ads</h5><div class="tag-list">${adNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
+        ${shortNames.length ? `<div class="host-section"><h5>🔗 Shortlinks</h5><div class="tag-list">${shortNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
+        ${popupNames.length ? `<div class="host-section"><h5>🪟 Popups</h5><div class="tag-list">${popupNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
+        <div class="host-actions">
+          <button class="btn btn-s btn-sm" onclick="editHost('${h.id}')">✏️ Edit</button>
+          <button class="btn btn-r btn-sm" onclick="deleteHost('${h.id}')">🗑 Delete</button>
+        </div>
+      </div>
+    `
+  }).join("")
+}
+
+async function toggleHost(id, active){
+  const h = HOSTS.find(x=>x.id===id)
+  if(!h) return
+  await api(`${API}/host-monetization/${id}`,"PUT",{...h, active: active?1:0})
+  await loadHosts()
+}
 
 function editHost(id){
-
-  const host =
-  HOSTS.find(
-    x=>x.id === id
-  )
-
-  if(!host){
-
-    return
-
-  }
-
-  editingHostId =
-  host.id
-
-  hostModalTitle.innerText =
-  "Edit Host Monetization"
-
-  /* =====================================================
-     FIELDS
-  ===================================================== */
-
-  hostName.value =
-  host.host || ""
-
-  hostStorage.value =
-  host.storage || ""
-
-  hostKnight.value =
-
-    host.knight
-    ? "1"
-    : "0"
-
-  hostMode.value =
-  host.mode || "random"
-
-  /* =====================================================
-     CHECKBOXES
-  ===================================================== */
-
-  renderSelectionList(
-
-    hostAdsList,
-
-    ADS,
-
-    host.ads?.map(
-      x=>x.id || x
-    ) || []
-
-  )
-
-  renderSelectionList(
-
-    hostShortlinksList,
-
-    SHORTLINKS,
-
-    host.shortlinks?.map(
-      x=>x.id || x
-    ) || []
-
-  )
-
-  renderSelectionList(
-
-    hostPopupsList,
-
-    POPUPS,
-
-    host.popups?.map(
-      x=>x.id || x
-    ) || []
-
-  )
-
-  openModal()
-
+  const h = HOSTS.find(x=>x.id===id)
+  if(!h) return
+  editingHostId=id
+  D("hostModalTitle").textContent="Edit Host Config"
+  D("hostName").value=h.host||h.name||""
+  D("hostStorage").value=h.storage||""
+  D("hostKnight").value=h.knight?'1':'0'
+  D("hostMode").value=h.mode||"random"
+  renderSelList(D("hostAdsList"), ADS, h.ads||[])
+  renderSelList(D("hostShortlinksList"), SHORTLINKS, h.shortlinks||[])
+  renderSelList(D("hostPopupsList"), POPUPS, h.popups||[])
+  openModal("hostModal")
 }
-
-/* =========================================================
-   DELETE HOST
-========================================================= */
 
 async function deleteHost(id){
-
-  const confirmDelete =
-  confirm(
-    "Delete this host configuration?"
-  )
-
-  if(!confirmDelete){
-
-    return
-
-  }
-
-  const res =
-  await api(
-
-    `${API}/host-monetization/${id}`,
-
-    "DELETE"
-
-  )
-
-  if(!res){
-
-    return
-
-  }
-
-  showToast(
-    "Host Deleted"
-  )
-
-  /* =====================================================
-     CLEAN EDIT STATE
-  ===================================================== */
-
-  if(editingHostId === id){
-
-    resetHostForm()
-
-  }
-
-  /* =====================================================
-     RELOAD
-  ===================================================== */
-
-  await loadHosts()
-
-  renderAnalytics()
-
+  if(!confirm("Delete this host config?")) return
+  const r = await api(`${API}/host-monetization/${id}`,"DELETE")
+  if(r){ toast("Host config deleted","ok"); await loadHosts(); renderAnalytics() }
 }
 
-/* =========================================================
-   INIT HOSTS
-========================================================= */
-
-async function initHosts(){
-
-  await loadHosts()
-
-}
-
-/* =========================================================
-   ⚡ PART 6 — ANALYTICS + FINAL INIT
-========================================================= */
-
-/* =========================================================
-   RENDER ANALYTICS
-========================================================= */
+/* ============================================================
+  ANALYTICS
+============================================================ */
 
 function renderAnalytics(){
-
-  /* =========================
-     TOTAL HOSTS
-  ========================= */
-
-  totalHosts.innerText =
-  HOSTS.length || 0
-
-  /* =========================
-     TOTAL ADS
-  ========================= */
-
-  totalAds.innerText =
-  ADS.length || 0
-
-  /* =========================
-     TOTAL SHORTLINKS
-  ========================= */
-
-  totalShortlinks.innerText =
-  SHORTLINKS.length || 0
-
-  /* =========================
-     TOTAL DOWNLOADS
-  ========================= */
-
-  totalClicks.innerText =
-
-    HOSTS.reduce((acc,host)=>{
-
-      return (
-        acc +
-        Number(
-          host.clicks || 0
-        )
-      )
-
-    },0)
-
+  D("statHosts").textContent   = HOSTS.length
+  D("statAds").textContent     = ADS.length
+  D("statShorts").textContent  = SHORTLINKS.length
+  D("statPopups").textContent  = POPUPS.length
+  D("statClicks").textContent  = HOSTS.reduce((a,h)=>a+Number(h.clicks||0),0).toLocaleString()
+  // Also load page ads performance
+  loadAdsPerformance()
 }
-
-/* =========================================================
-   RELOAD EVERYTHING
-========================================================= */
-
-async function reloadAll(){
-
-  await Promise.all([
-
-    loadAds(),
-
-    loadShortlinks(),
-
-    loadPopups(),
-
-    loadHosts()
-
-  ])
-
-  renderAnalytics()
-
-}
-
-/* =========================================================
-   ESC CLOSE
-========================================================= */
-
-window.addEventListener(
-
-  "keydown",
-
-  (e)=>{
-
-    if(
-      e.key === "Escape"
-    ){
-
-      closeModal()
-
-    }
-
+async function loadAdsPerformance(){
+  const el = D("adsPerformanceTable")
+  if(!el) return
+  const r = await api(`${API}/ads-analytics`)
+  if(!r?.data || !r.data.length){
+    el.innerHTML='<div class="empty-box">No page ad performance data yet.</div>'
+    return
   }
-
-)
-
-/* =========================================================
-   AUTO RESET ON CLOSE
-========================================================= */
-
-function cleanupModal(){
-
-  resetHostForm()
-
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:1px solid #1a2035">
+          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Ad Name</th>
+          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Type</th>
+          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Page</th>
+          <th style="text-align:right;padding:8px 12px;color:#ffcc00">Impressions</th>
+          <th style="text-align:right;padding:8px 12px;color:#ffcc00">Clicks</th>
+          <th style="text-align:right;padding:8px 12px;color:#ffcc00">CTR</th>
+          <th style="text-align:center;padding:8px 12px;color:#ffcc00">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${r.data.map(a=>`
+          <tr style="border-bottom:1px solid #1a203520">
+            <td style="padding:8px 12px;color:#fff;font-weight:600">${a.name||'—'}</td>
+            <td style="padding:8px 12px"><span class="badge badge-blue">${a.type||'—'}</span></td>
+            <td style="padding:8px 12px;color:#aaa">${a.page||'all'}</td>
+            <td style="padding:8px 12px;text-align:right;color:#ccc">${(a.impressions||0).toLocaleString()}</td>
+            <td style="padding:8px 12px;text-align:right;color:#ccc">${(a.clicks||0).toLocaleString()}</td>
+            <td style="padding:8px 12px;text-align:right;color:#ffcc00;font-weight:700">${a.ctr||'0%'}</td>
+            <td style="padding:8px 12px;text-align:center">
+              <span class="badge ${a.active?'badge-green':'badge-gray'}">${a.active?'Active':'Off'}</span>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `
 }
 
-/* =========================================================
-   MODAL CLOSE PATCH
-========================================================= */
-
-const oldCloseModal =
-closeModal
-
-closeModal = ()=>{
-
-  oldCloseModal()
-
-  cleanupModal()
-
+async function clearAdsAnalytics(){
+  if(!confirm("Clear all page ad analytics? This cannot be undone.")) return
+  const r = await api(`${API}/ads-analytics-clear`, "DELETE")
+  if(r){ toast("Analytics cleared"); loadAdsPerformance() }
 }
 
-/* =========================================================
-   AUTO REFRESH SELECTIONS
-========================================================= */
+/* ============================================================
+  KEYBOARD + REFRESH
+============================================================ */
 
-async function refreshSelections(){
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeModal("hostModal") } })
+D("refreshBtn").onclick = reloadAll
 
-  renderSelectionList(
-    hostAdsList,
-    ADS
-  )
-
-  renderSelectionList(
-    hostShortlinksList,
-    SHORTLINKS
-  )
-
-  renderSelectionList(
-    hostPopupsList,
-    POPUPS
-  )
-
-}
-
-/* =========================================================
-   SAFE NUMBER
-========================================================= */
-
-function safeNumber(v){
-
-  return Number(v || 0)
-
-}
-
-/* =========================================================
-   FORMAT MODE
-========================================================= */
-
-function formatMode(mode){
-
-  if(!mode){
-
-    return "RANDOM"
-
-  }
-
-  return mode
-  .toUpperCase()
-
-}
-
-/* =========================================================
-   EMPTY CHECK
-========================================================= */
-
-function isEmpty(v){
-
-  return (
-    !v ||
-    !String(v).trim()
-  )
-
-}
-
-/* =========================================================
-   BUTTON LOADER
-========================================================= */
-
-function buttonLoading(
-  button,
-  state=true,
-  text="Please Wait..."
-){
-
-  if(state){
-
-    button.dataset.oldText =
-    button.innerHTML
-
-    button.innerHTML =
-    text
-
-    button.disabled = true
-
-    button.style.opacity =
-    ".7"
-
-  }else{
-
-    button.innerHTML =
-    button.dataset.oldText
-
-    button.disabled = false
-
-    button.style.opacity =
-    "1"
-
-  }
-
-}
-
-/* =========================================================
-   FINAL INIT
-========================================================= */
+/* ============================================================
+  INIT
+============================================================ */
 
 async function init(){
-
-  console.log(
-    "AnimeHunt Monetization Engine Started"
-  )
-
+  await loadPageAdsState()
   await reloadAll()
-
 }
 
-/* =========================================================
-   START
-========================================================= */
-
 init()
-
-
 </script>
-  
-
+</body>
 </html>
