@@ -2,534 +2,796 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Brain – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>AI Brain – AnimeHunt CMS</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#060a14;color:#fff}
-.cms-app{display:flex;min-height:100vh}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-/* SIDEBAR */
-.cms-sidebar{width:240px;background:#070b16;border-right:1px solid #1a2035;padding:16px 0}
-.brand{padding:0 20px 16px;font-size:20px}
-.brand b{color:#ffcc00}
-.brand small{display:block;font-size:11px;color:#888}
-.cms-menu a{display:flex;gap:8px;padding:10px 20px;font-size:14px;color:#cfcfcf;text-decoration:none}
-.cms-menu a:hover,.cms-menu a.active{background:#0e1424;color:#ffcc00}
-
-/* MAIN */
-.cms-main{flex:1;display:flex;flex-direction:column}
-.cms-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035}
-.cms-header .title{font-size:18px;font-weight:600}
-.cms-content{padding:20px}
-
-/* BUTTON */
-.pause-btn{background:#ffcc00;border:none;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer}
-
-/* GRID */
-.ai-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(360px, 1fr));
-  gap:20px;
+/* ========== SIDEBAR ========== */
+.cms-sidebar{
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100
 }
-/* CARD */
-.ai-card{background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;padding:16px}
-.ai-card h3{font-size:15px;color:#ffcc00;margin-bottom:10px}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
+.cms-menu a{
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
+}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-/* ITEM */
-.ai-item{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:#ddd}
-.ai-item input{width:16px;height:16px;accent-color:#ffcc00}
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.cms-header{
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
+}
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.run-btn{
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;transition:.2s
+}
+.run-btn:hover{background:#ffd633;transform:translateY(-1px)}
+.run-btn:disabled{opacity:.5;cursor:default}
+.pause-btn{
+  background:transparent;border:1px solid #ff9800;color:#ff9800;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.pause-btn:hover{background:#ff9800;color:#000}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px;padding-bottom:40px}
 
-/* STATUS */
-.status{padding:4px 8px;border-radius:6px;font-size:11px}
-.ok{background:#123c1a;color:#4cff4c}
-.warn{background:#3c2d12;color:#ffcc00}
-.bad{background:#3c1212;color:#ff4c4c}
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
 
-/* CARD BUTTON */
-.card-btn{width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;background:#0e1424;color:#fff;cursor:pointer}
-.card-btn:hover{background:#141c33}
+/* ========== SECTION LABEL ========== */
+.section-label{
+  font-size:11px;color:#555;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;margin:22px 0 12px;display:flex;align-items:center;gap:8px
+}
+.section-label::after{content:"";flex:1;height:1px;background:#1a2035}
+
+/* ========== STATUS PANEL ========== */
+.status-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 18px;margin-bottom:4px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px
+}
+.status-left{display:flex;align-items:center;gap:14px}
+.ai-status-dot{
+  width:14px;height:14px;border-radius:50%;flex-shrink:0;
+  animation:pulse2 2s infinite
+}
+.dot-running{background:#4caf50;box-shadow:0 0 10px rgba(76,175,80,.5)}
+.dot-paused{background:#ff9800;box-shadow:0 0 10px rgba(255,152,0,.3);animation:none}
+@keyframes pulse2{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.15)}}
+.ai-status-text .s-title{font-size:13px;font-weight:700}
+.ai-status-text .s-sub{font-size:11px;color:#555;margin-top:3px}
+.status-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.status-badge{
+  font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;
+  border:1px solid
+}
+.badge-running{background:#1a3a2a;color:#4caf50;border-color:#4caf50}
+.badge-paused{background:#2a1a0a;color:#ff9800;border-color:#ff9800}
+.cron-info{font-size:11px;color:#555}
+
+/* ========== ENGINE GRID ========== */
+.engine-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+
+.engine-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 18px;transition:.2s
+}
+.engine-card.active-card{border-color:#1a3a2a}
+.engine-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  padding-bottom:12px;border-bottom:1px solid #1a2035
+}
+.engine-icon{font-size:22px}
+.engine-info{flex:1}
+.engine-name{font-size:13px;font-weight:700}
+.engine-desc{font-size:10px;color:#555;margin-top:2px}
+.engine-active-dot{
+  width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0
+}
+.engine-active-dot.on{background:#4caf50;box-shadow:0 0 5px rgba(76,175,80,.5)}
+
+/* Toggle rows */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid #1a203533
+}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:11px;color:#bbb}
+.toggle-label small{display:block;font-size:10px;color:#444;margin-top:1px}
+
+/* Switch */
+.sw{position:relative;width:38px;height:21px;flex-shrink:0;display:inline-block}
+.sw input{display:none}
+.sw-sl{
+  position:absolute;inset:0;background:#1a2035;border-radius:21px;
+  cursor:pointer;transition:.25s;border:1px solid #2a3055
+}
+.sw-sl:before{
+  content:"";position:absolute;width:15px;height:15px;
+  left:2px;top:2px;background:#555;border-radius:50%;transition:.25s
+}
+.sw input:checked+.sw-sl{background:#1a3a2a;border-color:#4caf50}
+.sw input:checked+.sw-sl:before{transform:translateX(17px);background:#4caf50}
+
+/* ========== LOGS ========== */
+.log-panel{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px}
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.log-title{font-size:12px;font-weight:700;color:#ffcc00}
+.clear-btn{
+  background:transparent;border:1px solid #3a1a1a;color:#f44336;
+  padding:4px 10px;border-radius:5px;font-size:10px;cursor:pointer;transition:.2s
+}
+.clear-btn:hover{background:#3a1a1a}
+.log-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.log-item{
+  display:flex;align-items:center;gap:10px;padding:7px 10px;
+  background:#0b0f1a;border-radius:6px;border:1px solid #1a2035;font-size:11px
+}
+.log-type{
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;
+  flex-shrink:0;white-space:nowrap
+}
+.type-CYCLE{background:#1a2a3a;color:#2196f3}
+.type-PAUSED{background:#2a2a1a;color:#ff9800}
+.type-RESUMED{background:#1a3a2a;color:#4caf50}
+.type-ERROR{background:#3a1a1a;color:#f44336}
+.type-RESET{background:#2a1a3a;color:#9c27b0}
+.type-default{background:#1a2035;color:#777}
+.log-msg{color:#aaa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log-time{color:#444;font-size:10px;flex-shrink:0}
+.no-logs{color:#555;font-size:12px;text-align:center;padding:16px}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.toast.info{border-color:#2196f3;background:#0d1a28}
+
+/* ========== SPINNER ========== */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #1a2035;border-top-color:#ffcc00;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
-
 <body>
 
-<div class="cms-app">
-
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
-
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-
-    <!-- CORE -->
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
+    <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
-
-    <!-- CONTENT -->
+    <div class="menu-sep"></div>
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
-
-    <!-- DATA & SEO -->
-    <a href="seo.html">📈 Seo</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
-
-    <!-- SECURITY & DEPLOY -->
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-    <!-- AI & ADS -->
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
-   <a href="ai-brain.html" class="active">🧠 Ai Brain</a>
-    <!-- LAYOUT CONTROL -->
+    <a href="ai-brain.html" class="active">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
-
-    <!-- ADMIN / SYSTEM (LAST) -->
-    <a href="system-settings.html">⚙ System-settings</a>
-
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
 
-<header class="cms-header">
-  <div class="title">🧠 AI Brain Control Center</div>
-  <button class="pause-btn">⏸ Pause All AI</button>
-</header>
+  <header class="cms-header">
+    <div class="title">🧠 AI Brain Engine</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="run-btn"   id="runBtn">▶ Run Now</button>
+      <button class="pause-btn" id="pauseBtn">⏸ Pause</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-<section class="cms-content">
+  <section class="cms-content">
 
-<div class="ai-grid">
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-info">
+          <div class="num" id="statStatus">—</div>
+          <div class="lbl">AI Status</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-info">
+          <div class="num" id="statRunCount">—</div>
+          <div class="lbl">Total Runs</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🕒</div>
+        <div class="stat-info">
+          <div class="num" id="statLastRun">—</div>
+          <div class="lbl">Last Run</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚙️</div>
+        <div class="stat-info">
+          <div class="num" id="statEngines">—</div>
+          <div class="lbl">Active Engines</div>
+        </div>
+      </div>
+    </div>
 
-<!-- AUTO SERVER -->
-<div class="ai-card">
-<h3>🌐 Auto Server Engine</h3>
-<div class="ai-item">Health Check <input type="checkbox" checked></div>
-<div class="ai-item">Auto Failover <input type="checkbox" checked></div>
-<div class="ai-item">Auto Priority <input type="checkbox" checked></div>
-<div class="ai-item">Auto Fallback <input type="checkbox" checked></div>
-</div>
+    <!-- STATUS PANEL -->
+    <div class="section-label">🤖 AI Engine Status</div>
+    <div class="status-panel">
+      <div class="status-left">
+        <div class="ai-status-dot" id="statusDot"></div>
+        <div class="ai-status-text">
+          <div class="s-title" id="statusTitle">Checking...</div>
+          <div class="s-sub" id="statusSub">Loading AI state</div>
+        </div>
+      </div>
+      <div class="status-right">
+        <span class="status-badge" id="statusBadge">—</span>
+        <span class="cron-info">⏱ Cron: every 5 min</span>
+      </div>
+    </div>
 
-<!-- AUTO PLAYER -->
-<div class="ai-card">
-<h3>🎞 Auto Player Engine</h3>
-<div class="ai-item">Server Switch <input type="checkbox" checked></div>
-<div class="ai-item">Stream Priority <input type="checkbox" checked></div>
-<div class="ai-item">Embed Rotation <input type="checkbox"></div>
-</div>
+    <!-- ENGINE CARDS -->
+    <div class="section-label">⚙️ Engine Configuration</div>
+    <div class="engine-grid">
 
-<!-- AUTO ANALYTICS -->
-<div class="ai-card">
-<h3>📊 Auto Analytics Engine</h3>
-<div class="ai-item">Popular Detect <input type="checkbox" checked></div>
-<div class="ai-item">Trending Detect <input type="checkbox" checked></div>
-<div class="ai-item">Heatmap Logic <input type="checkbox"></div>
-<div class="ai-item">Homepage Optimize <input type="checkbox" checked></div>
-</div>
+      <!-- SERVER ENGINE -->
+      <div class="engine-card" id="card-server">
+        <div class="engine-header">
+          <span class="engine-icon">🌐</span>
+          <div class="engine-info">
+            <div class="engine-name">Server Engine</div>
+            <div class="engine-desc">Auto-manages streaming server health and failover</div>
+          </div>
+          <div class="engine-active-dot" id="dot-server"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Health Check<small>Auto-disable broken servers</small></div>
+          <label class="sw"><input type="checkbox" data-engine="server" data-setting="health_check" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Failover<small>Switch to next server on fail</small></div>
+          <label class="sw"><input type="checkbox" data-engine="server" data-setting="auto_failover" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Priority<small>Sort servers by reliability</small></div>
+          <label class="sw"><input type="checkbox" data-engine="server" data-setting="auto_priority" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO BACKUP -->
-<div class="ai-card">
-<h3>💾 Auto Backup Engine</h3>
-<div class="ai-item">Backup Schedule <input type="checkbox" checked></div>
-<div class="ai-item">Auto Versioning <input type="checkbox"></div>
-<div class="ai-item">Auto Restore <input type="checkbox"></div>
-</div>
+      <!-- ANALYTICS ENGINE -->
+      <div class="engine-card" id="card-analytics">
+        <div class="engine-header">
+          <span class="engine-icon">📊</span>
+          <div class="engine-info">
+            <div class="engine-name">Analytics Engine</div>
+            <div class="engine-desc">Auto-detects trending & popular anime</div>
+          </div>
+          <div class="engine-active-dot" id="dot-analytics"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Trending Detection<small>Mark high-rated anime as trending</small></div>
+          <label class="sw"><input type="checkbox" data-engine="analytics" data-setting="trending_detect" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Popular Detection<small>Mark most viewed anime</small></div>
+          <label class="sw"><input type="checkbox" data-engine="analytics" data-setting="popular_detect" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Homepage Optimize<small>Put trending on homepage</small></div>
+          <label class="sw"><input type="checkbox" data-engine="analytics" data-setting="homepage_optimize" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO DEPLOY -->
-<div class="ai-card">
-<h3>🚀 Auto Deploy Engine</h3>
-<div class="ai-item">Auto Publish <input type="checkbox"></div>
-<div class="ai-item">Auto Sync <input type="checkbox" checked></div>
-<div class="ai-item">Auto Update <input type="checkbox"></div>
-<div class="ai-item">Auto Rollback <input type="checkbox"></div>
-</div>
+      <!-- CATEGORY ENGINE -->
+      <div class="engine-card" id="card-category">
+        <div class="engine-header">
+          <span class="engine-icon">🗂</span>
+          <div class="engine-info">
+            <div class="engine-name">Category Engine</div>
+            <div class="engine-desc">Auto-categorizes anime by type and status</div>
+          </div>
+          <div class="engine-active-dot" id="dot-category"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Trending<small>High rated → trending flag</small></div>
+          <label class="sw"><input type="checkbox" data-engine="category" data-setting="auto_trending" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Latest<small>New anime → homepage row</small></div>
+          <label class="sw"><input type="checkbox" data-engine="category" data-setting="auto_latest" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO CATEGORY -->
-<div class="ai-card">
-<h3>🗂 Auto Category Engine</h3>
-<div class="ai-item">Genre Detect <input type="checkbox" checked></div>
-<div class="ai-item">Category Assign <input type="checkbox" checked></div>
-<div class="ai-item">Auto Trending <input type="checkbox"></div>
-<div class="ai-item">Auto Latest <input type="checkbox" checked></div>
-</div>
+      <!-- BANNER ENGINE -->
+      <div class="engine-card" id="card-banner">
+        <div class="engine-header">
+          <span class="engine-icon">🖼</span>
+          <div class="engine-info">
+            <div class="engine-name">Banner Engine</div>
+            <div class="engine-desc">Auto-manages homepage and page banners</div>
+          </div>
+          <div class="engine-active-dot" id="dot-banner"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Homepage Banners<small>Auto-activate home page banners</small></div>
+          <label class="sw"><input type="checkbox" data-engine="banner" data-setting="homepage_banners" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Trending Banners<small>Auto-activate trending banners</small></div>
+          <label class="sw"><input type="checkbox" data-engine="banner" data-setting="trending_banners" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Hero Banners<small>Top-rated anime as hero banner</small></div>
+          <label class="sw"><input type="checkbox" data-engine="banner" data-setting="hero_banners" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO BANNER -->
-<div class="ai-card">
-<h3>🖼 Auto Banner Engine</h3>
-<div class="ai-item">Homepage Banners <input type="checkbox" checked></div>
-<div class="ai-item">Category Banners <input type="checkbox"></div>
-<div class="ai-item">Trending Banners <input type="checkbox"></div>
-<div class="ai-item">Hero Banners <input type="checkbox" checked></div>
-</div>
+      <!-- SEO ENGINE -->
+      <div class="engine-card" id="card-seo">
+        <div class="engine-header">
+          <span class="engine-icon">📈</span>
+          <div class="engine-info">
+            <div class="engine-name">SEO Engine</div>
+            <div class="engine-desc">Auto-generates meta titles, descriptions & sitemap</div>
+          </div>
+          <div class="engine-active-dot" id="dot-seo"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Title<small>Generate SEO titles for all anime</small></div>
+          <label class="sw"><input type="checkbox" data-engine="seo" data-setting="auto_title" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Description<small>Generate meta descriptions</small></div>
+          <label class="sw"><input type="checkbox" data-engine="seo" data-setting="auto_description" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Sitemap & Robots<small>Keep sitemap updated</small></div>
+          <label class="sw"><input type="checkbox" data-engine="seo" data-setting="sitemap_robots" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO HOMEPAGE -->
-<div class="ai-card">
-<h3>🏠 Auto Homepage Engine</h3>
-<div class="ai-item">Row Generate <input type="checkbox" checked></div>
-<div class="ai-item">Row Sorting <input type="checkbox" checked></div>
-<div class="ai-item">Priority System <input type="checkbox"></div>
-<div class="ai-item">Layout Logic <input type="checkbox"></div>
-</div>
+      <!-- HOMEPAGE ENGINE -->
+      <div class="engine-card" id="card-homepage">
+        <div class="engine-header">
+          <span class="engine-icon">🏠</span>
+          <div class="engine-info">
+            <div class="engine-name">Homepage Engine</div>
+            <div class="engine-desc">Auto-builds and optimizes homepage rows</div>
+          </div>
+          <div class="engine-active-dot" id="dot-homepage"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Row Generate<small>Auto-populate homepage rows</small></div>
+          <label class="sw"><input type="checkbox" data-engine="homepage" data-setting="row_generate" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO SEARCH -->
-<div class="ai-card">
-<h3>🔍 Auto Search Engine</h3>
-<div class="ai-item">Auto Indexing <input type="checkbox" checked></div>
-<div class="ai-item">Auto Suggestion <input type="checkbox" checked></div>
-<div class="ai-item">Auto Ranking <input type="checkbox"></div>
-<div class="ai-item">Popularity Boost <input type="checkbox"></div>
-</div>
+      <!-- BACKUP ENGINE -->
+      <div class="engine-card" id="card-backup">
+        <div class="engine-header">
+          <span class="engine-icon">💾</span>
+          <div class="engine-info">
+            <div class="engine-name">Backup Engine</div>
+            <div class="engine-desc">Auto-creates daily database backups</div>
+          </div>
+          <div class="engine-active-dot" id="dot-backup"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Backup<small>Create backup every 24 hours</small></div>
+          <label class="sw"><input type="checkbox" data-engine="backup" data-setting="backup_schedule" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO SEO -->
-<div class="ai-card">
-<h3>📈 Auto SEO Engine</h3>
-<div class="ai-item">Auto Title <input type="checkbox" checked></div>
-<div class="ai-item">Auto Description <input type="checkbox" checked></div>
-<div class="ai-item">OG Tags <input type="checkbox"></div>
-<div class="ai-item">Sitemap & Robots <input type="checkbox"></div>
-</div>
+      <!-- SEARCH ENGINE -->
+      <div class="engine-card" id="card-search">
+        <div class="engine-header">
+          <span class="engine-icon">🔍</span>
+          <div class="engine-info">
+            <div class="engine-name">Search Engine</div>
+            <div class="engine-desc">Auto-optimizes search ranking and index</div>
+          </div>
+          <div class="engine-active-dot" id="dot-search"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Ranking<small>Sort search by rating & views</small></div>
+          <label class="sw"><input type="checkbox" data-engine="search" data-setting="auto_ranking" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Popularity Boost<small>Boost trending in search results</small></div>
+          <label class="sw"><input type="checkbox" data-engine="search" data-setting="popularity_boost" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<!-- AUTO DOWNLOAD -->
-<div class="ai-card">
-<h3>📥 Auto Download Engine</h3>
-<div class="ai-item">Quality Mapping <input type="checkbox" checked></div>
-<div class="ai-item">Server Mapping <input type="checkbox" checked></div>
-<div class="ai-item">Link Validation <input type="checkbox"></div>
-<div class="ai-item">Broken Remove <input type="checkbox"></div>
-</div>
+      <!-- DEPLOY ENGINE -->
+      <div class="engine-card" id="card-deploy">
+        <div class="engine-header">
+          <span class="engine-icon">🚀</span>
+          <div class="engine-info">
+            <div class="engine-name">Deploy Engine</div>
+            <div class="engine-desc">Auto-publishes and deploys content changes</div>
+          </div>
+          <div class="engine-active-dot" id="dot-deploy"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Publish<small>Deploy changes automatically</small></div>
+          <label class="sw"><input type="checkbox" data-engine="deploy" data-setting="auto_publish" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-</div>
-</section>
+      <!-- DOWNLOAD ENGINE -->
+      <div class="engine-card" id="card-download">
+        <div class="engine-header">
+          <span class="engine-icon">📥</span>
+          <div class="engine-info">
+            <div class="engine-name">Download Engine</div>
+            <div class="engine-desc">Auto-validates and cleans download links</div>
+          </div>
+          <div class="engine-active-dot" id="dot-download"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Link Validation<small>Remove broken download links</small></div>
+          <label class="sw"><input type="checkbox" data-engine="download" data-setting="link_validation" onchange="saveSetting(this)"><span class="sw-sl"></span></label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AI LOGS -->
+    <div class="section-label">📋 AI Engine Logs</div>
+    <div class="log-panel">
+      <div class="log-header">
+        <div class="log-title">Recent AI Events</div>
+        <button class="clear-btn" onclick="clearLogs()">🗑 Clear Logs</button>
+      </div>
+      <div class="log-list" id="logList">
+        <div class="no-logs">Loading...</div>
+      </div>
+    </div>
+
+  </section>
 </main>
-</div>
-  <!-- ============================= -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
+/* =========================================
+   CONFIG
+========================================= */
+const API    = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const AI_API = `${API}/ai`
 
-/* ===============================
-AI BRAIN v4 ULTRA FRONTEND
-FULL FINAL VERSION
-================================ */
+/* =========================================
+   AUTH
+========================================= */
+function getToken() { return localStorage.getItem("ah_token") }
 
-const API_BASE="https://animehunt-backend.animehunt715.workers.dev/api"
-const AI_API=`${API_BASE}/admin/ai`
-const TOKEN_KEY="AUTH_TOKEN"
-
-const pauseBtn=document.querySelector(".pause-btn")
-
-let loading=false
-let aiState=null
-let saveQueue={}
-let saveTimer=null
-
-/* ===============================
-AUTH
-================================ */
-
-function getToken(){
-const t=localStorage.getItem(TOKEN_KEY)
-if(!t){
-location.href="login.html"
-return null
-}
-return t
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
 }
 
-/* ===============================
-ENGINE MAPPING (FIXED)
-================================ */
-
-function getEngine(title){
-
-title=title.toLowerCase()
-
-if(title.includes("server")) return "server"
-if(title.includes("player")) return "player"
-if(title.includes("analytics")) return "analytics"
-if(title.includes("backup")) return "backup"
-if(title.includes("deploy")) return "deploy"
-if(title.includes("category")) return "category"
-if(title.includes("banner")) return "banner"
-if(title.includes("homepage")) return "homepage"
-if(title.includes("search")) return "search"
-if(title.includes("seo")) return "seo"
-if(title.includes("download")) return "download"
-
-return "unknown"
+function requireAuth() {
+  if (!getToken()) { window.location.href = "login.html"; return false }
+  return true
 }
 
-/* ===============================
-SETTING CLEAN
-================================ */
-
-function getSetting(text){
-
-return text
-.toLowerCase()
-.replace(/[^a-z0-9\s]/g,"")
-.trim()
-.replace(/\s+/g,"_")
-
+async function checkAuth() {
+  try {
+    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+    document.getElementById("adminName").textContent = json.data.username
+  } catch { window.location.href = "login.html" }
 }
 
-/* ===============================
-SAFE API (RETRY + JSON SAFE)
-================================ */
-
-async function api(url,method="GET",body=null,retry=1){
-
-const token=getToken()
-if(!token) return null
-
-try{
-
-const res=await fetch(url,{
-method,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-body:body?JSON.stringify(body):null
-})
-
-if(res.status===401){
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-return null
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
 }
 
-const text=await res.text()
-
-let data
-try{
-data=JSON.parse(text)
-}catch{
-throw new Error("Invalid JSON")
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 3500)
 }
 
-if(!res.ok){
-throw new Error(data?.error||"API error")
+/* =========================================
+   STATE
+========================================= */
+let isPaused = false
+
+/* =========================================
+   LOAD AI STATE + SETTINGS
+========================================= */
+async function loadAI() {
+  try {
+    const res  = await fetch(AI_API, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    const d = json.data
+    isPaused = !!d.paused
+
+    /* Stats */
+    document.getElementById("statStatus").textContent   = isPaused ? "⏸ Paused" : "✅ Running"
+    document.getElementById("statRunCount").textContent = d.runCount || 0
+    document.getElementById("statLastRun").textContent  = d.lastRun
+      ? new Date(d.lastRun).toLocaleTimeString()
+      : "Never"
+
+    /* Status panel */
+    const dot   = document.getElementById("statusDot")
+    const title = document.getElementById("statusTitle")
+    const sub   = document.getElementById("statusSub")
+    const badge = document.getElementById("statusBadge")
+
+    if (isPaused) {
+      dot.className   = "ai-status-dot dot-paused"
+      title.textContent = "AI Engine Paused"
+      sub.textContent   = "Click Resume to restart"
+      badge.textContent = "⏸ PAUSED"
+      badge.className   = "status-badge badge-paused"
+      document.getElementById("pauseBtn").textContent = "▶ Resume"
+    } else {
+      dot.className   = "ai-status-dot dot-running"
+      title.textContent = "AI Engine Running"
+      sub.textContent   = `${d.runCount || 0} cycles completed · cron every 5 min`
+      badge.textContent = "✅ ACTIVE"
+      badge.className   = "status-badge badge-running"
+      document.getElementById("pauseBtn").textContent = "⏸ Pause"
+    }
+
+    /* Apply engine toggles */
+    const engines = d.engines || {}
+    let activeCount = 0
+
+    document.querySelectorAll("[data-engine]").forEach(cb => {
+      const engine  = cb.dataset.engine
+      const setting = cb.dataset.setting
+      const val     = engines[engine]?.[setting] ?? false
+      cb.checked    = !!val
+      if (!!val) activeCount++
+    })
+
+    document.getElementById("statEngines").textContent = activeCount
+
+    /* Update engine card dots */
+    const engineNames = ["server","analytics","category","banner","seo","homepage","backup","search","deploy","download"]
+    engineNames.forEach(name => {
+      const hasAny = Object.values(engines[name] || {}).some(Boolean)
+      const dot    = document.getElementById(`dot-${name}`)
+      const card   = document.getElementById(`card-${name}`)
+      if (dot) dot.className  = `engine-active-dot ${hasAny ? "on" : ""}`
+      if (card) card.classList.toggle("active-card", hasAny)
+    })
+
+    /* Logs */
+    renderLogs(d.logs || [])
+
+  } catch (err) {
+    showToast("Load failed: " + err.message, "error")
+  }
 }
 
-return data
+/* =========================================
+   SAVE SETTING
+========================================= */
+async function saveSetting(checkbox) {
+  const engine  = checkbox.dataset.engine
+  const setting = checkbox.dataset.setting
+  const value   = checkbox.checked
 
-}catch(err){
+  try {
+    const res  = await fetch(AI_API, {
+      method: "PATCH", headers: authHeaders(),
+      body: JSON.stringify({ engine, setting, value })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
 
-console.error("AI ERROR:",err)
+    showToast(`${engine}.${setting} ${value ? "enabled" : "disabled"} ✅`)
 
-if(retry>0){
-return api(url,method,body,retry-1)
+    /* Update engine dot */
+    const allCBs = document.querySelectorAll(`[data-engine="${engine}"]`)
+    const hasAny = [...allCBs].some(cb => cb.checked)
+    const dot    = document.getElementById(`dot-${engine}`)
+    const card   = document.getElementById(`card-${engine}`)
+    if (dot)  dot.className = `engine-active-dot ${hasAny ? "on" : ""}`
+    if (card) card.classList.toggle("active-card", hasAny)
+
+    /* Update active count */
+    const total = document.querySelectorAll("[data-engine]:checked").length
+    document.getElementById("statEngines").textContent = total
+
+  } catch (err) {
+    checkbox.checked = !value
+    showToast(err.message, "error")
+  }
 }
 
-alert("AI system error")
-return null
+/* =========================================
+   RUN NOW
+========================================= */
+document.getElementById("runBtn").onclick = async () => {
+  const btn = document.getElementById("runBtn")
+  btn.disabled    = true
+  btn.textContent = "⏳ Running..."
 
+  try {
+    const res  = await fetch(`${AI_API}/run`, {
+      method: "POST", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    const engines = json.data.engines || []
+    showToast(`AI ran — ${engines.length} engine(s) ✅`)
+    loadAI()
+
+  } catch (err) {
+    showToast(err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "▶ Run Now"
+  }
 }
 
+/* =========================================
+   PAUSE / RESUME
+========================================= */
+document.getElementById("pauseBtn").onclick = async () => {
+  try {
+    const res  = await fetch(`${AI_API}/pause`, {
+      method: "PATCH", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    isPaused = json.data.paused
+    showToast(isPaused ? "AI Paused ⏸" : "AI Resumed ✅", "info")
+    loadAI()
+
+  } catch (err) {
+    showToast(err.message, "error")
+  }
 }
 
-/* ===============================
-LOADING STATE
-================================ */
-
-function setLoading(state){
-
-loading=state
-
-document.querySelectorAll(".ai-item input")
-.forEach(i=>i.disabled=state)
-
-pauseBtn.disabled=state
-
+/* =========================================
+   RESET
+========================================= */
+async function resetAI() {
+  if (!confirm("Reset all AI settings to defaults?")) return
+  try {
+    const res  = await fetch(`${AI_API}/reset`, {
+      method: "POST", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("AI settings reset ✅")
+    loadAI()
+  } catch (err) { showToast(err.message, "error") }
 }
 
-/* ===============================
-LOAD AI STATE
-================================ */
-
-async function loadAI(){
-
-if(loading) return
-
-setLoading(true)
-
-const data=await api(AI_API)
-
-setLoading(false)
-
-if(!data) return
-
-aiState=data
-
-updatePauseUI(data.paused)
-
-document.querySelectorAll(".ai-card").forEach(card=>{
-
-const engine=getEngine(card.querySelector("h3").innerText)
-
-const engineData=data.engines?.[engine]||{}
-
-card.querySelectorAll(".ai-item").forEach(item=>{
-
-const label=item.childNodes[0]?.textContent||""
-const setting=getSetting(label)
-
-const checkbox=item.querySelector("input")
-
-checkbox.checked=!!engineData[setting]
-checkbox.disabled=data.paused
-
-item.style.opacity=data.paused?0.5:1
-
-})
-
-})
-
-console.log("AI STATE:",data)
-
+/* =========================================
+   LOGS
+========================================= */
+function renderLogs(list) {
+  const el = document.getElementById("logList")
+  if (!list.length) {
+    el.innerHTML = `<div class="no-logs">No AI events yet</div>`
+    return
+  }
+  el.innerHTML = list.map(l => {
+    const typeClass = `type-${l.type || "default"}`
+    const time = l.created_at ? new Date(l.created_at).toLocaleTimeString() : "—"
+    return `
+      <div class="log-item">
+        <span class="log-type ${typeClass}">${l.type || "?"}</span>
+        <span class="log-msg">${l.message || "—"}</span>
+        <span class="log-time">${time}</span>
+      </div>
+    `
+  }).join("")
 }
 
-/* ===============================
-QUEUE SAVE (SMART)
-================================ */
-
-function queueSave(engine,setting,value){
-
-saveQueue[engine+"_"+setting]={engine,setting,value}
-
-clearTimeout(saveTimer)
-
-saveTimer=setTimeout(async()=>{
-
-const tasks=Object.values(saveQueue)
-saveQueue={}
-
-for(const t of tasks){
-
-await api(AI_API,"PATCH",t)
-
-console.log("Saved:",t)
-
+async function loadLogs() {
+  try {
+    const res  = await fetch(`${AI_API}/logs?limit=20`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) return
+    renderLogs(json.data || [])
+  } catch {}
 }
 
-},300)
-
+async function clearLogs() {
+  if (!confirm("Clear all AI logs?")) return
+  try {
+    const res  = await fetch(`${AI_API}/logs`, {
+      method: "DELETE", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Logs cleared ✅")
+    renderLogs([])
+  } catch (err) { showToast(err.message, "error") }
 }
 
-/* ===============================
-TOGGLE HANDLER
-================================ */
+/* =========================================
+   AUTO REFRESH — every 30s
+========================================= */
+setInterval(() => {
+  loadAI()
+}, 30000)
 
-function handleToggle(e){
-
-if(loading) return
-
-const checkbox=e.target
-
-const item=checkbox.closest(".ai-item")
-const card=checkbox.closest(".ai-card")
-
-const engine=getEngine(card.querySelector("h3").innerText)
-const setting=getSetting(item.childNodes[0].textContent)
-
-queueSave(engine,setting,checkbox.checked)
-
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  checkAuth()
+  loadAI()
 }
-
-/* ===============================
-PAUSE SYSTEM
-================================ */
-
-async function togglePause(){
-
-setLoading(true)
-
-const res=await api(`${AI_API}/pause`,"PATCH")
-
-setLoading(false)
-
-if(!res) return
-
-updatePauseUI(res.paused)
-loadAI()
-
-}
-
-/* ===============================
-BUTTON UPDATE
-================================ */
-
-function updatePauseUI(paused){
-
-if(paused){
-pauseBtn.innerText="▶ Resume AI Systems"
-pauseBtn.style.background="#1abc9c"
-}else{
-pauseBtn.innerText="⏸ Pause AI Systems"
-pauseBtn.style.background="#ffcc00"
-}
-
-}
-
-/* ===============================
-AUTO REFRESH
-================================ */
-
-function autoRefresh(){
-
-setInterval(()=>{
-if(!loading){
-loadAI()
-}
-},20000)
-
-}
-
-/* ===============================
-ERROR WATCHER (CRITICAL)
-================================ */
-
-window.addEventListener("error",(e)=>{
-console.error("GLOBAL ERROR:",e.message)
-})
-
-window.addEventListener("unhandledrejection",(e)=>{
-console.error("PROMISE ERROR:",e.reason)
-})
-
-/* ===============================
-INIT
-================================ */
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-loadAI()
-
-document.querySelectorAll(".ai-item input")
-.forEach(i=>{
-i.addEventListener("change",handleToggle)
-})
-
-pauseBtn.onclick=togglePause
-
-autoRefresh()
-
-})
-
 </script>
-
- 
-  
 </body>
 </html>
