@@ -1,357 +1,1268 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Security – AnimeHunt CMS</title>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#0b0f1a;color:#fff}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-.cms-app{display:flex;min-height:100vh;}
-
+/* ========== SIDEBAR ========== */
 .cms-sidebar{
-width:260px;
-background:linear-gradient(180deg,#0b0f1a,#0e1424);
-border-right:1px solid #1a2035;
-padding:20px 14px;
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100
 }
-
-.brand{font-size:20px;font-weight:700;margin-bottom:30px}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
 .brand b{color:#ffcc00}
-.brand small{display:block;font-size:10px;color:#777;margin-top:4px}
-
-.cms-menu{display:flex;flex-direction:column;gap:6px}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
 .cms-menu a{
-padding:10px 14px;
-border-radius:8px;
-font-size:13px;
-color:#ccc;
-text-decoration:none;
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
 }
-.cms-menu a:hover{background:#1a2035;color:#ffcc00}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-.cms-main{flex:1;display:flex;flex-direction:column;background:#0e1424;}
-
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
 .cms-header{
-height:60px;
-background:#0b0f1a;
-display:flex;
-align-items:center;
-padding:0 20px;
-border-bottom:1px solid #1a2035;
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
 }
-
-.cms-content{
-padding:20px;
-width:100%;
-max-width:1100px;
-margin:0 auto;
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.save-btn{
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;transition:.2s
 }
-
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:20px;
-align-items:start;
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.outline-btn{
+  background:transparent;border:1px solid #2a3055;color:#aaa;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
 }
-
-@media(max-width:700px){
-.grid{grid-template-columns:1fr}
+.outline-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
 }
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px;padding-bottom:80px}
 
-.card{
-background:#0b0f1a;
-border:1px solid #1a2035;
-border-radius:12px;
-padding:16px;
-transition:.2s;
+/* ========== SCORE PANEL ========== */
+.score-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:12px;
+  padding:20px 22px;margin-bottom:20px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center
 }
-
-.card:hover{
-transform:translateY(-3px);
-border-color:#2a3255;
+.score-circle{
+  width:80px;height:80px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:3px solid #1a2035;position:relative;flex-shrink:0
 }
-
-.card h3{
-font-size:14px;
-color:#ffcc00;
-margin-bottom:10px;
+.s-num{font-size:22px;font-weight:800;color:#ffcc00;line-height:1}
+.s-max{font-size:9px;color:#555;margin-top:2px}
+.score-grade{
+  position:absolute;top:-8px;right:-8px;
+  background:#ffcc00;color:#000;font-size:10px;font-weight:800;
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center
 }
+.score-info{flex:1}
+.score-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.score-bar-bg{height:8px;background:#1a2035;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.score-bar-fill{height:100%;border-radius:4px;transition:width .6s;background:#ffcc00}
+.score-bar-fill.A{background:#4caf50}
+.score-bar-fill.B{background:#8bc34a}
+.score-bar-fill.C{background:#ffcc00}
+.score-bar-fill.D{background:#ff9800}
+.score-bar-fill.F{background:#f44336}
+.score-tips{display:flex;flex-wrap:wrap;gap:6px}
+.score-tip{font-size:10px;color:#ff9800;background:#2a1a00;padding:3px 8px;border-radius:10px;border:1px solid #ff980033}
+.score-stats{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.score-stat .s-val{font-size:18px;font-weight:700;color:#ffcc00}
+.score-stat .s-lbl{font-size:10px;color:#555;margin-top:1px;text-align:right}
 
-.toggle{
-display:flex;
-justify-content:space-between;
-margin:10px 0;
-font-size:13px;
+/* ========== FIREWALL METER ========== */
+.fw-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 18px;margin-bottom:20px
 }
-
-.switch{
-position:relative;width:42px;height:22px;
+.fw-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.fw-levels{display:flex;gap:8px;margin-bottom:12px}
+.fw-level{
+  flex:1;padding:10px 8px;border-radius:8px;border:1px solid #1a2035;
+  background:#0b0f1a;cursor:pointer;text-align:center;transition:.2s
 }
-.switch input{display:none}
+.fw-level:hover{border-color:#2a3055}
+.fw-level.active{border-color:#ffcc00;background:#1a2035}
+.fw-level .lv-num{font-size:16px;font-weight:800;color:#ffcc00}
+.fw-level .lv-label{font-size:9px;color:#777;margin-top:3px}
+.fw-level .lv-desc{font-size:9px;color:#555;margin-top:2px}
+.fw-level.active .lv-label{color:#ffcc00}
 
-.slider{
-position:absolute;top:0;left:0;right:0;bottom:0;
-background:#333;border-radius:22px;
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
 }
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
 
-.slider:before{
-content:"";
-position:absolute;height:16px;width:16px;
-left:3px;top:3px;background:#fff;border-radius:50%;
-transition:.3s;
+/* ========== SECTION LABEL ========== */
+.section-label{
+  font-size:11px;color:#555;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;margin:22px 0 12px;display:flex;align-items:center;gap:8px
 }
+.section-label::after{content:"";flex:1;height:1px;background:#1a2035}
 
-input:checked+.slider{background:#00ffb3}
-input:checked+.slider:before{transform:translateX(20px)}
+/* ========== AUTOMATION PANEL ========== */
+.auto-panel{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px;margin-bottom:4px}
+.auto-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:12px}
+.auto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.auto-btn{
+  background:#0b0f1a;border:1px solid #1a2035;color:#ccc;
+  padding:12px 14px;border-radius:8px;font-size:11px;cursor:pointer;
+  transition:.2s;display:flex;flex-direction:column;align-items:center;
+  gap:6px;text-align:center;width:100%
+}
+.auto-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.auto-btn .a-icon{font-size:20px}
+.auto-btn .a-label{font-weight:600}
+.auto-btn .a-sub{color:#555;font-size:10px}
+.auto-btn.danger{border-color:#3a1a1a}
+.auto-btn.danger:hover{border-color:#f44336;color:#f44336;background:#3a1a1a}
 
-.range{width:100%;margin-top:10px}
+/* ========== TOGGLE GRID ========== */
+.toggle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.toggle-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;transition:.2s
+}
+.toggle-card.enabled{border-color:#1a3a2a}
+.toggle-card.disabled-card{border-color:#2a1a1a}
+.tc-icon{font-size:20px;flex-shrink:0}
+.tc-info{flex:1;min-width:0}
+.tc-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.tc-desc{font-size:10px;color:#555;line-height:1.4}
+.tc-impact{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;margin-top:4px;display:inline-block}
+.impact-critical{background:#3a1a1a;color:#f44336}
+.impact-high{background:#1a3a2a;color:#4caf50}
+.impact-med{background:#2a2a1a;color:#ffcc00}
+/* Switch */
+.sw{position:relative;width:40px;height:22px;flex-shrink:0}
+.sw input{display:none}
+.sw-sl{position:absolute;inset:0;background:#1a2035;border-radius:22px;cursor:pointer;transition:.25s;border:1px solid #2a3055}
+.sw-sl:before{content:"";position:absolute;width:16px;height:16px;left:2px;top:2px;background:#555;border-radius:50%;transition:.25s}
+.sw input:checked+.sw-sl{background:#1a3a2a;border-color:#4caf50}
+.sw input:checked+.sw-sl:before{transform:translateX(18px);background:#4caf50}
+
+/* ========== ADVANCED GRID ========== */
+.adv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.adv-card{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px}
+.adv-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #1a2035;display:flex;align-items:center;gap:6px}
+.form-group{margin-bottom:12px}
+.form-group:last-child{margin-bottom:0}
+.form-label{font-size:11px;color:#777;margin-bottom:5px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;background:#0b0f1a;border:1px solid #1a2035;color:#fff;padding:8px 11px;border-radius:7px;font-size:12px;outline:none;transition:.2s}
+.form-input:focus{border-color:#ffcc00}
+select.form-input option{background:#0b0f1a}
+
+/* ========== BAN IP PANEL ========== */
+.ban-panel{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px}
+.ban-row{display:flex;gap:8px;margin-bottom:12px}
+.ban-input{flex:1;background:#0b0f1a;border:1px solid #1a2035;color:#fff;padding:9px 12px;border-radius:7px;font-size:12px;outline:none;transition:.2s}
+.ban-input:focus{border-color:#ffcc00}
+.ban-btn{background:#f44336;border:none;color:#fff;padding:9px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+.ban-btn:hover{background:#e53935}
+.ip-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.ip-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;background:#0b0f1a;border-radius:7px;border:1px solid #1a2035;font-size:12px
+}
+.ip-item .ip-addr{color:#f44336;font-family:monospace;font-weight:600}
+.ip-item .ip-reason{color:#555;font-size:10px;margin-left:8px}
+.ip-item .ip-count{color:#ffcc00;font-size:10px;margin-left:auto;margin-right:8px}
+.unban-btn{background:none;border:none;color:#4caf50;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px}
+.unban-btn:hover{background:#1a3a2a}
+.no-bans{color:#555;font-size:12px;text-align:center;padding:16px}
+
+/* ========== THREAT LOG ========== */
+.threat-panel{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px}
+.threat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.threat-title{font-size:12px;font-weight:700;color:#ffcc00}
+.clear-btn{background:transparent;border:1px solid #3a1a1a;color:#f44336;padding:4px 10px;border-radius:5px;font-size:10px;cursor:pointer;transition:.2s}
+.clear-btn:hover{background:#3a1a1a}
+.threat-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.threat-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;background:#0b0f1a;border-radius:6px;border:1px solid #1a2035;font-size:11px
+}
+.threat-type{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:#3a1a1a;color:#f44336;flex-shrink:0}
+.threat-ip{color:#ffcc00;font-family:monospace;font-size:11px}
+.threat-path{color:#555;font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.threat-time{color:#444;font-size:10px;flex-shrink:0}
+.no-threats{color:#555;font-size:12px;text-align:center;padding:16px}
+
+/* ========== UNSAVED BAR ========== */
+.unsaved-bar{
+  position:fixed;bottom:0;left:230px;right:0;
+  background:#1a2035;border-top:2px solid #ffcc00;
+  padding:10px 22px;display:none;align-items:center;
+  justify-content:space-between;z-index:99
+}
+.unsaved-bar.show{display:flex}
+.unsaved-msg{color:#ffcc00;font-weight:600;font-size:13px}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:70px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.toast.info{border-color:#2196f3;background:#0d1a28}
+
+/* ========== SPINNER ========== */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #1a2035;border-top-color:#ffcc00;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
-
 <body>
 
-<div class="cms-app">
-
-<!-- SIDEBAR -->
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
-<div class="brand">
-<span>Anime</span><b>Hunt</b>
-<small>CMS</small>
-</div>
-
-<nav class="cms-menu">
-<a href="dashboard.html">🏠 Dashboard</a>
-<a href="anime.html">🎬 Anime</a>
-<a href="episodes.html">📺 Episodes</a>
-<a href="categories.html">🗂 Catagorys</a>
-<a href="banners.html">🖼 Banners</a>
-<a href="homepage.html">🏠 Homepage</a>
-<a href="downloads.html">📥 Downloads</a>
-<a href="servers.html">🌐 Servers</a>
-<a href="player.html">🎞 Player</a>
-<a href="search.html">🔍 Search</a>
-<a href="seo.html">📈 Seo</a>
-<a href="analytics.html">📊 Analytics</a>
-<a href="performance.html">⚡ Performance</a>
-<a href="security.html" class="active">🔐 Security</a>
-<a href="deploy-backup.html">🚀 Deploy-backup</a>
-<a href="ads.html">📢 Ads</a>
-<a href="ai-brain.html">🧠 Ai Brain</a>
-<a href="sidebar.html">📌 Sidebar</a>
-<a href="footer.html">🦶 Footer</a>
-<a href="system-settings.html">⚙ System-settings</a>
-</nav>
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
+  <nav class="cms-menu">
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html">🗂 Categories</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+    <div class="menu-sep"></div>
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+    <div class="menu-sep"></div>
+    <a href="security.html" class="active">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
+  </nav>
 </aside>
 
-<!-- MAIN -->
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
 
-<header class="cms-header">
-<div>🔐 Security Settings</div>
-</header>
+  <header class="cms-header">
+    <div class="title">🔐 Security Control</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="outline-btn" id="resetBtn">↺ Defaults</button>
+      <button class="save-btn" id="saveBtn">💾 Save Settings</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-<section class="cms-content">
+  <section class="cms-content">
 
-<div class="grid">
+    <!-- SCORE PANEL -->
+    <div class="score-panel">
+      <div class="score-circle">
+        <div class="s-num" id="scoreNum">—</div>
+        <div class="s-max">/100</div>
+        <div class="score-grade" id="scoreGrade">?</div>
+      </div>
+      <div class="score-info">
+        <div class="score-title">Security Score</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill" id="scoreBar" style="width:0"></div>
+        </div>
+        <div class="score-tips" id="scoreTips">
+          <span style="font-size:11px;color:#555">Loading...</span>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat">
+          <div class="s-val" id="statBanned">—</div>
+          <div class="s-lbl">Banned IPs</div>
+        </div>
+        <div class="score-stat">
+          <div class="s-val" id="statThreats">—</div>
+          <div class="s-lbl">Threats Logged</div>
+        </div>
+      </div>
+    </div>
 
-<!-- CORE -->
-<div class="card">
-<h3>Core Protection</h3>
+    <!-- FIREWALL LEVEL -->
+    <div class="fw-panel">
+      <div class="fw-title">🛡 Firewall Level</div>
+      <div class="fw-levels" id="fwLevels">
+        <div class="fw-level" data-lv="1" onclick="setFirewall(1)">
+          <div class="lv-num">1</div>
+          <div class="lv-label">Minimal</div>
+          <div class="lv-desc">Dev mode</div>
+        </div>
+        <div class="fw-level" data-lv="2" onclick="setFirewall(2)">
+          <div class="lv-num">2</div>
+          <div class="lv-label">Low</div>
+          <div class="lv-desc">Basic only</div>
+        </div>
+        <div class="fw-level active" data-lv="3" onclick="setFirewall(3)">
+          <div class="lv-num">3</div>
+          <div class="lv-label">Medium</div>
+          <div class="lv-desc">Recommended</div>
+        </div>
+        <div class="fw-level" data-lv="4" onclick="setFirewall(4)">
+          <div class="lv-num">4</div>
+          <div class="lv-label">High</div>
+          <div class="lv-desc">Strict rules</div>
+        </div>
+        <div class="fw-level" data-lv="5" onclick="setFirewall(5)">
+          <div class="lv-num">5</div>
+          <div class="lv-label">Maximum</div>
+          <div class="lv-desc">Fort Knox</div>
+        </div>
+      </div>
+    </div>
 
-<div class="toggle">Bot Protection
-<label class="switch"><input type="checkbox" id="botProt"><span class="slider"></span></label>
-</div>
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🛡</div>
+        <div class="stat-info">
+          <div class="num" id="statGrade">—</div>
+          <div class="lbl">Security Grade</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <div class="num" id="statFW">—</div>
+          <div class="lbl">Firewall Level</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-info">
+          <div class="num" id="statAI">—</div>
+          <div class="lbl">AI Auto-Ban</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱</div>
+        <div class="stat-info">
+          <div class="num" id="statLastSave">—</div>
+          <div class="lbl">Last Saved</div>
+        </div>
+      </div>
+    </div>
 
-<div class="toggle">Scraper Shield
-<label class="switch"><input type="checkbox" id="scraperShield"><span class="slider"></span></label>
-</div>
+    <!-- AUTOMATION -->
+    <div class="section-label">🤖 Quick Automation</div>
+    <div class="auto-panel">
+      <div class="auto-title">⚡ One-Click Security Actions</div>
+      <div class="auto-grid">
+        <button class="auto-btn" onclick="enableAll()">
+          <span class="a-icon">✅</span>
+          <span class="a-label">Enable All</span>
+          <span class="a-sub">Max protection on</span>
+        </button>
+        <button class="auto-btn" onclick="loadScore()">
+          <span class="a-icon">📊</span>
+          <span class="a-label">Refresh Score</span>
+          <span class="a-sub">Recalculate security</span>
+        </button>
+        <button class="auto-btn" onclick="loadBannedIPs()">
+          <span class="a-icon">🚫</span>
+          <span class="a-label">Refresh Bans</span>
+          <span class="a-sub">Reload banned IPs</span>
+        </button>
+        <button class="auto-btn danger" onclick="clearAllBans()">
+          <span class="a-icon">🗑</span>
+          <span class="a-label">Clear All Bans</span>
+          <span class="a-sub">Unban all IPs</span>
+        </button>
+      </div>
+    </div>
 
-<div class="toggle">Hotlink Block
-<label class="switch"><input type="checkbox" id="hotlinkBlock"><span class="slider"></span></label>
-</div>
+    <!-- CORE PROTECTION -->
+    <div class="section-label">🛡 Core Protection</div>
+    <div class="toggle-grid">
 
-<div class="toggle">Embed Lock
-<label class="switch"><input type="checkbox" id="embedLock"><span class="slider"></span></label>
-</div>
-</div>
+      <div class="toggle-card" id="card-bot">
+        <span class="tc-icon">🤖</span>
+        <div class="tc-info">
+          <div class="tc-title">Bot Protection</div>
+          <div class="tc-desc">Blocks automated bots from scraping or abusing your site.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_bot" onchange="toggleCard('bot','core_bot');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-<!-- ADMIN -->
-<div class="card">
-<h3>Admin Security</h3>
+      <div class="toggle-card" id="card-scraper">
+        <span class="tc-icon">🕷</span>
+        <div class="tc-info">
+          <div class="tc-title">Scraper Shield</div>
+          <div class="tc-desc">Prevents content scrapers from stealing your anime data.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_scraper" onchange="toggleCard('scraper','core_scraper');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-<div class="toggle">Login Limit
-<label class="switch"><input type="checkbox" id="loginLimit"><span class="slider"></span></label>
-</div>
+      <div class="toggle-card" id="card-hotlink">
+        <span class="tc-icon">🔗</span>
+        <div class="tc-info">
+          <div class="tc-title">Hotlink Block</div>
+          <div class="tc-desc">Stops other sites from hotlinking your images and videos.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_hotlink" onchange="toggleCard('hotlink','core_hotlink');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-<div class="toggle">Session Monitor
-<label class="switch"><input type="checkbox" id="sessionMonitor"><span class="slider"></span></label>
-</div>
-</div>
+      <div class="toggle-card" id="card-xss">
+        <span class="tc-icon">💉</span>
+        <div class="tc-info">
+          <div class="tc-title">XSS Protection</div>
+          <div class="tc-desc">Blocks cross-site scripting attacks in requests and inputs.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_xss" onchange="toggleCard('xss','core_xss');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-<!-- FIREWALL -->
-<div class="card">
-<h3>Firewall Level</h3>
-<input type="range" id="firewallLevel" min="1" max="5" value="3">
-<p id="fwLabel">Level 3</p>
-</div>
+      <div class="toggle-card" id="card-csrf">
+        <span class="tc-icon">🎭</span>
+        <div class="tc-info">
+          <div class="tc-title">CSRF Protection</div>
+          <div class="tc-desc">Prevents cross-site request forgery attacks on your admin.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_csrf" onchange="toggleCard('csrf','core_csrf');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-<!-- AUTO -->
-<div class="card">
-<h3>Auto Protection</h3>
-<div class="toggle">Auto IP Ban
-<label class="switch"><input type="checkbox" id="autoBan"><span class="slider"></span></label>
-</div>
-</div>
+      <div class="toggle-card" id="card-sqli">
+        <span class="tc-icon">🗄</span>
+        <div class="tc-info">
+          <div class="tc-title">SQL Injection Block</div>
+          <div class="tc-desc">Detects and blocks SQL injection attempts on all routes.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_sqli" onchange="toggleCard('sqli','core_sqli');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
 
-</div>
-</section>
+    </div>
+
+    <!-- NETWORK PROTECTION -->
+    <div class="section-label">🌐 Network Protection</div>
+    <div class="toggle-grid">
+
+      <div class="toggle-card" id="card-rateLimit">
+        <span class="tc-icon">⏱</span>
+        <div class="tc-info">
+          <div class="tc-title">Rate Limiting</div>
+          <div class="tc-desc">Limits requests per IP. Stops API abuse and flooding.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="rate_limit" onchange="toggleCard('rateLimit','rate_limit');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-ddos">
+        <span class="tc-icon">🌊</span>
+        <div class="tc-info">
+          <div class="tc-title">DDoS Protection</div>
+          <div class="tc-desc">Auto-blocks IPs sending too many requests. Keeps site alive.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="ddos_protect" onchange="toggleCard('ddos','ddos_protect');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-tor">
+        <span class="tc-icon">🧅</span>
+        <div class="tc-info">
+          <div class="tc-title">Tor Block</div>
+          <div class="tc-desc">Blocks requests from Tor exit nodes — high risk traffic.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="tor_block" onchange="toggleCard('tor','tor_block');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- AI + ADMIN PROTECTION -->
+    <div class="section-label">🤖 AI + Admin Protection</div>
+    <div class="toggle-grid">
+
+      <div class="toggle-card" id="card-autoBan">
+        <span class="tc-icon">🤖</span>
+        <div class="tc-info">
+          <div class="tc-title">AI Auto-Ban</div>
+          <div class="tc-desc">AI automatically bans IPs after repeated threats are detected.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="ai_auto_ban" onchange="toggleCard('autoBan','ai_auto_ban');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-aiThreat">
+        <span class="tc-icon">🔍</span>
+        <div class="tc-info">
+          <div class="tc-title">AI Threat Detection</div>
+          <div class="tc-desc">Real-time pattern analysis to detect attacks before they hit.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="ai_threat_detect" onchange="toggleCard('aiThreat','ai_threat_detect');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-aiAnomaly">
+        <span class="tc-icon">📡</span>
+        <div class="tc-info">
+          <div class="tc-title">AI Anomaly Detection</div>
+          <div class="tc-desc">Detects unusual traffic patterns that indicate attacks.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="ai_anomaly" onchange="toggleCard('aiAnomaly','ai_anomaly');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-loginLimit">
+        <span class="tc-icon">🔑</span>
+        <div class="tc-info">
+          <div class="tc-title">Admin Login Limit</div>
+          <div class="tc-desc">Locks admin after failed attempts. Stops brute force.</div>
+          <span class="tc-impact impact-critical">CRITICAL</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="admin_login_limit" onchange="toggleCard('loginLimit','admin_login_limit');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-session">
+        <span class="tc-icon">👁</span>
+        <div class="tc-info">
+          <div class="tc-title">Session Monitor</div>
+          <div class="tc-desc">Monitors admin sessions for suspicious activity.</div>
+          <span class="tc-impact impact-med">MEDIUM</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="session_monitor" onchange="toggleCard('session','session_monitor');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- SECURITY HEADERS -->
+    <div class="section-label">📋 Security Headers</div>
+    <div class="toggle-grid">
+
+      <div class="toggle-card" id="card-hsts">
+        <span class="tc-icon">🔒</span>
+        <div class="tc-info">
+          <div class="tc-title">HSTS</div>
+          <div class="tc-desc">Forces HTTPS. Prevents protocol downgrade attacks.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="hsts" onchange="toggleCard('hsts','hsts');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-csp">
+        <span class="tc-icon">📜</span>
+        <div class="tc-info">
+          <div class="tc-title">Content Security Policy</div>
+          <div class="tc-desc">Prevents unauthorized scripts from running on your site.</div>
+          <span class="tc-impact impact-high">HIGH</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="csp" onchange="toggleCard('csp','csp');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-xframe">
+        <span class="tc-icon">🖼</span>
+        <div class="tc-info">
+          <div class="tc-title">X-Frame-Options</div>
+          <div class="tc-desc">Prevents clickjacking by blocking iframe embedding.</div>
+          <span class="tc-impact impact-med">MEDIUM</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="xframe" onchange="toggleCard('xframe','xframe');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+      <div class="toggle-card" id="card-nosniff">
+        <span class="tc-icon">👃</span>
+        <div class="tc-info">
+          <div class="tc-title">X-Content-Type-Options</div>
+          <div class="tc-desc">Stops browsers from MIME sniffing — prevents script injection.</div>
+          <span class="tc-impact impact-med">MEDIUM</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="nosniff" onchange="toggleCard('nosniff','nosniff');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- ADVANCED SETTINGS -->
+    <div class="section-label">⚙️ Advanced Settings</div>
+    <div class="adv-grid">
+
+      <div class="adv-card">
+        <div class="adv-title">⏱ Rate Limiting</div>
+        <div class="form-group">
+          <label class="form-label">Max Requests per Window</label>
+          <select class="form-input" id="rate_limit_req" onchange="markDirty()">
+            <option value="30">30 req (Strict)</option>
+            <option value="60">60 req</option>
+            <option value="100">100 req (Default)</option>
+            <option value="200">200 req</option>
+            <option value="500">500 req (Loose)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Window (seconds)</label>
+          <select class="form-input" id="rate_limit_window" onchange="markDirty()">
+            <option value="30">30 seconds</option>
+            <option value="60">60 seconds (1 min)</option>
+            <option value="120">120 seconds (2 min)</option>
+            <option value="300">300 seconds (5 min)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="adv-card">
+        <div class="adv-title">🌊 DDoS Settings</div>
+        <div class="form-group">
+          <label class="form-label">Block Threshold (req)</label>
+          <select class="form-input" id="ddos_threshold" onchange="markDirty()">
+            <option value="100">100 (Very Strict)</option>
+            <option value="300">300 (Strict)</option>
+            <option value="500">500 (Default)</option>
+            <option value="1000">1000 (Loose)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Block Duration (seconds)</label>
+          <select class="form-input" id="ddos_block_time" onchange="markDirty()">
+            <option value="60">60s (1 min)</option>
+            <option value="300">300s (5 min)</option>
+            <option value="600">600s (10 min)</option>
+            <option value="3600">3600s (1 hour)</option>
+            <option value="86400">86400s (24 hours)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="adv-card">
+        <div class="adv-title">🤖 AI Ban Settings</div>
+        <div class="form-group">
+          <label class="form-label">Auto-Ban Threshold (threats)</label>
+          <select class="form-input" id="ai_ban_threshold" onchange="markDirty()">
+            <option value="3">3 threats (Aggressive)</option>
+            <option value="5">5 threats (Default)</option>
+            <option value="10">10 threats (Moderate)</option>
+            <option value="20">20 threats (Lenient)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Admin Max Login Attempts</label>
+          <select class="form-input" id="admin_max_attempts" onchange="markDirty()">
+            <option value="3">3 attempts (Strict)</option>
+            <option value="5">5 attempts (Default)</option>
+            <option value="10">10 attempts (Loose)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Admin Lockout (minutes)</label>
+          <select class="form-input" id="admin_lockout_min" onchange="markDirty()">
+            <option value="15">15 min</option>
+            <option value="30">30 min (Default)</option>
+            <option value="60">60 min (1 hour)</option>
+            <option value="1440">1440 min (24 hours)</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BAN IP PANEL -->
+    <div class="section-label">🚫 IP Ban Manager</div>
+    <div class="ban-panel">
+      <div class="ban-row">
+        <input class="ban-input" id="banIPInput" placeholder="Enter IP to ban (e.g. 192.168.1.1)">
+        <input class="ban-input" id="banReasonInput" placeholder="Reason (optional)" style="max-width:200px">
+        <button class="ban-btn" onclick="banIP()">🚫 Ban IP</button>
+      </div>
+      <div class="ip-list" id="ipList">
+        <div class="no-bans">Loading...</div>
+      </div>
+    </div>
+
+    <!-- THREAT LOG -->
+    <div class="section-label">🔍 Threat Log</div>
+    <div class="threat-panel">
+      <div class="threat-head">
+        <div class="threat-title">Recent Security Events</div>
+        <button class="clear-btn" onclick="clearThreats()">🗑 Clear Log</button>
+      </div>
+      <div class="threat-list" id="threatList">
+        <div class="no-threats">Loading...</div>
+      </div>
+    </div>
+
+  </section>
 </main>
+
+<!-- UNSAVED BAR -->
+<div class="unsaved-bar" id="unsavedBar">
+  <span class="unsaved-msg">⚠️ Unsaved changes</span>
+  <div style="display:flex;gap:8px">
+    <button class="outline-btn" onclick="loadSettings()">↺ Discard</button>
+    <button class="save-btn" onclick="saveSettings()">💾 Save Now</button>
+  </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-const API="https://animehunt-backend.animehunt715.workers.dev/api/admin/security"
-const el=id=>document.getElementById(id)
+/* =========================================
+   CONFIG
+========================================= */
+const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const SEC_API = `${API}/security`
 
-/* ================= API ================= */
+let currentFW = 3
+let isDirty   = false
 
-async function api(url,method="GET",body=null){
+/* =========================================
+   AUTH
+========================================= */
+function getToken() { return localStorage.getItem("ah_token") }
 
-  try{
-    const TOKEN=localStorage.getItem("AUTH_TOKEN")
-
-    if(!TOKEN){
-      alert("Login required")
-      return null
-    }
-
-    const res=await fetch(url,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+TOKEN
-      },
-      body:body?JSON.stringify(body):null
-    })
-
-    const text = await res.text()
-
-    let data
-    try{
-      data = JSON.parse(text)
-    }catch{
-      console.error("INVALID JSON:", text)
-      alert("Server error")
-      return null
-    }
-
-    if(!res.ok){
-      console.error("API ERROR:", data)
-      alert(data.error || "API Error")
-      return null
-    }
-
-    return data
-
-  }catch(e){
-    console.error("FETCH ERROR:", e)
-    alert("Network error")
-    return null
-  }
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
 }
 
-/* ================= LOAD ================= */
-
-async function loadSecurity(){
-
-  const d = await api(API)
-
-  if(!d){
-    console.log("Load failed")
-    return
-  }
-
-  el("firewallLevel").value = d.firewallLevel || 3
-
-  el("botProt").checked = !!d.core?.bot
-  el("scraperShield").checked = !!d.core?.scraper
-  el("hotlinkBlock").checked = !!d.core?.hotlink
-  el("embedLock").checked = !!d.core?.embed
-
-  el("loginLimit").checked = !!d.admin?.loginLimit
-  el("sessionMonitor").checked = !!d.advanced?.sessionMonitor
-
-  el("autoBan").checked = !!d.ai?.autoBan
-
-  updateFirewallLabel()
+function requireAuth() {
+  if (!getToken()) { window.location.href = "login.html"; return false }
+  return true
 }
 
-/* ================= SAVE ================= */
-
-let timer
-
-function saveSecurity(){
-
-  clearTimeout(timer)
-
-  timer = setTimeout(async()=>{
-
-    const payload = {
-
-      firewallLevel: Number(el("firewallLevel").value),
-
-      core:{
-        bot: el("botProt").checked,
-        scraper: el("scraperShield").checked,
-        hotlink: el("hotlinkBlock").checked,
-        embed: el("embedLock").checked
-      },
-
-      admin:{
-        loginLimit: el("loginLimit").checked
-      },
-
-      advanced:{
-        sessionMonitor: el("sessionMonitor").checked
-      },
-
-      ai:{
-        autoBan: el("autoBan").checked
-      }
-    }
-
-    const res = await api(API,"POST",payload)
-
-    if(res?.success){
-      console.log("Saved ✅")
-    }
-
-  },300)
+async function checkAuth() {
+  try {
+    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+    document.getElementById("adminName").textContent = json.data.username
+  } catch { window.location.href = "login.html" }
 }
 
-/* ================= UI ================= */
-
-function updateFirewallLabel(){
-  el("fwLabel").innerText = "Level " + el("firewallLevel").value
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
 }
 
-/* ================= INIT ================= */
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 3500)
+}
 
-document.addEventListener("DOMContentLoaded",()=>{
+/* =========================================
+   DIRTY
+========================================= */
+function markDirty() {
+  isDirty = true
+  document.getElementById("unsavedBar").classList.add("show")
+}
 
-  loadSecurity()
+function clearDirty() {
+  isDirty = false
+  document.getElementById("unsavedBar").classList.remove("show")
+}
 
-  document.querySelectorAll("input").forEach(i=>{
-    i.addEventListener("change", saveSecurity)
-  })
-
-  el("firewallLevel").addEventListener("input",()=>{
-    updateFirewallLabel()
-    saveSecurity()
-  })
-
+window.addEventListener("beforeunload", e => {
+  if (isDirty) { e.preventDefault(); e.returnValue = "" }
 })
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveSettings() }
+})
+
+/* =========================================
+   FIREWALL SELECTOR
+========================================= */
+function setFirewall(lv) {
+  currentFW = lv
+  document.querySelectorAll(".fw-level").forEach(el => {
+    el.classList.toggle("active", Number(el.dataset.lv) === lv)
+  })
+  document.getElementById("statFW").textContent = `Level ${lv}`
+  markDirty()
+}
+
+/* =========================================
+   TOGGLE CARDS
+========================================= */
+function toggleCard(cardId, cbId) {
+  const cb   = document.getElementById(cbId)
+  const card = document.getElementById(`card-${cardId}`)
+  if (!card || !cb) return
+  card.classList.toggle("enabled",       !!cb.checked)
+  card.classList.toggle("disabled-card", !cb.checked)
+}
+
+function updateAllCards() {
+  const pairs = [
+    ["bot","core_bot"],["scraper","core_scraper"],["hotlink","core_hotlink"],
+    ["xss","core_xss"],["csrf","core_csrf"],["sqli","core_sqli"],
+    ["rateLimit","rate_limit"],["ddos","ddos_protect"],["tor","tor_block"],
+    ["autoBan","ai_auto_ban"],["aiThreat","ai_threat_detect"],["aiAnomaly","ai_anomaly"],
+    ["loginLimit","admin_login_limit"],["session","session_monitor"],
+    ["hsts","hsts"],["csp","csp"],["xframe","xframe"],["nosniff","nosniff"]
+  ]
+  pairs.forEach(([c,i]) => toggleCard(c,i))
+}
+
+/* =========================================
+   SCORE
+========================================= */
+async function loadScore() {
+  try {
+    const res  = await fetch(`${SEC_API}/score`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) return
+
+    const d = json.data
+    document.getElementById("scoreNum").textContent   = d.score
+    document.getElementById("scoreGrade").textContent = d.grade
+    document.getElementById("statGrade").textContent  = d.grade
+
+    const bar = document.getElementById("scoreBar")
+    bar.style.width = `${d.score}%`
+    bar.className   = `score-bar-fill ${d.grade[0]}`
+
+    const tips = document.getElementById("scoreTips")
+    if (d.tips?.length) {
+      tips.innerHTML = d.tips.slice(0,4).map(t =>
+        `<span class="score-tip">⚠ ${t}</span>`
+      ).join("")
+    } else {
+      tips.innerHTML = `<span style="font-size:11px;color:#4caf50">✅ All security features enabled!</span>`
+    }
+  } catch (err) { console.error("loadScore:", err) }
+}
+
+/* =========================================
+   STATS
+========================================= */
+async function loadStats() {
+  try {
+    const res  = await fetch(`${SEC_API}/stats`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) return
+    document.getElementById("statBanned").textContent  = json.data.bannedIPs
+    document.getElementById("statThreats").textContent = json.data.threats
+  } catch {}
+}
+
+/* =========================================
+   LOAD SETTINGS
+========================================= */
+async function loadSettings() {
+  try {
+    const res  = await fetch(SEC_API, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    const d = json.data
+
+    setFirewall(d.firewallLevel || 3)
+
+    const setCB = (id, val) => {
+      const el = document.getElementById(id)
+      if (el) el.checked = !!val
+    }
+
+    setCB("core_bot",          d.core?.bot)
+    setCB("core_scraper",      d.core?.scraper)
+    setCB("core_hotlink",      d.core?.hotlink)
+    setCB("core_xss",          d.core?.xss)
+    setCB("core_csrf",         d.core?.csrf)
+    setCB("core_sqli",         d.core?.sqli)
+    setCB("rate_limit",        d.rateLimit?.enabled)
+    setCB("ddos_protect",      d.ddos?.protect)
+    setCB("tor_block",         d.advanced?.torBlock)
+    setCB("ai_auto_ban",       d.ai?.autoBan)
+    setCB("ai_threat_detect",  d.ai?.threatDetect)
+    setCB("ai_anomaly",        d.ai?.anomaly)
+    setCB("admin_login_limit", d.admin?.loginLimit)
+    setCB("session_monitor",   d.advanced?.sessionMonitor)
+    setCB("hsts",              d.headers?.hsts)
+    setCB("csp",               d.headers?.csp)
+    setCB("xframe",            d.headers?.xframe)
+    setCB("nosniff",           d.headers?.nosniff)
+
+    const setVal = (id, val) => {
+      const el = document.getElementById(id)
+      if (el) el.value = String(val)
+    }
+
+    setVal("rate_limit_req",    d.rateLimit?.req)
+    setVal("rate_limit_window", d.rateLimit?.window)
+    setVal("ddos_threshold",    d.ddos?.threshold)
+    setVal("ddos_block_time",   d.ddos?.blockTime)
+    setVal("ai_ban_threshold",  d.ai?.banThreshold)
+    setVal("admin_max_attempts",d.admin?.maxAttempts)
+    setVal("admin_lockout_min", d.admin?.lockoutMin)
+
+    document.getElementById("statAI").textContent =
+      d.ai?.autoBan ? "✅ Active" : "❌ Off"
+
+    document.getElementById("statLastSave").textContent =
+      d.updated_at ? new Date(d.updated_at).toLocaleDateString() : "Never"
+
+    updateAllCards()
+    clearDirty()
+    await loadScore()
+
+  } catch (err) {
+    showToast("Load failed: " + err.message, "error")
+  }
+}
+
+/* =========================================
+   BUILD PAYLOAD
+========================================= */
+function buildPayload() {
+  const cb  = (id) => !!document.getElementById(id)?.checked
+  const val = (id) => Number(document.getElementById(id)?.value) || 0
+
+  return {
+    firewallLevel: currentFW,
+    core: {
+      bot:     cb("core_bot"),
+      scraper: cb("core_scraper"),
+      hotlink: cb("core_hotlink"),
+      xss:     cb("core_xss"),
+      csrf:    cb("core_csrf"),
+      sqli:    cb("core_sqli")
+    },
+    rateLimit: {
+      enabled: cb("rate_limit"),
+      req:     val("rate_limit_req"),
+      window:  val("rate_limit_window"),
+      ban:     true
+    },
+    ddos: {
+      protect:   cb("ddos_protect"),
+      threshold: val("ddos_threshold"),
+      blockTime: val("ddos_block_time")
+    },
+    admin: {
+      loginLimit:  cb("admin_login_limit"),
+      maxAttempts: val("admin_max_attempts"),
+      lockoutMin:  val("admin_lockout_min"),
+      twoFA:       false
+    },
+    advanced: {
+      sessionMonitor: cb("session_monitor"),
+      torBlock:       cb("tor_block"),
+      geoBlock:       false,
+      geoBlockedCountries: "",
+      vpnBlock: false
+    },
+    ai: {
+      autoBan:      cb("ai_auto_ban"),
+      threatDetect: cb("ai_threat_detect"),
+      anomaly:      cb("ai_anomaly"),
+      banThreshold: val("ai_ban_threshold")
+    },
+    headers: {
+      hsts:    cb("hsts"),
+      csp:     cb("csp"),
+      xframe:  cb("xframe"),
+      nosniff: cb("nosniff")
+    }
+  }
+}
+
+/* =========================================
+   SAVE
+========================================= */
+async function saveSettings() {
+  const btn = document.getElementById("saveBtn")
+  btn.disabled    = true
+  btn.textContent = "Saving..."
+
+  try {
+    const res  = await fetch(SEC_API, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify(buildPayload())
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    showToast("Security settings saved ✅")
+    clearDirty()
+
+    document.getElementById("statLastSave").textContent =
+      new Date().toLocaleDateString()
+
+    loadScore()
+
+  } catch (err) {
+    showToast("Save failed: " + err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "💾 Save Settings"
+  }
+}
+
+document.getElementById("saveBtn").onclick = saveSettings
+document.getElementById("resetBtn").onclick = async () => {
+  if (!confirm("Reset all security settings to defaults?")) return
+  try {
+    const res  = await fetch(`${SEC_API}/reset`, { method: "POST", headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Reset to defaults ✅")
+    loadSettings()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   ENABLE ALL
+========================================= */
+async function enableAll() {
+  try {
+    const res  = await fetch(`${SEC_API}/enable-all`, { method: "POST", headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("All security features enabled ✅")
+    loadSettings()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   BAN IP
+========================================= */
+async function banIP() {
+  const ip     = document.getElementById("banIPInput").value.trim()
+  const reason = document.getElementById("banReasonInput").value.trim()
+
+  if (!ip) { showToast("Enter an IP address","error"); return }
+
+  try {
+    const res  = await fetch(`${SEC_API}/ban`, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ ip, reason: reason || "manual" })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    document.getElementById("banIPInput").value    = ""
+    document.getElementById("banReasonInput").value = ""
+    showToast(`IP ${ip} banned ✅`)
+    loadBannedIPs()
+    loadStats()
+
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   LOAD BANNED IPs
+========================================= */
+async function loadBannedIPs() {
+  try {
+    const res  = await fetch(`${SEC_API}/banned`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+
+    const list = json.data || []
+    const el   = document.getElementById("ipList")
+
+    if (!list.length) {
+      el.innerHTML = `<div class="no-bans">No banned IPs</div>`
+      return
+    }
+
+    el.innerHTML = list.map(b => `
+      <div class="ip-item">
+        <span class="ip-addr">${b.ip}</span>
+        <span class="ip-reason">${b.reason || "manual"}</span>
+        <span class="ip-count">×${b.ban_count}</span>
+        <button class="unban-btn" onclick="unbanIP('${b.ip}')">✓ Unban</button>
+      </div>
+    `).join("")
+
+  } catch {
+    document.getElementById("ipList").innerHTML =
+      `<div class="no-bans">Could not load</div>`
+  }
+}
+
+async function unbanIP(ip) {
+  try {
+    const res  = await fetch(`${SEC_API}/ban/${encodeURIComponent(ip)}`, {
+      method: "DELETE", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast(`${ip} unbanned`)
+    loadBannedIPs()
+    loadStats()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+async function clearAllBans() {
+  if (!confirm("Unban ALL IPs?")) return
+  try {
+    const res  = await fetch(`${SEC_API}/banned/all`, {
+      method: "DELETE", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("All bans cleared ✅")
+    loadBannedIPs()
+    loadStats()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   THREAT LOG
+========================================= */
+async function loadThreats() {
+  try {
+    const res  = await fetch(`${SEC_API}/threats?limit=30`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+
+    const list = json.data || []
+    const el   = document.getElementById("threatList")
+
+    if (!list.length) {
+      el.innerHTML = `<div class="no-threats">No threats logged</div>`
+      return
+    }
+
+    el.innerHTML = list.map(t => {
+      const time = t.created_at
+        ? new Date(t.created_at).toLocaleTimeString()
+        : "—"
+      return `
+        <div class="threat-item">
+          <span class="threat-type">${t.type || "unknown"}</span>
+          <span class="threat-ip">${t.ip || "—"}</span>
+          <span class="threat-path">${t.path || "—"}</span>
+          <span class="threat-time">${time}</span>
+        </div>
+      `
+    }).join("")
+
+  } catch {
+    document.getElementById("threatList").innerHTML =
+      `<div class="no-threats">Could not load</div>`
+  }
+}
+
+async function clearThreats() {
+  if (!confirm("Clear all threat logs?")) return
+  try {
+    const res  = await fetch(`${SEC_API}/threats`, {
+      method: "DELETE", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Threat log cleared ✅")
+    loadThreats()
+    loadStats()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  checkAuth()
+  loadSettings()
+  loadStats()
+  loadBannedIPs()
+  loadThreats()
+}
 </script>
 </body>
 </html>
