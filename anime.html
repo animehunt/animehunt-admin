@@ -1,806 +1,976 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Anime CMS – AnimeHunt</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime – AnimeHunt CMS</title>
+<style>
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-  <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family: system-ui, sans-serif;
-}
-
-body{
-  background:#0b0f1a;
-  color:#fff;
-}
-
-a{ text-decoration:none; color:inherit }
-
-.cms-app{
-  display:flex;
-  min-height:100vh;
-}
-
-.cms-main{
-  flex:1;
-  background:#0e1424;
-  display:flex;
-  flex-direction:column;
-}
-
-.cms-header{
-  height:60px;
-  background:#0b0f1a;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid #1a2035;
-}
-
-.cms-content{
-  flex:1;
-  padding:20px;
-  overflow:auto;
-}
-
+/* ========== SIDEBAR ========== */
 .cms-sidebar{
-  width:260px;
-  background:linear-gradient(180deg,#0b0f1a,#0e1424);
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
   border-right:1px solid #1a2035;
-  padding:20px 14px;
+  padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;
+  overflow-y:auto;z-index:100
 }
-
-.brand{
-  font-size:20px;
-  font-weight:700;
-  margin-bottom:30px;
-}
-.brand b{ color:#ffcc00 }
-.brand small{
-  display:block;
-  font-size:10px;
-  color:#777;
-  margin-top:4px;
-}
-
-.cms-menu{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
 .cms-menu a{
-  padding:10px 14px;
-  border-radius:8px;
-  font-size:13px;
-  color:#ccc;
-  transition:.25s;
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
 }
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-.cms-menu a:hover{
-  background:#1a2035;
-  color:#ffcc00;
-  transform:translateX(6px);
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.cms-header{
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
 }
-
-/* BUTTON */
+.cms-header .title{font-size:15px;font-weight:600}
+.cms-header .hdr-right{display:flex;align-items:center;gap:10px}
 .add-btn{
-  background:#ffcc00;
-  border:none;
-  padding:8px 16px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;
+  display:flex;align-items:center;gap:6px;transition:.2s
 }
+.add-btn:hover{background:#ffd633;transform:translateY(-1px)}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px}
 
-/* FILTER */
+/* ========== STATS ROW ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.stat-icon{font-size:22px}
+.stat-info{flex:1}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
+
+/* ========== FILTERS ========== */
 .anime-filters{
-  display:flex;
-  gap:10px;
-  margin-bottom:16px;
+  display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center
 }
-
 .anime-filters select,
 .anime-filters input{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  color:#fff;
-  padding:8px 10px;
-  border-radius:6px;
-  font-size:12px;
+  background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:8px 10px;border-radius:7px;font-size:12px;outline:none
 }
+.anime-filters input{flex:1;min-width:160px}
+.anime-filters select:focus,
+.anime-filters input:focus{border-color:#ffcc00}
 
-/* ================= TABLE FIX ================= */
-
-/* HEAD */
+/* ========== TABLE ========== */
+.table-wrap{background:#0e1424;border:1px solid #1a2035;border-radius:10px;overflow:hidden}
 .table-head{
   display:grid;
-  grid-template-columns:60px 200px 100px 100px 1fr 90px 90px 120px;
-  background:#0e1424;
-  padding:12px;
-  font-size:12px;
-  color:#aaa;
+  grid-template-columns:56px 1fr 90px 90px 120px 80px 80px 100px;
+  padding:11px 14px;font-size:11px;color:#666;background:#0b0f1a;
+  border-bottom:1px solid #1a2035;font-weight:600;text-transform:uppercase;letter-spacing:.5px
 }
-
-/* ROW */
 .table-body .row{
   display:grid;
-  grid-template-columns:60px 200px 100px 100px 1fr 90px 90px 120px;
-  padding:12px;
-  border-top:1px solid #1a2035;
-  align-items:center;
-  font-size:12px;
-  min-width:0;
+  grid-template-columns:56px 1fr 90px 90px 120px 80px 80px 100px;
+  padding:10px 14px;border-top:1px solid #1a2035;align-items:center;
+  font-size:12px;transition:background .15s
 }
-
-/* IMAGE */
-.row img{
-  width:40px;
-  height:60px;
-  object-fit:cover;
-  border-radius:6px;
+.table-body .row:hover{background:#111827}
+.row img{width:36px;height:54px;object-fit:cover;border-radius:5px}
+.row .title-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;padding-right:8px}
+.row .title-cell small{display:block;color:#555;font-size:10px;font-weight:400;margin-top:2px}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600
 }
-
-/* ================= TITLE FIX FINAL ================= */
-.table-body .row span:nth-child(2){
-  display:block;
-  max-width:200px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight:600;
-  color:#fff;
+.badge-ongoing{background:#1a3a2a;color:#4caf50}
+.badge-completed{background:#1a2a3a;color:#2196f3}
+.badge-public{background:#1a3a2a;color:#4caf50}
+.badge-hidden{background:#3a1a1a;color:#f44336}
+.badge-yes{background:#2a2a1a;color:#ffcc00}
+.badge-no{color:#555;font-size:10px}
+.row-actions{display:flex;gap:6px}
+.row-actions button{
+  background:none;border:none;cursor:pointer;padding:5px;border-radius:5px;
+  font-size:14px;transition:.15s
 }
+.row-actions .edit-btn:hover{background:#1a2a3a}
+.row-actions .del-btn:hover{background:#3a1a1a}
+.empty-state{text-align:center;padding:60px 20px;color:#555}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
 
-/* बाकी spans */
-.table-body .row span{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+/* ========== PAGINATION ========== */
+.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:14px}
+.pagination button{
+  background:#0e1424;border:1px solid #1a2035;color:#ccc;
+  padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;transition:.15s
 }
+.pagination button:hover{border-color:#ffcc00;color:#ffcc00}
+.pagination button.active{background:#ffcc00;color:#000;border-color:#ffcc00}
+.pagination button:disabled{opacity:.4;cursor:default}
+.page-info{font-size:11px;color:#555;margin-right:4px}
 
-/* ACTION */
-.actions button{
-  background:none;
-  border:none;
-  color:#ffcc00;
-  cursor:pointer;
-  margin-right:6px;
-}
-
-/* MODAL */
+/* ========== MODAL ========== */
 .modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;z-index:9999;padding:16px
 }
-
+.modal.open{display:flex}
 .modal-box{
-  width:720px;
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:14px;
-  overflow:hidden;
+  width:100%;max-width:740px;max-height:92vh;
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden
 }
-
 .modal-header{
-  display:flex;
-  justify-content:space-between;
-  padding:14px 16px;
-  background:#0e1424;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;background:#0e1424;border-bottom:1px solid #1a2035;flex-shrink:0
 }
-
-.modal-body{
-  padding:16px;
+.modal-header h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;line-height:1;padding:4px}
+.modal-close:hover{color:#fff}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/3}
+.form-label{font-size:11px;color:#777;margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.form-input{
+  width:100%;background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:9px 11px;border-radius:7px;font-size:12.5px;outline:none;transition:.2s
 }
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.form-grid input,
-.form-grid select,
-.form-grid textarea{
-  background:#0e1424;
-  border:1px solid #1a2035;
-  color:#fff;
-  padding:8px 10px;
-  border-radius:6px;
-  font-size:12px;
-}
-
-.form-grid textarea{
-  grid-column:1/3;
-  height:80px;
-  resize:none;
-}
-
-.check{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-}
-
-.modal-footer{
-  padding:14px 16px;
-  background:#0e1424;
-  text-align:right;
-}
-
-.modal-footer button{
-  background:#ffcc00;
-  border:none;
-  padding:8px 18px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-/* UPLOAD */
-input[type="file"]{
-  font-size:11px;
-  color:#aaa;
-}
-
-#genres{
-  height:120px;
-}
-
+.form-input:focus{border-color:#ffcc00}
+.form-input::placeholder{color:#444}
+select.form-input option{background:#0e1424}
+textarea.form-input{resize:vertical;min-height:75px}
+.upload-row{display:flex;gap:8px;align-items:center}
 .upload-btn{
-  background:#1a2035;
-  padding:8px;
-  border-radius:6px;
-  text-align:center;
-  cursor:pointer;
-  font-size:12px;
+  flex-shrink:0;background:#1a2035;border:none;color:#aaa;padding:9px 13px;
+  border-radius:7px;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap
 }
+.upload-btn:hover{background:#ffcc00;color:#000}
+.upload-btn input[type=file]{display:none}
+.url-preview{
+  font-size:10px;color:#555;margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.img-preview{
+  width:36px;height:54px;object-fit:cover;border-radius:4px;
+  border:1px solid #1a2035;display:none
+}
+.checks-row{display:flex;flex-wrap:wrap;gap:8px}
+.check-item{
+  display:flex;align-items:center;gap:5px;font-size:12px;color:#bbb;
+  background:#0e1424;padding:6px 12px;border-radius:20px;border:1px solid #1a2035;
+  cursor:pointer;user-select:none;transition:.15s
+}
+.check-item:hover{border-color:#ffcc00}
+.check-item input{width:13px;height:13px;accent-color:#ffcc00;cursor:pointer}
+.check-item.checked{border-color:#ffcc00;color:#ffcc00;background:#1a2035}
+.genres-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:160px;overflow-y:auto}
+.genre-item{
+  display:flex;align-items:center;gap:6px;font-size:11px;padding:5px 8px;
+  border-radius:5px;border:1px solid #1a2035;cursor:pointer;transition:.15s
+}
+.genre-item:hover{border-color:#ffcc00}
+.genre-item.selected{border-color:#ffcc00;background:#1a2035;color:#ffcc00}
+.genre-item input{accent-color:#ffcc00;cursor:pointer}
+.modal-footer{
+  padding:13px 18px;background:#0e1424;border-top:1px solid #1a2035;
+  display:flex;justify-content:flex-end;gap:8px;flex-shrink:0
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:9px 22px;border-radius:7px;
+  font-weight:700;font-size:13px;cursor:pointer;color:#000;transition:.2s
+}
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.cancel-btn{
+  background:transparent;border:1px solid #1a2035;color:#aaa;
+  padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;transition:.2s
+}
+.cancel-btn:hover{border-color:#aaa;color:#fff}
 
-.upload-btn:hover{
-  background:#ffcc00;
-  color:#000;
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
 }
-  </style>
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+
+/* ========== LOADING ========== */
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid #1a2035;border-top-color:#ffcc00;
+  border-radius:50%;animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{text-align:center;padding:40px;color:#555}
+</style>
 </head>
 
 <body>
 
-<div class="cms-app">
-
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
-
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-
-    <!-- CORE -->
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html" class="active">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
+    <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
-
-    <!-- CONTENT -->
+    <div class="menu-sep"></div>
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
-
-    <!-- DATA & SEO -->
-    <a href="seo.html">📈 Seo</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
-
-    <!-- SECURITY & DEPLOY -->
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-    <!-- AI & ADS -->
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 Ai Brain</a>
-
-    <!-- LAYOUT CONTROL -->
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
-
-    <!-- ADMIN / SYSTEM (LAST) -->
-    <a href="system-settings.html">⚙ System-settings</a>
-
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
-  <!-- MAIN -->
-  <main class="cms-main">
+<!-- ========== MAIN ========== -->
+<main class="cms-main">
 
-    <header class="cms-header">
-      <div class="title">🎬 Anime Management</div>
-      <button class="add-btn" id="openAddAnime">➕ Add Anime</button>
-    </header>
+  <header class="cms-header">
+    <div class="title">🎬 Anime Management</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="add-btn" id="openAddBtn">➕ Add Anime</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-    <section class="cms-content">
+  <section class="cms-content">
 
-      <!-- FILTER BAR -->
-      <div class="anime-filters">
-        <select id="typeFilter">
-          <option value="">All Types</option>
-          <option value="anime">Anime</option>
-          <option value="movie">Movie</option>
-          <option value="series">Series</option>
-          <option value="cartoon">Cartoon</option>
-        </select>
-
-        <select id="statusFilter">
-          <option value="">All Status</option>
-          <option value="ongoing">Ongoing</option>
-          <option value="completed">Completed</option>
-        </select>
-
-        <select id="homeFilter">
-          <option value="">Homepage</option>
-          <option value="yes">On Home</option>
-          <option value="no">Not On Home</option>
-        </select>
-
-        <input type="text" id="searchAnime" placeholder="Search anime...">
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-info">
+          <div class="num" id="statTotal">—</div>
+          <div class="lbl">Total Anime</div>
+        </div>
       </div>
-
-      <!-- TABLE -->
-
-        <div class="table-head">
-  <span>Poster</span>
-  <span>Title</span>
-  <span>Type</span>
-  <span>Status</span>
-  <span>Categories</span>
-  <span>Visibility</span>
-  <span>Trending</span>
-  <span>Actions</span>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <div class="num" id="statTrending">—</div>
+          <div class="lbl">Trending</div>
         </div>
-
-        <div class="table-body" id="animeList">
-          <!-- JS DATA -->
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏠</div>
+        <div class="stat-info">
+          <div class="num" id="statHome">—</div>
+          <div class="lbl">On Homepage</div>
         </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🙈</div>
+        <div class="stat-info">
+          <div class="num" id="statHidden">—</div>
+          <div class="lbl">Hidden</div>
+        </div>
+      </div>
+    </div>
 
-    </section>
+    <!-- FILTERS -->
+    <div class="anime-filters">
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="anime">Anime</option>
+        <option value="movie">Movie</option>
+        <option value="series">Series</option>
+        <option value="cartoon">Cartoon</option>
+      </select>
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="ongoing">Ongoing</option>
+        <option value="completed">Completed</option>
+      </select>
+      <select id="homeFilter">
+        <option value="">All</option>
+        <option value="yes">On Homepage</option>
+        <option value="no">Not on Homepage</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="🔍 Search anime...">
+    </div>
 
-  </main>
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <span>Poster</span>
+        <span>Title</span>
+        <span>Type</span>
+        <span>Status</span>
+        <span>Genres</span>
+        <span>Visible</span>
+        <span>Trending</span>
+        <span>Actions</span>
+      </div>
+      <div class="table-body" id="animeList">
+        <div class="loading-row"><div class="spinner"></div></div>
+      </div>
+    </div>
 
-</div>
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination"></div>
 
-<!-- ADD / EDIT MODAL -->
+  </section>
+</main>
+
+<!-- ========== MODAL ========== -->
 <div class="modal" id="animeModal">
   <div class="modal-box">
 
     <div class="modal-header">
       <h3 id="modalTitle">Add Anime</h3>
-      <span id="closeModal">✕</span>
+      <button class="modal-close" id="closeModal">✕</button>
     </div>
 
     <div class="modal-body">
-
       <div class="form-grid">
 
-        <input id="title" placeholder="Title">
-        <input id="slug" placeholder="Slug (auto)">
-        
-        <select id="type" multiple>
-          <option value="anime">Anime</option>
-          <option value="movie">Movie</option>
-          <option value="series">Series</option>
-          <option value="cartoon">Cartoon</option>
-        </select>
+        <!-- Title -->
+        <div>
+          <label class="form-label">Title *</label>
+          <input class="form-input" id="f-title" placeholder="e.g. Naruto Shippuden">
+        </div>
 
-        <select id="status">
-          <option value="ongoing">Ongoing</option>
-          <option value="completed">Completed</option>
-        </select>
+        <!-- Slug -->
+        <div>
+          <label class="form-label">Slug (auto)</label>
+          <input class="form-input" id="f-slug" placeholder="naruto-shippuden">
+        </div>
 
-        <!-- POSTER -->
-<label class="upload-btn">
-  Upload Poster
-  <input type="file" id="posterFile" hidden>
-</label>
-<input id="poster" placeholder="Poster URL" readonly>
+        <!-- Type -->
+        <div>
+          <label class="form-label">Type</label>
+          <select class="form-input" id="f-type">
+            <option value="anime">Anime</option>
+            <option value="movie">Movie</option>
+            <option value="series">Series</option>
+            <option value="cartoon">Cartoon</option>
+          </select>
+        </div>
 
-<label class="upload-btn">
-  Upload Banner
-  <input type="file" id="bannerFile" hidden>
-</label>
-<input id="banner" placeholder="Banner URL" readonly>
-       
-        <input id="year" placeholder="Year">
-        <input id="rating" placeholder="Rating">
+        <!-- Status -->
+        <div>
+          <label class="form-label">Status</label>
+          <select class="form-input" id="f-status">
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
 
-        <input id="language" placeholder="Language">
-        <input id="duration" placeholder="Duration">
+        <!-- Poster -->
+        <div>
+          <label class="form-label">Poster *</label>
+          <div class="upload-row">
+            <label class="upload-btn">
+              📁 Upload
+              <input type="file" id="f-poster-file" accept="image/*">
+            </label>
+            <input class="form-input" id="f-poster" placeholder="or paste URL">
+          </div>
+          <div class="url-preview" id="f-poster-preview"></div>
+        </div>
 
-        <select id="genres" multiple size="6">
+        <!-- Banner -->
+        <div>
+          <label class="form-label">Banner</label>
+          <div class="upload-row">
+            <label class="upload-btn">
+              📁 Upload
+              <input type="file" id="f-banner-file" accept="image/*">
+            </label>
+            <input class="form-input" id="f-banner" placeholder="or paste URL">
+          </div>
+          <div class="url-preview" id="f-banner-preview"></div>
+        </div>
 
-<option value="action">Action</option>
-<option value="adventure">Adventure</option>
-<option value="comedy">Comedy</option>
-<option value="drama">Drama</option>
-<option value="fantasy">Fantasy</option>
-<option value="romance">Romance</option>
-<option value="school">School</option>
-<option value="supernatural">Supernatural</option>
-<option value="sports">Sports</option>
-<option value="horror">Horror</option>
-<option value="thriller">Thriller</option>
-<option value="sci-fi">Sci-Fi</option>
-<option value="mystery">Mystery</option>
+        <!-- Year -->
+        <div>
+          <label class="form-label">Year</label>
+          <input class="form-input" id="f-year" placeholder="2024" type="number" min="1950" max="2099">
+        </div>
 
-</select>
+        <!-- Rating -->
+        <div>
+          <label class="form-label">Rating (0-10)</label>
+          <input class="form-input" id="f-rating" placeholder="8.5" type="number" min="0" max="10" step="0.1">
+        </div>
 
-<label class="check">
-<input type="checkbox" id="autoGenre">
-🎭 Auto Genre Detect
-</label>
-        <input id="tags" placeholder="Tags (comma separated)">
+        <!-- Language -->
+        <div>
+          <label class="form-label">Language</label>
+          <input class="form-input" id="f-language" placeholder="Japanese, Hindi Dub...">
+        </div>
 
-        <label class="check">
-          <input type="checkbox" id="isHome"> Homepage
-        </label>
+        <!-- Duration -->
+        <div>
+          <label class="form-label">Duration</label>
+          <input class="form-input" id="f-duration" placeholder="24 min/ep">
+        </div>
 
-        <label class="check">
-          <input type="checkbox" id="isTrending"> Trending
-        </label>
+        <!-- Genres -->
+        <div class="form-full">
+          <label class="form-label">Genres (select multiple)</label>
+          <div class="genres-grid" id="genresGrid"></div>
+        </div>
 
-        <label class="check">
-          <input type="checkbox" id="isMostViewed"> Most Viewed
-        </label>
+        <!-- Tags -->
+        <div class="form-full">
+          <label class="form-label">Tags (comma separated)</label>
+          <input class="form-input" id="f-tags" placeholder="shonen, ninja, action...">
+        </div>
 
-        <label class="check">
-          <input type="checkbox" id="isBanner"> Banner
-        </label>
+        <!-- Flags -->
+        <div class="form-full">
+          <label class="form-label">Visibility & Flags</label>
+          <div class="checks-row" id="flagsRow">
+            <label class="check-item" id="lbl-isHome">
+              <input type="checkbox" id="f-isHome"> 🏠 Homepage
+            </label>
+            <label class="check-item" id="lbl-isTrending">
+              <input type="checkbox" id="f-isTrending"> 🔥 Trending
+            </label>
+            <label class="check-item" id="lbl-isMostViewed">
+              <input type="checkbox" id="f-isMostViewed"> 👁 Most Viewed
+            </label>
+            <label class="check-item" id="lbl-isBanner">
+              <input type="checkbox" id="f-isBanner"> 🖼 Banner
+            </label>
+            <label class="check-item" id="lbl-isHidden">
+              <input type="checkbox" id="f-isHidden"> 🙈 Hidden
+            </label>
+          </div>
+        </div>
 
-        <label class="check">
-  <input type="checkbox" id="isHidden">
-  🙈 Hidden (Hide from site)
-        </label>
-
-        <textarea id="description" placeholder="Description"></textarea>
+        <!-- Description -->
+        <div class="form-full">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="f-description" placeholder="Anime description..."></textarea>
+        </div>
 
       </div>
-
     </div>
 
     <div class="modal-footer">
-      <button id="saveAnimeBtn">💾 Save Anime</button>
+      <button class="cancel-btn" id="cancelModal">Cancel</button>
+      <button class="save-btn" id="saveBtn">💾 Save Anime</button>
     </div>
 
   </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-const API_BASE = "https://animehunt-backend.animehunt715.workers.dev/api/admin";
+/* =========================================
+   CONFIG
+========================================= */
+const API  = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const GENRES = [
+  "Action","Adventure","Comedy","Drama","Fantasy","Romance",
+  "School","Supernatural","Sports","Horror","Thriller",
+  "Sci-Fi","Mystery","Slice of Life","Mecha","Isekai",
+  "Psychological","Historical","Military","Music"
+]
 
-// STATE
-let animeData = [];
-let editId = null;
-
-// ELEMENTS
-const el = (id) => document.getElementById(id);
-
-const elements = {
-  modal: el("animeModal"),
-  openBtn: el("openAddAnime"),
-  closeBtn: el("closeModal"),
-  list: el("animeList"),
-
-  title: el("title"),
-  slug: el("slug"),
-  type: el("type"),
-  status: el("status"),
-  poster: el("poster"),
-  banner: el("banner"),
-  posterFile: el("posterFile"),
-  bannerFile: el("bannerFile"),
-  genres: el("genres"),
-  tags: el("tags"),
-  description: el("description"),
-
-  isHome: el("isHome"),
-  isTrending: el("isTrending"),
-  isMostViewed: el("isMostViewed"),
-  isBanner: el("isBanner"),
-  isHidden: el("isHidden"),
-
-  year: el("year"),
-  rating: el("rating"),
-  language: el("language"),
-  duration: el("duration"),
-
-  saveBtn: el("saveAnimeBtn"),
-  modalTitle: el("modalTitle")
-};
-
-// ================= HELPERS =================
-
-const slugify = (text) =>
-  text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-
-const getMultiSelect = (select) =>
-  [...select.options].filter(o => o.selected).map(o => o.value);
-
-const setMultiSelect = (select, values) => {
-  [...select.options].forEach(o => {
-    o.selected = values.includes(o.value);
-  });
-};
-
-// ================= FORM =================
-
-function resetForm() {
-  Object.values(elements).forEach(e => {
-    if (e?.type === "text" || e?.tagName === "TEXTAREA") e.value = "";
-  });
-
-  elements.status.value = "ongoing";
-
-  elements.isHome.checked = false;
-  elements.isTrending.checked = false;
-  elements.isMostViewed.checked = false;
-  elements.isBanner.checked = false;
-  elements.isHidden.checked = false;
-
-  setMultiSelect(elements.type, []);
-  setMultiSelect(elements.genres, []);
-
-  elements.modalTitle.innerText = "Add Anime";
+/* =========================================
+   AUTH
+========================================= */
+function getToken() {
+  return localStorage.getItem("ah_token")
 }
 
-elements.title.oninput = () => {
-  elements.slug.value = slugify(elements.title.value);
-};
-
-// ================= MODAL =================
-
-elements.openBtn.onclick = () => {
-  editId = null;
-  resetForm();
-  elements.modal.style.display = "flex";
-};
-
-elements.closeBtn.onclick = closeModal;
-
-elements.modal.onclick = (e) => {
-  if (e.target === elements.modal) closeModal();
-};
-
-function closeModal() {
-  elements.modal.style.display = "none";
-  resetForm();
+function authHeaders() {
+  const token = getToken()
+  return {
+    "Content-Type":  "application/json",
+    "Authorization": `Bearer ${token}`
+  }
 }
 
-// ================= UPLOAD =================
-
-async function uploadImage(fileInput, urlInput) {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  // basic validation
-  if (!file.type.startsWith("image/")) {
-    alert("Only images allowed");
-    return;
+function requireAuth() {
+  const token = getToken()
+  if (!token) {
+    window.location.href = "login.html"
+    return false
   }
+  return true
+}
 
-  if (file.size > 2 * 1024 * 1024) {
-    alert("Max size 2MB");
-    return;
-  }
-
-  const fd = new FormData();
-  fd.append("file", file);
-
+async function checkAuth() {
   try {
-    urlInput.value = "Uploading...";
-
-    const res = await fetch(`${API_BASE}/upload`, {
-      method: "POST",
-      body: fd
-    });
-
-    const result = await res.json();
-
-    if (!result.success) throw new Error(result.message);
-
-    urlInput.value = result.data.url;
-
-  } catch (err) {
-    console.error(err);
-    alert("Upload failed");
-    urlInput.value = "";
+    const res = await fetch(`${API}/me`, { headers: authHeaders() })
+    if (!res.ok) throw new Error("Not authorized")
+    const json = await res.json()
+    if (json.success) {
+      document.getElementById("adminName").textContent = json.data.username
+    }
+  } catch {
+    window.location.href = "login.html"
   }
 }
 
-elements.posterFile.onchange = () => uploadImage(elements.posterFile, elements.poster);
-elements.bannerFile.onchange = () => uploadImage(elements.bannerFile, elements.banner);
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
+}
 
-// ================= DATA =================
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 3000)
+}
 
+/* =========================================
+   STATE
+========================================= */
+let animeData  = []
+let editId     = null
+let currentPage = 1
+let totalPages  = 1
+const PAGE_SIZE = 20
+
+/* =========================================
+   GENRES GRID
+========================================= */
+function buildGenresGrid() {
+  const grid = document.getElementById("genresGrid")
+  grid.innerHTML = ""
+  GENRES.forEach(g => {
+    const lbl = document.createElement("label")
+    lbl.className = "genre-item"
+    lbl.dataset.genre = g
+    lbl.innerHTML = `<input type="checkbox" value="${g}"> ${g}`
+    lbl.querySelector("input").addEventListener("change", () => {
+      lbl.classList.toggle("selected", lbl.querySelector("input").checked)
+    })
+    grid.appendChild(lbl)
+  })
+}
+
+function getSelectedGenres() {
+  return [...document.querySelectorAll("#genresGrid input:checked")].map(i => i.value)
+}
+
+function setSelectedGenres(values) {
+  document.querySelectorAll("#genresGrid label").forEach(lbl => {
+    const v = lbl.dataset.genre
+    const checked = values.includes(v)
+    lbl.querySelector("input").checked = checked
+    lbl.classList.toggle("selected", checked)
+  })
+}
+
+/* =========================================
+   CHECK LABELS
+========================================= */
+function setupCheckLabels() {
+  document.querySelectorAll(".check-item input[type=checkbox]").forEach(cb => {
+    const lbl = cb.closest(".check-item")
+    cb.addEventListener("change", () => {
+      lbl.classList.toggle("checked", cb.checked)
+    })
+  })
+}
+
+/* =========================================
+   FORM
+========================================= */
 function getFormData() {
   return {
-    title: elements.title.value.trim(),
-    slug: elements.slug.value.trim(),
-    type: getMultiSelect(elements.type)[0] || "anime",
-    status: elements.status.value,
-
-    poster: elements.poster.value,
-    banner: elements.banner.value,
-
-    year: Number(elements.year.value) || null,
-    rating: Number(elements.rating.value) || null,
-    language: elements.language.value,
-    duration: elements.duration.value,
-
-    genres: getMultiSelect(elements.genres),
-
-    tags: elements.tags.value
-      ? elements.tags.value.split(",").map(t => t.trim()).filter(Boolean)
-      : [],
-
-    isHome: elements.isHome.checked,
-    isTrending: elements.isTrending.checked,
-    isMostViewed: elements.isMostViewed.checked,
-    isBanner: elements.isBanner.checked,
-    isHidden: elements.isHidden.checked,
-
-    description: elements.description.value
-  };
+    title:       document.getElementById("f-title").value.trim(),
+    slug:        document.getElementById("f-slug").value.trim(),
+    type:        document.getElementById("f-type").value,
+    status:      document.getElementById("f-status").value,
+    poster:      document.getElementById("f-poster").value.trim(),
+    banner:      document.getElementById("f-banner").value.trim(),
+    year:        Number(document.getElementById("f-year").value)   || null,
+    rating:      Number(document.getElementById("f-rating").value) || null,
+    language:    document.getElementById("f-language").value.trim(),
+    duration:    document.getElementById("f-duration").value.trim(),
+    genres:      getSelectedGenres(),
+    tags:        document.getElementById("f-tags").value
+                   .split(",").map(t=>t.trim()).filter(Boolean),
+    isHome:       document.getElementById("f-isHome").checked,
+    isTrending:   document.getElementById("f-isTrending").checked,
+    isMostViewed: document.getElementById("f-isMostViewed").checked,
+    isBanner:     document.getElementById("f-isBanner").checked,
+    isHidden:     document.getElementById("f-isHidden").checked,
+    description:  document.getElementById("f-description").value.trim()
+  }
 }
 
-// ================= SAVE =================
+function resetForm() {
+  ["f-title","f-slug","f-poster","f-banner","f-year","f-rating",
+   "f-language","f-duration","f-tags","f-description"].forEach(id => {
+    document.getElementById(id).value = ""
+  })
+  document.getElementById("f-type").value   = "anime"
+  document.getElementById("f-status").value = "ongoing"
+  document.getElementById("f-poster-preview").textContent = ""
+  document.getElementById("f-banner-preview").textContent = ""
+  ;["f-isHome","f-isTrending","f-isMostViewed","f-isBanner","f-isHidden"].forEach(id => {
+    const cb = document.getElementById(id)
+    cb.checked = false
+    cb.closest(".check-item").classList.remove("checked")
+  })
+  setSelectedGenres([])
+  editId = null
+}
 
-elements.saveBtn.onclick = async () => {
-  const form = getFormData();
+function populateForm(a) {
+  document.getElementById("f-title").value    = a.title       || ""
+  document.getElementById("f-slug").value     = a.slug        || ""
+  document.getElementById("f-type").value     = a.type        || "anime"
+  document.getElementById("f-status").value   = a.status      || "ongoing"
+  document.getElementById("f-poster").value   = a.poster      || ""
+  document.getElementById("f-banner").value   = a.banner      || ""
+  document.getElementById("f-year").value     = a.year        || ""
+  document.getElementById("f-rating").value   = a.rating      || ""
+  document.getElementById("f-language").value = a.language    || ""
+  document.getElementById("f-duration").value = a.duration    || ""
+  document.getElementById("f-tags").value     = (a.tags||[]).join(", ")
+  document.getElementById("f-description").value = a.description || ""
 
-  if (!form.title) return alert("Title required");
-  if (!form.poster) return alert("Poster required");
+  if (a.poster) document.getElementById("f-poster-preview").textContent = a.poster
+  if (a.banner) document.getElementById("f-banner-preview").textContent = a.banner
+
+  ;["isHome","isTrending","isMostViewed","isBanner","isHidden"].forEach(key => {
+    const cb  = document.getElementById(`f-${key}`)
+    cb.checked = !!a[key]
+    cb.closest(".check-item").classList.toggle("checked", !!a[key])
+  })
+
+  setSelectedGenres(a.genres || [])
+}
+
+/* Slug auto-generate */
+document.getElementById("f-title").addEventListener("input", function() {
+  const slug = this.value.toLowerCase()
+    .replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")
+  document.getElementById("f-slug").value = slug
+})
+
+/* =========================================
+   UPLOAD
+========================================= */
+async function uploadFile(file, previewEl, urlInput) {
+  if (!file) return
+  if (!file.type.startsWith("image/")) { showToast("Only images allowed","error"); return }
+  if (file.size > 5 * 1024 * 1024)    { showToast("Max 5MB allowed","error"); return }
+
+  const fd = new FormData()
+  fd.append("file", file)
+
+  urlInput.value = "Uploading..."
+  previewEl.textContent = "Uploading..."
 
   try {
-    const url = editId
-      ? `${API_BASE}/anime/${editId}`
-      : `${API_BASE}/anime`;
+    const res  = await fetch(`${API}/upload`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${getToken()}` },
+      body: fd
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    urlInput.value      = json.data.url
+    previewEl.textContent = json.data.url
+    showToast("Image uploaded ✅")
+  } catch (err) {
+    showToast("Upload failed: " + err.message, "error")
+    urlInput.value = ""
+    previewEl.textContent = ""
+  }
+}
 
-    const method = editId ? "PUT" : "POST";
+document.getElementById("f-poster-file").addEventListener("change", function() {
+  uploadFile(
+    this.files[0],
+    document.getElementById("f-poster-preview"),
+    document.getElementById("f-poster")
+  )
+})
 
-    const res = await fetch(url, {
+document.getElementById("f-banner-file").addEventListener("change", function() {
+  uploadFile(
+    this.files[0],
+    document.getElementById("f-banner-preview"),
+    document.getElementById("f-banner")
+  )
+})
+
+/* =========================================
+   MODAL
+========================================= */
+function openModal(title = "Add Anime") {
+  document.getElementById("modalTitle").textContent = title
+  document.getElementById("animeModal").classList.add("open")
+}
+
+function closeModal() {
+  document.getElementById("animeModal").classList.remove("open")
+  resetForm()
+}
+
+document.getElementById("openAddBtn").onclick  = () => { resetForm(); openModal("Add Anime") }
+document.getElementById("closeModal").onclick  = closeModal
+document.getElementById("cancelModal").onclick = closeModal
+document.getElementById("animeModal").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("animeModal")) closeModal()
+})
+
+/* =========================================
+   SAVE
+========================================= */
+document.getElementById("saveBtn").onclick = async () => {
+  const form = getFormData()
+
+  if (!form.title)  { showToast("Title is required","error"); return }
+  if (!form.poster) { showToast("Poster URL is required","error"); return }
+
+  const btn = document.getElementById("saveBtn")
+  btn.disabled    = true
+  btn.textContent = "Saving..."
+
+  try {
+    const url    = editId ? `${API}/anime/${editId}` : `${API}/anime`
+    const method = editId ? "PUT" : "POST"
+
+    const res  = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify(form)
-    });
+    })
+    const json = await res.json()
 
-    const result = await res.json();
+    if (!json.success) throw new Error(json.message || "Save failed")
 
-    if (!result.success) {
-      console.error(result);
-      return alert(result.message || "Error");
-    }
-
-    alert("Saved ✅");
-
-    closeModal();
-    loadAnime();
+    showToast(editId ? "Anime updated ✅" : "Anime added ✅")
+    closeModal()
+    loadAnime()
 
   } catch (err) {
-    console.error(err);
-    alert("Save failed");
+    showToast(err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "💾 Save Anime"
   }
-};
+}
 
-// ================= LOAD =================
+/* =========================================
+   LOAD
+========================================= */
+async function loadAnime(page = 1) {
+  currentPage = page
 
-async function loadAnime() {
+  const search = document.getElementById("searchInput").value.trim()
+  const type   = document.getElementById("typeFilter").value
+  const status = document.getElementById("statusFilter").value
+
+  let url = `${API}/anime?page=${page}&limit=${PAGE_SIZE}`
+  if (search) url += `&search=${encodeURIComponent(search)}`
+  if (type)   url += `&type=${type}`
+  if (status) url += `&status=${status}`
+
+  document.getElementById("animeList").innerHTML =
+    `<div class="loading-row"><div class="spinner"></div></div>`
+
   try {
-    const res = await fetch(`${API_BASE}/anime`);
-    const json = await res.json();
+    const res  = await fetch(url, { headers: authHeaders() })
+    const json = await res.json()
 
-    animeData = json.data || [];
-    renderTable();
+    if (!json.success) throw new Error(json.message)
+
+    animeData  = json.data.data || []
+    totalPages = Math.ceil((json.data.total || 0) / PAGE_SIZE) || 1
+
+    updateStats(json.data)
+    renderTable()
+    renderPagination()
 
   } catch (err) {
-    console.error(err);
+    document.getElementById("animeList").innerHTML =
+      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
   }
 }
 
-// ================= DELETE =================
-
-async function deleteAnime(id) {
-  if (!confirm("Delete this anime?")) return;
-
-  await fetch(`${API_BASE}/anime/${id}`, { method: "DELETE" });
-  loadAnime();
+function updateStats(data) {
+  document.getElementById("statTotal").textContent = data.total || 0
+  const list = data.data || []
+  document.getElementById("statTrending").textContent = list.filter(a=>a.isTrending).length
+  document.getElementById("statHome").textContent     = list.filter(a=>a.isHome).length
+  document.getElementById("statHidden").textContent   = list.filter(a=>a.isHidden).length
 }
 
-// ================= RENDER =================
-
+/* =========================================
+   RENDER TABLE
+========================================= */
 function renderTable() {
-  elements.list.innerHTML = "";
+  const list = document.getElementById("animeList")
+
+  if (!animeData.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🎬</div>
+        <div>No anime found</div>
+      </div>`
+    return
+  }
+
+  list.innerHTML = ""
 
   animeData.forEach(a => {
-    const row = document.createElement("div");
-    row.className = "row";
+    const row = document.createElement("div")
+    row.className = "row"
+
+    const poster = a.poster
+      ? `<img src="${a.poster}" alt="${a.title}" loading="lazy">`
+      : `<div style="width:36px;height:54px;background:#1a2035;border-radius:5px"></div>`
+
+    const genres = (a.genres || []).slice(0,2).join(", ") + (a.genres?.length > 2 ? "..." : "")
 
     row.innerHTML = `
-      <img src="${a.poster || "https://via.placeholder.com/40x60"}">
-      <span title="${a.title}">${a.title}</span>
-      <span>${a.type}</span>
-      <span>${a.status}</span>
-      <span>${(a.genres || []).join(", ")}</span>
-      <span>${a.isHidden ? "Hidden" : "Public"}</span>
-      <span>${a.isTrending ? "Yes" : "No"}</span>
-      <span class="actions"></span>
-    `;
+      ${poster}
+      <div class="title-cell" title="${a.title}">
+        ${a.title}
+        <small>${a.slug}</small>
+      </div>
+      <span><span class="badge">${a.type}</span></span>
+      <span><span class="badge badge-${a.status}">${a.status}</span></span>
+      <span style="color:#777;font-size:11px">${genres || "—"}</span>
+      <span><span class="badge ${a.isHidden ? 'badge-hidden' : 'badge-public'}">${a.isHidden ? "Hidden" : "Public"}</span></span>
+      <span>${a.isTrending ? '<span class="badge badge-yes">🔥 Yes</span>' : '<span class="badge-no">No</span>'}</span>
+      <span class="row-actions">
+        <button class="edit-btn" title="Edit">✏️</button>
+        <button class="del-btn" title="Delete">🗑️</button>
+      </span>
+    `
 
-    const actions = row.querySelector(".actions");
+    row.querySelector(".edit-btn").onclick = () => editAnime(a.id)
+    row.querySelector(".del-btn").onclick  = () => deleteAnime(a.id, a.title)
 
-    const editBtn = document.createElement("button");
-    editBtn.innerText = "✏️";
-    editBtn.onclick = () => editAnime(a.id);
-
-    const delBtn = document.createElement("button");
-    delBtn.innerText = "🗑";
-    delBtn.onclick = () => deleteAnime(a.id);
-
-    actions.append(editBtn, delBtn);
-
-    elements.list.appendChild(row);
-  });
+    list.appendChild(row)
+  })
 }
 
-// ================= EDIT =================
+/* =========================================
+   PAGINATION
+========================================= */
+function renderPagination() {
+  const el = document.getElementById("pagination")
+  if (totalPages <= 1) { el.innerHTML = ""; return }
 
+  let html = `<span class="page-info">Page ${currentPage} / ${totalPages}</span>`
+  html += `<button ${currentPage===1?"disabled":""} onclick="loadAnime(${currentPage-1})">← Prev</button>`
+
+  const start = Math.max(1, currentPage-2)
+  const end   = Math.min(totalPages, currentPage+2)
+  for (let i = start; i <= end; i++) {
+    html += `<button class="${i===currentPage?"active":""}" onclick="loadAnime(${i})">${i}</button>`
+  }
+
+  html += `<button ${currentPage===totalPages?"disabled":""} onclick="loadAnime(${currentPage+1})">Next →</button>`
+  el.innerHTML = html
+}
+
+/* =========================================
+   EDIT
+========================================= */
 function editAnime(id) {
-  const a = animeData.find(x => x.id === id);
-  if (!a) return;
-
-  editId = id;
-  elements.modal.style.display = "flex";
-
-  elements.title.value = a.title;
-  elements.slug.value = a.slug;
-  elements.status.value = a.status;
-
-  elements.poster.value = a.poster;
-  elements.banner.value = a.banner;
-
-  elements.year.value = a.year || "";
-  elements.rating.value = a.rating || "";
-  elements.language.value = a.language || "";
-  elements.duration.value = a.duration || "";
-
-  elements.description.value = a.description || "";
-  elements.tags.value = (a.tags || []).join(",");
-
-  elements.isHome.checked = a.isHome;
-  elements.isTrending.checked = a.isTrending;
-  elements.isMostViewed.checked = a.isMostViewed;
-  elements.isBanner.checked = a.isBanner;
-  elements.isHidden.checked = a.isHidden;
-
-  setMultiSelect(elements.type, [a.type]);
-  setMultiSelect(elements.genres, a.genres || []);
-
-  elements.modalTitle.innerText = "Edit Anime";
+  const a = animeData.find(x => x.id === id)
+  if (!a) return
+  editId = id
+  populateForm(a)
+  openModal("Edit Anime")
 }
 
-// INIT
-loadAnime();
-</script>
+/* =========================================
+   DELETE
+========================================= */
+async function deleteAnime(id, title) {
+  if (!confirm(`Delete "${title}"?\n\nThis cannot be undone.`)) return
 
+  try {
+    const res  = await fetch(`${API}/anime/${id}`, {
+      method:  "DELETE",
+      headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Deleted ✅")
+    loadAnime(currentPage)
+  } catch (err) {
+    showToast(err.message, "error")
+  }
+}
+
+/* =========================================
+   FILTER EVENTS
+========================================= */
+let searchDebounce
+document.getElementById("searchInput").addEventListener("input", () => {
+  clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => loadAnime(1), 400)
+})
+document.getElementById("typeFilter").addEventListener("change",   () => loadAnime(1))
+document.getElementById("statusFilter").addEventListener("change", () => loadAnime(1))
+document.getElementById("homeFilter").addEventListener("change",   () => loadAnime(1))
+
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  buildGenresGrid()
+  setupCheckLabels()
+  checkAuth()
+  loadAnime()
+}
+</script>
 </body>
 </html>
+                                    
