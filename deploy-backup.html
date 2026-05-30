@@ -2,584 +2,880 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Deploy & Backup – AnimeHunt CMS</title>
-
 <style>
-/* ===== BASE LAYOUT ===== */
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:#070b17;
-  color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
-  font-size:13px;
-}
-.cms-app{
-  display:flex;
-  min-height:100vh;
-}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-/* ===== SIDEBAR ===== */
+/* ========== SIDEBAR ========== */
 .cms-sidebar{
-  width:240px;
-  background:#0b0f1a;
-  border-right:1px solid #1a2035;
-  padding:20px;
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100
 }
-.brand{
-  font-size:18px;
-  margin-bottom:30px;
-}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
 .brand b{color:#ffcc00}
-.brand small{
-  display:block;
-  font-size:11px;
-  color:#777;
-}
-
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
 .cms-menu a{
-  display:block;
-  padding:10px 12px;
-  margin-bottom:6px;
-  color:#ccc;
-  text-decoration:none;
-  border-radius:8px;
-  font-size:13px;
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
 }
-.cms-menu a.active,
-.cms-menu a:hover{
-  background:#1a2035;
-  color:#ffcc00;
-}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-/* ===== MAIN ===== */
-.cms-main{
-  flex:1;
-  padding:12px 10px;
-}
-
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
 .cms-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
 }
-.cms-header .title{
-  font-size:18px;
-  font-weight:600;
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
 }
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px;padding-bottom:40px}
 
-.cms-content{
-  padding-bottom:30px;
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
 }
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
 
-/* ===== DEPLOY & BACKUP ===== */
-.deploy-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
+/* ========== SECTION LABEL ========== */
+.section-label{
+  font-size:11px;color:#555;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;margin:22px 0 12px;display:flex;align-items:center;gap:8px
 }
+.section-label::after{content:"";flex:1;height:1px;background:#1a2035}
 
-.deploy-card{
-  background:#0b0f1a;
-  border:1px solid #1a2035;
-  border-radius:14px;
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+/* ========== DB STATUS ========== */
+.db-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 18px;margin-bottom:4px
 }
+.db-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:10px}
+.db-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.db-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
+  padding:10px 14px;display:flex;align-items:center;gap:10px
+}
+.db-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#4caf50;box-shadow:0 0 6px rgba(76,175,80,.5)}
+.dot-gray{background:#555}
+.db-info .db-name{font-size:12px;font-weight:600}
+.db-info .db-status{font-size:10px;color:#777;margin-top:2px}
 
-.deploy-card h3{
-  font-size:13px;
-  color:#00ffd5;
+/* ========== STATE PANEL ========== */
+.state-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 18px;margin-bottom:4px
 }
+.state-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:12px}
+.state-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+.state-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between
+}
+.state-label{font-size:12px;color:#aaa}
+.state-val{font-size:12px;font-weight:700}
+.val-ok{color:#4caf50}
+.val-warn{color:#ffcc00}
+.val-danger{color:#f44336}
 
-.deploy-card button{
-  background:#1a2035;
-  border:none;
-  color:#fff;
-  padding:10px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:.25s;
-  font-size:13px;
+/* ========== ACTION GRID ========== */
+.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.action-btn{
+  background:#0b0f1a;border:1px solid #1a2035;color:#ccc;
+  padding:12px 14px;border-radius:8px;font-size:11px;cursor:pointer;
+  transition:.2s;display:flex;flex-direction:column;align-items:center;
+  gap:6px;text-align:center;width:100%
 }
+.action-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.action-btn .a-icon{font-size:20px}
+.action-btn .a-label{font-weight:600}
+.action-btn .a-sub{color:#555;font-size:10px}
+.action-btn.primary{border-color:#ffcc0044;background:#1a1a0a}
+.action-btn.primary:hover{border-color:#ffcc00;background:#2a2a10;color:#ffcc00}
+.action-btn.danger{border-color:#f4433633}
+.action-btn.danger:hover{border-color:#f44336;color:#f44336;background:#3a1a1a}
+.action-btn.success{border-color:#4caf5033}
+.action-btn.success:hover{border-color:#4caf50;color:#4caf50;background:#1a3a1a}
+.action-btn:disabled{opacity:.4;cursor:default}
 
-.deploy-card button:hover{
-  background:#00ffd5;
-  color:#000;
+/* ========== BACKUP PANEL ========== */
+.backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px}
+.panel-title{
+  font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between
 }
+.panel-sub{font-size:10px;color:#555;font-weight:400}
 
-.deploy-card.full{
-  grid-column:1/4;
+/* Create backup row */
+.backup-create-row{display:flex;gap:8px;margin-bottom:12px}
+.backup-note-input{
+  flex:1;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:8px 12px;border-radius:7px;font-size:12px;outline:none;transition:.2s
 }
+.backup-note-input:focus{border-color:#ffcc00}
+.create-btn{
+  background:#ffcc00;border:none;color:#000;padding:8px 14px;
+  border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;
+  white-space:nowrap;transition:.2s
+}
+.create-btn:hover{background:#ffd633}
+.create-btn:disabled{opacity:.5;cursor:default}
 
-.list-item{
-  background:#11162a;
-  padding:8px 10px;
-  border-radius:6px;
-  font-size:12px;
-  border:1px solid #1a2035;
+/* Backup list */
+.backup-list{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.backup-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:7px;
+  padding:10px 12px;display:flex;align-items:center;gap:8px
 }
+.backup-item-info{flex:1;min-width:0}
+.backup-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.backup-meta{font-size:10px;color:#555;margin-top:2px}
+.backup-size{font-size:10px;color:#ffcc00;flex-shrink:0}
+.backup-actions{display:flex;gap:4px;flex-shrink:0}
+.backup-actions button{
+  background:none;border:none;cursor:pointer;padding:4px 8px;
+  border-radius:5px;font-size:11px;transition:.15s
+}
+.restore-btn{color:#4caf50;border:1px solid #1a3a2a !important}
+.restore-btn:hover{background:#1a3a2a}
+.download-btn{color:#2196f3;border:1px solid #1a2a3a !important}
+.download-btn:hover{background:#1a2a3a}
+.del-backup-btn{color:#f44336;border:1px solid #3a1a1a !important}
+.del-backup-btn:hover{background:#3a1a1a}
+.no-items{color:#555;font-size:12px;text-align:center;padding:20px}
+
+/* ========== VERSION LIST ========== */
+.version-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.version-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:7px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px
+}
+.version-tag{
+  background:#1a2a3a;color:#2196f3;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:10px;flex-shrink:0
+}
+.version-info{flex:1;min-width:0}
+.version-name{font-size:12px;font-weight:600}
+.version-meta{font-size:10px;color:#555;margin-top:2px}
+
+/* ========== EMERGENCY ========== */
+.emergency-panel{
+  background:#0e1424;border:1px solid #3a1a1a;border-radius:10px;
+  padding:16px 18px
+}
+.emergency-title{font-size:12px;font-weight:700;color:#f44336;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.emergency-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.emergency-btn{
+  background:#0b0f1a;border:1px solid #3a1a1a;color:#f44336;
+  padding:12px 14px;border-radius:8px;font-size:11px;cursor:pointer;
+  transition:.2s;display:flex;flex-direction:column;align-items:center;
+  gap:6px;text-align:center;width:100%;font-weight:600
+}
+.emergency-btn:hover{border-color:#f44336;background:#3a1a1a}
+.emergency-btn .e-icon{font-size:20px}
+.recover-btn{border-color:#4caf5033;color:#4caf50}
+.recover-btn:hover{border-color:#4caf50;background:#1a3a1a}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:340px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.toast.info{border-color:#2196f3;background:#0d1a28}
+
+/* ========== SPINNER ========== */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #1a2035;border-top-color:#ffcc00;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Auto-refresh bar */
+.refresh-bar{height:2px;background:#1a2035;position:fixed;bottom:0;left:230px;right:0;z-index:99}
+.refresh-prog{height:100%;background:#ffcc00;width:0;transition:width linear}
 </style>
 </head>
-
 <body>
 
-<div class="cms-app">
+<!-- AUTO REFRESH BAR -->
+<div class="refresh-bar"><div class="refresh-prog" id="refreshProg"></div></div>
 
-<!-- SIDEBAR -->
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
-
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-
-    <!-- CORE -->
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
+    <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
-
-    <!-- CONTENT -->
+    <div class="menu-sep"></div>
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
-
-    <!-- DATA & SEO -->
-    <a href="seo.html">📈 Seo</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
-
-    <!-- SECURITY & DEPLOY -->
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html" class="active">🚀 Deploy-backup</a>
-    <!-- AI & ADS -->
+    <a href="deploy-backup.html" class="active">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 Ai Brain</a>
-
-    <!-- LAYOUT CONTROL -->
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
-
-    <!-- ADMIN / SYSTEM (LAST) -->
-    <a href="system-settings.html">⚙ System-settings</a>
-
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
-<!-- MAIN -->
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
 
-<header class="cms-header">
-  <div class="title">🚀 Deployment & Backup</div>
-</header>
+  <header class="cms-header">
+    <div class="title">🚀 Deploy & Backup</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <span id="lastDeploy" style="font-size:11px;color:#555"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-<section class="cms-content">
+  <section class="cms-content">
 
-  <div class="deploy-grid">
-
-    <div class="deploy-card">
-      <h3>Deployment</h3>
-      <button id="deploySite">🚀 Deploy Website</button>
-      <button id="freezeSite">🧊 Freeze Site</button>
-      <button id="unfreezeSite">🔥 Unfreeze Site</button>
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-info">
+          <div class="num" id="statAnime">—</div>
+          <div class="lbl">Anime in DB</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📺</div>
+        <div class="stat-info">
+          <div class="num" id="statEpisodes">—</div>
+          <div class="lbl">Episodes in DB</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💾</div>
+        <div class="stat-info">
+          <div class="num" id="statBackups">—</div>
+          <div class="lbl">Backups Saved</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏷</div>
+        <div class="stat-info">
+          <div class="num" id="statVersions">—</div>
+          <div class="lbl">Versions</div>
+        </div>
+      </div>
     </div>
 
-    <div class="deploy-card">
-      <h3>Backup</h3>
-      <button id="createBackup">💾 Create Backup</button>
-      <div id="backupList"></div>
+    <!-- DB STATUS -->
+    <div class="section-label">💾 Database Sync Status</div>
+    <div class="db-panel">
+      <div class="db-title">🔄 Triple DB Redundancy</div>
+      <div class="db-grid">
+        <div class="db-item">
+          <div class="db-dot dot-green" id="d1Dot"></div>
+          <div class="db-info">
+            <div class="db-name">Cloudflare D1</div>
+            <div class="db-status" id="d1Status">Primary — Connected</div>
+          </div>
+        </div>
+        <div class="db-item">
+          <div class="db-dot dot-gray" id="tursoDot"></div>
+          <div class="db-info">
+            <div class="db-name">Turso</div>
+            <div class="db-status" id="tursoStatus">Checking...</div>
+          </div>
+        </div>
+        <div class="db-item">
+          <div class="db-dot dot-gray" id="supabaseDot"></div>
+          <div class="db-info">
+            <div class="db-name">Supabase</div>
+            <div class="db-status" id="supabaseStatus">Checking...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="deploy-card">
-      <h3>Restore</h3>
-      <div id="restoreList"></div>
+    <!-- SITE STATE -->
+    <div class="section-label">📡 Site State</div>
+    <div class="state-panel">
+      <div class="state-title">Current Status</div>
+      <div class="state-grid">
+        <div class="state-item">
+          <span class="state-label">🌐 Site Status</span>
+          <span class="state-val val-ok" id="siteStatus">Online</span>
+        </div>
+        <div class="state-item">
+          <span class="state-label">🧊 Frozen</span>
+          <span class="state-val" id="frozenStatus">—</span>
+        </div>
+        <div class="state-item">
+          <span class="state-label">🚨 Emergency</span>
+          <span class="state-val" id="emergencyStatus">—</span>
+        </div>
+        <div class="state-item">
+          <span class="state-label">🚀 Last Deploy</span>
+          <span class="state-val val-ok" id="lastDeployState">—</span>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="action-grid">
+        <button class="action-btn primary" id="deployBtn">
+          <span class="a-icon">🚀</span>
+          <span class="a-label">Deploy Site</span>
+          <span class="a-sub">Push to production</span>
+        </button>
+        <button class="action-btn" id="freezeBtn">
+          <span class="a-icon">🧊</span>
+          <span class="a-label">Freeze Site</span>
+          <span class="a-sub">Pause updates</span>
+        </button>
+        <button class="action-btn success" id="unfreezeBtn">
+          <span class="a-icon">🔥</span>
+          <span class="a-label">Unfreeze</span>
+          <span class="a-sub">Resume updates</span>
+        </button>
+        <button class="action-btn" id="refreshBtn">
+          <span class="a-icon">🔄</span>
+          <span class="a-label">Refresh</span>
+          <span class="a-sub">Reload status</span>
+        </button>
+      </div>
     </div>
 
-    <div class="deploy-card full">
-      <h3>Emergency Control</h3>
-      <button id="emergencyShutdown">🚨 Emergency Shutdown</button>
-      <button id="emergencyRecover">🛟 Emergency Recover</button>
+    <!-- BACKUP -->
+    <div class="section-label">💾 Backup Manager</div>
+    <div class="backup-grid">
+
+      <!-- BACKUPS -->
+      <div class="panel">
+        <div class="panel-title">
+          💾 Backups
+          <span class="panel-sub" id="backupCount">0 saved</span>
+        </div>
+        <div class="backup-create-row">
+          <input class="backup-note-input" id="backupNote" placeholder="Note (optional)...">
+          <button class="create-btn" id="createBackupBtn">💾 Create Backup</button>
+        </div>
+        <div class="backup-list" id="backupList">
+          <div class="no-items">Loading...</div>
+        </div>
+      </div>
+
+      <!-- VERSIONS -->
+      <div class="panel">
+        <div class="panel-title">
+          🏷 Version History
+          <button class="create-btn" id="createVersionBtn" style="font-size:11px;padding:5px 10px">+ Snapshot</button>
+        </div>
+        <div class="version-list" id="versionList">
+          <div class="no-items">Loading...</div>
+        </div>
+      </div>
+
     </div>
 
-  </div>
+    <!-- EMERGENCY -->
+    <div class="section-label">🚨 Emergency Controls</div>
+    <div class="emergency-panel">
+      <div class="emergency-title">⚠️ Danger Zone — Use with caution</div>
+      <div class="emergency-grid">
+        <button class="emergency-btn" id="emergencyShutdownBtn">
+          <span class="e-icon">🚨</span>
+          Emergency Shutdown
+        </button>
+        <button class="emergency-btn recover-btn" id="emergencyRecoverBtn">
+          <span class="e-icon">🛟</span>
+          Emergency Recover
+        </button>
+        <button class="emergency-btn" onclick="createFullBackupAndDeploy()">
+          <span class="e-icon">🔒</span>
+          Backup + Deploy
+        </button>
+      </div>
+    </div>
 
-</section>
-
+  </section>
 </main>
-</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
+/* =========================================
+   CONFIG
+========================================= */
+const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const DEPLOY   = `${API}/deploy`
+const REFRESH_INTERVAL = 30000
 
-/* =====================================
-   ANIMEHUNT CMS – DEPLOY ENGINE (FINAL)
-===================================== */
+/* =========================================
+   AUTH
+========================================= */
+function getToken() { return localStorage.getItem("ah_token") }
 
-const API_BASE =
-"https://animehunt-backend.animehunt715.workers.dev/api/admin/deploy"
-
-const TOKEN_KEY="AUTH_TOKEN"
-
-/* ELEMENTS */
-
-const deployBtn=document.getElementById("deploySite")
-const freezeBtn=document.getElementById("freezeSite")
-const unfreezeBtn=document.getElementById("unfreezeSite")
-
-const createBackupBtn=document.getElementById("createBackup")
-const createVersionBtn=document.getElementById("createVersion")
-
-const emergencyShutdownBtn=document.getElementById("emergencyShutdown")
-const emergencyRecoverBtn=document.getElementById("emergencyRecover")
-
-const versionList=document.getElementById("versionList")
-const backupList=document.getElementById("backupList")
-const restoreList=document.getElementById("restoreList")
-
-/* =====================================
-AUTH CHECK
-===================================== */
-
-const token=localStorage.getItem(TOKEN_KEY)
-
-if(!token){
-location.href="login.html"
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
 }
 
-/* =====================================
-API HELPER (IMPROVED)
-===================================== */
-
-async function api(path,method="GET",body=null){
-
-try{
-
-const res=await fetch(API_BASE+path,{
-
-method,
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
-
-body:body?JSON.stringify(body):null
-
-})
-
-const text = await res.text()
-
-let data
-
-try{
-data = JSON.parse(text)
-}catch{
-console.error("INVALID JSON:",text)
-alert("Server error")
-return null
+function requireAuth() {
+  if (!getToken()) { window.location.href = "login.html"; return false }
+  return true
 }
 
-if(res.status===401){
-localStorage.removeItem(TOKEN_KEY)
-location.href="login.html"
-return null
+async function checkAuth() {
+  try {
+    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+    document.getElementById("adminName").textContent = json.data.username
+  } catch { window.location.href = "login.html" }
 }
 
-if(!res.ok){
-console.error("API ERROR:",data)
-alert(data.error || "API Error")
-return null
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
 }
 
-return data
-
-}catch(err){
-
-console.error("FETCH ERROR:",err)
-alert("Network error")
-
-return null
-
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 4000)
 }
 
+/* =========================================
+   BUTTON LOADING
+========================================= */
+function btnLoad(id, text) {
+  const btn = document.getElementById(id)
+  if (!btn) return
+  btn.dataset.old = btn.innerHTML
+  btn.innerHTML   = `<span class="spinner"></span> ${text}`
+  btn.disabled    = true
 }
 
-/* =====================================
-LOADING BUTTON STATE
-===================================== */
-
-function setLoading(btn,text){
-
-btn.dataset.oldText=btn.innerText
-btn.innerText=text
-btn.disabled=true
-
+function btnReset(id) {
+  const btn = document.getElementById(id)
+  if (!btn || !btn.dataset.old) return
+  btn.innerHTML = btn.dataset.old
+  btn.disabled  = false
 }
 
-function clearLoading(btn){
+/* =========================================
+   LOAD DATA
+========================================= */
+async function loadData() {
+  try {
+    const res  = await fetch(DEPLOY, { headers: authHeaders() })
+    const json = await res.json()
 
-btn.innerText=btn.dataset.oldText
-btn.disabled=false
+    if (res.status === 401) { window.location.href = "login.html"; return }
+    if (!json.success) throw new Error(json.message)
 
+    const d = json.data
+
+    /* Stats */
+    document.getElementById("statAnime").textContent    = d.stats?.anime    || 0
+    document.getElementById("statEpisodes").textContent = d.stats?.episodes  || 0
+    document.getElementById("statBackups").textContent  = (d.backups || []).length
+    document.getElementById("statVersions").textContent = (d.versions || []).length
+
+    /* DB Status */
+    updateDBStatus("d1",       true,          "Primary — Connected")
+    updateDBStatus("turso",    d.dbStatus?.turso,    d.dbStatus?.turso    ? "Connected ✅" : "Not Configured")
+    updateDBStatus("supabase", d.dbStatus?.supabase, d.dbStatus?.supabase ? "Connected ✅" : "Not Configured")
+
+    /* Site State */
+    const state = d.state || {}
+    const frozenEl    = document.getElementById("frozenStatus")
+    const emergencyEl = document.getElementById("emergencyStatus")
+    const lastEl      = document.getElementById("lastDeployState")
+
+    frozenEl.textContent    = state.frozen    ? "🧊 Yes" : "No"
+    frozenEl.className      = `state-val ${state.frozen ? "val-warn" : "val-ok"}`
+    emergencyEl.textContent = state.emergency ? "🚨 ACTIVE" : "Normal"
+    emergencyEl.className   = `state-val ${state.emergency ? "val-danger" : "val-ok"}`
+
+    if (state.last_deploy) {
+      const d2 = new Date(state.last_deploy)
+      lastEl.textContent = d2.toLocaleString()
+      document.getElementById("lastDeploy").textContent =
+        `Last deploy: ${d2.toLocaleTimeString()}`
+    }
+
+    document.getElementById("siteStatus").textContent =
+      state.emergency ? "🚨 OFFLINE" : state.frozen ? "🧊 Frozen" : "✅ Online"
+    document.getElementById("siteStatus").className =
+      `state-val ${state.emergency ? "val-danger" : state.frozen ? "val-warn" : "val-ok"}`
+
+    /* Backups */
+    renderBackups(d.backups || [])
+
+    /* Versions */
+    renderVersions(d.versions || [])
+
+  } catch (err) {
+    console.error("loadData:", err)
+    showToast("Load failed: " + err.message, "error")
+  }
 }
 
-/* =====================================
-LOAD DATA
-===================================== */
-
-async function loadData(){
-
-versionList.innerHTML="Loading..."
-backupList.innerHTML="Loading..."
-restoreList.innerHTML="Loading..."
-
-const data=await api("")
-
-if(!data){
-versionList.innerHTML="Error"
-backupList.innerHTML="Error"
-restoreList.innerHTML="Error"
-return
+function updateDBStatus(db, ok, text) {
+  const dot = document.getElementById(`${db}Dot`)
+  const sts = document.getElementById(`${db}Status`)
+  if (dot) dot.className = `db-dot ${ok ? "dot-green" : "dot-gray"}`
+  if (sts) sts.textContent = text
 }
 
-updateUI(data.state)
-renderVersions(data.versions || [])
-renderBackups(data.backups || [])
+/* =========================================
+   RENDER BACKUPS
+========================================= */
+function renderBackups(list) {
+  const el = document.getElementById("backupList")
+  document.getElementById("backupCount").textContent = `${list.length} saved`
 
+  if (!list.length) {
+    el.innerHTML = `<div class="no-items">No backups yet — create one!</div>`
+    return
+  }
+
+  el.innerHTML = list.map(b => {
+    const date = b.created_at ? new Date(b.created_at).toLocaleString() : "—"
+    const size = b.size_kb ? `${b.size_kb} KB` : ""
+    return `
+      <div class="backup-item">
+        <div class="backup-item-info">
+          <div class="backup-name" title="${b.name}">${b.name}</div>
+          <div class="backup-meta">${date}</div>
+        </div>
+        ${size ? `<span class="backup-size">${size}</span>` : ""}
+        <div class="backup-actions">
+          <button class="restore-btn" onclick="restoreBackup('${b.id}','${b.name.replace(/'/g,"\\'")}')" title="Restore">↩ Restore</button>
+          <a href="${DEPLOY}/backup/${b.id}/download?token=${getToken()}" target="_blank">
+            <button class="download-btn" title="Download">⬇</button>
+          </a>
+          <button class="del-backup-btn" onclick="deleteBackup('${b.id}')" title="Delete">🗑</button>
+        </div>
+      </div>
+    `
+  }).join("")
 }
 
-/* =====================================
-RENDER VERSIONS
-===================================== */
+/* =========================================
+   RENDER VERSIONS
+========================================= */
+function renderVersions(list) {
+  const el = document.getElementById("versionList")
 
-function renderVersions(list){
+  if (!list.length) {
+    el.innerHTML = `<div class="no-items">No versions yet</div>`
+    return
+  }
 
-if(!list.length){
-
-versionList.innerHTML="<div class='list-item'>No versions</div>"
-return
-
+  el.innerHTML = list.map(v => {
+    const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : "—"
+    return `
+      <div class="version-item">
+        <span class="version-tag">${v.tag || "v?"}</span>
+        <div class="version-info">
+          <div class="version-name">${v.name}</div>
+          <div class="version-meta">${v.anime_count || 0} anime · ${v.ep_count || 0} eps · ${date}</div>
+        </div>
+      </div>
+    `
+  }).join("")
 }
 
-versionList.innerHTML=list.map(v=>`
-
-<div class="list-item">
-<b>${v.name}</b><br>
-<small style="color:#777">
-${new Date(v.date).toLocaleString()}
-</small>
-</div>
-
-`).join("")
-
+/* =========================================
+   DEPLOY
+========================================= */
+document.getElementById("deployBtn").onclick = async () => {
+  if (!confirm("Deploy to production now?")) return
+  btnLoad("deployBtn", "Deploying...")
+  try {
+    const res  = await fetch(`${DEPLOY}/deploy`, { method: "POST", headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast(`Deployed! Version ${json.data.version} ✅`)
+    loadData()
+  } catch (err) {
+    showToast(err.message, "error")
+  } finally {
+    btnReset("deployBtn")
+  }
 }
 
-/* =====================================
-RENDER BACKUPS (WITH DELETE)
-===================================== */
+/* =========================================
+   CREATE BACKUP
+========================================= */
+document.getElementById("createBackupBtn").onclick = async () => {
+  const note = document.getElementById("backupNote").value.trim()
+  btnLoad("createBackupBtn", "Creating...")
 
-function renderBackups(list){
+  try {
+    const res  = await fetch(`${DEPLOY}/backup`, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ note })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
 
-if(!list.length){
+    document.getElementById("backupNote").value = ""
+    const c = json.data.counts
+    showToast(`Backup created — ${c.anime} anime, ${c.episodes} eps, ${json.data.size_kb} KB ✅`)
+    loadData()
 
-backupList.innerHTML="<div class='list-item'>No backups</div>"
-restoreList.innerHTML=""
-return
-
+  } catch (err) {
+    showToast("Backup failed: " + err.message, "error")
+  } finally {
+    btnReset("createBackupBtn")
+  }
 }
 
-/* BACKUP LIST */
+/* =========================================
+   RESTORE BACKUP
+========================================= */
+async function restoreBackup(id, name) {
+  if (!confirm(`Restore backup:\n"${name}"\n\nAll current data will be REPLACED.\nThis cannot be undone.`)) return
+  if (!confirm("Are you absolutely sure?")) return
 
-backupList.innerHTML=list.map(b=>`
+  showToast("Restoring... please wait", "info")
 
-<div class="list-item"
-style="display:flex;justify-content:space-between;align-items:center">
+  try {
+    const res  = await fetch(`${DEPLOY}/restore`, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ id })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
 
-<span>${b.name}</span>
+    const r = json.data.restored
+    showToast(`Restore complete — ${r.anime} anime, ${r.episodes} eps, ${r.categories} cats ✅`)
+    loadData()
 
-<button onclick="deleteBackup('${b.id}')"
-style="background:#ff4c4c;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer">
-Delete
-</button>
-
-</div>
-
-`).join("")
-
-/* RESTORE LIST */
-
-restoreList.innerHTML=list.map(b=>`
-
-<div class="list-item"
-style="display:flex;justify-content:space-between">
-
-<span>${b.name}</span>
-
-<button onclick="restoreBackup('${b.id}')">
-Restore
-</button>
-
-</div>
-
-`).join("")
-
+  } catch (err) {
+    showToast("Restore failed: " + err.message, "error")
+  }
 }
 
-/* =====================================
-STATE UI
-===================================== */
+/* =========================================
+   DELETE BACKUP
+========================================= */
+async function deleteBackup(id) {
+  if (!confirm("Delete this backup permanently?")) return
 
-function updateUI(state){
-
-if(!state) return
-
-freezeBtn.innerText = state.frozen
-? "🧊 Site Frozen"
-: "Freeze Site"
-
-emergencyShutdownBtn.innerText = state.emergency
-? "🚨 SYSTEM OFFLINE"
-: "Emergency Shutdown"
-
+  try {
+    const res  = await fetch(`${DEPLOY}/backup/${id}`, {
+      method: "DELETE", headers: authHeaders()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Backup deleted ✅")
+    loadData()
+  } catch (err) {
+    showToast(err.message, "error")
+  }
 }
 
-/* =====================================
-DEPLOY
-===================================== */
-
-deployBtn.onclick=async()=>{
-
-setLoading(deployBtn,"Deploying...")
-
-await api("/deploy","POST")
-
-clearLoading(deployBtn)
-
-loadData()
-
+/* =========================================
+   CREATE VERSION
+========================================= */
+document.getElementById("createVersionBtn").onclick = async () => {
+  try {
+    const res  = await fetch(`${DEPLOY}/version`, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({})
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast(`Version ${json.data.tag} created ✅`)
+    loadData()
+  } catch (err) {
+    showToast(err.message, "error")
+  }
 }
 
-/* =====================================
-BACKUP
-===================================== */
-
-createBackupBtn.onclick=async()=>{
-
-setLoading(createBackupBtn,"Creating Backup...")
-
-await api("/backup","POST")
-
-clearLoading(createBackupBtn)
-
-loadData()
-
+/* =========================================
+   FREEZE / UNFREEZE
+========================================= */
+document.getElementById("freezeBtn").onclick = async () => {
+  if (!confirm("Freeze the site? Updates will be paused.")) return
+  try {
+    const res  = await fetch(`${DEPLOY}/state`, {
+      method: "PATCH", headers: authHeaders(),
+      body: JSON.stringify({ type: "freeze", value: true })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Site frozen 🧊", "info")
+    loadData()
+  } catch (err) { showToast(err.message, "error") }
 }
 
-/* =====================================
-VERSION
-===================================== */
-
-createVersionBtn.onclick=async()=>{
-
-setLoading(createVersionBtn,"Creating Version...")
-
-await api("/version","POST")
-
-clearLoading(createVersionBtn)
-
-loadData()
-
+document.getElementById("unfreezeBtn").onclick = async () => {
+  try {
+    const res  = await fetch(`${DEPLOY}/state`, {
+      method: "PATCH", headers: authHeaders(),
+      body: JSON.stringify({ type: "freeze", value: false })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Site unfrozen ✅")
+    loadData()
+  } catch (err) { showToast(err.message, "error") }
 }
 
-/* =====================================
-FREEZE
-===================================== */
+/* =========================================
+   EMERGENCY
+========================================= */
+document.getElementById("emergencyShutdownBtn").onclick = async () => {
+  if (!confirm("⚠️ EMERGENCY SHUTDOWN\nTake site offline immediately?")) return
+  if (!confirm("Are you absolutely sure? This will affect all users.")) return
 
-freezeBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"freeze",value:true})
-
-loadData()
-
+  try {
+    const res  = await fetch(`${DEPLOY}/state`, {
+      method: "PATCH", headers: authHeaders(),
+      body: JSON.stringify({ type: "emergency", value: true })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("🚨 Emergency shutdown activated", "error")
+    loadData()
+  } catch (err) { showToast(err.message, "error") }
 }
 
-unfreezeBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"freeze",value:false})
-
-loadData()
-
+document.getElementById("emergencyRecoverBtn").onclick = async () => {
+  try {
+    const res  = await fetch(`${DEPLOY}/state`, {
+      method: "PATCH", headers: authHeaders(),
+      body: JSON.stringify({ type: "emergency", value: false })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Site recovered ✅")
+    loadData()
+  } catch (err) { showToast(err.message, "error") }
 }
 
-/* =====================================
-EMERGENCY
-===================================== */
+/* =========================================
+   BACKUP + DEPLOY (combined)
+========================================= */
+async function createFullBackupAndDeploy() {
+  if (!confirm("Create a backup then deploy in one step?")) return
 
-emergencyShutdownBtn.onclick=async()=>{
+  showToast("Creating backup...", "info")
 
-if(!confirm("Shutdown entire site?")) return
+  try {
+    /* Step 1: backup */
+    const bRes  = await fetch(`${DEPLOY}/backup`, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ note: "Pre-deploy backup" })
+    })
+    const bJson = await bRes.json()
+    if (!bJson.success) throw new Error("Backup failed: " + bJson.message)
 
-await api("/state","PATCH",{type:"emergency",value:true})
+    showToast("Backup done, deploying...", "info")
 
-loadData()
+    /* Step 2: deploy */
+    const dRes  = await fetch(`${DEPLOY}/deploy`, {
+      method: "POST", headers: authHeaders()
+    })
+    const dJson = await dRes.json()
+    if (!dJson.success) throw new Error("Deploy failed: " + dJson.message)
 
+    showToast(`Backup + Deploy complete ✅ — ${dJson.data.version}`)
+    loadData()
+
+  } catch (err) {
+    showToast(err.message, "error")
+  }
 }
 
-emergencyRecoverBtn.onclick=async()=>{
-
-await api("/state","PATCH",{type:"emergency",value:false})
-
-loadData()
-
+/* =========================================
+   REFRESH BUTTON
+========================================= */
+document.getElementById("refreshBtn").onclick = () => {
+  showToast("Refreshing...", "info")
+  loadData()
 }
 
-/* =====================================
-RESTORE
-===================================== */
+/* =========================================
+   AUTO REFRESH WITH PROGRESS BAR
+========================================= */
+let autoRefreshTimer
+let progTimer
 
-window.restoreBackup=async(id)=>{
+function startAutoRefresh() {
+  clearInterval(autoRefreshTimer)
 
-if(!confirm("Restore this backup?\nAll current data will be replaced.")) return
+  autoRefreshTimer = setInterval(() => {
+    loadData()
+    startProgress()
+  }, REFRESH_INTERVAL)
 
-await api("/restore","POST",{id})
-
-alert("Restore completed")
-
-loadData()
-
+  startProgress()
 }
 
-/* =====================================
-DELETE BACKUP (NEW)
-===================================== */
-
-window.deleteBackup=async(id)=>{
-
-if(!confirm("Delete this backup?")) return
-
-await api("/delete-backup","POST",{id})
-
-alert("Backup deleted")
-
-loadData()
-
+function startProgress() {
+  const bar = document.getElementById("refreshProg")
+  bar.style.transition = "none"
+  bar.style.width      = "0"
+  clearTimeout(progTimer)
+  progTimer = setTimeout(() => {
+    bar.style.transition = `width ${REFRESH_INTERVAL}ms linear`
+    bar.style.width      = "100%"
+  }, 100)
 }
 
-/* =====================================
-AUTO REFRESH
-===================================== */
-
-setInterval(loadData,30000)
-
-/* INIT */
-
-document.addEventListener("DOMContentLoaded",loadData)
-
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  checkAuth()
+  loadData()
+  startAutoRefresh()
+}
 </script>
 </body>
 </html>
