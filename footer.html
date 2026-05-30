@@ -2,448 +2,895 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Footer PRO – AnimeHunt CMS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Footer – AnimeHunt CMS</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:#060a14;color:#fff}
-.cms-app{display:flex;min-height:100vh}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
+/* ========== SIDEBAR ========== */
 .cms-sidebar{
-  width:230px;background:#070b16;border-right:1px solid #1a2035;padding:14px 0
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100
 }
-.brand{padding:0 18px 14px;font-size:20px}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
 .brand b{color:#ffcc00}
-.brand small{display:block;font-size:11px;color:#888}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
 .cms-menu a{
-  display:block;padding:10px 18px;color:#ccc;text-decoration:none;font-size:14px
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
 }
-.cms-menu a.active,.cms-menu a:hover{
-  background:#0e1424;color:#ffcc00
-}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-.cms-main{flex:1}
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
 .cms-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px 20px;background:#070b16;border-bottom:1px solid #1a2035
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
 }
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:8px}
 .save-btn{
-  background:#ffcc00;border:none;padding:8px 18px;
-  border-radius:8px;font-weight:600;cursor:pointer
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;transition:.2s
 }
-.cms-content{padding:20px}
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.outline-btn{
+  background:transparent;border:1px solid #2a3055;color:#aaa;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.outline-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.danger-btn{
+  background:transparent;border:1px solid #3a1a1a;color:#f44336;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.danger-btn:hover{background:#3a1a1a}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px;padding-bottom:80px}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:18px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
+
+/* ========== SECTION LABEL ========== */
+.section-label{
+  font-size:11px;color:#555;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;margin:22px 0 12px;display:flex;align-items:center;gap:8px
+}
+.section-label::after{content:"";flex:1;height:1px;background:#1a2035}
+
+/* ========== SETTINGS GRID ========== */
+.settings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.settings-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+
 .card{
-  background:#0b0f1a;border:1px solid #1a2035;
-  border-radius:12px;padding:14px;
-  display:flex;flex-direction:column;gap:10px
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px 18px
 }
-.card h3{font-size:14px;color:#ffcc00}
+.card-title{
+  font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:14px;
+  display:flex;align-items:center;gap:6px;
+  padding-bottom:10px;border-bottom:1px solid #1a2035
+}
+.form-group{margin-bottom:12px}
+.form-group:last-child{margin-bottom:0}
+.form-label{
+  font-size:11px;color:#777;margin-bottom:5px;display:block;
+  font-weight:600;text-transform:uppercase;letter-spacing:.4px
+}
+.form-input{
+  width:100%;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:8px 11px;border-radius:7px;font-size:12px;outline:none;transition:.2s
+}
+.form-input:focus{border-color:#ffcc00}
+.form-input::placeholder{color:#444}
+select.form-input option{background:#0b0f1a}
 
-label{font-size:12px;color:#aaa}
-input,select{
-  background:#0e1424;border:1px solid #1a2035;color:#fff;
-  padding:7px 10px;border-radius:6px;font-size:12px
+/* Color row */
+.color-row{display:flex;gap:8px;align-items:center}
+.color-row input[type=color]{
+  width:36px;height:32px;border:1px solid #1a2035;border-radius:6px;
+  background:#0b0f1a;cursor:pointer;padding:2px;flex-shrink:0
 }
-.check{display:flex;gap:8px;align-items:center;font-size:12px}
-.btns{display:flex;gap:8px;flex-wrap:wrap}
-.btns button{
-  background:#1a2035;border:none;color:#fff;
-  padding:7px 12px;border-radius:6px;cursor:pointer
-}
-.btns button:hover{background:#ffcc00;color:#000}
-.full{grid-column:1/4}
-.status{font-size:11px;color:#4cff4c}
 
-#footer{
-  margin-top:20px;
-  padding:15px;
-  border-top:1px solid #1a2035;
+/* Toggle rows */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid #1a203533
 }
-#footer a{
-  margin-right:10px;
-  color:#ffcc00;
-  text-decoration:none;
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:12px;color:#ccc}
+.toggle-label small{display:block;font-size:10px;color:#555;margin-top:2px}
+
+/* Switch */
+.sw{position:relative;width:40px;height:22px;flex-shrink:0;display:inline-block}
+.sw input{display:none}
+.sw-sl{
+  position:absolute;inset:0;background:#1a2035;border-radius:22px;
+  cursor:pointer;transition:.25s;border:1px solid #2a3055
 }
+.sw-sl:before{
+  content:"";position:absolute;width:16px;height:16px;
+  left:2px;top:2px;background:#555;border-radius:50%;transition:.25s
+}
+.sw input:checked+.sw-sl{background:#1a3a2a;border-color:#4caf50}
+.sw input:checked+.sw-sl:before{transform:translateX(18px);background:#4caf50}
+
+/* Custom links */
+.link-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.link-item{
+  display:flex;align-items:center;gap:6px;
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:7px;padding:6px 10px
+}
+.link-item input{
+  background:transparent;border:none;color:#fff;font-size:12px;
+  outline:none;flex:1
+}
+.link-item .rm-link{
+  background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px
+}
+.add-link-row{display:flex;gap:6px}
+.add-link-row input{
+  flex:1;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:7px 10px;border-radius:7px;font-size:12px;outline:none
+}
+.add-link-row input:focus{border-color:#ffcc00}
+.add-link-btn{
+  background:#1a2035;border:none;color:#ffcc00;
+  padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer
+}
+.add-link-btn:hover{background:#ffcc00;color:#000}
+
+/* Footer preview */
+.footer-preview{
+  background:#060a14;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 20px;margin-top:4px
+}
+.preview-title{font-size:11px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.preview-links{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.preview-link{font-size:12px;color:#aaa}
+.preview-link:hover{color:#ffcc00}
+.preview-copy{font-size:11px;color:#555}
+.preview-promo{
+  background:#ffcc00;color:#000;font-size:11px;font-weight:600;
+  padding:5px 14px;border-radius:5px;margin-top:8px;display:inline-block
+}
+.preview-social{display:flex;gap:10px;margin-top:10px}
+.social-dot{
+  width:28px;height:28px;border-radius:50%;background:#1a2035;
+  display:flex;align-items:center;justify-content:center;font-size:14px
+}
+
+/* ========== UNSAVED BAR ========== */
+.unsaved-bar{
+  position:fixed;bottom:0;left:230px;right:0;
+  background:#1a2035;border-top:2px solid #ffcc00;
+  padding:10px 22px;display:none;align-items:center;
+  justify-content:space-between;z-index:99
+}
+.unsaved-bar.show{display:flex}
+.unsaved-msg{color:#ffcc00;font-weight:600;font-size:13px}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:70px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.toast.info{border-color:#2196f3;background:#0d1a28}
 </style>
 </head>
-
 <body>
 
-<div class="cms-app">
-
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
-
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
     <a href="dashboard.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
+    <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
-
+    <div class="menu-sep"></div>
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
-
-    <a href="seo.html">📈 Seo</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
-
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 Ai Brain</a>
-
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html" class="active">🦶 Footer</a>
-
-    <a href="system-settings.html">⚙ System-settings</a>
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
 
-<header class="cms-header">
-  <div>🦶 Footer PRO Control</div>
-  <button class="save-btn" onclick="save()">💾 Save Footer</button>
-</header>
+  <header class="cms-header">
+    <div class="title">🦶 Footer Control</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="outline-btn" id="resetBtn">↺ Reset</button>
+      <button class="danger-btn"  id="killBtn">⛔ Kill Footer</button>
+      <button class="save-btn"    id="saveBtn">💾 Save Footer</button>
+      <button class="logout-btn"  id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-<section class="cms-content">
-<div class="grid">
+  <section class="cms-content">
 
-<div class="card">
-<h3>Global Footer</h3>
-<label class="check"><input type="checkbox" id="footerOn"> Enabled</label>
-<label class="check"><input type="checkbox" id="footerLazy"> Lazy Load</label>
-<label class="check"><input type="checkbox" id="footerBlur"> Blur</label>
-<label class="check"><input type="checkbox" id="footerLock"> Lock</label>
-<select id="footerTheme">
-<option>Dark</option><option>Light</option><option>Auto</option>
-</select>
-</div>
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🦶</div>
+        <div class="stat-info">
+          <div class="num" id="statFooter">—</div>
+          <div class="lbl">Footer Status</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔤</div>
+        <div class="stat-info">
+          <div class="num" id="statAZ">—</div>
+          <div class="lbl">A-Z Navigation</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📱</div>
+        <div class="stat-info">
+          <div class="num" id="statMobile">—</div>
+          <div class="lbl">Mobile Nav</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📢</div>
+        <div class="stat-info">
+          <div class="num" id="statPromo">—</div>
+          <div class="lbl">Promo Bar</div>
+        </div>
+      </div>
+    </div>
 
-<div class="card">
-<h3>Footer Links</h3>
-<label class="check"><input type="checkbox" id="about"> About</label>
-<label class="check"><input type="checkbox" id="privacy"> Privacy</label>
-<label class="check"><input type="checkbox" id="disclaimer"> Disclaimer</label>
-<label class="check"><input type="checkbox" id="dmca"> DMCA</label>
-<label class="check"><input type="checkbox" id="telegram"> Telegram</label>
-</div>
+    <!-- GLOBAL FOOTER -->
+    <div class="section-label">🦶 Global Footer</div>
+    <div class="settings-grid">
 
-<div class="card">
-<h3>Mobile Nav</h3>
-<label class="check"><input type="checkbox" id="mobileNav"> Enable</label>
-</div>
+      <div class="card">
+        <div class="card-title">⚙️ Footer Settings</div>
+        <div class="toggle-row">
+          <div class="toggle-label">Footer Enabled<small>Show footer on all pages</small></div>
+          <label class="sw"><input type="checkbox" id="footerOn" onchange="markDirty();updateStats();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Lazy Load<small>Load footer only when scrolled to</small></div>
+          <label class="sw"><input type="checkbox" id="footerLazy" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Blur Effect<small>Frosted glass background</small></div>
+          <label class="sw"><input type="checkbox" id="footerBlur" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Sticky Footer<small>Lock to bottom of screen</small></div>
+          <label class="sw"><input type="checkbox" id="footerLock" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label">Theme</label>
+          <select class="form-input" id="footerTheme" onchange="markDirty()">
+            <option value="Dark">Dark</option>
+            <option value="Light">Light</option>
+            <option value="Auto">Auto (System)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Copyright Text</label>
+          <input class="form-input" id="footerText" placeholder="© 2026 AnimeHunt. All Rights Reserved." oninput="markDirty();updatePreview()">
+        </div>
+      </div>
 
-<div class="card full">
-<h3>System</h3>
-<div class="btns">
-<button onclick="resetCfg()">Reset</button>
-<button onclick="kill()">Kill</button>
-<button onclick="debug()">Debug</button>
-</div>
-<div class="status" id="status">Ready</div>
-<pre id="debugBox"></pre>
-</div>
+      <div class="card">
+        <div class="card-title">🔗 Footer Links</div>
+        <div class="toggle-row">
+          <div class="toggle-label">About</div>
+          <label class="sw"><input type="checkbox" id="about" onchange="markDirty();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Privacy Policy</div>
+          <label class="sw"><input type="checkbox" id="privacy" onchange="markDirty();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Disclaimer</div>
+          <label class="sw"><input type="checkbox" id="disclaimer" onchange="markDirty();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">DMCA</div>
+          <label class="sw"><input type="checkbox" id="dmca" onchange="markDirty();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Telegram<small>Links to your Telegram channel</small></div>
+          <label class="sw"><input type="checkbox" id="telegram" onchange="markDirty();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Link Badges<small>Badge style instead of plain text</small></div>
+          <label class="sw"><input type="checkbox" id="linkBadges" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+      </div>
 
-<div id="footer">
-  <div id="footer-links"></div>
-  <div id="footer-promo"></div>
-</div>
+      <div class="card">
+        <div class="card-title">🔗 Custom Links</div>
+        <div style="font-size:11px;color:#555;margin-bottom:8px">Add extra links to footer</div>
+        <div class="link-list" id="customLinksList"></div>
+        <div class="add-link-row">
+          <input id="newLinkLabel" placeholder="Label (e.g. Contact)">
+          <input id="newLinkUrl"   placeholder="URL (e.g. /contact.html)">
+          <button class="add-link-btn" onclick="addCustomLink()">+</button>
+        </div>
+      </div>
 
-</div>
-</section>
+    </div>
 
+    <!-- SOCIAL LINKS -->
+    <div class="section-label">📱 Social Links</div>
+    <div class="settings-grid">
+
+      <div class="card">
+        <div class="card-title">📣 Telegram</div>
+        <div class="form-group">
+          <label class="form-label">Telegram URL</label>
+          <input class="form-input" id="socialTelegram" placeholder="https://t.me/toons15" oninput="markDirty();updatePreview()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🐦 Twitter / X</div>
+        <div class="form-group">
+          <label class="form-label">Twitter URL</label>
+          <input class="form-input" id="socialTwitter" placeholder="https://twitter.com/..." oninput="markDirty();updatePreview()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📺 YouTube & Instagram</div>
+        <div class="form-group">
+          <label class="form-label">YouTube URL</label>
+          <input class="form-input" id="socialYoutube" placeholder="https://youtube.com/..." oninput="markDirty()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instagram URL</label>
+          <input class="form-input" id="socialInstagram" placeholder="https://instagram.com/..." oninput="markDirty()">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- A-Z NAVIGATION -->
+    <div class="section-label">🔤 A–Z Navigation</div>
+    <div class="settings-grid">
+
+      <div class="card">
+        <div class="card-title">🔤 A-Z Bar Settings</div>
+        <div class="toggle-row">
+          <div class="toggle-label">Enable A-Z Nav<small>Letter bar on homepage</small></div>
+          <label class="sw"><input type="checkbox" id="azOn" onchange="markDirty();updateStats()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto Populate<small>Auto-detect active letters from DB</small></div>
+          <label class="sw"><input type="checkbox" id="azAuto" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Sticky<small>A-Z bar sticks at top on scroll</small></div>
+          <label class="sw"><input type="checkbox" id="azSticky" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Compact Mode<small>Smaller letter buttons</small></div>
+          <label class="sw"><input type="checkbox" id="azCompact" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label">A-Z Mode</label>
+          <select class="form-input" id="azMode" onchange="markDirty()">
+            <option value="Scroll">Scroll to Section</option>
+            <option value="Filter">Filter Results</option>
+            <option value="Link">Link to Page</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MOBILE NAV -->
+    <div class="section-label">📱 Mobile Bottom Navigation</div>
+    <div class="settings-grid">
+
+      <div class="card">
+        <div class="card-title">📱 Mobile Nav Settings</div>
+        <div class="toggle-row">
+          <div class="toggle-label">Enable Mobile Nav<small>Bottom tab bar for mobile users</small></div>
+          <label class="sw"><input type="checkbox" id="mobileNav" onchange="markDirty();updateStats()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Float Mode<small>Float above content</small></div>
+          <label class="sw"><input type="checkbox" id="mobileFloat" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Blur Background<small>Frosted glass mobile nav</small></div>
+          <label class="sw"><input type="checkbox" id="mobileBlur" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Hide on Scroll Down<small>Shows again on scroll up</small></div>
+          <label class="sw"><input type="checkbox" id="mobileHideScroll" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PROMO BAR -->
+    <div class="section-label">📢 Promotional Bar</div>
+    <div class="settings-grid">
+
+      <div class="card">
+        <div class="card-title">📢 Promo Settings</div>
+        <div class="toggle-row">
+          <div class="toggle-label">Enable Promo Bar<small>Show at top of page</small></div>
+          <label class="sw"><input type="checkbox" id="promoOn" onchange="markDirty();updateStats();updatePreview()"><span class="sw-sl"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">Auto-Hide (5 sec)<small>Promo disappears after 5 seconds</small></div>
+          <label class="sw"><input type="checkbox" id="promoAutoHide" onchange="markDirty()"><span class="sw-sl"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✏️ Promo Content</div>
+        <div class="form-group">
+          <label class="form-label">Promo Text</label>
+          <input class="form-input" id="promoText" placeholder="🔥 New episodes added daily!" oninput="markDirty();updatePreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Promo Link URL</label>
+          <input class="form-input" id="promoLink" placeholder="https://t.me/toons15" oninput="markDirty()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Background Color</label>
+          <div class="color-row">
+            <input type="color" id="promoBgPicker" value="#ffcc00" oninput="document.getElementById('promoBg').value=this.value;markDirty();updatePreview()">
+            <input class="form-input" id="promoBg" value="#ffcc00" oninput="markDirty();updatePreview()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Text Color</label>
+          <div class="color-row">
+            <input type="color" id="promoColorPicker" value="#000000" oninput="document.getElementById('promoColor').value=this.value;markDirty();updatePreview()">
+            <input class="form-input" id="promoColor" value="#000000" oninput="markDirty();updatePreview()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👁 Live Preview</div>
+        <div class="footer-preview" id="footerPreview">
+          <div class="preview-title">Footer Preview</div>
+          <div class="preview-links" id="previewLinks"></div>
+          <div class="preview-social" id="previewSocial"></div>
+          <div class="preview-copy" id="previewCopy">© 2026 AnimeHunt. All Rights Reserved.</div>
+          <div class="preview-promo" id="previewPromo" style="display:none"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
 </main>
+
+<!-- UNSAVED BAR -->
+<div class="unsaved-bar" id="unsavedBar">
+  <span class="unsaved-msg">⚠️ Unsaved changes</span>
+  <div style="display:flex;gap:8px">
+    <button class="outline-btn" onclick="loadSettings()">↺ Discard</button>
+    <button class="save-btn" onclick="saveSettings()">💾 Save Now</button>
+  </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
+/* =========================================
+   CONFIG
+========================================= */
+const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const FOOT_API = `${API}/footer`
 
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/footer"
-const PUBLIC_API = "https://animehunt-backend.animehunt715.workers.dev/api/footer/public"
+/* =========================================
+   AUTH
+========================================= */
+function getToken() { return localStorage.getItem("ah_token") }
 
-const TOKEN = localStorage.getItem("AUTH_TOKEN")
-
-if(!TOKEN){
-  location.href = "login.html"
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
 }
 
-/* ================= DOM ================= */
-
-const status = document.getElementById("status")
-const debugBox = document.getElementById("debugBox")
-
-const fields = [
-"footerOn","footerLazy","footerBlur","footerLock","footerTheme",
-"about","privacy","disclaimer","dmca","telegram","linkBadges",
-"azOn","azAuto","azSticky","azCompact","azMode",
-"mobileNav","mobileFloat","mobileBlur","mobileHideScroll",
-"promoOn","promoText","promoLink","promoAutoHide"
-]
-
-/* ================= API ================= */
-
-async function api(url, method="GET", body=null){
-
-  try{
-
-    const res = await fetch(url,{
-      method,
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + TOKEN
-      },
-      body: body ? JSON.stringify(body) : null
-    })
-
-    if(res.status === 401){
-      location.href = "login.html"
-      return
-    }
-
-    if(!res.ok){
-      throw new Error("API ERROR: " + res.status)
-    }
-
-    return await res.json()
-
-  }catch(e){
-    console.error("API FAIL:", e)
-    status.innerText = "API Error ❌"
-    throw e
-  }
+function requireAuth() {
+  if (!getToken()) { window.location.href = "login.html"; return false }
+  return true
 }
 
-/* ================= LOAD ADMIN ================= */
-
-async function loadFooter(){
-
-  status.innerText = "Loading..."
-
-  try{
-
-    const data = await api(API)
-
-    fields.forEach(id=>{
-      const el = document.getElementById(id)
-      if(!el) return
-
-      if(el.type === "checkbox"){
-        el.checked = !!data[id]
-      }else{
-        el.value = data[id] ?? ""
-      }
-    })
-
-    status.innerText = "Synced ✅"
-
-  }catch(e){
-    console.error(e)
-  }
+async function checkAuth() {
+  try {
+    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error()
+    document.getElementById("adminName").textContent = json.data.username
+  } catch { window.location.href = "login.html" }
 }
 
-/* ================= SAVE ================= */
-
-async function save(){
-
-  const payload = {}
-
-  fields.forEach(id=>{
-    const el = document.getElementById(id)
-    if(!el) return
-
-    payload[id] = el.type === "checkbox"
-      ? (el.checked ? 1 : 0)
-      : el.value
-  })
-
-  status.innerText = "Saving..."
-
-  try{
-    await api(API,"POST",payload)
-    status.innerText = "Saved ✅"
-  }catch{
-    status.innerText = "Save Failed ❌"
-  }
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
 }
 
-/* ================= RESET ================= */
-
-async function resetCfg(){
-
-  if(!confirm("Reset footer settings?")) return
-
-  try{
-    await api(API + "/reset","POST")
-    await loadFooter()
-  }catch(e){
-    console.error(e)
-  }
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 3500)
 }
 
-/* ================= KILL ================= */
+/* =========================================
+   DIRTY
+========================================= */
+let isDirty = false
 
-async function kill(){
-
-  if(!confirm("Disable footer system?")) return
-
-  try{
-    await api(API + "/kill","POST")
-    await loadFooter()
-  }catch(e){
-    console.error(e)
-  }
+function markDirty() {
+  isDirty = true
+  document.getElementById("unsavedBar").classList.add("show")
 }
 
-/* ================= DEBUG ================= */
-
-async function debug(){
-
-  try{
-    const data = await api(API)
-
-    debugBox.style.display = "block"
-    debugBox.textContent = JSON.stringify(data,null,2)
-  }catch(e){
-    console.error(e)
-  }
+function clearDirty() {
+  isDirty = false
+  document.getElementById("unsavedBar").classList.remove("show")
 }
 
-/* ================= PUBLIC FOOTER ================= */
-
-async function initFooter(){
-
-  try{
-
-    const res = await fetch(PUBLIC_API)
-
-    if(!res.ok){
-      console.warn("Public API failed:", res.status)
-      return
-    }
-
-    const cfg = await res.json()
-
-    if(!cfg || Object.keys(cfg).length === 0){
-      console.warn("Empty footer config")
-      return
-    }
-
-    const footer = document.getElementById("footer")
-    if(!footer) return
-
-    /* ENABLE */
-    if(!cfg.footerOn){
-      footer.style.display = "none"
-      return
-    }
-
-    /* THEME */
-    footer.className = cfg.footerTheme?.toLowerCase() || "dark"
-
-    /* BLUR */
-    if(cfg.footerBlur){
-      footer.style.backdropFilter = "blur(10px)"
-    }
-
-    /* LOCK */
-    if(cfg.footerLock){
-      footer.style.position = "fixed"
-      footer.style.bottom = "0"
-      footer.style.width = "100%"
-    }
-
-    /* LINKS */
-    const links = []
-
-    if(cfg.about) links.push("About")
-    if(cfg.privacy) links.push("Privacy")
-    if(cfg.disclaimer) links.push("Disclaimer")
-    if(cfg.dmca) links.push("DMCA")
-    if(cfg.telegram) links.push("Telegram")
-
-    const box = document.getElementById("footer-links")
-
-    if(box){
-      box.innerHTML = links.map(l =>
-        `<a href="/${l.toLowerCase()}">${l}</a>`
-      ).join("")
-    }
-
-    /* PROMO */
-    if(cfg.promoOn && cfg.promoText){
-
-      const promo = document.getElementById("footer-promo")
-
-      if(promo){
-        promo.innerHTML = `<a href="${cfg.promoLink}" target="_blank">${cfg.promoText}</a>`
-        promo.style.display = "block"
-
-        if(cfg.promoAutoHide){
-          setTimeout(()=>{
-            promo.style.display = "none"
-          },5000)
-        }
-      }
-    }
-
-    /* MOBILE NAV */
-    if(cfg.mobileNav){
-
-      const nav = document.getElementById("mobile-nav")
-
-      if(nav){
-
-        nav.style.display = "flex"
-
-        if(cfg.mobileFloat){
-          nav.style.position = "fixed"
-          nav.style.bottom = "10px"
-        }
-
-        if(cfg.mobileHideScroll){
-
-          let lastScroll = 0
-
-          window.addEventListener("scroll",()=>{
-
-            const current = window.scrollY
-
-            nav.style.display = current > lastScroll ? "none" : "flex"
-
-            lastScroll = current
-
-          })
-
-        }
-
-      }
-    }
-
-  }catch(e){
-    console.error("Footer Load Error:", e)
-  }
-}
-
-/* ================= INIT ================= */
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  loadFooter()
-  initFooter()
+window.addEventListener("beforeunload", e => {
+  if (isDirty) { e.preventDefault(); e.returnValue = "" }
 })
 
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveSettings() }
+})
+
+/* =========================================
+   CUSTOM LINKS
+========================================= */
+let customLinks = []
+
+function renderCustomLinks() {
+  const el = document.getElementById("customLinksList")
+  el.innerHTML = customLinks.map((l, i) => `
+    <div class="link-item">
+      <input value="${l.label}" placeholder="Label" onchange="customLinks[${i}].label=this.value;markDirty()">
+      <input value="${l.url}"   placeholder="URL"   onchange="customLinks[${i}].url=this.value;markDirty()">
+      <button class="rm-link" onclick="removeCustomLink(${i})">×</button>
+    </div>
+  `).join("")
+}
+
+function addCustomLink() {
+  const label = document.getElementById("newLinkLabel").value.trim()
+  const url   = document.getElementById("newLinkUrl").value.trim()
+  if (!label || !url) { showToast("Enter label and URL","error"); return }
+  customLinks.push({ label, url })
+  document.getElementById("newLinkLabel").value = ""
+  document.getElementById("newLinkUrl").value   = ""
+  renderCustomLinks()
+  markDirty()
+  updatePreview()
+}
+
+function removeCustomLink(idx) {
+  customLinks.splice(idx, 1)
+  renderCustomLinks()
+  markDirty()
+  updatePreview()
+}
+
+/* =========================================
+   STATS UPDATE
+========================================= */
+function updateStats() {
+  document.getElementById("statFooter").textContent =
+    document.getElementById("footerOn")?.checked ? "✅ On" : "❌ Off"
+  document.getElementById("statAZ").textContent =
+    document.getElementById("azOn")?.checked ? "✅ On" : "❌ Off"
+  document.getElementById("statMobile").textContent =
+    document.getElementById("mobileNav")?.checked ? "✅ On" : "❌ Off"
+  document.getElementById("statPromo").textContent =
+    document.getElementById("promoOn")?.checked ? "✅ On" : "❌ Off"
+}
+
+/* =========================================
+   LIVE PREVIEW
+========================================= */
+function updatePreview() {
+  const linksEl  = document.getElementById("previewLinks")
+  const copyEl   = document.getElementById("previewCopy")
+  const promoEl  = document.getElementById("previewPromo")
+  const socialEl = document.getElementById("previewSocial")
+
+  /* Links */
+  const links = []
+  if (document.getElementById("about")?.checked)      links.push("About")
+  if (document.getElementById("privacy")?.checked)    links.push("Privacy")
+  if (document.getElementById("disclaimer")?.checked) links.push("Disclaimer")
+  if (document.getElementById("dmca")?.checked)       links.push("DMCA")
+  if (document.getElementById("telegram")?.checked)   links.push("Telegram")
+  customLinks.forEach(l => links.push(l.label))
+
+  linksEl.innerHTML = links.map(l =>
+    `<span class="preview-link">${l}</span>`
+  ).join("")
+
+  /* Copyright */
+  copyEl.textContent = document.getElementById("footerText")?.value || "© 2026 AnimeHunt."
+
+  /* Promo */
+  const promoOn   = document.getElementById("promoOn")?.checked
+  const promoText = document.getElementById("promoText")?.value
+  const promoBg   = document.getElementById("promoBg")?.value   || "#ffcc00"
+  const promoClr  = document.getElementById("promoColor")?.value || "#000"
+
+  if (promoOn && promoText) {
+    promoEl.textContent     = promoText
+    promoEl.style.background = promoBg
+    promoEl.style.color      = promoClr
+    promoEl.style.display    = "inline-block"
+  } else {
+    promoEl.style.display = "none"
+  }
+
+  /* Social */
+  const socials = []
+  if (document.getElementById("socialTelegram")?.value)  socials.push("📣")
+  if (document.getElementById("socialTwitter")?.value)   socials.push("🐦")
+  if (document.getElementById("socialYoutube")?.value)   socials.push("📺")
+  if (document.getElementById("socialInstagram")?.value) socials.push("📸")
+  socialEl.innerHTML = socials.map(s =>
+    `<div class="social-dot">${s}</div>`
+  ).join("")
+}
+
+/* =========================================
+   LOAD SETTINGS
+========================================= */
+async function loadSettings() {
+  try {
+    const res  = await fetch(FOOT_API, { headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    const d = json.data
+
+    const setCB  = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val }
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value   = val ?? "" }
+
+    /* Footer */
+    setCB("footerOn",   d.footer?.on)
+    setCB("footerLazy", d.footer?.lazy)
+    setCB("footerBlur", d.footer?.blur)
+    setCB("footerLock", d.footer?.lock)
+    setVal("footerTheme", d.footer?.theme || "Dark")
+    setVal("footerText",  d.footer?.text  || "")
+
+    /* Links */
+    setCB("about",       d.links?.about)
+    setCB("privacy",     d.links?.privacy)
+    setCB("disclaimer",  d.links?.disclaimer)
+    setCB("dmca",        d.links?.dmca)
+    setCB("telegram",    d.links?.telegram)
+    setCB("linkBadges",  d.links?.badges)
+
+    customLinks = d.links?.custom || []
+    renderCustomLinks()
+
+    /* Social */
+    setVal("socialTelegram",  d.social?.telegram)
+    setVal("socialTwitter",   d.social?.twitter)
+    setVal("socialYoutube",   d.social?.youtube)
+    setVal("socialInstagram", d.social?.instagram)
+
+    /* A-Z */
+    setCB("azOn",      d.az?.on)
+    setCB("azAuto",    d.az?.auto)
+    setCB("azSticky",  d.az?.sticky)
+    setCB("azCompact", d.az?.compact)
+    setVal("azMode",   d.az?.mode || "Scroll")
+
+    /* Mobile */
+    setCB("mobileNav",        d.mobile?.nav)
+    setCB("mobileFloat",      d.mobile?.float)
+    setCB("mobileBlur",       d.mobile?.blur)
+    setCB("mobileHideScroll", d.mobile?.hideScroll)
+
+    /* Promo */
+    setCB("promoOn",       d.promo?.on)
+    setCB("promoAutoHide", d.promo?.autoHide)
+    setVal("promoText",  d.promo?.text  || "")
+    setVal("promoLink",  d.promo?.link  || "")
+    setVal("promoBg",    d.promo?.bg    || "#ffcc00")
+    setVal("promoColor", d.promo?.color || "#000000")
+
+    /* Color pickers */
+    const promoBgEl  = document.getElementById("promoBgPicker")
+    const promoClrEl = document.getElementById("promoColorPicker")
+    if (promoBgEl)  promoBgEl.value  = d.promo?.bg    || "#ffcc00"
+    if (promoClrEl) promoClrEl.value = d.promo?.color || "#000000"
+
+    updateStats()
+    updatePreview()
+    clearDirty()
+
+  } catch (err) {
+    showToast("Load failed: " + err.message, "error")
+  }
+}
+
+/* =========================================
+   BUILD PAYLOAD
+========================================= */
+function buildPayload() {
+  const cb  = (id) => !!document.getElementById(id)?.checked
+  const val = (id) => document.getElementById(id)?.value || ""
+
+  return {
+    footer: {
+      on:    cb("footerOn"),
+      lazy:  cb("footerLazy"),
+      blur:  cb("footerBlur"),
+      lock:  cb("footerLock"),
+      theme: val("footerTheme"),
+      text:  val("footerText")
+    },
+    links: {
+      about:      cb("about"),
+      privacy:    cb("privacy"),
+      disclaimer: cb("disclaimer"),
+      dmca:       cb("dmca"),
+      telegram:   cb("telegram"),
+      badges:     cb("linkBadges"),
+      custom:     [...customLinks]
+    },
+    social: {
+      telegram:  val("socialTelegram"),
+      twitter:   val("socialTwitter"),
+      youtube:   val("socialYoutube"),
+      instagram: val("socialInstagram")
+    },
+    az: {
+      on:      cb("azOn"),
+      auto:    cb("azAuto"),
+      sticky:  cb("azSticky"),
+      compact: cb("azCompact"),
+      mode:    val("azMode")
+    },
+    mobile: {
+      nav:        cb("mobileNav"),
+      float:      cb("mobileFloat"),
+      blur:       cb("mobileBlur"),
+      hideScroll: cb("mobileHideScroll")
+    },
+    promo: {
+      on:       cb("promoOn"),
+      text:     val("promoText"),
+      link:     val("promoLink"),
+      autoHide: cb("promoAutoHide"),
+      bg:       val("promoBg"),
+      color:    val("promoColor")
+    }
+  }
+}
+
+/* =========================================
+   SAVE
+========================================= */
+async function saveSettings() {
+  const btn = document.getElementById("saveBtn")
+  btn.disabled    = true
+  btn.textContent = "Saving..."
+
+  try {
+    const res  = await fetch(FOOT_API, {
+      method: "POST", headers: authHeaders(),
+      body: JSON.stringify(buildPayload())
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    showToast("Footer settings saved ✅")
+    clearDirty()
+
+  } catch (err) {
+    showToast("Save failed: " + err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "💾 Save Footer"
+  }
+}
+
+document.getElementById("saveBtn").onclick = saveSettings
+
+/* =========================================
+   RESET
+========================================= */
+document.getElementById("resetBtn").onclick = async () => {
+  if (!confirm("Reset footer to defaults?")) return
+  try {
+    const res  = await fetch(`${FOOT_API}/reset`, { method: "POST", headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Reset to defaults ✅")
+    loadSettings()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   KILL FOOTER
+========================================= */
+document.getElementById("killBtn").onclick = async () => {
+  if (!confirm("Disable footer on entire site?")) return
+  try {
+    const res  = await fetch(`${FOOT_API}/kill`, { method: "POST", headers: authHeaders() })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Footer disabled ⛔", "info")
+    loadSettings()
+  } catch (err) { showToast(err.message, "error") }
+}
+
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  checkAuth()
+  loadSettings()
+}
 </script>
-    
-            
 </body>
 </html>
