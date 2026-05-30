@@ -1,621 +1,727 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Analytics CMS – AnimeHunt</title>
   <meta charset="UTF-8">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics – AnimeHunt CMS</title>
   <style>
-  /* ===== GLOBAL ===== */
-  *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:system-ui,sans-serif;
-  }
-  body{
-    background:#0b0f1a;
-    color:#fff;
-  }
-  a{ text-decoration:none; color:inherit }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
-  /* ===== LAYOUT ===== */
-  .cms-app{ display:flex; min-height:100vh; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0b0f1a;
+      color: #fff;
+    }
 
-  .cms-main{
-    flex:1;
-    background:#0e1424;
-    display:flex;
-    flex-direction:column;
-  }
+    a { text-decoration: none; color: inherit; }
 
-  .cms-header{
-    height:60px;
-    background:#0b0f1a;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 20px;
-    border-bottom:1px solid #1a2035;
-  }
+    /* ===== LAYOUT ===== */
+    .cms-app { display: flex; min-height: 100vh; }
 
-  .cms-content{
-    flex:1;
-    padding:20px;
-    overflow:auto;
-  }
+    /* ===== SIDEBAR ===== */
+    .cms-sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #0b0f1a, #0e1424);
+      border-right: 1px solid #1a2035;
+      padding: 20px 14px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
 
-  /* ===== SIDEBAR ===== */
-  .cms-sidebar{
-    width:260px;
-    background:linear-gradient(180deg,#0b0f1a,#0e1424);
-    border-right:1px solid #1a2035;
-    padding:20px 14px;
-  }
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1a2035;
+    }
+    .brand b { color: #ffcc00; }
+    .brand small {
+      display: block;
+      font-size: 10px;
+      color: #555;
+      margin-top: 4px;
+      font-weight: 400;
+    }
 
-  .brand{
-    font-size:20px;
-    font-weight:700;
-    margin-bottom:30px;
-  }
-  .brand b{ color:#ffcc00 }
-  .brand small{
-    display:block;
-    font-size:10px;
-    color:#777;
-    margin-top:4px;
-  }
+    .cms-menu { display: flex; flex-direction: column; gap: 2px; }
 
-  .cms-menu{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
+    .cms-menu a {
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: #999;
+      transition: .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .cms-menu a{
-    padding:10px 14px;
-    border-radius:8px;
-    font-size:13px;
-    color:#ccc;
-    transition:.25s;
-  }
+    .cms-menu a:hover,
+    .cms-menu a.active {
+      background: #1a2035;
+      color: #ffcc00;
+      padding-left: 18px;
+    }
 
-  .cms-menu a:hover,
-  .cms-menu a.active{
-    background:#1a2035;
-    color:#ffcc00;
-    transform:translateX(6px);
-  }
+    /* ===== MAIN ===== */
+    .cms-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
 
-  /* ===== HEADER SELECT ===== */
-  select{
-    background:#0e1424;
-    border:1px solid #1a2035;
-    color:#fff;
-    padding:6px 10px;
-    border-radius:6px;
-  }
+    .cms-header {
+      height: 56px;
+      background: #0b0f1a;
+      border-bottom: 1px solid #1a2035;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-  /* ===== STATS GRID ===== */
-  .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:12px;
-    margin-bottom:16px;
-  }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-  .stat-card{
-    background:#0b0f1a;
-    border:1px solid #1a2035;
-    border-radius:12px;
-    padding:14px;
-    text-align:center;
-  }
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
 
-  .stat-card h3{
-    font-size:11px;
-    color:#aaa;
-  }
+    .live-badge {
+      background: #0d2218;
+      border: 1px solid #4caf5040;
+      color: #4caf50;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-  .stat-card p{
-    font-size:22px;
-    color:#ffcc00;
-    font-weight:700;
-    margin-top:6px;
-  }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #4caf50;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
 
-  /* ===== ANALYTICS GRID ===== */
-  .analytics-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:16px;
-  }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
 
-  .card{
-    background:#0b0f1a;
-    border:1px solid #1a2035;
-    border-radius:12px;
-    padding:14px;
-  }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  .card h3{
-    font-size:13px;
-    color:#ffcc00;
-    margin-bottom:10px;
-  }
+    select {
+      background: #0e1424;
+      border: 1px solid #1a2035;
+      color: #ccc;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+    }
 
-  .card ul{
-    list-style:none;
-  }
+    select:focus { border-color: #ffcc00; }
 
-  .card li{
-    font-size:12px;
-    padding:6px 0;
-    border-bottom:1px solid #1a2035;
-    color:#ccc;
-  }
+    .refresh-btn {
+      background: #0e1424;
+      border: 1px solid #1a2035;
+      color: #ccc;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: .2s;
+    }
 
-  .card li:last-child{
-    border-bottom:none;
-  }
+    .refresh-btn:hover { border-color: #ffcc00; color: #ffcc00; }
+
+    .last-updated {
+      font-size: 11px;
+      color: #555;
+    }
+
+    /* ===== CONTENT ===== */
+    .cms-content {
+      flex: 1;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0b0f1acc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: .3s;
+    }
+
+    .loading-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #1a2035;
+      border-top-color: #ffcc00;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== STATS GRID ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card {
+      background: #0b0f1a;
+      border: 1px solid #1a2035;
+      border-radius: 12px;
+      padding: 16px 14px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+
+    .stat-card:hover { border-color: #ffcc0040; }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent, #ffcc00);
+      opacity: 0.4;
+    }
+
+    .stat-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .stat-card h3 {
+      font-size: 10px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+
+    .stat-card p {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffcc00;
+      transition: opacity .3s;
+    }
+
+    .stat-change {
+      font-size: 10px;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    /* ===== ANALYTICS GRID ===== */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 1300px) { .analytics-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 800px)  { .analytics-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #0b0f1a;
+      border: 1px solid #1a2035;
+      border-radius: 12px;
+      padding: 16px;
+      transition: border-color .2s;
+    }
+
+    .card:hover { border-color: #2a3055; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #ffcc00;
+    }
+
+    .card-count {
+      font-size: 10px;
+      color: #555;
+      background: #1a2035;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ===== LIST ITEMS ===== */
+    .list-item {
+      position: relative;
+      padding: 9px 10px;
+      margin-bottom: 3px;
+      border-radius: 7px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .list-item-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 204, 0, 0.07);
+      border-radius: 7px;
+      transform-origin: left;
+      transition: transform .5s ease;
+    }
+
+    .item-name {
+      font-size: 12px;
+      color: #ccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 75%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .item-rank {
+      font-size: 10px;
+      color: #555;
+      margin-right: 6px;
+      min-width: 16px;
+    }
+
+    .item-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffcc00;
+      position: relative;
+      z-index: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 10px;
+      color: #555;
+      font-size: 12px;
+    }
+
+    /* ===== ERROR BANNER ===== */
+    .error-banner {
+      background: #2a0d0d;
+      border: 1px solid #f4433633;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #f44336;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-banner.show { display: flex; align-items: center; gap: 10px; }
+
+    /* ===== SECTION LABEL ===== */
+    .section-label {
+      font-size: 10px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
   </style>
 </head>
-
 <body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+</div>
 
 <div class="cms-app">
 
-  <!-- SIDEBAR -->
+  <!-- ===== SIDEBAR ===== -->
   <aside class="cms-sidebar">
-  <div class="brand">
-    <span>Anime</span><b>Hunt</b>
-    <small>CMS</small>
-  </div>
+    <div class="brand">
+      <span>Anime</span><b>Hunt</b>
+      <small>Admin CMS</small>
+    </div>
 
-  <nav class="cms-menu">
+    <nav class="cms-menu">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="anime.html">🎬 Anime</a>
+      <a href="episodes.html">📺 Episodes</a>
+      <a href="categories.html">🗂 Categories</a>
+      <a href="banners.html">🖼 Banners</a>
+      <a href="homepage.html">🏠 Homepage</a>
+      <a href="downloads.html">📥 Downloads</a>
+      <a href="servers.html">🌐 Servers</a>
+      <a href="player.html">🎞 Player</a>
+      <a href="search.html">🔍 Search</a>
+      <a href="seo.html">📈 SEO</a>
+      <a href="analytics.html" class="active">📊 Analytics</a>
+      <a href="performance.html">⚡ Performance</a>
+      <a href="security.html">🔐 Security</a>
+      <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
+      <a href="ads.html">📢 Ads</a>
+      <a href="ai-brain.html">🧠 AI Brain</a>
+      <a href="sidebar.html">📌 Sidebar</a>
+      <a href="footer.html">🦶 Footer</a>
+      <a href="system-settings.html">⚙ System Settings</a>
+    </nav>
+  </aside>
 
-    <!-- CORE -->
-    <a href="dashboard.html">🏠 Dashboard</a>
-    <a href="anime.html">🎬 Anime</a>
-    <a href="episodes.html">📺 Episodes</a>
-    <a href="categories.html">🗂 Catagorys</a>
-    <a href="banners.html">🖼 Banners</a>
-    <a href="homepage.html">🏠 Homepage</a>
-
-    <!-- CONTENT -->
-    <a href="downloads.html">📥 Downloads</a>
-    <a href="servers.html">🌐 Servers</a>
-    <a href="player.html">🎞 Player</a>
-    <a href="search.html">🔍 Search</a>
-
-    <!-- DATA & SEO -->
-    <a href="seo.html">📈 Seo</a>
-    <a href="analytics.html" class="active">📊 Analytics</a>
-    <a href="performance.html">⚡ Performance</a>
-
-    <!-- SECURITY & DEPLOY -->
-    <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy-backup</a>
-
-    <!-- AI & ADS -->
-    <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 Ai Brain</a>
-
-    <!-- LAYOUT CONTROL -->
-    <a href="sidebar.html">📌 Sidebar</a>
-    <a href="footer.html">🦶 Footer</a>
-
-    <!-- ADMIN / SYSTEM (LAST) -->
-    <a href="system-settings.html">⚙ System-settings</a>
-
-  </nav>
-</aside>
-  <!-- MAIN -->
+  <!-- ===== MAIN ===== -->
   <main class="cms-main">
 
+    <!-- HEADER -->
     <header class="cms-header">
-      <div class="title">📊 Analytics Dashboard</div>
-      <select id="range">
-        <option value="today">Today</option>
-        <option value="7">Last 7 Days</option>
-        <option value="30">Last 30 Days</option>
-        <option value="365">Year</option>
-      </select>
+      <div class="header-left">
+        <div class="header-title">📊 Analytics</div>
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="last-updated" id="lastUpdated">—</span>
+        <select id="range">
+          <option value="today">Today</option>
+          <option value="7" selected>Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="365">This Year</option>
+        </select>
+        <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+      </div>
     </header>
 
+    <!-- CONTENT -->
     <section class="cms-content">
 
-      <!-- STATS -->
-      <div class="stats-grid">
-        <div class="stat-card"><h3>Visitors</h3><p id="visitors">0</p></div>
-        <div class="stat-card"><h3>Page Views</h3><p id="views">0</p></div>
-        <div class="stat-card"><h3>Anime Views</h3><p id="animeViews">0</p></div>
-        <div class="stat-card"><h3>Episode Views</h3><p id="episodeViews">0</p></div>
-        <div class="stat-card"><h3>Downloads</h3><p id="downloads">0</p></div>
-        <div class="stat-card"><h3>Searches</h3><p id="searches">0</p></div>
+      <!-- Error Banner -->
+      <div class="error-banner" id="errorBanner">
+        ⚠️ <span id="errorMsg">Failed to load analytics data.</span>
       </div>
 
-      <!-- LIST DATA -->
+      <!-- STATS -->
+      <div class="section-label">Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent:#2196f3">
+          <div class="stat-icon">👥</div>
+          <h3>Visitors</h3>
+          <p id="visitors">—</p>
+        </div>
+        <div class="stat-card" style="--accent:#4caf50">
+          <div class="stat-icon">📄</div>
+          <h3>Page Views</h3>
+          <p id="views">—</p>
+        </div>
+        <div class="stat-card" style="--accent:#ffcc00">
+          <div class="stat-icon">🎬</div>
+          <h3>Anime Views</h3>
+          <p id="animeViews">—</p>
+        </div>
+        <div class="stat-card" style="--accent:#ff9800">
+          <div class="stat-icon">📺</div>
+          <h3>Episode Views</h3>
+          <p id="episodeViews">—</p>
+        </div>
+        <div class="stat-card" style="--accent:#9c27b0">
+          <div class="stat-icon">📥</div>
+          <h3>Downloads</h3>
+          <p id="downloads">—</p>
+        </div>
+        <div class="stat-card" style="--accent:#f44336">
+          <div class="stat-icon">🔍</div>
+          <h3>Searches</h3>
+          <p id="searches">—</p>
+        </div>
+      </div>
+
+      <!-- LISTS -->
+      <div class="section-label">Detailed Breakdown</div>
       <div class="analytics-grid">
 
         <div class="card">
-          <h3>🔥 Top Anime</h3>
+          <div class="card-header">
+            <h3>🔥 Top Anime</h3>
+            <span class="card-count" id="topAnimeCount">—</span>
+          </div>
           <ul id="topAnime"></ul>
         </div>
 
         <div class="card">
-          <h3>📺 Top Episodes</h3>
+          <div class="card-header">
+            <h3>📺 Top Episodes</h3>
+            <span class="card-count" id="topEpisodesCount">—</span>
+          </div>
           <ul id="topEpisodes"></ul>
         </div>
 
         <div class="card">
-          <h3>🔍 Trending Searches</h3>
+          <div class="card-header">
+            <h3>🔍 Trending Searches</h3>
+            <span class="card-count" id="topSearchesCount">—</span>
+          </div>
           <ul id="topSearches"></ul>
         </div>
 
         <div class="card">
-          <h3>🗂 Popular Categories</h3>
+          <div class="card-header">
+            <h3>🗂 Popular Categories</h3>
+            <span class="card-count" id="topCategoriesCount">—</span>
+          </div>
           <ul id="topCategories"></ul>
         </div>
 
         <div class="card">
-          <h3>🖼 Banner Performance</h3>
+          <div class="card-header">
+            <h3>🖼 Banner Clicks</h3>
+            <span class="card-count" id="topBannersCount">—</span>
+          </div>
           <ul id="topBanners"></ul>
         </div>
 
         <div class="card">
-          <h3>🎞 Player Servers</h3>
+          <div class="card-header">
+            <h3>🎞 Server Usage</h3>
+            <span class="card-count" id="topServersCount">—</span>
+          </div>
           <ul id="topServers"></ul>
         </div>
 
       </div>
-
     </section>
 
   </main>
-
 </div>
 
-    /* ============================================================
-ANIMEHUNT CMS - COMPLETE ANALYTICS SYSTEM
-============================================================ */
-
-const API_BASE =
-"https://animehunt-backend.animehunt715.workers.dev/api"
-
-const ADMIN_ANALYTICS =
-API_BASE + "/admin/analytics"
-
-const TRACK_API =
-API_BASE + "/analytics/track"
-
-const TOKEN_KEY = "AUTH_TOKEN"
-
-const rangeSelect = document.getElementById("range")
-
+<script>
 /* ============================================================
-AUTH CHECK
+  ANIMEHUNT — ANALYTICS PAGE
+  File: admin/analytics.html
+  Auth token key: ah_token (same as all admin pages)
 ============================================================ */
 
-function getToken(){
-return localStorage.getItem(TOKEN_KEY)
+const BASE = "https://animehunt-backend.animehunt715.workers.dev"
+const ADMIN_API = BASE + "/api/admin/analytics"
+const TOKEN_KEY = "ah_token"
+
+/* ── Auth ── */
+function getToken() { return localStorage.getItem(TOKEN_KEY) }
+
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + getToken()
+  }
 }
 
-if(!getToken()){
-location.href="login.html"
+/* Redirect to login if no token */
+if (!getToken()) { location.href = "login.html" }
+
+/* ── DOM refs ── */
+const rangeSelect  = document.getElementById("range")
+const refreshBtn   = document.getElementById("refreshBtn")
+const errorBanner  = document.getElementById("errorBanner")
+const errorMsg     = document.getElementById("errorMsg")
+const lastUpdated  = document.getElementById("lastUpdated")
+const loadingOverlay = document.getElementById("loadingOverlay")
+
+/* ── UI helpers ── */
+function showLoading(on) {
+  loadingOverlay.classList.toggle("show", on)
 }
 
-/* ============================================================
-SAFE FETCH
-============================================================ */
-
-async function api(url,options={}){
-
-try{
-
-const res = await fetch(url,{
-...options,
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer " + getToken(),
-...(options.headers||{})
-}
-})
-
-if(res.status===401){
-location.href="login.html"
-return
+function showError(msg) {
+  errorMsg.textContent = msg || "Failed to load analytics data."
+  errorBanner.classList.add("show")
 }
 
-if(!res.ok){
-throw new Error("API Error")
+function hideError() {
+  errorBanner.classList.remove("show")
 }
 
-return await res.json()
-
-}catch(err){
-
-console.error("API Error:",err)
-return null
-
+function setText(id, val) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.textContent = Number(val || 0).toLocaleString()
 }
 
+function setCount(id, list) {
+  const el = document.getElementById(id)
+  if (el) el.textContent = list ? list.length + " items" : "0 items"
 }
 
-/* ============================================================
-LIST RENDER
-============================================================ */
+/* ── Render list with bar ── */
+function fillList(ulEl, list, keyName, valName) {
+  if (!ulEl) return
+  ulEl.innerHTML = ""
 
-function fillList(el,list,keyName,valName){
+  if (!list || list.length === 0) {
+    ulEl.innerHTML = `<div class="empty-state">No data for this period</div>`
+    return
+  }
 
-if(!el) return
+  const maxVal = Math.max(...list.map(i => Number(i[valName]) || 0))
 
-el.innerHTML=""
+  list.forEach((item, idx) => {
+    const key     = item[keyName] || "Unknown"
+    const val     = Number(item[valName]) || 0
+    const percent = maxVal > 0 ? (val / maxVal) * 100 : 0
 
-if(!list || list.length===0){
-
-el.innerHTML =
-`<li style="color:#666;text-align:center;padding:20px;font-size:11px">
-No data available
-
-</li>`return
-
+    const li = document.createElement("li")
+    li.style.listStyle = "none"
+    li.innerHTML = `
+      <div class="list-item">
+        <div class="list-item-bg" style="transform:scaleX(${percent/100})"></div>
+        <span class="item-rank">#${idx + 1}</span>
+        <span class="item-name" title="${key}">${key}</span>
+        <b class="item-val">${val.toLocaleString()}</b>
+      </div>
+    `
+    ulEl.appendChild(li)
+  })
 }
 
-const maxVal = Math.max(...list.map(i=>i[valName]||0))
+/* ── Main fetch ── */
+async function loadAnalytics(showSpinner = true) {
+  hideError()
+  if (showSpinner) showLoading(true)
 
-list.forEach(item=>{
+  // Fade stats
+  document.querySelectorAll(".stat-card p").forEach(el => el.style.opacity = "0.4")
 
-const key = item[keyName] || "Unknown"
-const val = item[valName] || 0
+  const range = rangeSelect?.value || "7"
 
-const percent =
-maxVal>0 ? (val/maxVal)*100 : 0
+  let data = null
+  try {
+    const res = await fetch(`${ADMIN_API}?range=${range}`, {
+      headers: authHeaders()
+    })
 
-const li = document.createElement("li")
+    if (res.status === 401) {
+      location.href = "login.html"
+      return
+    }
 
-li.style.cssText="position:relative; padding:10px; margin-bottom:4px; border-bottom:1px solid #1a2035; display:flex; justify-content:space-between; overflow:hidden;"
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`)
+    }
 
-li.innerHTML=`
+    const json = await res.json()
 
-<div style="
-position:absolute;
-left:0;
-top:0;
-height:100%;
-width:${percent}%;
-background:rgba(255,204,0,0.08);
-z-index:-1;
-transition:width .5s
-"></div><span style="
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
-max-width:80%
-">${key}</span>
+    // Handle both {stats, topAnime...} directly OR {success, data: {...}}
+    data = (json.success !== undefined) ? json.data : json
 
-<b style="color:#ffcc00">${val}</b>
-`
+    if (!data) throw new Error("Empty response from server")
 
-el.appendChild(li)
+  } catch (err) {
+    showError(err.message || "Could not reach the server. Check your connection.")
+    console.error("Analytics fetch error:", err)
+  } finally {
+    showLoading(false)
+    document.querySelectorAll(".stat-card p").forEach(el => el.style.opacity = "1")
+  }
 
-})
+  if (!data) return
 
+  /* ── Stats ── */
+  const stats = data.stats || {}
+  setText("visitors",     stats.visitors     ?? 0)
+  setText("views",        stats.pageViews    ?? 0)
+  setText("animeViews",   stats.animeViews   ?? 0)
+  setText("episodeViews", stats.episodeViews ?? 0)
+  setText("downloads",    stats.downloads    ?? 0)
+  setText("searches",     stats.searches     ?? 0)
+
+  /* ── Lists ── */
+  const ta  = data.topAnime      || []
+  const te  = data.topEpisodes   || []
+  const ts  = data.topSearches   || []
+  const tc  = data.topCategories || []
+  const tb  = data.topBanners    || []
+  const tsv = data.topServers    || []
+
+  fillList(document.getElementById("topAnime"),      ta,  "slug", "v")
+  fillList(document.getElementById("topEpisodes"),   te,  "id",   "v")
+  fillList(document.getElementById("topSearches"),   ts,  "q",    "c")
+  fillList(document.getElementById("topCategories"), tc,  "cat",  "v")
+  fillList(document.getElementById("topBanners"),    tb,  "ban",  "c")
+  fillList(document.getElementById("topServers"),    tsv, "srv",  "v")
+
+  setCount("topAnimeCount",      ta)
+  setCount("topEpisodesCount",   te)
+  setCount("topSearchesCount",   ts)
+  setCount("topCategoriesCount", tc)
+  setCount("topBannersCount",    tb)
+  setCount("topServersCount",    tsv)
+
+  /* ── Last updated ── */
+  const now = new Date()
+  lastUpdated.textContent = "Updated " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 }
 
-/* ============================================================
-LOAD ANALYTICS
-============================================================ */
-
-async function loadAnalytics(){
-
-const range = rangeSelect?.value || "7"
-
-document.querySelectorAll(".stat-card p")
-.forEach(el=>el.style.opacity="0.4")
-
-const data = await api(
-"${ADMIN_ANALYTICS}?range=${range}"
-)
-
-if(!data){
-return
-}
-
-/* STATS */
-
-setText("visitors",data.stats.visitors)
-setText("views",data.stats.pageViews)
-setText("animeViews",data.stats.animeViews)
-setText("episodeViews",data.stats.episodeViews)
-setText("downloads",data.stats.downloads)
-setText("searches",data.stats.searches)
-
-/* LISTS */
-
-fillList(
-document.getElementById("topAnime"),
-data.topAnime,
-"slug",
-"v"
-)
-
-fillList(
-document.getElementById("topEpisodes"),
-data.topEpisodes,
-"id",
-"v"
-)
-
-fillList(
-document.getElementById("topSearches"),
-data.topSearches,
-"q",
-"c"
-)
-
-fillList(
-document.getElementById("topCategories"),
-data.topCategories,
-"cat",
-"v"
-)
-
-fillList(
-document.getElementById("topBanners"),
-data.topBanners,
-"ban",
-"c"
-)
-
-fillList(
-document.getElementById("topServers"),
-data.topServers,
-"srv",
-"v"
-)
-
-document.querySelectorAll(".stat-card p")
-.forEach(el=>el.style.opacity="1")
-
-}
-
-/* ============================================================
-SET TEXT SAFE
-============================================================ */
-
-function setText(id,val){
-
-const el = document.getElementById(id)
-
-if(!el) return
-
-el.textContent =
-Number(val||0).toLocaleString()
-
-}
-
-/* ============================================================
-TRACKING FUNCTIONS
-============================================================ */
-
-function trackEvent(type,data={}){
-
-fetch(TRACK_API,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-type,
-...data
-})
-})
-
-}
-
-/* PAGE VIEW */
-
-function trackPage(){
-
-trackEvent("page",{
-ref:location.pathname
-})
-
-}
-
-/* ANIME VIEW */
-
-function trackAnime(slug){
-
-trackEvent("anime",{
-ref:slug
-})
-
-}
-
-/* EPISODE VIEW */
-
-function trackEpisode(id){
-
-trackEvent("episode",{
-ref:id
-})
-
-}
-
-/* DOWNLOAD */
-
-function trackDownload(id){
-
-trackEvent("download",{
-ref:id
-})
-
-}
-
-/* SEARCH */
-
-function trackSearch(query){
-
-trackEvent("search",{
-value:query
-})
-
-}
-
-/* BANNER */
-
-function trackBanner(id){
-
-trackEvent("banner",{
-ref:id
-})
-
-}
-
-/* SERVER */
-
-function trackServer(server){
-
-trackEvent("server",{
-ref:server
-})
-
-}
-
-/* CATEGORY */
-
-function trackCategory(cat){
-
-trackEvent("category",{
-ref:cat
-})
-
-}
-
-/* ============================================================
-INIT
-============================================================ */
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-trackPage()
-
-loadAnalytics()
-
-})
-
-if(rangeSelect){
-rangeSelect.addEventListener(
-"change",
-loadAnalytics
-)
-}
-
-/* AUTO REFRESH */
-
-setInterval(loadAnalytics,120000)
-
+/* ── Events ── */
+rangeSelect.addEventListener("change", () => loadAnalytics(true))
+refreshBtn.addEventListener("click", () => loadAnalytics(true))
+
+/* ── Auto refresh every 2 minutes (silent — no spinner) ── */
+setInterval(() => loadAnalytics(false), 2 * 60 * 1000)
+
+/* ── Init ── */
+document.addEventListener("DOMContentLoaded", () => loadAnalytics(true))
+</script>
 
 </body>
 </html>
