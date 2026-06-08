@@ -1,1 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categories – AnimeHunt CMS</title>
+<style>
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+a{text-decoration:none;color:inherit}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
+
+/* ========== SIDEBAR ========== */
+.cms-sidebar{
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100
+}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
+.brand b{color:#ffcc00}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
+.cms-menu a{
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
+}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
+
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.cms-header{
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
+}
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.add-btn{
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;
+  display:flex;align-items:center;gap:6px;transition:.2s
+}
+.add-btn:hover{background:#ffd633;transform:translateY(-1px)}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px}
+
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
+
+/* ========== FILTERS ========== */
+.filters-row{
+  display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center
+}
+.filters-row select,
+.filters-row input{
+  background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:8px 10px;border-radius:7px;font-size:12px;outline:none
+}
+.filters-row input{flex:1;min-width:160px}
+.filters-row select:focus,
+.filters-row input:focus{border-color:#ffcc00}
+
+/* ========== TABLE ========== */
+.table-wrap{background:#0e1424;border:1px solid #1a2035;border-radius:10px;overflow:hidden}
+.table-head{
+  display:grid;
+  grid-template-columns:36px 1.4fr 1fr 100px 70px 70px 140px 120px;
+  padding:11px 14px;font-size:11px;color:#666;background:#0b0f1a;
+  border-bottom:1px solid #1a2035;font-weight:600;text-transform:uppercase;letter-spacing:.5px
+}
+.table-body .row{
+  display:grid;
+  grid-template-columns:36px 1.4fr 1fr 100px 70px 70px 140px 120px;
+  padding:10px 14px;border-top:1px solid #1a2035;align-items:center;
+  font-size:12px;transition:background .15s;cursor:grab
+}
+.table-body .row:hover{background:#111827}
+.table-body .row.dragging{opacity:.4;background:#1a2035}
+.table-body .row.drag-over{border-top:2px solid #ffcc00}
+
+.drag-handle{color:#444;font-size:14px;cursor:grab;user-select:none;text-align:center}
+.drag-handle:hover{color:#ffcc00}
+
+.name-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;padding-right:8px}
+.name-cell small{display:block;color:#555;font-size:10px;font-weight:400;margin-top:2px}
+.slug-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777;font-size:11px}
+
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600
+}
+.badge-row{background:#1a2a3a;color:#2196f3}
+.badge-page{background:#1a3a2a;color:#4caf50}
+.badge-both{background:#2a2a1a;color:#ffcc00}
+.badge-active{background:#1a3a2a;color:#4caf50}
+.badge-inactive{background:#3a1a1a;color:#f44336}
+
+.flags-cell{display:flex;gap:4px;flex-wrap:wrap}
+.flag{
+  font-size:10px;padding:2px 6px;border-radius:10px;
+  background:#1a2035;color:#aaa
+}
+.flag.on{background:#1a3a2a;color:#4caf50}
+
+.row-actions{display:flex;gap:4px;align-items:center}
+.row-actions button{
+  background:none;border:none;cursor:pointer;padding:5px;
+  border-radius:5px;font-size:13px;transition:.15s
+}
+.row-actions .edit-btn:hover{background:#1a2a3a}
+.row-actions .del-btn:hover{background:#3a1a1a}
+.toggle-btn{
+  background:none;border:1px solid #1a2035;color:#aaa;
+  padding:3px 8px;border-radius:12px;font-size:10px;cursor:pointer;transition:.2s
+}
+.toggle-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.toggle-btn.active-btn{border-color:#4caf50;color:#4caf50}
+
+.empty-state{text-align:center;padding:60px 20px;color:#555}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
+
+/* ========== MODAL ========== */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;z-index:9999;padding:16px
+}
+.modal.open{display:flex}
+.modal-box{
+  width:100%;max-width:680px;max-height:92vh;
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden
+}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;background:#0e1424;border-bottom:1px solid #1a2035;flex-shrink:0
+}
+.modal-header h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:4px}
+.modal-close:hover{color:#fff}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/3}
+.form-label{
+  font-size:11px;color:#777;margin-bottom:4px;display:block;
+  font-weight:600;text-transform:uppercase;letter-spacing:.4px
+}
+.form-input{
+  width:100%;background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:9px 11px;border-radius:7px;font-size:12.5px;outline:none;transition:.2s
+}
+.form-input:focus{border-color:#ffcc00}
+.form-input::placeholder{color:#444}
+select.form-input option{background:#0e1424}
+
+.section-title{
+  font-size:11px;color:#555;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid #1a2035
+}
+
+.checks-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.check-item{
+  display:flex;align-items:center;gap:5px;font-size:12px;color:#bbb;
+  background:#0e1424;padding:6px 12px;border-radius:20px;border:1px solid #1a2035;
+  cursor:pointer;user-select:none;transition:.15s
+}
+.check-item:hover{border-color:#ffcc00}
+.check-item input{width:13px;height:13px;accent-color:#ffcc00;cursor:pointer}
+.check-item.checked{border-color:#ffcc00;color:#ffcc00;background:#1a2035}
+
+.modal-footer{
+  padding:13px 18px;background:#0e1424;border-top:1px solid #1a2035;
+  display:flex;justify-content:flex-end;gap:8px;flex-shrink:0
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:9px 22px;border-radius:7px;
+  font-weight:700;font-size:13px;cursor:pointer;color:#000;transition:.2s
+}
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.cancel-btn{
+  background:transparent;border:1px solid #1a2035;color:#aaa;
+  padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;transition:.2s
+}
+.cancel-btn:hover{border-color:#aaa;color:#fff}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.toast.info{border-color:#2196f3;background:#0d1a28}
+
+/* ========== SPINNER ========== */
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid #1a2035;border-top-color:#ffcc00;
+  border-radius:50%;animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{text-align:center;padding:40px;color:#555}
+</style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="cms-sidebar">
+  <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
+  <nav class="cms-menu">
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="anime.html">🎬 Anime</a>
+    <a href="episodes.html">📺 Episodes</a>
+    <a href="categories.html" class="active">🗂 Categories</a>
+    <a href="banners.html">🖼 Banners</a>
+    <a href="homepage.html">🏠 Homepage</a>
+    <div class="menu-sep"></div>
+    <a href="downloads.html">📥 Downloads</a>
+    <a href="servers.html">🌐 Servers</a>
+    <a href="player.html">🎞 Player</a>
+    <a href="search.html">🔍 Search</a>
+    <div class="menu-sep"></div>
+    <a href="seo.html">📈 SEO</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="performance.html">⚡ Performance</a>
+    <div class="menu-sep"></div>
+    <a href="security.html">🔐 Security</a>
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
+    <a href="ads.html">📢 Ads</a>
+    <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
+    <a href="sidebar.html">📌 Sidebar</a>
+    <a href="footer.html">🦶 Footer</a>
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
+  </nav>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<main class="cms-main">
+
+  <header class="cms-header">
+    <div class="title">🗂 Category Management</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="add-btn" id="openAddBtn">➕ Add Category</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <section class="cms-content">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🗂</div>
+        <div class="stat-info">
+          <div class="num" id="statTotal">—</div>
+          <div class="lbl">Total Categories</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="num" id="statActive">—</div>
+          <div class="lbl">Active</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏠</div>
+        <div class="stat-info">
+          <div class="num" id="statHome">—</div>
+          <div class="lbl">On Homepage</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-info">
+          <div class="num" id="statAI">—</div>
+          <div class="lbl">AI Enabled</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-row">
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="row">Homepage Row</option>
+        <option value="page">Category Page</option>
+        <option value="both">Row + Page</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="🔍 Search categories...">
+      <button class="add-btn" id="saveOrderBtn" style="display:none;background:#1a2035;color:#ffcc00;border:1px solid #ffcc00">
+        💾 Save Order
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <span>⠿</span>
+        <span>Name</span>
+        <span>Slug</span>
+        <span>Type</span>
+        <span>Order</span>
+        <span>Priority</span>
+        <span>Flags</span>
+        <span>Actions</span>
+      </div>
+      <div class="table-body" id="categoryList">
+        <div class="loading-row"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<!-- ========== MODAL ========== -->
+<div class="modal" id="categoryModal">
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h3 id="modalTitle">Add Category</h3>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <!-- Name -->
+        <div>
+          <label class="form-label">Name *</label>
+          <input class="form-input" id="f-name" placeholder="e.g. Action Anime">
+        </div>
+
+        <!-- Slug -->
+        <div>
+          <label class="form-label">Slug (auto)</label>
+          <input class="form-input" id="f-slug" placeholder="action-anime">
+        </div>
+
+        <!-- Type -->
+        <div>
+          <label class="form-label">Type</label>
+          <select class="form-input" id="f-type">
+            <option value="row">Homepage Row</option>
+            <option value="page">Category Page</option>
+            <option value="both">Row + Page</option>
+          </select>
+        </div>
+
+        <!-- Priority -->
+        <div>
+          <label class="form-label">Priority (1=highest)</label>
+          <select class="form-input" id="f-priority">
+            <option value="1">1 — Highest</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5 — Lowest</option>
+          </select>
+        </div>
+
+        <!-- Order -->
+        <div class="form-full">
+          <label class="form-label">Display Order (leave blank = auto last)</label>
+          <input class="form-input" id="f-order" type="number" min="1" placeholder="Auto">
+        </div>
+
+      </div>
+
+      <!-- Visibility Flags -->
+      <div class="section-title">Visibility</div>
+      <div class="checks-row">
+        <label class="check-item" id="lbl-showHome">
+          <input type="checkbox" id="f-showHome"> 🏠 Show on Home
+        </label>
+        <label class="check-item" id="lbl-isActive">
+          <input type="checkbox" id="f-isActive"> ✅ Active
+        </label>
+        <label class="check-item" id="lbl-isFeatured">
+          <input type="checkbox" id="f-isFeatured"> ⭐ Featured
+        </label>
+      </div>
+
+      <!-- AI Flags -->
+      <div class="section-title">AI Settings</div>
+      <div class="checks-row">
+        <label class="check-item" id="lbl-aiTrending">
+          <input type="checkbox" id="f-aiTrending"> 🔥 AI Trending
+        </label>
+        <label class="check-item" id="lbl-aiPopular">
+          <input type="checkbox" id="f-aiPopular"> 📈 AI Popular
+        </label>
+        <label class="check-item" id="lbl-aiAssign">
+          <input type="checkbox" id="f-aiAssign"> 🤖 AI Auto Assign
+        </label>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelModal">Cancel</button>
+      <button class="save-btn" id="saveBtn">💾 Save Category</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================
+   CONFIG
+========================================= */
+const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const CAT_API = `${API}/categories`
+
+/* =========================================
+   AUTH
+========================================= */
+function getToken() { return localStorage.getItem("ah_token") }
+
+function authHeaders() {
+  return {
+    "Content-Type":  "application/json",
+    "Authorization": `Bearer ${getToken()}`
+  }
+}
+
+function requireAuth() {
+  if (!getToken()) { window.location.href = "login.html"; return false }
+  return true
+}
+
+async function checkAuth() {
+  try {
+    const res = await fetch(`${API}/me`, { headers: authHeaders() })
+    if (res.status === 401) {
+      localStorage.removeItem("ah_token")   // ✅ FIX: clear stale token
+      window.location.href = "login.html"
+      return false
+    }
+    if (!res.ok) throw new Error("Not authorized")
+    const json = await res.json()
+    if (json.success) {
+      document.getElementById("adminName").textContent = json.data?.username || ""   // ✅ FIX: optional chaining prevents crash if data null
+    }
+    return true
+  } catch {
+    localStorage.removeItem("ah_token")
+    window.location.href = "login.html"
+    return false
+  }
+}
+
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("ah_token")
+  window.location.href = "login.html"
+}
+
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type = "success") {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = `toast ${type} show`
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { t.className = "toast" }, 3000)
+}
+
+/* =========================================
+   STATE
+========================================= */
+let catData    = []
+let editId     = null
+let orderDirty = false
+
+/* =========================================
+   FORM
+========================================= */
+const FLAGS = ["showHome","isActive","isFeatured","aiTrending","aiPopular","aiAssign"]
+
+function resetForm() {
+  document.getElementById("f-name").value     = ""
+  document.getElementById("f-slug").value     = ""
+  document.getElementById("f-type").value     = "row"
+  document.getElementById("f-priority").value = "1"
+  document.getElementById("f-order").value    = ""
+
+  FLAGS.forEach(key => {
+    const cb  = document.getElementById(`f-${key}`)
+    /* isActive default true */
+    cb.checked = (key === "isActive")
+    cb.closest(".check-item").classList.toggle("checked", cb.checked)
+  })
+  editId = null
+}
+
+function populateForm(cat) {
+  document.getElementById("f-name").value     = cat.name           || ""
+  document.getElementById("f-slug").value     = cat.slug           || ""
+  document.getElementById("f-type").value     = cat.type           || "row"
+  document.getElementById("f-priority").value = String(cat.priority || "1")
+  document.getElementById("f-order").value    = cat.category_order || ""
+
+  const map = {
+    showHome:   cat.show_home,
+    isActive:   cat.active,
+    isFeatured: cat.featured,
+    aiTrending: cat.ai_trending,
+    aiPopular:  cat.ai_popular,
+    aiAssign:   cat.ai_assign
+  }
+
+  FLAGS.forEach(key => {
+    const cb  = document.getElementById(`f-${key}`)
+    cb.checked = !!map[key]
+    cb.closest(".check-item").classList.toggle("checked", !!map[key])
+  })
+}
+
+function getFormData() {
+  const orderVal = Number(document.getElementById("f-order").value)
+  return {
+    name:       document.getElementById("f-name").value.trim(),
+    slug:       document.getElementById("f-slug").value.trim(),
+    type:       document.getElementById("f-type").value,
+    priority:   Number(document.getElementById("f-priority").value),
+    order:      orderVal >= 1 ? orderVal : null,   // ✅ FIX: was `|| 0` — sending 0 bypassed backend MAX()+1 auto-assign
+    showHome:   document.getElementById("f-showHome").checked,
+    isActive:   document.getElementById("f-isActive").checked,
+    isFeatured: document.getElementById("f-isFeatured").checked,
+    aiTrending: document.getElementById("f-aiTrending").checked,
+    aiPopular:  document.getElementById("f-aiPopular").checked,
+    aiAssign:   document.getElementById("f-aiAssign").checked
+  }
+}
+
+/* Auto slug */
+document.getElementById("f-name").addEventListener("input", function() {
+  if (editId) return
+  // ✅ FIX: improved slug — was leaving double dashes on consecutive special chars (e.g. "Action!! Anime" → "action--anime")
+  document.getElementById("f-slug").value = this.value.toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]+/g, "")
+    .replace(/[\s-]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+})
+
+/* Check labels */
+document.querySelectorAll(".check-item input[type=checkbox]").forEach(cb => {
+  cb.addEventListener("change", () => {
+    cb.closest(".check-item").classList.toggle("checked", cb.checked)
+  })
+})
+
+/* =========================================
+   MODAL
+========================================= */
+function openModal(title = "Add Category") {
+  document.getElementById("modalTitle").textContent = title
+  document.getElementById("categoryModal").classList.add("open")
+}
+
+function closeModal() {
+  document.getElementById("categoryModal").classList.remove("open")
+  resetForm()
+}
+
+document.getElementById("openAddBtn").onclick  = () => { resetForm(); openModal("Add Category") }
+document.getElementById("closeModal").onclick  = closeModal
+document.getElementById("cancelModal").onclick = closeModal
+document.getElementById("categoryModal").addEventListener("click", e => {
+  if (e.target.id === "categoryModal") closeModal()   // ✅ FIX: id string comparison is reliable
+})
+
+/* =========================================
+   SAVE
+========================================= */
+document.getElementById("saveBtn").onclick = async () => {
+  const form = getFormData()
+  if (!form.name) { showToast("Name is required","error"); return }
+
+  // ✅ FIX: warn user if they have unsaved drag order — saving will refresh from server
+  if (orderDirty && !confirm("You have unsaved order changes. Saving this category will reload the list and lose the drag order. Continue?")) return
+
+  const btn = document.getElementById("saveBtn")
+  btn.disabled    = true
+  btn.textContent = "Saving..."
+
+  try {
+    const url    = editId ? `${CAT_API}/${editId}` : CAT_API
+    const method = editId ? "PUT" : "POST"
+
+    const res = await fetch(url, {
+      method,
+      headers: authHeaders(),
+      body: JSON.stringify(form)
+    })
+
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+
+    if (!json.success) throw new Error(json.message || "Save failed")
+
+    showToast(editId ? "Category updated ✅" : "Category added ✅")
+    closeModal()
+    orderDirty = false   // ✅ FIX: reset dirty flag since we're reloading from server
+    document.getElementById("saveOrderBtn").style.display = "none"
+    loadCategories()
+
+  } catch (err) {
+    showToast(err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "💾 Save Category"
+  }
+}
+
+/* =========================================
+   LOAD
+========================================= */
+let loadController = null
+async function loadCategories() {
+  const search = document.getElementById("searchInput").value.trim()
+  const type   = document.getElementById("typeFilter").value
+
+  let url = CAT_API
+  const params = []
+  if (search) params.push(`search=${encodeURIComponent(search)}`)
+  if (type)   params.push(`type=${encodeURIComponent(type)}`)   // ✅ FIX: encode type value
+  if (params.length) url += "?" + params.join("&")
+
+  // ✅ FIX: abort previous in-flight request — debounced search + filter change = race condition
+  if (loadController) loadController.abort()
+  loadController = new AbortController()
+
+  document.getElementById("categoryList").innerHTML =
+    `<div class="loading-row"><div class="spinner"></div></div>`
+
+  try {
+    const res = await fetch(url, { headers: authHeaders(), signal: loadController.signal })
+
+    // ✅ FIX: handle expired token
+    if (res.status === 401) {
+      localStorage.removeItem("ah_token")
+      window.location.href = "login.html"
+      return
+    }
+
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON response
+
+    if (!json.success) throw new Error(json.message)
+
+    catData = json.data || []
+    updateStats()
+    renderTable()
+
+  } catch (err) {
+    if (err.name === "AbortError") return   // ✅ FIX: ignore cancelled requests silently
+    document.getElementById("categoryList").innerHTML =
+      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+  }
+}
+
+function updateStats() {
+  document.getElementById("statTotal").textContent  = catData.length
+  document.getElementById("statActive").textContent = catData.filter(c => c.active).length
+  document.getElementById("statHome").textContent   = catData.filter(c => c.show_home).length
+  document.getElementById("statAI").textContent     = catData.filter(c => c.ai_trending || c.ai_popular || c.ai_assign).length
+}
+
+/* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
+/* =========================================
+   RENDER
+========================================= */
+function renderTable() {
+  const listEl = document.getElementById("categoryList")
+
+  if (!catData.length) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🗂</div>
+        <div>No categories found</div>
+      </div>`
+    return
+  }
+
+  listEl.innerHTML = ""
+
+  catData.forEach((cat, idx) => {
+    const row = document.createElement("div")
+    row.className   = "row"
+    row.dataset.id  = cat.id
+    row.dataset.idx = idx
+    row.draggable   = true
+
+    const safeName = escapeHtml(cat.name)
+    const safeSlug = escapeHtml(cat.slug)
+    const safeId   = escapeHtml(String(cat.id || "").slice(0, 8))   // ✅ FIX: guard null id before slice
+
+    const typeBadge = {
+      row:  '<span class="badge badge-row">Row</span>',
+      page: '<span class="badge badge-page">Page</span>',
+      both: '<span class="badge badge-both">Both</span>'
+    }[cat.type] || escapeHtml(cat.type)   // ✅ FIX: escape unknown type values
+
+    const flags = [
+      cat.show_home   && `<span class="flag on">🏠 Home</span>`,
+      cat.featured    && `<span class="flag on">⭐ Featured</span>`,
+      cat.ai_trending && `<span class="flag on">🔥 Trending</span>`,
+      cat.ai_popular  && `<span class="flag on">📈 Popular</span>`,
+      cat.ai_assign   && `<span class="flag on">🤖 AI</span>`
+    ].filter(Boolean).join("") || `<span class="flag">None</span>`
+
+    row.innerHTML = `
+      <span class="drag-handle">⠿</span>
+      <div class="name-cell" title="${safeName}">
+        ${safeName}
+        <small>#${safeId}</small>
+      </div>
+      <div class="slug-cell" title="${safeSlug}">${safeSlug}</div>
+      <span>${typeBadge}</span>
+      <span style="color:#777">${escapeHtml(String(cat.category_order ?? "—"))}</span>
+      <span style="color:#777">P${escapeHtml(String(cat.priority ?? "—"))}</span>
+      <span class="flags-cell">${flags}</span>
+      <span class="row-actions">
+        <button class="toggle-btn ${cat.active ? 'active-btn' : ''}" title="${cat.active ? 'Deactivate' : 'Activate'}">
+          ${cat.active ? '✅' : '❌'}
+        </button>
+        <button class="edit-btn" title="Edit">✏️</button>
+        <button class="del-btn"  title="Delete">🗑️</button>
+      </span>
+    `
+
+    row.querySelector(".toggle-btn").onclick = () => toggleCategory(cat.id, cat.active)
+    row.querySelector(".edit-btn").onclick   = () => editCategory(cat.id)
+    row.querySelector(".del-btn").onclick    = () => deleteCategory(cat.id, cat.name)
+
+    /* Drag events */
+    row.addEventListener("dragstart", onDragStart)
+    row.addEventListener("dragover",  onDragOver)
+    row.addEventListener("drop",      onDrop)
+    row.addEventListener("dragend",   onDragEnd)
+
+    listEl.appendChild(row)
+  })
+}
+
+/* =========================================
+   EDIT
+========================================= */
+async function editCategory(id) {
+  try {
+    const res = await fetch(`${CAT_API}/${id}`, { headers: authHeaders() })
+
+    if (res.status === 401) {   // ✅ FIX: handle expired token
+      localStorage.removeItem("ah_token")
+      window.location.href = "login.html"
+      return
+    }
+
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+
+    if (!json.success) throw new Error(json.message)
+
+    editId = id
+    populateForm(json.data)
+    openModal("Edit Category")
+
+  } catch (err) {
+    showToast("Could not load: " + err.message, "error")
+  }
+}
+
+/* =========================================
+   DELETE
+========================================= */
+async function deleteCategory(id, name) {
+  if (!confirm(`Delete "${name}"?\n\nThis cannot be undone.`)) return
+
+  try {
+    const res = await fetch(`${CAT_API}/${id}`, {
+      method:  "DELETE",
+      headers: authHeaders()
+    })
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    if (!json.success) throw new Error(json.message)
+    showToast("Deleted ✅")
+    loadCategories()
+  } catch (err) {
+    showToast(err.message, "error")
+  }
+}
+
+/* =========================================
+   TOGGLE ACTIVE
+========================================= */
+async function toggleCategory(id, currentActive) {
+  try {
+    const res = await fetch(`${CAT_API}/${id}/toggle`, {
+      method:  "PATCH",
+      headers: authHeaders()
+    })
+
+    if (res.status === 401) {   // ✅ FIX: handle expired token
+      localStorage.removeItem("ah_token")
+      window.location.href = "login.html"
+      return
+    }
+
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+
+    if (!json.success) throw new Error(json.message)
+
+    // ✅ FIX: update local data instead of full reload — full reload was losing unsaved drag order (orderDirty state)
+    const cat = catData.find(c => c.id === id)
+    if (cat) cat.active = json.data.active
+
+    showToast(json.data.active ? "Activated ✅" : "Deactivated")
+    updateStats()
+    renderTable()
+
+  } catch (err) {
+    showToast(err.message, "error")
+  }
+}
+
+/* =========================================
+   DRAG & DROP REORDER
+========================================= */
+let dragSrcIdx = null
+
+function onDragStart(e) {
+  dragSrcIdx = Number(this.dataset.idx)
+  this.classList.add("dragging")
+  e.dataTransfer.effectAllowed = "move"
+}
+
+function onDragOver(e) {
+  e.preventDefault()
+  e.dataTransfer.dropEffect = "move"
+  document.querySelectorAll(".row").forEach(r => r.classList.remove("drag-over"))
+  this.classList.add("drag-over")
+}
+
+function onDrop(e) {
+  e.preventDefault()
+  const targetIdx = Number(this.dataset.idx)
+  if (dragSrcIdx === null || dragSrcIdx === targetIdx) return
+
+  // ✅ FIX: verify indices are still valid — stale idx after a concurrent render would corrupt order
+  if (dragSrcIdx >= catData.length || targetIdx >= catData.length) {
+    showToast("Drag failed — list changed. Please try again.", "error")
+    dragSrcIdx = null
+    return
+  }
+
+  /* Reorder catData array */
+  const moved = catData.splice(dragSrcIdx, 1)[0]
+  catData.splice(targetIdx, 0, moved)
+
+  /* Update order values */
+  catData.forEach((c, i) => { c.category_order = i + 1 })
+
+  orderDirty = true
+  document.getElementById("saveOrderBtn").style.display = "flex"
+
+  renderTable()
+  showToast("Drag to reorder — click Save Order to apply", "info")
+}
+
+function onDragEnd() {
+  document.querySelectorAll(".row").forEach(r => {
+    r.classList.remove("dragging","drag-over")
+  })
+  dragSrcIdx = null
+}
+
+/* Save reorder */
+document.getElementById("saveOrderBtn").onclick = async () => {
+  const btn = document.getElementById("saveOrderBtn")
+  btn.textContent = "Saving..."
+  btn.disabled    = true
+
+  try {
+    const order = catData.map((c, i) => ({ id: c.id, order: i + 1 }))
+
+    const res = await fetch(`${CAT_API}/reorder`, {
+      method:  "POST",
+      headers: authHeaders(),
+      body:    JSON.stringify({ order })
+    })
+
+    if (res.status === 401) {   // ✅ FIX: handle expired token
+      localStorage.removeItem("ah_token")
+      window.location.href = "login.html"
+      return
+    }
+
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+
+    if (!json.success) throw new Error(json.message)
+
+    orderDirty = false
+    document.getElementById("saveOrderBtn").style.display = "none"
+    showToast("Order saved ✅")
+
+  } catch (err) {
+    showToast("Save order failed: " + err.message, "error")
+  } finally {
+    btn.textContent = "💾 Save Order"
+    btn.disabled    = false
+  }
+}
+
+/* =========================================
+   FILTER EVENTS
+========================================= */
+let searchDebounce
+document.getElementById("searchInput").addEventListener("input", () => {
+  clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => loadCategories(), 400)
+})
+document.getElementById("typeFilter").addEventListener("change", () => loadCategories())
+
+/* =========================================
+   INIT
+========================================= */
+if (requireAuth()) {
+  checkAuth().then(ok => {
+    if (!ok) return   // ✅ FIX: stop all API calls if auth failed/redirected
+    loadCategories()  // ✅ FIX: only load after auth confirmed — was concurrent causing 401 on fresh load
+  })
+}
+</script>
+</body>
+</html>
 
