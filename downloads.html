@@ -2,168 +2,373 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Downloads – AnimeHunt CMS</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
-html,body{background:#060a14;color:#fff;overflow-x:hidden}
-button,input,select,textarea{font-family:inherit;outline:none}
-button{cursor:pointer;transition:.2s;border:none}
-button:hover{transform:translateY(-1px)}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
 a{text-decoration:none;color:inherit}
-img{display:block;max-width:100%}
-::-webkit-scrollbar{width:7px;height:7px}
-::-webkit-scrollbar-thumb{background:#1f2742;border-radius:20px}
-::-webkit-scrollbar-track{background:#060a14}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-/* LAYOUT */
-.cms-app{display:flex;min-height:100vh}
-.cms-sidebar{width:240px;background:#070b16;border-right:1px solid #1a2035;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.brand{padding:18px;font-size:20px;font-weight:700;border-bottom:1px solid #1a2035}
+/* ========== SIDEBAR ========== */
+.cms-sidebar{
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;
+  padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;
+  overflow-y:auto;z-index:100
+}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
 .brand b{color:#ffcc00}
-.brand small{display:block;color:#555;font-size:10px;margin-top:4px;font-weight:400}
-.cms-menu{display:flex;flex-direction:column;padding:10px;gap:2px}
-.cms-menu a{display:block;padding:10px 14px;color:#aaa;border-radius:10px;font-size:13px;transition:.2s}
-.cms-menu a:hover,.cms-menu a.active{background:#141d35;color:#ffcc00;padding-left:18px}
-.cms-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
+.cms-menu a{
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
+}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-/* HEADER */
-.cms-header{min-height:64px;border-bottom:1px solid #1a2035;background:#070b16;padding:0 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
-.header-left{display:flex;flex-direction:column;gap:4px}
-.header-left h2{font-size:20px;font-weight:700}
-.breadcrumb{color:#555;font-size:12px;min-height:16px}
-.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.cms-header{
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
+}
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.add-btn{
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;
+  display:flex;align-items:center;gap:6px;transition:.2s
+}
+.add-btn:hover{background:#ffd633;transform:translateY(-1px)}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px}
 
-/* INPUTS */
-input,select,textarea{background:#0e1424;border:1px solid #1a2035;color:#fff;border-radius:11px;padding:10px 14px;font-size:13px;transition:.2s}
-input:focus,select:focus,textarea:focus{border-color:#ffcc00}
-input::placeholder,textarea::placeholder{color:#555}
-textarea{resize:vertical}
+/* ========== STATS ========== */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.stat-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.stat-icon{font-size:22px}
+.stat-info .num{font-size:20px;font-weight:700;color:#ffcc00}
+.stat-info .lbl{font-size:11px;color:#777;margin-top:2px}
 
-/* BTNS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:11px;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s;white-space:nowrap}
-.btn:hover{transform:translateY(-1px)}
-.btn-y{background:#ffcc00;color:#000}
-.btn-s{background:#1a2035;color:#ccc}
-.btn-g{background:#1a2a1a;color:#4caf50;border:1px solid #4caf5022}
-.btn-r{background:#2a1a1a;color:#f44336;border:1px solid #f4433622}
-.btn-sm{padding:7px 12px;font-size:12px;border-radius:9px}
-.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
-.badge-yellow{background:#2a2200;color:#ffcc00;border:1px solid #ffcc0022}
-.badge-blue{background:#0d1a2a;color:#2196f3;border:1px solid #2196f322}
-.badge-green{background:#0d2218;color:#4caf50;border:1px solid #4caf5022}
-.badge-gray{background:#1a2035;color:#888}
+/* ========== TWO-PANEL LAYOUT ========== */
+.dl-layout{display:grid;grid-template-columns:300px 1fr;gap:14px;height:calc(100vh - 220px)}
 
-/* CONTENT */
-.cms-content{padding:20px;flex:1}
+/* ========== ANIME GRID PANEL ========== */
+.anime-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  display:flex;flex-direction:column;overflow:hidden
+}
+.panel-head{
+  padding:12px 14px;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0
+}
+.panel-head h3{font-size:13px;font-weight:700;color:#ffcc00}
+.panel-search{
+  width:100%;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:7px 10px;border-radius:6px;font-size:11.5px;outline:none;margin-top:8px
+}
+.panel-search:focus{border-color:#ffcc00}
+.anime-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding:10px;overflow-y:auto;flex:1
+}
+.anime-card{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
+  cursor:pointer;transition:.15s;overflow:hidden;position:relative
+}
+.anime-card:hover{border-color:#ffcc00;transform:translateY(-2px)}
+.anime-card.active{border-color:#ffcc00;background:#1a2035}
+.anime-card img{
+  width:100%;aspect-ratio:2/3;object-fit:cover;display:block
+}
+.anime-card-info{padding:6px 8px}
+.anime-card-info .title{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.anime-card-info .type{font-size:9px;color:#777;margin-top:2px}
+.anime-card-placeholder{
+  width:100%;aspect-ratio:2/3;background:#1a2035;
+  display:flex;align-items:center;justify-content:center;font-size:28px
+}
 
-/* DRILL-DOWN VIEWS */
-.view{display:none}
-.view.active{display:block}
+/* ========== RIGHT PANEL ========== */
+.right-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  display:flex;flex-direction:column;overflow:hidden
+}
+.breadcrumb{
+  padding:10px 16px;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;gap:6px;font-size:12px;
+  color:#555;flex-shrink:0;flex-wrap:wrap
+}
+.breadcrumb span{color:#aaa}
+.breadcrumb b{color:#ffcc00}
+.breadcrumb .sep{color:#333}
+.panel-content{flex:1;overflow-y:auto;padding:12px}
 
-/* ANIME GRID */
-.anime-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
-.anime-card{background:#0d1322;border:1px solid #1a2035;border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;position:relative}
-.anime-card:hover{border-color:#ffcc0066;transform:translateY(-2px);box-shadow:0 8px 24px #00000055}
-.anime-poster{width:100%;aspect-ratio:2/3;object-fit:cover;background:#0b0f1a}
-.anime-poster-placeholder{width:100%;aspect-ratio:2/3;background:linear-gradient(135deg,#0d1322,#1a2035);display:flex;align-items:center;justify-content:center;font-size:32px}
-.anime-info{padding:10px}
-.anime-title{font-size:12px;font-weight:600;line-height:1.4;margin-bottom:4px}
-.anime-type{font-size:10px;color:#ffcc00;text-transform:uppercase}
-.anime-ep-count{position:absolute;top:8px;right:8px;background:#000000aa;border:1px solid #1a2035;border-radius:8px;padding:3px 7px;font-size:10px;color:#4caf50}
+/* ========== SEASON / STRUCTURE ========== */
+.structure-list{display:flex;flex-direction:column;gap:8px}
+.struct-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
+  padding:12px 14px;cursor:pointer;display:flex;align-items:center;
+  justify-content:space-between;transition:.15s
+}
+.struct-item:hover{border-color:#ffcc00;background:#111827}
+.struct-item .si-left{display:flex;align-items:center;gap:10px}
+.struct-item .si-icon{font-size:18px}
+.struct-item .si-title{font-size:13px;font-weight:600}
+.struct-item .si-sub{font-size:11px;color:#555;margin-top:2px}
+.struct-item .si-right{display:flex;align-items:center;gap:8px}
+.struct-item .ep-count{font-size:11px;color:#777}
+.struct-btn-add{
+  background:#1a2035;border:none;color:#aaa;padding:5px 10px;
+  border-radius:5px;font-size:11px;cursor:pointer;transition:.15s
+}
+.struct-btn-add:hover{background:#ffcc00;color:#000}
 
-/* SEASON GRID */
-.season-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.season-card{background:#0d1322;border:1px solid #1a2035;border-radius:14px;padding:18px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px}
-.season-card:hover{border-color:#ffcc0066;transform:translateY(-2px)}
-.season-icon{font-size:28px;flex-shrink:0}
-.season-label{font-size:15px;font-weight:700}
-.season-sub{font-size:11px;color:#555;margin-top:3px}
+/* ========== EPISODE LIST ========== */
+.ep-list{display:flex;flex-direction:column;gap:6px}
+.ep-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:7px;
+  padding:10px 12px;cursor:pointer;display:flex;align-items:center;
+  justify-content:space-between;transition:.15s
+}
+.ep-item:hover{border-color:#3a4a6a;background:#111827}
+.ep-item.has-hosts{border-left:3px solid #4caf50}
+.ep-item .ep-left{display:flex;align-items:center;gap:10px}
+.ep-item .ep-num{
+  font-size:11px;font-weight:700;color:#ffcc00;
+  background:#1a2035;padding:3px 8px;border-radius:4px;min-width:36px;text-align:center
+}
+.ep-item .ep-title{font-size:12px;font-weight:500}
+.ep-item .ep-meta{font-size:10px;color:#555;margin-top:2px}
+.ep-item .ep-right{display:flex;align-items:center;gap:6px}
+.host-dots{display:flex;gap:3px}
+.host-dot{
+  width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block
+}
 
-/* EPISODE LIST */
-.episode-list{display:flex;flex-direction:column;gap:8px}
-.episode-row{background:#0d1322;border:1px solid #1a2035;border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:.2s}
-.episode-row:hover{border-color:#2a3055}
-.episode-row.has-entry{border-color:#4caf5022}
-.ep-left{display:flex;align-items:center;gap:12px}
-.ep-num{background:#1a2035;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:#ffcc00;min-width:48px;text-align:center;flex-shrink:0}
-.ep-title{font-size:13px;font-weight:600;color:#ddd}
-.ep-sub{font-size:11px;color:#555;margin-top:2px}
-.ep-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.host-badge{background:#1a2035;border-radius:8px;padding:4px 10px;font-size:11px;color:#4caf50}
+/* ========== HOST ENTRIES ========== */
+.host-entries{display:flex;flex-direction:column;gap:8px}
+.host-entry{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;padding:12px 14px
+}
+.host-entry-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px
+}
+.host-name{font-size:13px;font-weight:700}
+.host-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600
+}
+.badge-knight{background:#2a1a3a;color:#ce93d8}
+.badge-storage{background:#1a2a3a;color:#64b5f6}
+.badge-mega{background:#1a3a2a;color:#4caf50}
+.badge-direct{background:#2a2a1a;color:#ffcc00}
+.badge-yes{background:#2a2a1a;color:#ffcc00}
+.badge-no{background:#1a2035;color:#555}
+.host-actions{display:flex;gap:6px}
+.host-actions button{
+  background:none;border:none;cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.15s
+}
+.host-actions .edit-btn:hover{background:#1a2a3a}
+.host-actions .del-btn:hover{background:#3a1a1a}
 
-/* HOST ENTRIES VIEW */
-.hosts-view-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #1a2035}
-.hosts-view-title{font-size:20px;font-weight:700}
-.hosts-view-sub{font-size:12px;color:#555;margin-top:3px}
-.hosts-grid{display:flex;flex-direction:column;gap:12px}
-.host-entry{background:#0d1322;border:1px solid #1a2035;border-radius:16px;padding:16px}
-.host-entry-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.host-entry-name{font-size:16px;font-weight:700}
-.host-entry-meta{font-size:12px;color:#555;margin-top:3px}
-.host-entry-actions{display:flex;gap:8px}
-.links-grid{display:flex;flex-wrap:wrap;gap:8px}
-.link-item{background:#070b16;border:1px solid #1a2035;border-radius:10px;padding:8px 14px;font-size:12px;display:flex;align-items:center;gap:8px}
-.link-item .quality{color:#ffcc00;font-weight:700}
-.link-item .link-url{color:#555;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Quality links */
+.quality-list{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.quality-row{
+  display:flex;align-items:center;gap:8px;background:#1a2035;
+  padding:6px 10px;border-radius:6px;font-size:11px
+}
+.quality-label{
+  color:#ffcc00;font-weight:700;min-width:44px;font-size:10px
+}
+.quality-link{
+  color:#6b8cde;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px
+}
+.direct-link{
+  font-size:10px;color:#6b8cde;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;margin-top:4px
+}
 
-/* SECTION LABEL */
-.section-label{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;padding-left:2px}
+/* Add host btn */
+.add-host-btn{
+  background:#0b0f1a;border:1px dashed #2a3055;color:#555;
+  padding:10px;border-radius:8px;width:100%;font-size:12px;cursor:pointer;
+  transition:.2s;text-align:center;margin-top:4px
+}
+.add-host-btn:hover{border-color:#ffcc00;color:#ffcc00}
 
-/* SEARCH BAR */
-.search-bar{position:relative;flex:1;max-width:280px}
-.search-bar input{width:100%;padding-left:36px}
-.search-bar::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none}
+/* Back button */
+.back-btn{
+  background:#1a2035;border:none;color:#aaa;padding:6px 12px;
+  border-radius:6px;font-size:11.5px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:5px
+}
+.back-btn:hover{background:#ffcc00;color:#000}
+.panel-toolbar{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-bottom:1px solid #1a2035;flex-shrink:0
+}
+.panel-toolbar .right{margin-left:auto;display:flex;gap:6px}
+.empty-state{text-align:center;padding:60px 20px;color:#555}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
 
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
-.modal.show{display:flex}
-.modal-box{background:#0b0f1a;border:1px solid #1a2035;border-radius:22px;overflow:hidden;width:820px;max-width:100%;max-height:92vh;display:flex;flex-direction:column}
-.modal-header{min-height:66px;background:#070b16;border-bottom:1px solid #1a2035;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
-.modal-header h3{font-size:17px;font-weight:700;color:#ffcc00}
-.modal-close{font-size:22px;cursor:pointer;color:#666;line-height:1;padding:4px}
+/* ========== SECTION TITLE ========== */
+.section-title{
+  font-size:11px;color:#555;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;margin:12px 0 8px;padding-bottom:6px;
+  border-bottom:1px solid #1a2035
+}
+
+/* ========== MODAL ========== */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:none;align-items:center;justify-content:center;z-index:9999;padding:16px
+}
+.modal.open{display:flex}
+.modal-box{
+  width:100%;max-width:640px;max-height:92vh;
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden
+}
+.modal-box.wide{max-width:780px}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;background:#0e1424;border-bottom:1px solid #1a2035;flex-shrink:0
+}
+.modal-header h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:4px}
 .modal-close:hover{color:#fff}
-.modal-body{padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
-.modal-footer{min-height:68px;background:#070b16;border-top:1px solid #1a2035;display:flex;align-items:center;justify-content:flex-end;padding:0 22px;gap:10px;flex-shrink:0}
-.sec-box{background:#0e1424;border:1px solid #1a2035;border-radius:14px;padding:16px}
-.sec-box h4{font-size:13px;font-weight:700;color:#ffcc00;margin-bottom:12px}
-.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.fgrid.g3{grid-template-columns:repeat(3,1fr)}
-label.fl{font-size:11px;color:#666;margin-bottom:4px;display:block}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+.form-label{font-size:11px;color:#777;margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.form-input{
+  width:100%;background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:9px 11px;border-radius:7px;font-size:12.5px;outline:none;transition:.2s
+}
+.form-input:focus{border-color:#ffcc00}
+.form-input::placeholder{color:#444}
+select.form-input option{background:#0e1424}
+textarea.form-input{resize:vertical;min-height:70px}
+.modal-footer{
+  padding:13px 18px;background:#0e1424;border-top:1px solid #1a2035;
+  display:flex;justify-content:flex-end;gap:8px;flex-shrink:0
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:9px 22px;border-radius:7px;
+  font-weight:700;font-size:13px;cursor:pointer;color:#000;transition:.2s
+}
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.cancel-btn{
+  background:transparent;border:1px solid #1a2035;color:#aaa;
+  padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;transition:.2s
+}
+.cancel-btn:hover{border-color:#aaa;color:#fff}
 
-/* HOST FORM ROW */
-.host-form-row{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:14px;position:relative}
-.host-form-row+.host-form-row{margin-top:10px}
-.host-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.host-row-title{font-size:13px;font-weight:700;color:#ccc}
-.quality-rows{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-.quality-row{display:flex;align-items:center;gap:8px}
-.quality-row select{flex:0 0 110px}
-.quality-row input{flex:1}
+/* ========== HOST MODAL EXTRAS ========== */
+.host-auto-info{
+  background:#0e1424;border:1px solid #1a2035;border-radius:8px;
+  padding:10px 14px;margin-bottom:12px;display:none
+}
+.host-auto-info.visible{display:block}
+.host-auto-info .hai-title{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;margin-bottom:8px}
+.hai-row{display:flex;gap:12px;flex-wrap:wrap}
+.hai-item{font-size:11px;color:#aaa}
+.hai-item b{color:#ffcc00}
+.hai-divider{height:1px;background:#1a2035;margin:10px 0}
 
-/* AUTO-FILL TAG */
-.auto-tag{background:#1a2a1a;border:1px solid #4caf5022;border-radius:8px;padding:3px 8px;font-size:10px;color:#4caf50;margin-left:6px}
+/* Quality builder */
+.quality-builder{display:flex;flex-direction:column;gap:6px}
+.quality-entry{
+  display:flex;gap:8px;align-items:center;
+  background:#0e1424;padding:8px 10px;border-radius:7px;
+}
+.quality-entry select{
+  background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:6px 8px;border-radius:5px;font-size:11.5px;outline:none;min-width:80px
+}
+.quality-entry select:focus{border-color:#ffcc00}
+.quality-entry input{
+  flex:1;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:6px 10px;border-radius:5px;font-size:11.5px;outline:none
+}
+.quality-entry input:focus{border-color:#ffcc00}
+.quality-entry .rm-q{
+  background:none;border:none;color:#ff4c4c;cursor:pointer;
+  font-size:16px;padding:2px 4px;border-radius:4px;flex-shrink:0
+}
+.quality-entry .rm-q:hover{background:#3a1a1a}
+.add-quality-btn{
+  background:#1a2035;border:1px dashed #2a3055;color:#aaa;
+  padding:7px;border-radius:7px;font-size:11.5px;cursor:pointer;
+  width:100%;transition:.2s;margin-top:2px
+}
+.add-quality-btn:hover{border-color:#ffcc00;color:#ffcc00}
 
-/* EMPTY */
-.empty-box{background:#070b16;border:1px dashed #1f2742;border-radius:14px;padding:24px;text-align:center;color:#555;font-size:12px}
+/* Monetization preview */
+.mon-preview{
+  background:#0e1424;border:1px solid #1a2035;border-radius:8px;
+  padding:10px 14px
+}
+.mon-preview .mp-title{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;margin-bottom:6px}
+.mon-tags{display:flex;flex-wrap:wrap;gap:5px}
+.mon-tag{
+  font-size:10px;padding:2px 8px;border-radius:12px;
+  background:#1a2035;color:#aaa;border:1px solid #2a3055
+}
+.mon-tag.ad{border-color:#3a1a3a;color:#ce93d8}
+.mon-tag.sl{border-color:#1a3a3a;color:#4dd0e1}
+.mon-tag.pop{border-color:#3a2a1a;color:#ffb74d}
 
-/* TOAST */
-.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999}
-.toast{background:#0d1322;border:1px solid #1a2035;border-radius:12px;padding:11px 16px;font-size:13px;min-width:190px;display:flex;align-items:center;gap:10px;animation:slideUp .3s ease;box-shadow:0 8px 24px #00000055}
-.toast.ok{border-color:#4caf5044;color:#4caf50}
-.toast.err{border-color:#f4433644;color:#f44336}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid #1a2035;border-top-color:#ffcc00;
+  border-radius:50%;animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{text-align:center;padding:40px;color:#555}
 
-/* RESPONSIVE */
-@media(max-width:900px){.anime-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}.fgrid,.fgrid.g3{grid-template-columns:1fr}}
-@media(max-width:700px){.cms-app{flex-direction:column}.cms-sidebar{width:100%;height:auto;position:static}.cms-header{padding:14px 16px}.cms-content{padding:14px}}
+/* ========== PAGINATION ========== */
+.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:10px}
+.pagination button{
+  background:#0e1424;border:1px solid #1a2035;color:#ccc;
+  padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;transition:.15s
+}
+.pagination button:hover{border-color:#ffcc00;color:#ffcc00}
+.pagination button.active{background:#ffcc00;color:#000;border-color:#ffcc00}
+.pagination button:disabled{opacity:.4;cursor:default}
+
+/* ZIP badge */
+.badge-zip{background:#2a1a1a;color:#ff7043}
 </style>
 </head>
 <body>
 
-<div class="cms-app">
-
-<!-- SIDEBAR -->
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
@@ -173,796 +378,973 @@ label.fl{font-size:11px;color:#666;margin-bottom:4px;display:block}
     <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
+    <div class="menu-sep"></div>
     <a href="downloads.html" class="active">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
+    <div class="menu-sep"></div>
     <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
     <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
-    <a href="system-settings.html">⚙ System Settings</a>
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
-<!-- MAIN -->
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
-
-  <!-- HEADER -->
   <header class="cms-header">
-    <div class="header-left">
-      <h2>📥 Downloads</h2>
-      <div class="breadcrumb" id="breadcrumb">All Anime</div>
-    </div>
-    <div class="header-right">
-      <div class="search-bar" id="searchWrap">
-        <input type="text" id="searchAnime" placeholder="Search anime...">
-      </div>
-      <select id="filterType" style="min-width:120px">
-        <option value="">All Types</option>
-        <option value="anime">Anime</option>
-        <option value="movie">Movie</option>
-        <option value="series">Series</option>
-        <option value="cartoon">Cartoon</option>
-      </select>
-      <button class="btn btn-s btn-sm" id="backBtn" style="display:none">← Back</button>
-      <button class="btn btn-y" id="openAddBtn">➕ Add Download</button>
+    <div class="title">📥 Download Management</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="add-btn" id="quickAddBtn">⚡ Quick Add Entry</button>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
   </header>
 
-  <div class="cms-content">
-
-    <!-- VIEW 1: ANIME GRID -->
-    <div class="view active" id="viewAnime">
-      <div class="section-label" id="animeCountLabel">Loading...</div>
-      <div class="anime-grid" id="animeGrid">
-        <div class="empty-box" style="grid-column:1/-1">Loading anime...</div>
+  <section class="cms-content">
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">📥</div>
+        <div class="stat-info"><div class="num" id="statEntries">—</div><div class="lbl">Total Entries</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌐</div>
+        <div class="stat-info"><div class="num" id="statHosts">—</div><div class="lbl">Active Hosts</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔗</div>
+        <div class="stat-info"><div class="num" id="statLinks">—</div><div class="lbl">Total Links</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👑</div>
+        <div class="stat-info"><div class="num" id="statKnight">—</div><div class="lbl">Knight Entries</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info"><div class="num" id="statClicks">—</div><div class="lbl">Total Clicks</div></div>
       </div>
     </div>
 
-    <!-- VIEW 2: SEASON SELECT -->
-    <div class="view" id="viewSeason">
-      <div class="section-label" id="seasonLabel">Seasons</div>
-      <div class="season-grid" id="seasonGrid"></div>
-    </div>
+    <!-- TWO-PANEL LAYOUT -->
+    <div class="dl-layout">
 
-    <!-- VIEW 3: EPISODE LIST -->
-    <div class="view" id="viewEpisode">
-      <div class="section-label" id="episodeLabel">Episodes</div>
-      <div class="episode-list" id="episodeList"></div>
-    </div>
-
-    <!-- VIEW 4: HOST ENTRIES -->
-    <div class="view" id="viewHosts">
-      <div class="hosts-view-header">
-        <div>
-          <div class="hosts-view-title" id="hostsViewTitle">Episode Hosts</div>
-          <div class="hosts-view-sub" id="hostsViewSub"></div>
+      <!-- LEFT: ANIME PANEL -->
+      <div class="anime-panel">
+        <div class="panel-head">
+          <h3>🎬 Anime</h3>
+          <span id="animeCount" style="font-size:11px;color:#555">Loading...</span>
         </div>
-        <button class="btn btn-y btn-sm" id="addHostToEntryBtn">➕ Add Host</button>
+        <div style="padding:8px 10px 0;border-bottom:1px solid #1a2035">
+          <input class="panel-search" id="animeSearch" placeholder="🔍 Search anime...">
+        </div>
+        <div class="anime-grid" id="animeGrid">
+          <div style="grid-column:1/-1" class="loading-row"><div class="spinner"></div></div>
+        </div>
       </div>
-      <div class="hosts-grid" id="hostsGrid">
-        <div class="empty-box">No hosts added yet.</div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel" id="rightPanel">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+          <span>Select an anime →</span>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="panel-toolbar" id="panelToolbar" style="display:none">
+          <button class="back-btn" id="backBtn">← Back</button>
+          <div class="right" id="toolbarRight"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="panel-content" id="panelContent">
+          <div class="empty-state">
+            <div class="icon">📥</div>
+            <div>Select an anime from the left to manage downloads</div>
+          </div>
+        </div>
       </div>
+
     </div>
-
-  </div>
+  </section>
 </main>
-</div>
 
-<!-- ===== ADD DOWNLOAD MODAL ===== -->
-<div class="modal" id="downloadModal">
-  <div class="modal-box">
+<!-- ========== TOAST ========== -->
+<div class="toast" id="toast"></div>
+
+<!-- ========== ADD HOST MODAL ========== -->
+<div class="modal" id="hostModal">
+  <div class="modal-box wide">
     <div class="modal-header">
-      <h3 id="modalTitle">Add Download Entry</h3>
-      <div class="modal-close" id="closeModalBtn">✕</div>
+      <h3 id="hostModalTitle">Add Host Entry</h3>
+      <button class="modal-close" id="closeHostModal">✕</button>
     </div>
     <div class="modal-body">
+      <div id="hostAutoInfo" class="host-auto-info">
+        <div class="hai-title">Auto-loaded from Host Config</div>
+        <div class="hai-row" id="hostAutoRow"></div>
+      </div>
 
-      <!-- STEP 1: ANIME + CONTENT INFO -->
-      <div class="sec-box">
-        <h4>📌 Anime & Content</h4>
-        <div class="fgrid">
-          <div>
-            <label class="fl">Anime</label>
-            <select id="animeSelect"><option value="">Select Anime</option></select>
-          </div>
-          <div>
-            <label class="fl">Content Type</label>
-            <select id="contentType">
-              <option value="episode">Episode</option>
-              <option value="movie">Movie</option>
-              <option value="zip">ZIP Pack</option>
-              <option value="ova">OVA</option>
-            </select>
-          </div>
-          <div>
-            <label class="fl">Season</label>
-            <input type="number" id="seasonNum" placeholder="1" min="1">
-          </div>
-          <div>
-            <label class="fl">Episode No.</label>
-            <input type="number" id="episodeNum" placeholder="1" min="1">
-          </div>
+      <div class="form-grid">
+        <!-- Host Select -->
+        <div class="form-full">
+          <label class="form-label">Host *</label>
+          <select class="form-input" id="hf-host">
+            <option value="">— Select Host —</option>
+          </select>
         </div>
+        <!-- Storage (auto-filled) -->
         <div>
-          <label class="fl">Episode Title <span class="auto-tag" id="epTitleAutoTag" style="display:none">auto-filled from DB</span></label>
-          <input type="text" id="episodeTitleInput" placeholder="e.g. Enter the Ninja World">
+          <label class="form-label">Storage (auto)</label>
+          <input class="form-input" id="hf-storage" placeholder="Auto from host" readonly style="opacity:.6">
+        </div>
+        <!-- Knight (auto-filled) -->
+        <div>
+          <label class="form-label">Knight Mode (auto)</label>
+          <input class="form-input" id="hf-knight" placeholder="Auto from host" readonly style="opacity:.6">
         </div>
       </div>
 
-      <!-- STEP 2: HOSTS -->
-      <div class="sec-box">
-        <h4>🌐 Download Hosts</h4>
-        <div id="hostsContainer"></div>
-        <button class="btn btn-s btn-sm" id="addHostRowBtn" style="margin-top:10px">➕ Add Host</button>
+      <!-- Monetization Preview -->
+      <div class="section-title">Monetization (auto from host)</div>
+      <div class="mon-preview" id="hf-monPreview">
+        <div class="mp-title">No monetization configured</div>
       </div>
 
+      <div class="hai-divider"></div>
+
+      <!-- Direct Link (for non-knight) -->
+      <div id="directLinkSection">
+        <div class="form-grid">
+          <div class="form-full">
+            <label class="form-label">Direct Download Link</label>
+            <input class="form-input" id="hf-link" placeholder="https://...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Quality Builder (for knight) -->
+      <div id="qualitySection" style="display:none">
+        <div class="section-title">Quality Links (Knight Mode)</div>
+        <div class="quality-builder" id="qualityBuilder"></div>
+        <button class="add-quality-btn" id="addQualityBtn">+ Add Quality</button>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-s" id="cancelModalBtn">Cancel</button>
-      <button class="btn btn-y" id="saveDownloadBtn">💾 Save Download</button>
+      <button class="cancel-btn" id="cancelHostModal">Cancel</button>
+      <button class="save-btn" id="saveHostBtn">💾 Save Host</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast-wrap" id="toastWrap"></div>
-
-<!-- HOST ROW TEMPLATE -->
-<template id="hostRowTpl">
-  <div class="host-form-row">
-    <div class="host-row-head">
-      <span class="host-row-title">Host</span>
-      <button class="btn btn-r btn-sm remove-host-btn">✕ Remove</button>
+<!-- ========== QUICK ADD MODAL ========== -->
+<div class="modal" id="quickModal">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <h3>⚡ Quick Add Download Entry</h3>
+      <button class="modal-close" id="closeQuickModal">✕</button>
     </div>
-    <div class="fgrid g3">
-      <div>
-        <label class="fl">Host Config <span class="auto-tag">auto-fills below</span></label>
-        <select class="host-select"><option value="">Select Host</option></select>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Anime *</label>
+          <select class="form-input" id="qf-anime">
+            <option value="">— Select Anime —</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Content Type</label>
+          <select class="form-input" id="qf-type" onchange="updateQuickForm()">
+            <option value="episode">Episode</option>
+            <option value="season_zip">Season ZIP</option>
+            <option value="movie">Movie</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Season</label>
+          <select class="form-input" id="qf-season">
+            <option value="1">Season 1</option>
+            <option value="2">Season 2</option>
+            <option value="3">Season 3</option>
+            <option value="4">Season 4</option>
+            <option value="5">Season 5</option>
+          </select>
+        </div>
+        <div id="qf-epNumWrap">
+          <label class="form-label">Episode Number</label>
+          <input class="form-input" id="qf-epNum" type="number" min="1" placeholder="e.g. 12">
+        </div>
+        <div id="qf-epTitleWrap">
+          <label class="form-label">Episode Title (optional)</label>
+          <input class="form-input" id="qf-epTitle" placeholder="auto from episodes DB">
+        </div>
+        <div class="form-full">
+          <label class="form-label">Host *</label>
+          <select class="form-input" id="qf-host" onchange="quickHostChanged()">
+            <option value="">— Select Host —</option>
+          </select>
+        </div>
+        <div class="form-full" id="qf-linkWrap">
+          <label class="form-label">Download Link *</label>
+          <input class="form-input" id="qf-link" placeholder="https://...">
+        </div>
       </div>
-      <div>
-        <label class="fl">Storage (auto)</label>
-        <input type="text" class="host-storage-input" placeholder="Auto from host config" readonly style="opacity:.7">
-      </div>
-      <div>
-        <label class="fl">Knight (auto)</label>
-        <input type="text" class="host-knight-input" placeholder="Auto" readonly style="opacity:.7">
+      <div id="qf-qualityWrap" style="display:none">
+        <div class="section-title">Quality Links (Knight)</div>
+        <div class="quality-builder" id="qf-qualityBuilder"></div>
+        <button class="add-quality-btn" id="qf-addQuality">+ Add Quality</button>
       </div>
     </div>
-    <!-- Direct link (for non-knight) -->
-    <div class="direct-link-wrap" style="margin-top:10px">
-      <label class="fl">Download Link</label>
-      <input type="text" class="direct-link-input" placeholder="https://mega.nz/... or direct URL">
-    </div>
-    <!-- Quality links (for knight) -->
-    <div class="knight-links-wrap" style="margin-top:10px;display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <label class="fl" style="margin:0">Quality Links</label>
-        <button class="btn btn-s btn-sm add-quality-btn">+ Add Quality</button>
-      </div>
-      <div class="quality-rows"></div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelQuickModal">Cancel</button>
+      <button class="save-btn" id="saveQuickBtn">💾 Add Entry</button>
     </div>
   </div>
-</template>
-
-<template id="qualityRowTpl">
-  <div class="quality-row">
-    <select class="qual-select">
-      <option value="480p">480p</option>
-      <option value="720p" selected>720p</option>
-      <option value="1080p">1080p</option>
-      <option value="4K">4K</option>
-    </select>
-    <input type="text" class="qual-link" placeholder="https://...">
-    <button class="btn btn-r btn-sm remove-qual-btn">✕</button>
-  </div>
-</template>
+</div>
 
 <script>
-/* ============================================================
-  ANIMEHUNT — DOWNLOADS ADMIN (FIXED)
-  Bugs fixed:
-  - loadEpisodes() now uses correct episodes API
-  - Episode field names fixed (episode vs episode_number)
-  - Host display shows correct knight/direct info
-  - API response handling fixed for all endpoints
-============================================================ */
+/* =========================================
+   CONFIG & STATE
+========================================= */
+const API = (window.API_BASE || '') + '/api'
 
-const BASE      = "https://animehunt-backend.animehunt715.workers.dev"
-const API       = BASE + "/api/admin"
-const TOKEN_KEY = "ah_token"
+function getToken(){ return localStorage.getItem('ah_token') || '' }
+function authHeaders(){ return { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() } }
 
-function getToken(){ return localStorage.getItem(TOKEN_KEY) }
-if(!getToken()){ location.href="login.html" }
-
-function authHdr(){
-  return { "Content-Type":"application/json", "Authorization":"Bearer "+getToken() }
+// Navigation state
+let navState = {
+  view: 'anime',      // anime | seasons | episodes | hosts
+  animeId: null,
+  animeTitle: '',
+  animeType: '',
+  season: null,
+  contentType: null,
+  entryId: null,
+  episodeTitle: ''
 }
 
-/* ── State ── */
-let ANIME     = []
-let DOWNLOADS = []
-let HOSTS_CFG = []
-let EPISODES  = {}  // cache: { animeId: [{season, episode, title}] }
+let animeList  = []
+let hostsDB    = []    // all hosts from DB
+let monDB      = {}    // monetization map: host_id -> config
+let adsDB      = []
+let shortlinksDB = []
+let popupsDB   = []
 
-let CUR_ANIME  = null
-let CUR_SEASON = null
-let CUR_ENTRY  = null
-let VIEW       = "anime"
-
-/* ── DOM ── */
-const D = id => document.getElementById(id)
-const toastWrap = D("toastWrap")
-
-function toast(msg, type="ok"){
-  const t = document.createElement("div")
-  t.className = `toast ${type}`
-  t.innerHTML = `<span>${type==="ok"?"✅":"❌"}</span><span>${msg}</span>`
-  toastWrap.appendChild(t)
-  setTimeout(()=>t.remove(), 3200)
+/* =========================================
+   AUTH
+========================================= */
+function requireAuth(){
+  if(!getToken()){ window.location.href='login.html'; return false }
+  return true
 }
-
-/* ── Generic API call ── */
-async function api(url, method="GET", body=null){
+async function checkAuth(){
   try{
-    const res = await fetch(url,{
-      method,
-      headers: authHdr(),
-      body: body ? JSON.stringify(body) : null
-    })
-    if(res.status===401){ location.href="login.html"; return null }
-    const json = await res.json().catch(()=>({}))
-    if(!res.ok){
-      toast(json?.message || json?.error || "Request failed","err")
-      return null
-    }
-    return json
-  }catch(err){
-    toast(err.message||"Network error","err")
-    return null
+    const r = await fetch(`${API}/auth/me`,{headers:authHeaders()})
+    if(r.status===401){ localStorage.removeItem('ah_token'); window.location.href='login.html'; return false }
+    const j = await r.json()
+    if(j.success) document.getElementById('adminName').textContent = j.data.name||''
+    return j.success
+  }catch{ return false }
+}
+document.getElementById('logoutBtn').onclick = ()=>{
+  localStorage.removeItem('ah_token')
+  window.location.href='login.html'
+}
+
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = `toast ${type}`
+  t.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200)
+}
+
+/* =========================================
+   LOAD HOSTS & MONETIZATION
+========================================= */
+async function loadHostsDB(){
+  try{
+    const r = await fetch(`${API}/hosts?active=1`,{headers:authHeaders()})
+    const j = await r.json()
+    hostsDB = j.success ? (j.data||[]) : []
+  }catch{ hostsDB = [] }
+}
+
+async function loadMonetizationDB(){
+  try{
+    const r = await fetch(`${API}/host-monetization`,{headers:authHeaders()})
+    const j = await r.json()
+    const arr = j.success ? (j.data||[]) : []
+    monDB = {}
+    arr.forEach(m => { monDB[m.host_id] = m })
+  }catch{ monDB = {} }
+}
+
+async function loadAdsDB(){
+  try{
+    const [ra,rs,rp] = await Promise.all([
+      fetch(`${API}/ads-library`,{headers:authHeaders()}),
+      fetch(`${API}/shortlinks-library`,{headers:authHeaders()}),
+      fetch(`${API}/popup-library`,{headers:authHeaders()})
+    ])
+    adsDB       = (await ra.json()).data || []
+    shortlinksDB = (await rs.json()).data || []
+    popupsDB    = (await rp.json()).data || []
+  }catch{}
+}
+
+/* =========================================
+   LOAD ANIME GRID
+========================================= */
+async function loadAnimeGrid(){
+  const grid = document.getElementById('animeGrid')
+  grid.innerHTML = '<div style="grid-column:1/-1" class="loading-row"><div class="spinner"></div></div>'
+  try{
+    const r = await fetch(`${API}/anime?limit=200`,{headers:authHeaders()})
+    if(r.status===401){ localStorage.removeItem('ah_token'); window.location.href='login.html'; return }
+    const j = await r.json()
+    animeList = j.success ? (j.data.data||[]) : []
+    document.getElementById('animeCount').textContent = animeList.length + ' anime'
+    renderAnimeGrid(animeList)
+    populateAnimeSelects()
+  }catch(e){
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#f44336;text-align:center;padding:40px">Error loading anime</div>'
   }
 }
 
-/* ============================================================
-  INIT
-============================================================ */
-async function init(){
-  await Promise.all([loadAnime(), loadHosts(), loadDownloads()])
-  renderAnimeGrid()
-}
-
-async function loadAnime(){
-  const r = await api(`${API}/anime-list`)
-  // anime-list returns: { success:true, data:[...] } or just [...]
-  ANIME = r?.data ?? (Array.isArray(r) ? r : [])
-  fillAnimeSelect()
-}
-
-async function loadHosts(){
-  const r = await api(`${API}/host-monetization`)
-  HOSTS_CFG = r?.data ?? (Array.isArray(r) ? r : [])
-}
-
-async function loadDownloads(){
-  const r = await api(`${API}/downloads-v2`)
-  // downloads-v2 returns: { success:true, data:[...] }
-  DOWNLOADS = r?.data ?? (Array.isArray(r) ? r : [])
-}
-
-/* ── Load episodes for an anime from episodes API (FIXED) ── */
-async function loadEpisodes(animeId){
-  if(EPISODES[animeId]) return EPISODES[animeId]
-
-  try {
-    // Use the public episodes API — correct endpoint
-    const res  = await fetch(`${BASE}/api/public/episodes/${animeId}`)
-    const json = await res.json()
-    // Returns array of episodes: [{id, season, episode, title, ...}]
-    const eps  = json?.data ?? (Array.isArray(json) ? json : [])
-    EPISODES[animeId] = eps
-    return eps
-  } catch {
-    EPISODES[animeId] = []
-    return []
-  }
-}
-
-/* ============================================================
-  VIEWS
-============================================================ */
-
-function showView(name){
-  VIEW = name
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-  D("view"+name.charAt(0).toUpperCase()+name.slice(1)).classList.add("active")
-  D("backBtn").style.display   = name==="anime" ? "none" : "inline-flex"
-  D("searchWrap").style.display = name==="anime" ? "block" : "none"
-  D("filterType").style.display = name==="anime" ? "block" : "none"
-}
-
-D("backBtn").onclick = ()=>{
-  if(VIEW==="season"){   showView("anime");   setBreadcrumb("All Anime"); CUR_ANIME=null }
-  else if(VIEW==="episode"){ showView("season"); setBreadcrumb(CUR_ANIME?.title||""); CUR_SEASON=null }
-  else if(VIEW==="hosts"){   showView("episode"); setBreadcrumb(`${CUR_ANIME?.title} › Season ${CUR_SEASON}`); CUR_ENTRY=null }
-}
-
-function setBreadcrumb(text){ D("breadcrumb").textContent = text }
-
-/* ============================================================
-  VIEW 1: ANIME GRID
-============================================================ */
-
-function getAnimeDownloadCount(animeId){
-  return DOWNLOADS.filter(d=>d.anime_id===animeId).length
-}
-
-function renderAnimeGrid(){
-  const q   = D("searchAnime").value.toLowerCase()
-  const typ = D("filterType").value
-  let list  = [...ANIME]
-
-  if(q)   list = list.filter(a=>(a.title||"").toLowerCase().includes(q))
-  if(typ) list = list.filter(a=>a.type===typ)
-
-  D("animeCountLabel").textContent = `${list.length} anime`
-
+function renderAnimeGrid(list){
+  const grid = document.getElementById('animeGrid')
   if(!list.length){
-    D("animeGrid").innerHTML='<div class="empty-box" style="grid-column:1/-1">No anime found.</div>'
+    grid.innerHTML = '<div style="grid-column:1/-1" class="empty-state"><div class="icon">🎬</div><div>No anime found</div></div>'
     return
   }
-
-  D("animeGrid").innerHTML = list.map(a=>{
-    const cnt = getAnimeDownloadCount(a.id)
-    const escapedId = (a.id||"").replace(/'/g,"\\'")
-    return `
-      <div class="anime-card" onclick="selectAnime('${escapedId}')">
-        ${a.poster
-          ? `<img class="anime-poster" src="${a.poster}" alt="${a.title||''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-          : ''}
-        <div class="anime-poster-placeholder" ${a.poster?'style="display:none"':''}>🎬</div>
-        ${cnt>0 ? `<div class="anime-ep-count">${cnt}</div>` : ''}
-        <div class="anime-info">
-          <div class="anime-title">${a.title||'Untitled'}</div>
-          <div class="anime-type">${a.type||'anime'}</div>
-        </div>
-      </div>
-    `
-  }).join("")
+  grid.innerHTML = ''
+  list.forEach(a => {
+    const card = document.createElement('div')
+    card.className = 'anime-card'
+    if(navState.animeId===a.id) card.classList.add('active')
+    const img = a.poster
+      ? `<img src="${esc(a.poster)}" alt="${esc(a.title)}" loading="lazy" onerror="this.style.display='none'">`
+      : `<div class="anime-card-placeholder">🎬</div>`
+    card.innerHTML = `${img}
+      <div class="anime-card-info">
+        <div class="title" title="${esc(a.title)}">${esc(a.title)}</div>
+        <div class="type">${esc((a.type||'ANIME').toUpperCase())}</div>
+      </div>`
+    card.onclick = ()=> selectAnime(a)
+    grid.appendChild(card)
+  })
 }
 
-D("searchAnime").addEventListener("input", renderAnimeGrid)
-D("filterType").addEventListener("change", renderAnimeGrid)
+document.getElementById('animeSearch').addEventListener('input', function(){
+  const q = this.value.toLowerCase()
+  renderAnimeGrid(animeList.filter(a => a.title.toLowerCase().includes(q)))
+})
 
-/* ============================================================
-  VIEW 2: SEASON SELECT
-============================================================ */
+/* =========================================
+   SELECT ANIME → SHOW SEASONS
+========================================= */
+async function selectAnime(a){
+  navState = { view:'seasons', animeId:a.id, animeTitle:a.title, animeType:a.type||'anime', season:null, contentType:null, entryId:null }
+  document.querySelectorAll('.anime-card').forEach(c => c.classList.remove('active'))
+  document.querySelectorAll('.anime-card').forEach(c => {
+    if(c.querySelector('.title')?.title===a.title) c.classList.add('active')
+  })
+  updateBreadcrumb()
+  showSeasons(a)
+}
 
-async function selectAnime(id){
-  CUR_ANIME = ANIME.find(a=>a.id===id)
-  if(!CUR_ANIME) return
-  setBreadcrumb(CUR_ANIME.title)
-  showView("season")
-  D("seasonLabel").textContent = `${CUR_ANIME.title} — Select Season`
+async function showSeasons(a){
+  const content = document.getElementById('panelContent')
+  const toolbar = document.getElementById('panelToolbar')
+  const tbRight = document.getElementById('toolbarRight')
+  toolbar.style.display='flex'
+  tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openAddEntryFlow()">➕ Add Entry</button>`
+  document.getElementById('backBtn').onclick = ()=>{ navState.view='anime'; resetRightPanel() }
 
-  // Seasons from existing downloads
-  const animeDownloads = DOWNLOADS.filter(d=>d.anime_id===id)
-  const seasonSet = new Set()
-  animeDownloads.forEach(d=>{ if(d.season != null) seasonSet.add(Number(d.season)) })
+  content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
 
-  // Seasons from episodes DB
-  const eps = await loadEpisodes(id)
-  eps.forEach(e=>{ if(e.season != null) seasonSet.add(Number(e.season)) })
+  try{
+    const r = await fetch(`${API}/downloads/structure/${a.id}`,{headers:authHeaders()})
+    const j = await r.json()
+    const structure = j.success ? (j.data||{}) : {}
+    renderSeasonStructure(structure, a)
+  }catch{
+    // Fallback: show default structure
+    renderSeasonStructure({seasons:[1,2,3], type:a.type}, a)
+  }
+}
 
-  // Default to Season 1
-  if(!seasonSet.size) seasonSet.add(1)
+function renderSeasonStructure(structure, a){
+  const content = document.getElementById('panelContent')
+  const type = (a.type||'anime').toLowerCase()
+  const seasons = structure.seasons || [1,2,3]
 
-  const seasons = [...seasonSet].sort((a,b)=>a-b)
+  let html = '<div class="structure-list">'
 
-  D("seasonGrid").innerHTML = seasons.map(s=>{
-    const cnt = animeDownloads.filter(d=>Number(d.season)===s).length
-    return `
-      <div class="season-card" onclick="selectSeason(${s})">
-        <div class="season-icon">📁</div>
-        <div>
-          <div class="season-label">Season ${s}</div>
-          <div class="season-sub">${cnt} download entries</div>
-        </div>
-      </div>
-    `
-  }).join("")
+  if(type==='movie'){
+    html += makeStructItem('🎬','Movies','Click to manage movie downloads','movie',null)
+  } else {
+    seasons.forEach(s => {
+      html += makeStructItem('📺',`Season ${s}`,`Episodes for Season ${s}`,'episode',s)
+      html += makeStructItem('🗜️',`Season ${s} ZIP`,`Full season package`,'season_zip',s)
+    })
+  }
+  html += '</div>'
 
-  // Add New Season option
-  D("seasonGrid").innerHTML += `
-    <div class="season-card" onclick="promptNewSeason()" style="border-style:dashed;opacity:.7">
-      <div class="season-icon">➕</div>
+  html += `<div class="section-title" style="margin-top:16px">Quick Add</div>
+  <button class="add-host-btn" onclick="openAddEntryFlow()">➕ Add new download entry for ${esc(a.title)}</button>`
+
+  content.innerHTML = html
+
+  // Attach clicks
+  content.querySelectorAll('.struct-item[data-ct]').forEach(el => {
+    el.onclick = ()=> showEpisodes(el.dataset.ct, parseInt(el.dataset.s)||null)
+  })
+}
+
+function makeStructItem(icon, title, sub, ct, season){
+  return `<div class="struct-item" data-ct="${ct}" data-s="${season||0}">
+    <div class="si-left">
+      <span class="si-icon">${icon}</span>
       <div>
-        <div class="season-label">New Season</div>
-        <div class="season-sub">Add season ${seasons.length+1}</div>
+        <div class="si-title">${title}</div>
+        <div class="si-sub">${sub}</div>
       </div>
     </div>
-  `
+    <div class="si-right">
+      <span class="ep-count" id="epcount_${ct}_${season||0}">Loading...</span>
+      <span>›</span>
+    </div>
+  </div>`
 }
 
-function promptNewSeason(){
-  const n = prompt("Enter season number:")
-  if(!n || isNaN(Number(n))) return
-  selectSeason(Number(n))
-}
+/* =========================================
+   SHOW EPISODES
+========================================= */
+async function showEpisodes(contentType, season){
+  navState.view = 'episodes'
+  navState.contentType = contentType
+  navState.season = season
+  updateBreadcrumb()
 
-/* ============================================================
-  VIEW 3: EPISODE LIST (FIXED — correct field names)
-============================================================ */
+  const content = document.getElementById('panelContent')
+  const tbRight = document.getElementById('toolbarRight')
+  tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openAddEntryFlow()">➕ Add Entry</button>`
+  document.getElementById('backBtn').onclick = ()=>{ navState.view='seasons'; showSeasons({id:navState.animeId,title:navState.animeTitle,type:navState.animeType}) }
 
-async function selectSeason(season){
-  CUR_SEASON = season
-  setBreadcrumb(`${CUR_ANIME.title} › Season ${season}`)
-  showView("episode")
-  D("episodeLabel").textContent = `${CUR_ANIME.title} — Season ${season}`
+  content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
 
-  // Episodes from DB (FIXED: field is 'episode' not 'episode_number', title is 'title')
-  const dbEps = await loadEpisodes(CUR_ANIME.id)
-  const seasonEps = dbEps.filter(e=>Number(e.season)===season)
-
-  // Existing download entries for this season
-  const existingEntries = DOWNLOADS.filter(
-    d=>d.anime_id===CUR_ANIME.id && Number(d.season)===season
-  )
-  const entryMap = {}
-  existingEntries.forEach(d=>{ entryMap[Number(d.episode)] = d })
-
-  let epList = []
-
-  if(seasonEps.length){
-    // Use episodes from DB — field 'episode' is the episode number, 'title' is the episode title
-    epList = seasonEps.map(e=>({
-      num:      Number(e.episode || e.episode_number || 0),
-      title:    e.title || `Episode ${e.episode || e.episode_number}`,
-      hasEntry: !!entryMap[Number(e.episode || e.episode_number)],
-      entry:    entryMap[Number(e.episode || e.episode_number)] || null
-    })).filter(e=>e.num > 0)
-  } else {
-    // No DB episodes — show from download entries or placeholder
-    const nums = [...new Set(existingEntries.map(d=>Number(d.episode)).filter(n=>n>0))].sort((a,b)=>a-b)
-    if(!nums.length){
-      // Placeholder episodes 1-12
-      for(let i=1;i<=12;i++) epList.push({ num:i, title:`Episode ${i}`, hasEntry:false, entry:null })
-    } else {
-      nums.forEach(n=> epList.push({
-        num: n,
-        title: entryMap[n]?.episode_title || `Episode ${n}`,
-        hasEntry: true,
-        entry: entryMap[n] || null
-      }))
-    }
+  try{
+    let url = `${API}/downloads/entries?anime_id=${navState.animeId}&content_type=${contentType}`
+    if(season) url += `&season=${season}`
+    const r = await fetch(url, {headers:authHeaders()})
+    const j = await r.json()
+    const entries = j.success ? (j.data||[]) : []
+    renderEpisodeList(entries)
+  }catch{
+    renderEpisodeList([])
   }
+}
 
-  epList = epList.sort((a,b)=>a.num-b.num)
-
-  if(!epList.length){
-    D("episodeList").innerHTML='<div class="empty-box">No episodes found for this season.</div>'
+function renderEpisodeList(entries){
+  const content = document.getElementById('panelContent')
+  if(!entries.length){
+    content.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div>No entries yet</div></div>
+    <button class="add-host-btn" onclick="openAddEntryFlow()">➕ Add first entry</button>`
     return
   }
-
-  D("episodeList").innerHTML = epList.map(ep=>{
-    const safeTitle = (ep.title||"").replace(/'/g,"\\'")
-    const hostCount = ep.entry?.hosts?.length || 0
-    return `
-      <div class="episode-row ${ep.hasEntry?'has-entry':''}" onclick="selectEpisode(${ep.num},'${safeTitle}')">
-        <div class="ep-left">
-          <div class="ep-num">EP ${ep.num}</div>
-          <div>
-            <div class="ep-title">${ep.title||'Episode '+ep.num}</div>
-            ${ep.hasEntry
-              ? `<div class="ep-sub">${hostCount} host(s) added</div>`
-              : '<div class="ep-sub" style="color:#555">No downloads yet</div>'}
-          </div>
-        </div>
-        <div class="ep-right">
-          ${ep.hasEntry
-            ? `<span class="host-badge">✅ ${hostCount} hosts</span>`
-            : `<span class="badge badge-gray">No entry</span>`}
+  let html = '<div class="ep-list">'
+  entries.forEach(e => {
+    const hostCount = e.host_count || 0
+    const dots = Array(Math.min(hostCount,5)).fill('<span class="host-dot"></span>').join('')
+    html += `<div class="ep-item ${hostCount?'has-hosts':''}" data-entry="${e.id}" data-title="${esc(e.episode_title||'')}">
+      <div class="ep-left">
+        <span class="ep-num">EP ${e.episode||1}</span>
+        <div>
+          <div class="ep-title">${esc(e.episode_title||'Untitled')}</div>
+          <div class="ep-meta">Season ${e.season||'—'} · ${hostCount} host${hostCount!==1?'s':''}</div>
         </div>
       </div>
-    `
-  }).join("")
+      <div class="ep-right">
+        <div class="host-dots">${dots}</div>
+        <span style="color:#555;font-size:12px">›</span>
+      </div>
+    </div>`
+  })
+  html += '</div>'
+  html += `<button class="add-host-btn" onclick="openAddEntryFlow()" style="margin-top:10px">➕ Add new entry</button>`
+  content.innerHTML = html
+
+  content.querySelectorAll('.ep-item').forEach(el => {
+    el.onclick = ()=> showHostEntries(el.dataset.entry, el.dataset.title)
+  })
 }
 
-/* ============================================================
-  VIEW 4: HOST ENTRIES
-============================================================ */
+/* =========================================
+   SHOW HOST ENTRIES
+========================================= */
+async function showHostEntries(entryId, episodeTitle){
+  navState.view = 'hosts'
+  navState.entryId = entryId
+  navState.episodeTitle = episodeTitle
+  updateBreadcrumb()
 
-async function selectEpisode(epNum, epTitle){
-  const entry = DOWNLOADS.find(
-    d=>d.anime_id===CUR_ANIME.id && Number(d.season)===CUR_SEASON && Number(d.episode)===epNum
-  )
-  CUR_ENTRY = entry || { anime_id: CUR_ANIME.id, season: CUR_SEASON, episode: epNum, episode_title: epTitle, hosts: [] }
-  setBreadcrumb(`${CUR_ANIME.title} › S${CUR_SEASON} › EP${epNum}`)
-  showView("hosts")
-  D("hostsViewTitle").textContent = `Episode ${epNum} — ${epTitle}`
-  D("hostsViewSub").textContent   = `${CUR_ANIME.title} · Season ${CUR_SEASON}`
-  renderHostsView()
+  const content = document.getElementById('panelContent')
+  const tbRight = document.getElementById('toolbarRight')
+  tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openHostModal(null,'${entryId}')">➕ Add Host</button>`
+  document.getElementById('backBtn').onclick = ()=>{ navState.view='episodes'; showEpisodes(navState.contentType,navState.season) }
+
+  content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
+
+  try{
+    const r = await fetch(`${API}/downloads/hosts/${entryId}`, {headers:authHeaders()})
+    const j = await r.json()
+    const hosts = j.success ? (j.data||[]) : []
+    renderHostEntries(hosts, entryId)
+  }catch{
+    renderHostEntries([], entryId)
+  }
 }
 
-function renderHostsView(){
-  const hosts = CUR_ENTRY?.hosts || []
+function renderHostEntries(hosts, entryId){
+  const content = document.getElementById('panelContent')
+  let html = `<div class="section-title">${esc(navState.episodeTitle||'Episode')}</div>`
+
   if(!hosts.length){
-    D("hostsGrid").innerHTML='<div class="empty-box">No hosts added yet. Click "Add Host" to add download links.</div>'
-    return
-  }
-  D("hostsGrid").innerHTML = hosts.map(h=>{
-    const isKnight = h.knight === true || h.knight === 1
-    const links = h.links || []
-    return `
-      <div class="host-entry">
-        <div class="host-entry-top">
-          <div>
-            <div class="host-entry-name">${h.host||h.name||'Unknown Host'}</div>
-            <div class="host-entry-meta">
-              Storage: ${h.storage||'—'} ·
-              <span class="badge ${isKnight?'badge-yellow':'badge-blue'}">${isKnight?'⚔️ Knight':'📁 Direct'}</span>
-            </div>
-          </div>
-          <div class="host-entry-actions">
-            <button class="btn btn-r btn-sm" onclick="deleteHostEntry('${h.id}')">🗑 Remove</button>
-          </div>
-        </div>
-        <div class="links-grid">
-          ${links.length
-            ? links.map(l=>`
-                <div class="link-item">
-                  <span class="quality">${l.quality||'Direct'}</span>
-                  <span class="link-url" title="${l.link||''}">${l.link||'—'}</span>
-                </div>
-              `).join('')
-            : `<div class="link-item"><span class="link-url" style="color:#555">No links added</span></div>`
+    html += `<div class="empty-state"><div class="icon">🌐</div><div>No hosts yet</div></div>`
+  } else {
+    html += '<div class="host-entries">'
+    hosts.forEach(h => {
+      const mon = monDB[h.host_id]
+      const isKnight = h.knight == 1 || h.knight === true
+      const storageLabel = h.storage||h.host_name||'Unknown'
+
+      // Build monetization tags
+      let monHtml = ''
+      if(mon){
+        try{
+          const ads = JSON.parse(mon.ads||'[]')
+          const sl  = JSON.parse(mon.shortlinks||'[]')
+          const pop = JSON.parse(mon.popups||'[]')
+          if(ads.length||sl.length||pop.length){
+            monHtml = '<div class="mon-tags" style="margin-top:6px">'
+            ads.forEach(()=>{ monHtml += '<span class="mon-tag ad">AD</span>' })
+            sl.forEach(()=>{ monHtml += '<span class="mon-tag sl">SHORTLINK</span>' })
+            pop.forEach(()=>{ monHtml += '<span class="mon-tag pop">POPUP</span>' })
+            monHtml += `<span class="mon-tag" style="color:#555">${mon.mode||'random'}</span></div>`
           }
+        }catch{}
+      }
+
+      // Quality links or direct link
+      let linksHtml = ''
+      if(isKnight && h.qualities && h.qualities.length){
+        linksHtml = '<div class="quality-list">'
+        h.qualities.forEach(q => {
+          linksHtml += `<div class="quality-row">
+            <span class="quality-label">${esc(q.quality)}</span>
+            <span class="quality-link">${esc(q.link)}</span>
+          </div>`
+        })
+        linksHtml += '</div>'
+      } else if(h.direct_download){
+        linksHtml = `<div class="direct-link">🔗 ${esc(h.direct_download)}</div>`
+      }
+
+      html += `<div class="host-entry">
+        <div class="host-entry-head">
+          <div>
+            <div class="host-name">${esc(h.host_name||'Unknown Host')}</div>
+            <div class="host-badges" style="margin-top:4px">
+              <span class="badge badge-storage">${esc(storageLabel)}</span>
+              ${isKnight ? '<span class="badge badge-knight">👑 Knight</span>' : '<span class="badge badge-direct">Direct</span>'}
+            </div>
+            ${monHtml}
+          </div>
+          <div class="host-actions">
+            <button class="edit-btn" title="Edit" onclick="openHostModal(${h.id},'${entryId}')">✏️</button>
+            <button class="del-btn" title="Delete" onclick="deleteHostEntry(${h.id},'${entryId}')">🗑️</button>
+          </div>
         </div>
-      </div>
-    `
-  }).join("")
-}
-
-D("addHostToEntryBtn").onclick = ()=> openAddModal({ prefill: true })
-
-async function deleteHostEntry(hostId){
-  if(!confirm("Remove this host entry?")) return
-  const r = await api(`${API}/download-host/${hostId}`, "DELETE")
-  if(r != null){
-    toast("Host removed")
-    await loadDownloads()
-    refreshCurEntry()
-  }
-}
-
-function refreshCurEntry(){
-  if(!CUR_ENTRY?.id) return
-  const fresh = DOWNLOADS.find(d=>d.id===CUR_ENTRY.id)
-  if(fresh) CUR_ENTRY = fresh
-  renderHostsView()
-}
-
-/* ============================================================
-  ADD DOWNLOAD MODAL
-============================================================ */
-
-D("openAddBtn").onclick    = ()=> openAddModal({})
-D("closeModalBtn").onclick  = closeAddModal
-D("cancelModalBtn").onclick = closeAddModal
-D("downloadModal").onclick  = e=>{ if(e.target===D("downloadModal")) closeAddModal() }
-
-function openAddModal({ prefill=false }){
-  fillAnimeSelect()
-  D("hostsContainer").innerHTML=""
-
-  if(prefill && CUR_ANIME){
-    D("animeSelect").value        = CUR_ANIME.id
-    D("seasonNum").value          = CUR_SEASON || 1
-    D("episodeNum").value         = CUR_ENTRY?.episode || ""
-    D("episodeTitleInput").value  = CUR_ENTRY?.episode_title || ""
-    if(CUR_ENTRY?.episode_title) D("epTitleAutoTag").style.display="inline"
-  } else {
-    D("animeSelect").value       = ""
-    D("contentType").value       = "episode"
-    D("seasonNum").value         = ""
-    D("episodeNum").value        = ""
-    D("episodeTitleInput").value = ""
-    D("epTitleAutoTag").style.display = "none"
-  }
-
-  addHostRow()
-  D("downloadModal").classList.add("show")
-  document.body.style.overflow="hidden"
-}
-
-function closeAddModal(){
-  D("downloadModal").classList.remove("show")
-  document.body.style.overflow=""
-}
-
-/* Auto-fill episode title (FIXED — uses correct field names) */
-D("episodeNum").addEventListener("change", autoFillEpTitle)
-D("seasonNum").addEventListener("change",  autoFillEpTitle)
-D("animeSelect").addEventListener("change", autoFillEpTitle)
-
-async function autoFillEpTitle(){
-  const animeId = D("animeSelect").value
-  const season  = Number(D("seasonNum").value)
-  const epNum   = Number(D("episodeNum").value)
-  if(!animeId || !epNum) return
-
-  const eps = await loadEpisodes(animeId)
-  // Field names: season, episode (number), title
-  const match = eps.find(e=>
-    Number(e.episode || e.episode_number) === epNum &&
-    Number(e.season || 1) === (season || 1)
-  )
-  if(match?.title){
-    D("episodeTitleInput").value = match.title
-    D("epTitleAutoTag").style.display="inline"
-  } else {
-    D("epTitleAutoTag").style.display="none"
-  }
-}
-
-function fillAnimeSelect(){
-  const sel = D("animeSelect")
-  const cur = sel.value
-  sel.innerHTML=`<option value="">Select Anime</option>`
-  ANIME.forEach(a=>{
-    sel.innerHTML+=`<option value="${a.id}">${a.title}</option>`
-  })
-  if(cur) sel.value=cur
-}
-
-/* ============================================================
-  HOST ROWS IN MODAL
-============================================================ */
-
-D("addHostRowBtn").onclick = ()=> addHostRow()
-
-function addHostRow(){
-  const tpl   = D("hostRowTpl")
-  const clone = tpl.content.cloneNode(true)
-  const row   = clone.querySelector(".host-form-row")
-
-  // Fill host select
-  const hostSel = row.querySelector(".host-select")
-  hostSel.innerHTML = `<option value="">Select Host Config</option>`
-  HOSTS_CFG.forEach(h=>{
-    const isKnight = h.knight===1 || h.knight===true
-    hostSel.innerHTML += `<option value="${h.id}" data-storage="${h.storage||''}" data-knight="${isKnight?'1':'0'}" data-name="${h.host||h.name||''}">${h.host||h.name||'Unknown'}</option>`
-  })
-
-  // Auto-fill on host select
-  hostSel.addEventListener("change", ()=>{
-    const opt     = hostSel.options[hostSel.selectedIndex]
-    const storage = opt.dataset.storage || ""
-    const knight  = opt.dataset.knight === "1"
-    const name    = opt.dataset.name   || ""
-
-    row.querySelector(".host-storage-input").value = storage
-    row.querySelector(".host-knight-input").value  = knight ? "⚔️ Yes (Knight)" : "📁 No (Direct)"
-    row.querySelector(".host-row-title").textContent = name || "Host"
-
-    if(knight){
-      row.querySelector(".direct-link-wrap").style.display  = "none"
-      row.querySelector(".knight-links-wrap").style.display = "block"
-      // Add default quality row if none exist
-      if(!row.querySelector(".quality-row")){
-        addQualityRow(row.querySelector(".quality-rows"))
-      }
-    } else {
-      row.querySelector(".direct-link-wrap").style.display  = "block"
-      row.querySelector(".knight-links-wrap").style.display = "none"
-    }
-  })
-
-  // Add quality row btn
-  row.querySelector(".add-quality-btn").addEventListener("click", ()=>{
-    addQualityRow(row.querySelector(".quality-rows"))
-  })
-
-  // Remove host row
-  row.querySelector(".remove-host-btn").addEventListener("click", ()=>{
-    row.remove()
-  })
-
-  D("hostsContainer").appendChild(row)
-}
-
-function addQualityRow(container){
-  const tpl   = D("qualityRowTpl")
-  const clone = tpl.content.cloneNode(true)
-  const qrow  = clone.querySelector(".quality-row")
-  qrow.querySelector(".remove-qual-btn").addEventListener("click", ()=>qrow.remove())
-  container.appendChild(qrow)
-}
-
-/* ============================================================
-  SAVE DOWNLOAD (FIXED — correct payload structure)
-============================================================ */
-
-D("saveDownloadBtn").onclick = async()=>{
-  const animeId = D("animeSelect").value
-  if(!animeId){ toast("Select an anime","err"); return }
-
-  const season  = D("seasonNum").value
-  const epNum   = D("episodeNum").value
-  const epTitle = D("episodeTitleInput").value.trim()
-  const ctype   = D("contentType").value
-
-  const hostRows = D("hostsContainer").querySelectorAll(".host-form-row")
-  if(!hostRows.length){ toast("Add at least one host","err"); return }
-
-  const hosts = []
-  for(const row of hostRows){
-    const hostCfgId = row.querySelector(".host-select").value
-    if(!hostCfgId){ toast("Select a host config for each row","err"); return }
-
-    const hostCfg  = HOSTS_CFG.find(h=>h.id===hostCfgId)
-    const knightTxt = row.querySelector(".host-knight-input").value
-    const isKnight  = knightTxt.includes("Yes") || knightTxt.includes("Knight")
-
-    const links = []
-
-    if(isKnight){
-      const qRows = row.querySelectorAll(".quality-row")
-      for(const qr of qRows){
-        const quality = qr.querySelector(".qual-select").value
-        const link    = qr.querySelector(".qual-link").value.trim()
-        if(link) links.push({ quality, link })
-      }
-      if(!links.length){ toast("Add at least one quality link for Knight host","err"); return }
-    } else {
-      const link = row.querySelector(".direct-link-input").value.trim()
-      if(!link){ toast("Enter download link","err"); return }
-      links.push({ quality: null, link })
-    }
-
-    hosts.push({
-      host:            hostCfg?.host || hostCfg?.name || "",
-      storage:         hostCfg?.storage || "",
-      knight:          isKnight ? 1 : 0,
-      monetization_id: hostCfgId,  // host config IS the monetization config
-      links
+        ${linksHtml}
+      </div>`
     })
+    html += '</div>'
+  }
+  html += `<button class="add-host-btn" onclick="openHostModal(null,'${entryId}')" style="margin-top:8px">➕ Add Host</button>`
+  content.innerHTML = html
+}
+
+/* =========================================
+   OPEN HOST MODAL
+========================================= */
+let editHostId = null
+let currentEntryId = null
+
+function openHostModal(hostId, entryId){
+  editHostId = hostId
+  currentEntryId = entryId
+  document.getElementById('hostModalTitle').textContent = hostId ? 'Edit Host Entry' : 'Add Host Entry'
+
+  // Populate host select
+  const sel = document.getElementById('hf-host')
+  sel.innerHTML = '<option value="">— Select Host —</option>'
+  hostsDB.forEach(h => {
+    sel.innerHTML += `<option value="${h.id}" data-storage="${esc(h.storage||h.name)}" data-knight="${h.knight?1:0}">${esc(h.name)}</option>`
+  })
+
+  // Reset
+  document.getElementById('hf-storage').value = ''
+  document.getElementById('hf-knight').value = ''
+  document.getElementById('hf-link').value = ''
+  document.getElementById('qualityBuilder').innerHTML = ''
+  document.getElementById('directLinkSection').style.display='block'
+  document.getElementById('qualitySection').style.display='none'
+  document.getElementById('hostAutoInfo').classList.remove('visible')
+  document.getElementById('hf-monPreview').innerHTML = '<div class="mp-title" style="color:#555">Select a host first</div>'
+
+  document.getElementById('hostModal').classList.add('open')
+}
+
+document.getElementById('hf-host').addEventListener('change', function(){
+  const opt = this.options[this.selectedIndex]
+  const storage = opt.dataset.storage||''
+  const knight  = opt.dataset.knight==='1'
+
+  document.getElementById('hf-storage').value = storage
+  document.getElementById('hf-knight').value  = knight ? 'YES — Knight UI' : 'NO — Direct'
+
+  // Toggle quality vs direct
+  if(knight){
+    document.getElementById('directLinkSection').style.display='none'
+    document.getElementById('qualitySection').style.display='block'
+    if(!document.getElementById('qualityBuilder').children.length) addQualityRow()
+  } else {
+    document.getElementById('directLinkSection').style.display='block'
+    document.getElementById('qualitySection').style.display='none'
   }
 
-  const payload = {
-    anime_id:      animeId,
-    content_type:  ctype,
-    season:        season  ? Number(season)  : null,
-    episode:       epNum   ? Number(epNum)   : null,
-    episode_title: epTitle || null,
-    hosts
+  // Load monetization preview
+  const hid = parseInt(this.value)
+  const mon = monDB[hid]
+  buildMonPreview(document.getElementById('hf-monPreview'), mon)
+
+  // Show auto info
+  const info = document.getElementById('hostAutoInfo')
+  const row  = document.getElementById('hostAutoRow')
+  if(storage || knight){
+    info.classList.add('visible')
+    row.innerHTML = `
+      <div class="hai-item">Storage: <b>${esc(storage)}</b></div>
+      <div class="hai-item">Knight: <b>${knight?'YES':'NO'}</b></div>
+      ${mon ? `<div class="hai-item">Mode: <b>${esc(mon.mode||'random')}</b></div>` : ''}
+    `
+  } else {
+    info.classList.remove('visible')
+  }
+})
+
+function buildMonPreview(el, mon){
+  if(!mon){ el.innerHTML = '<div class="mp-title" style="color:#555">No monetization configured for this host</div>'; return }
+  try{
+    const ads = JSON.parse(mon.ads||'[]')
+    const sl  = JSON.parse(mon.shortlinks||'[]')
+    const pop = JSON.parse(mon.popups||'[]')
+
+    let html = `<div class="mp-title">Mode: ${esc(mon.mode||'random')}</div><div class="mon-tags">`
+    ads.forEach(id => {
+      const a = adsDB.find(x=>x.id==id)
+      html += `<span class="mon-tag ad">📢 ${esc(a?a.name:'Ad')}</span>`
+    })
+    sl.forEach(id => {
+      const s = shortlinksDB.find(x=>x.id==id)
+      html += `<span class="mon-tag sl">🔗 ${esc(s?s.name:'Shortlink')}</span>`
+    })
+    pop.forEach(id => {
+      const p = popupsDB.find(x=>x.id==id)
+      html += `<span class="mon-tag pop">💬 ${esc(p?p.name:'Popup')}</span>`
+    })
+    html += '</div>'
+    el.innerHTML = html
+  }catch{ el.innerHTML = '<div class="mp-title" style="color:#555">Config error</div>' }
+}
+
+/* Quality rows */
+function addQualityRow(quality='', link=''){
+  const builder = document.getElementById('qualityBuilder')
+  const row = document.createElement('div')
+  row.className = 'quality-entry'
+  row.innerHTML = `
+    <select>
+      <option value="360p" ${quality==='360p'?'selected':''}>360p</option>
+      <option value="480p" ${quality==='480p'?'selected':''}>480p</option>
+      <option value="720p" ${quality==='720p'?'selected':''}>720p</option>
+      <option value="1080p" ${quality==='1080p'?'selected':''}>1080p</option>
+      <option value="4K" ${quality==='4K'?'selected':''}>4K</option>
+    </select>
+    <input type="text" placeholder="https://..." value="${esc(link)}">
+    <button class="rm-q" onclick="this.closest('.quality-entry').remove()">✕</button>
+  `
+  builder.appendChild(row)
+}
+document.getElementById('addQualityBtn').onclick = ()=> addQualityRow()
+
+/* Save host */
+document.getElementById('saveHostBtn').onclick = async ()=>{
+  const hid = document.getElementById('hf-host').value
+  if(!hid){ showToast('Select a host','error'); return }
+  const isKnight = document.getElementById('hf-knight').value.includes('YES')
+
+  let payload = {
+    entry_id: currentEntryId,
+    host_id:  hid
   }
 
-  const r = await api(`${API}/downloads-v2`, "POST", payload)
-  if(r != null){
-    toast("Download saved ✅")
-    closeAddModal()
-    await loadDownloads()
-    if(VIEW==="hosts") refreshCurEntry()
-    if(VIEW==="episode" && CUR_ANIME && CUR_SEASON) await selectSeason(CUR_SEASON)
-    renderAnimeGrid()
+  if(isKnight){
+    const rows = document.querySelectorAll('#qualityBuilder .quality-entry')
+    const qualities = []
+    rows.forEach(r => {
+      const q = r.querySelector('select').value
+      const l = r.querySelector('input').value.trim()
+      if(l) qualities.push({quality:q,link:l})
+    })
+    if(!qualities.length){ showToast('Add at least one quality link','error'); return }
+    payload.qualities = qualities
+  } else {
+    const link = document.getElementById('hf-link').value.trim()
+    if(!link){ showToast('Enter download link','error'); return }
+    payload.direct_download = link
+  }
+
+  const btn = document.getElementById('saveHostBtn')
+  btn.disabled = true; btn.textContent='Saving...'
+
+  try{
+    const url    = editHostId ? `${API}/downloads/hosts/${editHostId}` : `${API}/downloads/hosts`
+    const method = editHostId ? 'PUT' : 'POST'
+    const r = await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(payload)})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Host saved ✅')
+    document.getElementById('hostModal').classList.remove('open')
+    showHostEntries(currentEntryId, navState.episodeTitle)
+    loadStats()
+  }catch(e){ showToast(e.message,'error') }
+  finally{ btn.disabled=false; btn.textContent='💾 Save Host' }
+}
+
+async function deleteHostEntry(id, entryId){
+  if(!confirm('Delete this host entry?')) return
+  try{
+    const r = await fetch(`${API}/downloads/hosts/${id}`,{method:'DELETE',headers:authHeaders()})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Deleted ✅')
+    showHostEntries(entryId, navState.episodeTitle)
+    loadStats()
+  }catch(e){ showToast(e.message,'error') }
+}
+
+/* Modal close */
+['closeHostModal','cancelHostModal'].forEach(id=>{
+  document.getElementById(id).onclick = ()=> document.getElementById('hostModal').classList.remove('open')
+})
+
+/* =========================================
+   QUICK ADD FLOW
+========================================= */
+function populateAnimeSelects(){
+  ['qf-anime'].forEach(id=>{
+    const el = document.getElementById(id)
+    el.innerHTML = '<option value="">— Select Anime —</option>'
+    animeList.forEach(a => {
+      el.innerHTML += `<option value="${a.id}">${esc(a.title)}</option>`
+    })
+  })
+  const qfHost = document.getElementById('qf-host')
+  qfHost.innerHTML = '<option value="">— Select Host —</option>'
+  hostsDB.forEach(h => {
+    qfHost.innerHTML += `<option value="${h.id}" data-knight="${h.knight?1:0}">${esc(h.name)}</option>`
+  })
+}
+
+function openAddEntryFlow(){
+  document.getElementById('quickModal').classList.add('open')
+}
+
+function updateQuickForm(){
+  const type = document.getElementById('qf-type').value
+  const epNum  = document.getElementById('qf-epNumWrap')
+  const epTitle = document.getElementById('qf-epTitleWrap')
+  const season = document.getElementById('qf-season').closest
+  if(type==='movie'){
+    epNum.style.display='none'
+    epTitle.style.display='none'
+  } else {
+    epNum.style.display='block'
+    epTitle.style.display='block'
   }
 }
 
-/* ============================================================
-  KEYBOARD
-============================================================ */
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAddModal() })
+function quickHostChanged(){
+  const opt = document.getElementById('qf-host').options[document.getElementById('qf-host').selectedIndex]
+  const isKnight = opt.dataset&&opt.dataset.knight==='1'
+  document.getElementById('qf-linkWrap').style.display = isKnight?'none':'block'
+  document.getElementById('qf-qualityWrap').style.display = isKnight?'block':'none'
+  if(isKnight && !document.getElementById('qf-qualityBuilder').children.length) addQualityRowQF()
+}
 
-/* ============================================================
-  INIT
-============================================================ */
-init()
+function addQualityRowQF(q='',l=''){
+  const builder = document.getElementById('qf-qualityBuilder')
+  const row = document.createElement('div')
+  row.className = 'quality-entry'
+  row.innerHTML = `
+    <select>
+      <option value="480p" ${q==='480p'?'selected':''}>480p</option>
+      <option value="720p" ${q==='720p'?'selected':''}>720p</option>
+      <option value="1080p" ${q==='1080p'?'selected':''}>1080p</option>
+    </select>
+    <input type="text" placeholder="https://..." value="${esc(l)}">
+    <button class="rm-q" onclick="this.closest('.quality-entry').remove()">✕</button>
+  `
+  builder.appendChild(row)
+}
+document.getElementById('qf-addQuality').onclick = ()=> addQualityRowQF()
+
+document.getElementById('saveQuickBtn').onclick = async ()=>{
+  const animeId = document.getElementById('qf-anime').value
+  const type    = document.getElementById('qf-type').value
+  const season  = document.getElementById('qf-season').value
+  const epNum   = document.getElementById('qf-epNum').value
+  const epTitle = document.getElementById('qf-epTitle').value
+  const hostId  = document.getElementById('qf-host').value
+
+  if(!animeId){ showToast('Select anime','error'); return }
+  if(!hostId){ showToast('Select host','error'); return }
+
+  const opt = document.getElementById('qf-host').options[document.getElementById('qf-host').selectedIndex]
+  const isKnight = opt.dataset&&opt.dataset.knight==='1'
+
+  let payload = {
+    anime_id:      animeId,
+    content_type:  type,
+    season:        parseInt(season)||null,
+    episode:       parseInt(epNum)||null,
+    episode_title: epTitle||null,
+    host_id:       hostId
+  }
+
+  if(isKnight){
+    const rows = document.querySelectorAll('#qf-qualityBuilder .quality-entry')
+    const qualities = []
+    rows.forEach(r => {
+      const q = r.querySelector('select').value
+      const l = r.querySelector('input').value.trim()
+      if(l) qualities.push({quality:q,link:l})
+    })
+    payload.qualities = qualities
+  } else {
+    const link = document.getElementById('qf-link').value.trim()
+    if(!link){ showToast('Enter link','error'); return }
+    payload.direct_download = link
+  }
+
+  const btn = document.getElementById('saveQuickBtn')
+  btn.disabled=true; btn.textContent='Saving...'
+
+  try{
+    const r = await fetch(`${API}/downloads/quick-add`,{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Entry added ✅')
+    document.getElementById('quickModal').classList.remove('open')
+    loadStats()
+    // If currently viewing same anime, refresh
+    if(navState.animeId==animeId && navState.view!=='anime'){
+      showSeasons({id:animeId,title:navState.animeTitle,type:navState.animeType})
+    }
+  }catch(e){ showToast(e.message,'error') }
+  finally{ btn.disabled=false; btn.textContent='💾 Add Entry' }
+}
+
+['closeQuickModal','cancelQuickModal'].forEach(id=>{
+  document.getElementById(id).onclick = ()=> document.getElementById('quickModal').classList.remove('open')
+})
+
+document.getElementById('quickAddBtn').onclick = openAddEntryFlow
+
+/* =========================================
+   BREADCRUMB
+========================================= */
+function updateBreadcrumb(){
+  const bc = document.getElementById('breadcrumb')
+  let html = `<b>${esc(navState.animeTitle||'—')}</b>`
+  if(navState.view==='seasons') html += '<span class="sep">›</span><span>Structure</span>'
+  if(navState.view==='episodes'){
+    html += `<span class="sep">›</span><span>Structure</span><span class="sep">›</span><b>Season ${navState.season||'—'} ${navState.contentType==='season_zip'?'ZIP':''}</b>`
+  }
+  if(navState.view==='hosts'){
+    html += `<span class="sep">›</span><span>Season ${navState.season||'—'}</span><span class="sep">›</span><b>${esc(navState.episodeTitle||'Episode')}</b><span class="sep">›</span><span>Hosts</span>`
+  }
+  bc.innerHTML = html
+}
+
+function resetRightPanel(){
+  document.getElementById('panelToolbar').style.display='none'
+  document.getElementById('panelContent').innerHTML = '<div class="empty-state"><div class="icon">📥</div><div>Select an anime to manage downloads</div></div>'
+  document.getElementById('breadcrumb').innerHTML = '<span>Select an anime →</span>'
+}
+
+/* =========================================
+   STATS
+========================================= */
+async function loadStats(){
+  try{
+    const r = await fetch(`${API}/downloads/stats`,{headers:authHeaders()})
+    const j = await r.json()
+    const d = j.data || {}
+    document.getElementById('statEntries').textContent = d.total_entries ?? '—'
+    document.getElementById('statHosts').textContent   = d.active_hosts  ?? hostsDB.length
+    document.getElementById('statLinks').textContent   = d.total_links   ?? '—'
+    document.getElementById('statKnight').textContent  = d.knight_entries?? '—'
+    document.getElementById('statClicks').textContent  = d.total_clicks  ?? '—'
+  }catch{
+    document.getElementById('statHosts').textContent = hostsDB.length
+  }
+}
+
+/* =========================================
+   ESCAPE
+========================================= */
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+/* =========================================
+   INIT
+========================================= */
+if(requireAuth()){
+  checkAuth()
+  Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(()=>{
+    loadAnimeGrid()
+    loadStats()
+  })
+}
 </script>
 </body>
 </html>
