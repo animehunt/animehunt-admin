@@ -2,169 +2,297 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ads & Monetization – AnimeHunt CMS</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
-html,body{background:#070b16;color:#fff;overflow-x:hidden}
-button,input,select,textarea{font-family:inherit;outline:none}
-button{cursor:pointer;transition:.2s;border:none}
-button:hover{transform:translateY(-1px)}
+/* ========== RESET ========== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
 a{text-decoration:none;color:inherit}
-img{display:block;max-width:100%}
-::-webkit-scrollbar{width:7px;height:7px}
-::-webkit-scrollbar-thumb{background:#1f2742;border-radius:20px}
-::-webkit-scrollbar-track{background:#070b16}
+body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
-/* LAYOUT */
-.cms-app{display:flex;min-height:100vh}
-
-/* SIDEBAR */
-.cms-sidebar{width:240px;background:#060912;border-right:1px solid #1a2035;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.brand{padding:18px;border-bottom:1px solid #1a2035;font-size:20px;font-weight:700}
+/* ========== SIDEBAR ========== */
+.cms-sidebar{
+  width:230px;min-width:230px;
+  background:linear-gradient(180deg,#0b0f1a 0%,#0e1424 100%);
+  border-right:1px solid #1a2035;
+  padding:20px 12px;
+  position:fixed;top:0;left:0;height:100vh;
+  overflow-y:auto;z-index:100
+}
+.brand{font-size:19px;font-weight:800;margin-bottom:28px;padding:4px 6px}
 .brand b{color:#ffcc00}
-.brand small{display:block;margin-top:4px;font-size:10px;color:#555;font-weight:400}
-.cms-menu{display:flex;flex-direction:column;padding:10px;gap:2px}
-.cms-menu a{display:block;padding:10px 14px;border-radius:10px;color:#aaa;font-size:13px;transition:.2s}
-.cms-menu a:hover,.cms-menu a.active{background:#141d35;color:#ffcc00;padding-left:18px}
+.brand small{display:block;font-size:10px;color:#555;margin-top:2px;font-weight:400}
+.cms-menu{display:flex;flex-direction:column;gap:2px}
+.cms-menu a{
+  padding:9px 12px;border-radius:7px;font-size:12.5px;color:#aaa;
+  transition:all .2s;display:flex;align-items:center;gap:8px
+}
+.cms-menu a:hover{background:#1a2035;color:#ffcc00;transform:translateX(4px)}
+.cms-menu a.active{background:#1a2035;color:#ffcc00;font-weight:600}
+.menu-sep{height:1px;background:#1a2035;margin:8px 4px}
 
-/* MAIN */
-.cms-main{flex:1;display:flex;flex-direction:column;min-width:0}
+/* ========== MAIN ========== */
+.cms-main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.cms-header{
+  height:58px;background:#0b0f1a;border-bottom:1px solid #1a2035;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:99
+}
+.cms-header .title{font-size:15px;font-weight:600}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.logout-btn{
+  background:transparent;border:1px solid #ff4c4c;color:#ff4c4c;
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s
+}
+.logout-btn:hover{background:#ff4c4c;color:#fff}
+.cms-content{flex:1;padding:20px 22px}
 
-/* HEADER */
-.cms-header{min-height:60px;background:#060912;border-bottom:1px solid #1a2035;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:50}
-.header-left{display:flex;align-items:center;gap:12px}
-.header-title{font-size:16px;font-weight:700}
-.live-badge{background:#0d2218;border:1px solid #4caf5033;color:#4caf50;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px}
-.live-dot{width:6px;height:6px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.header-right{display:flex;align-items:center;gap:10px}
-.last-upd{font-size:11px;color:#555}
+/* ========== TABS ========== */
+.tab-bar{
+  display:flex;gap:4px;margin-bottom:18px;
+  background:#0e1424;padding:5px;border-radius:10px;border:1px solid #1a2035;
+  width:fit-content
+}
+.tab{
+  padding:8px 18px;border-radius:7px;font-size:12.5px;cursor:pointer;
+  color:#777;font-weight:500;transition:.15s;white-space:nowrap
+}
+.tab:hover{color:#fff}
+.tab.active{background:#1a2035;color:#ffcc00;font-weight:600}
 
-/* CONTENT */
-.cms-content{padding:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+/* ========== ADD BUTTON ========== */
+.add-btn{
+  background:#ffcc00;border:none;padding:8px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;
+  display:flex;align-items:center;gap:6px;transition:.2s
+}
+.add-btn:hover{background:#ffd633;transform:translateY(-1px)}
 
-/* CARD */
-.card{background:#0d1322;border:1px solid #1a2035;border-radius:20px;padding:22px}
-.card.full{grid-column:1/-1}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px}
-.card-head h3{color:#ffcc00;font-size:17px;font-weight:700}
-.card hr{border:none;border-top:1px solid #1a2035;margin:18px 0}
+/* ========== SECTION HEADER ========== */
+.sec-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:14px
+}
+.sec-head h2{font-size:14px;font-weight:700;color:#ffcc00}
+.sec-desc{font-size:11px;color:#555;margin-top:2px}
 
-/* FORM */
-.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-.fgrid.g3{grid-template-columns:repeat(3,1fr)}
-input,select,textarea{width:100%;background:#070b16;border:1px solid #1f2742;color:#fff;border-radius:12px;padding:12px 14px;font-size:13px;transition:.2s}
-input:focus,select:focus,textarea:focus{border-color:#ffcc00}
-input::placeholder,textarea::placeholder{color:#555}
-textarea{resize:vertical;min-height:110px}
-label.field-label{font-size:11px;color:#777;margin-bottom:5px;display:block;padding-left:2px}
+/* ========== CARDS GRID ========== */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px}
+.card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:14px 16px;
+  transition:.15s;position:relative
+}
+.card:hover{border-color:#2a3a5a}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-title{font-size:13px;font-weight:700}
+.card-sub{font-size:11px;color:#555;margin-top:3px}
+.card-actions{display:flex;gap:4px;flex-shrink:0}
+.card-actions button{
+  background:none;border:none;cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.15s
+}
+.card-actions .edit-btn:hover{background:#1a2a3a}
+.card-actions .del-btn:hover{background:#3a1a1a}
+.card-body{margin-top:10px;font-size:11px;color:#777;line-height:1.6}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{
+  font-size:10px;padding:2px 8px;border-radius:12px;
+  background:#1a2035;color:#aaa;border:1px solid #2a3055
+}
+.tag.ad{border-color:#3a1a3a;color:#ce93d8}
+.tag.sl{border-color:#1a3a3a;color:#4dd0e1}
+.tag.pop{border-color:#3a2a1a;color:#ffb74d}
+.tag.knight{border-color:#2a1a3a;color:#ce93d8}
+.tag.mode-random{border-color:#1a3a1a;color:#4caf50}
+.tag.mode-sequence{border-color:#3a3a1a;color:#ffcc00}
+.tag.mode-direct{border-color:#1a2a3a;color:#64b5f6}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-type-redirect{background:#1a2a3a;color:#64b5f6}
+.badge-type-popup{background:#2a1a3a;color:#ce93d8}
+.badge-type-script{background:#1a3a1a;color:#4caf50}
+.badge-type-banner{background:#3a2a1a;color:#ffb74d}
+.badge-active{background:#1a3a2a;color:#4caf50}
+.badge-inactive{background:#3a1a1a;color:#f44336}
 
-/* BTNS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s}
-.btn:hover{transform:translateY(-1px)}
-.btn-y{background:#ffcc00;color:#000}
-.btn-g{background:#1a2a1a;color:#4caf50;border:1px solid #4caf5033}
-.btn-r{background:#2a1a1a;color:#f44336;border:1px solid #f4433633}
-.btn-s{background:#1a2035;color:#ccc}
-.btn-sm{padding:7px 12px;font-size:12px;border-radius:9px}
-.row-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* ========== HOST MONETIZATION TABLE ========== */
+.mon-table{background:#0e1424;border:1px solid #1a2035;border-radius:10px;overflow:hidden}
+.mon-head{
+  display:grid;grid-template-columns:160px 1fr 80px 80px 80px 100px 100px;
+  padding:11px 14px;font-size:11px;color:#666;background:#0b0f1a;
+  border-bottom:1px solid #1a2035;font-weight:600;text-transform:uppercase;letter-spacing:.5px
+}
+.mon-row{
+  display:grid;grid-template-columns:160px 1fr 80px 80px 80px 100px 100px;
+  padding:10px 14px;border-top:1px solid #1a2035;align-items:center;font-size:12px;transition:background .15s
+}
+.mon-row:hover{background:#111827}
+.mon-tags{display:flex;flex-wrap:wrap;gap:4px}
+.empty-state{text-align:center;padding:60px 20px;color:#555}
+.empty-state .icon{font-size:40px;margin-bottom:10px}
 
-/* TOGGLE SWITCH */
-.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:#1a2035;border-radius:20px;cursor:pointer;transition:.3s}
-.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#555;border-radius:50%;transition:.3s}
-.toggle input:checked + .toggle-slider{background:#ffcc0022;border:1px solid #ffcc0066}
-.toggle input:checked + .toggle-slider:before{transform:translateX(18px);background:#ffcc00}
+/* ========== PAGE ADS CONTROL ========== */
+.page-ads-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.page-ad-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px
+}
+.page-ad-card h3{font-size:13px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.page-ad-card .desc{font-size:11px;color:#555;margin-bottom:12px}
+.control-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+.control-label{font-size:12px;color:#aaa;flex:1}
+.control-input{
+  background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:6px 10px;border-radius:6px;font-size:12px;outline:none;width:100px;text-align:center
+}
+.control-input:focus{border-color:#ffcc00}
+.control-select{
+  background:#0b0f1a;border:1px solid #1a2035;color:#fff;
+  padding:6px 10px;border-radius:6px;font-size:12px;outline:none
+}
+.control-select:focus{border-color:#ffcc00}
+.toggle-switch{position:relative;display:inline-block;width:42px;height:22px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;cursor:pointer;inset:0;
+  background:#1a2035;border-radius:22px;transition:.3s
+}
+.toggle-slider:before{
+  content:'';position:absolute;height:16px;width:16px;
+  left:3px;bottom:3px;background:#555;border-radius:50%;transition:.3s
+}
+.toggle-switch input:checked + .toggle-slider{background:#1a3a2a}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px);background:#4caf50}
+.save-page-btn{
+  background:#ffcc00;border:none;padding:7px 16px;border-radius:7px;
+  font-weight:700;font-size:12px;cursor:pointer;color:#000;transition:.2s;width:100%;margin-top:8px
+}
+.save-page-btn:hover{background:#ffd633}
 
-/* LIBRARY ITEM */
-.lib-item{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;transition:.2s}
-.lib-item:hover{border-color:#2a3055}
-.lib-item.inactive{opacity:.5}
-.lib-left{min-width:0;flex:1}
-.lib-name{font-size:14px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:8px}
-.lib-meta{color:#666;font-size:11px}
-.badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
-.badge-blue{background:#0d1a2a;color:#2196f3;border:1px solid #2196f322}
-.badge-green{background:#0d2218;color:#4caf50;border:1px solid #4caf5022}
-.badge-orange{background:#2a1a0a;color:#ff9800;border:1px solid #ff980022}
-.badge-yellow{background:#2a2200;color:#ffcc00;border:1px solid #ffcc0022}
-.badge-red{background:#2a0d0d;color:#f44336;border:1px solid #f4433622}
-.badge-gray{background:#1a2035;color:#888}
+/* Poster targeting */
+.poster-target-section{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;padding:16px;margin-bottom:24px
+}
+.poster-target-section h3{font-size:13px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.poster-target-section .desc{font-size:11px;color:#555;margin-bottom:12px}
+.target-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.target-item{
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px
+}
+.target-poster{
+  width:32px;height:48px;object-fit:cover;border-radius:4px;
+  background:#1a2035;flex-shrink:0
+}
+.target-info{flex:1;min-width:0}
+.target-info .ti-title{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.target-info .ti-ad{font-size:10px;color:#555;margin-top:3px}
+.target-select{
+  background:#1a2035;border:1px solid #2a3055;color:#fff;
+  padding:4px 6px;border-radius:5px;font-size:10px;outline:none;width:100%;margin-top:4px
+}
+.target-select:focus{border-color:#ffcc00}
 
-/* EMPTY STATE */
-.empty-box{background:#070b16;border:1px dashed #1f2742;border-radius:14px;padding:24px;text-align:center;color:#555;font-size:12px}
+/* ========== SECTION TITLE ========== */
+.section-title{
+  font-size:11px;color:#555;font-weight:600;text-transform:uppercase;
+  letter-spacing:.5px;margin:14px 0 8px;padding-bottom:6px;
+  border-bottom:1px solid #1a2035
+}
 
-/* HOST CARD */
-.host-card{background:#070b16;border:1px solid #1a2035;border-radius:18px;padding:20px;margin-bottom:14px;transition:.2s}
-.host-card:hover{border-color:#2a3055}
-.host-card.inactive{opacity:.6}
-.host-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
-.host-name{font-size:20px;font-weight:700;margin-bottom:5px}
-.host-storage{color:#888;font-size:12px}
-.host-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.host-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.host-section{padding-top:12px;border-top:1px solid #1a2035;margin-top:12px}
-.host-section h5{font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.tag-list{display:flex;flex-wrap:wrap;gap:6px}
-.tag-item{background:#141b30;border:1px solid #1f2742;border-radius:8px;padding:5px 10px;font-size:11px;color:#ccc}
-.host-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-
-/* PAGE ADS */
-.page-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.page-slot{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:14px}
-.page-slot-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.page-slot-name{font-size:13px;font-weight:600;color:#fff}
-.page-slot-select{margin-top:8px}
-.page-slot-select select{font-size:12px;padding:8px 10px;border-radius:9px}
-
-/* ANALYTICS GRID */
-.analytics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-.stat-box{background:#070b16;border:1px solid #1a2035;border-radius:16px;padding:20px;text-align:center}
-.stat-box h2{color:#ffcc00;font-size:28px;font-weight:800;margin-bottom:6px}
-.stat-box p{color:#888;font-size:12px}
-
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
-.modal.show{display:flex}
-.modal-box{background:#0b0f1a;border:1px solid #1a2035;border-radius:24px;overflow:hidden;width:900px;max-width:100%;max-height:92vh;display:flex;flex-direction:column}
-.modal-header{min-height:70px;background:#060912;border-bottom:1px solid #1a2035;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0}
-.modal-header h3{font-size:18px;font-weight:700;color:#ffcc00}
-.modal-close{font-size:22px;cursor:pointer;color:#777;line-height:1;padding:4px}
+/* ========== MODAL ========== */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:none;align-items:center;justify-content:center;z-index:9999;padding:16px
+}
+.modal.open{display:flex}
+.modal-box{
+  width:100%;max-width:600px;max-height:92vh;
+  background:#0b0f1a;border:1px solid #1a2035;border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden
+}
+.modal-box.wide{max-width:760px}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;background:#0e1424;border-bottom:1px solid #1a2035;flex-shrink:0
+}
+.modal-header h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:4px}
 .modal-close:hover{color:#fff}
-.modal-body{padding:22px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:18px}
-.modal-footer{min-height:72px;background:#060912;border-top:1px solid #1a2035;display:flex;align-items:center;justify-content:flex-end;padding:0 22px;gap:10px;flex-shrink:0}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-full{grid-column:1/-1}
+.form-label{font-size:11px;color:#777;margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.form-input{
+  width:100%;background:#0e1424;border:1px solid #1a2035;color:#fff;
+  padding:9px 11px;border-radius:7px;font-size:12.5px;outline:none;transition:.2s
+}
+.form-input:focus{border-color:#ffcc00}
+.form-input::placeholder{color:#444}
+select.form-input option{background:#0e1424}
+textarea.form-input{resize:vertical;min-height:80px;font-family:monospace;font-size:12px}
+.modal-footer{
+  padding:13px 18px;background:#0e1424;border-top:1px solid #1a2035;
+  display:flex;justify-content:flex-end;gap:8px;flex-shrink:0
+}
+.save-btn{
+  background:#ffcc00;border:none;padding:9px 22px;border-radius:7px;
+  font-weight:700;font-size:13px;cursor:pointer;color:#000;transition:.2s
+}
+.save-btn:hover{background:#ffd633}
+.save-btn:disabled{opacity:.5;cursor:default}
+.cancel-btn{
+  background:transparent;border:1px solid #1a2035;color:#aaa;
+  padding:9px 16px;border-radius:7px;font-size:13px;cursor:pointer;transition:.2s
+}
+.cancel-btn:hover{border-color:#aaa;color:#fff}
 
-/* SECTION BOX (modal) */
-.sec-box{background:#0e1424;border:1px solid #1a2035;border-radius:16px;padding:18px}
-.sec-box h4{color:#ffcc00;font-size:13px;margin-bottom:14px;font-weight:700}
+/* Multi select */
+.multi-select-box{
+  background:#0e1424;border:1px solid #1a2035;border-radius:8px;
+  max-height:160px;overflow-y:auto;padding:6px
+}
+.ms-item{
+  display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;
+  cursor:pointer;transition:.1s;font-size:12px
+}
+.ms-item:hover{background:#1a2035}
+.ms-item input{accent-color:#ffcc00;cursor:pointer;width:13px;height:13px}
+.ms-item.checked{background:#1a2035;color:#ffcc00}
 
-/* SELECTION GRID */
-.sel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.sel-item{background:#070b16;border:1px solid #1a2035;border-radius:14px;padding:13px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:.2s}
-.sel-item:hover{border-color:#2a3055}
-.sel-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:#ffcc00;flex-shrink:0}
-.sel-item b{display:block;font-size:13px;margin-bottom:3px}
-.sel-item small{color:#666;font-size:11px}
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:99999;
+  background:#1a2035;border:1px solid #1a2035;color:#fff;
+  padding:12px 18px;border-radius:9px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  transform:translateY(100px);opacity:0;transition:.3s;max-width:320px
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:#4caf50;background:#0d2218}
+.toast.error{border-color:#f44336;background:#220d0d}
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid #1a2035;border-top-color:#ffcc00;
+  border-radius:50%;animation:spin .7s linear infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{text-align:center;padding:40px;color:#555}
 
-/* TOAST */
-.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:99999}
-.toast{background:#0d1322;border:1px solid #1a2035;border-radius:14px;padding:12px 18px;font-size:13px;min-width:200px;display:flex;align-items:center;gap:10px;animation:slideUp .3s ease;box-shadow:0 8px 24px #00000055}
-.toast.ok{border-color:#4caf5044;color:#4caf50}
-.toast.err{border-color:#f4433644;color:#f44336}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* Analytics mini */
+.analytics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.analytics-card{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px
+}
+.analytics-card .ac-icon{font-size:22px}
+.analytics-card .ac-num{font-size:20px;font-weight:700;color:#ffcc00}
+.analytics-card .ac-lbl{font-size:11px;color:#777;margin-top:2px}
 
-/* RESPONSIVE */
-@media(max-width:1200px){.cms-content{grid-template-columns:1fr}.analytics-grid{grid-template-columns:repeat(3,1fr)}.page-slots{grid-template-columns:repeat(2,1fr)}.sel-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:800px){.cms-app{flex-direction:column}.cms-sidebar{width:100%;height:auto;position:static}.analytics-grid{grid-template-columns:repeat(2,1fr)}.page-slots{grid-template-columns:1fr}.fgrid,.fgrid.g3{grid-template-columns:1fr}}
+/* Tab pane */
+.tab-pane{display:none}
+.tab-pane.active{display:block}
 </style>
 </head>
 <body>
 
-<div class="cms-app">
-
-<!-- SIDEBAR -->
+<!-- ========== SIDEBAR ========== -->
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
@@ -174,841 +302,1145 @@ label.field-label{font-size:11px;color:#777;margin-bottom:5px;display:block;padd
     <a href="categories.html">🗂 Categories</a>
     <a href="banners.html">🖼 Banners</a>
     <a href="homepage.html">🏠 Homepage</a>
+    <div class="menu-sep"></div>
     <a href="downloads.html">📥 Downloads</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
     <a href="search.html">🔍 Search</a>
+    <div class="menu-sep"></div>
     <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
     <a href="performance.html">⚡ Performance</a>
+    <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
+    <a href="deploy-backup.html">🚀 Deploy</a>
+    <div class="menu-sep"></div>
     <a href="ads.html" class="active">📢 Ads</a>
     <a href="ai-brain.html">🧠 AI Brain</a>
+    <div class="menu-sep"></div>
     <a href="sidebar.html">📌 Sidebar</a>
     <a href="footer.html">🦶 Footer</a>
-    <a href="system-settings.html">⚙ System Settings</a>
+    <div class="menu-sep"></div>
+    <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
 
-<!-- MAIN -->
+<!-- ========== MAIN ========== -->
 <main class="cms-main">
-
-  <!-- HEADER -->
   <header class="cms-header">
-    <div class="header-left">
-      <div class="header-title">📢 Ads & Monetization</div>
-      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    </div>
-    <div class="header-right">
-      <span class="last-upd" id="lastUpd">—</span>
-      <button class="btn btn-s btn-sm" id="refreshBtn">↻ Refresh</button>
+    <div class="title">📢 Ads & Monetization</div>
+    <div class="hdr-right">
+      <span id="adminName" style="font-size:12px;color:#555"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
   </header>
 
   <section class="cms-content">
 
-    <!-- ===== ADS LIBRARY ===== -->
-    <div class="card">
-      <div class="card-head">
-        <h3>📢 Ads Library</h3>
-        <button class="btn btn-y btn-sm" id="openAdForm">➕ New Ad</button>
+    <!-- ANALYTICS -->
+    <div class="analytics-row">
+      <div class="analytics-card">
+        <div class="ac-icon">👁️</div>
+        <div><div class="ac-num" id="statImpressions">—</div><div class="ac-lbl">Ad Impressions</div></div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-icon">🖱️</div>
+        <div><div class="ac-num" id="statAdClicks">—</div><div class="ac-lbl">Ad Clicks</div></div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-icon">🔗</div>
+        <div><div class="ac-num" id="statShortClicks">—</div><div class="ac-lbl">Shortlink Clicks</div></div>
+      </div>
+      <div class="analytics-card">
+        <div class="ac-icon">💬</div>
+        <div><div class="ac-num" id="statPopups">—</div><div class="ac-lbl">Popup Opens</div></div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+      <div class="tab active" data-tab="ads">📢 Ads Library</div>
+      <div class="tab" data-tab="shortlinks">🔗 Shortlinks</div>
+      <div class="tab" data-tab="popups">💬 Popups</div>
+      <div class="tab" data-tab="hosts">🌐 Host Monetization</div>
+      <div class="tab" data-tab="page-control">📄 Page Ads Control</div>
+      <div class="tab" data-tab="poster-target">🎯 Poster Targeting</div>
+    </div>
+
+    <!-- ===== TAB: ADS LIBRARY ===== -->
+    <div class="tab-pane active" id="tab-ads">
+      <div class="sec-head">
+        <div>
+          <h2>📢 Ads Library</h2>
+          <div class="sec-desc">Reusable ads — assign to any host monetization config</div>
+        </div>
+        <button class="add-btn" onclick="openModal('ad')">➕ New Ad</button>
+      </div>
+      <div class="cards-grid" id="adsList">
+        <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: SHORTLINKS ===== -->
+    <div class="tab-pane" id="tab-shortlinks">
+      <div class="sec-head">
+        <div>
+          <h2>🔗 Shortlinks Library</h2>
+          <div class="sec-desc">cuty.io, shrinkme, adlinkfly — auto-wraps download links</div>
+        </div>
+        <button class="add-btn" onclick="openModal('shortlink')">➕ New Shortlink</button>
+      </div>
+      <div class="cards-grid" id="shortlinksList">
+        <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: POPUPS ===== -->
+    <div class="tab-pane" id="tab-popups">
+      <div class="sec-head">
+        <div>
+          <h2>💬 Popup Library</h2>
+          <div class="sec-desc">Popup scripts triggered before download flow</div>
+        </div>
+        <button class="add-btn" onclick="openModal('popup')">➕ New Popup</button>
+      </div>
+      <div class="cards-grid" id="popupsList">
+        <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: HOST MONETIZATION ===== -->
+    <div class="tab-pane" id="tab-hosts">
+      <div class="sec-head">
+        <div>
+          <h2>🌐 Host Monetization</h2>
+          <div class="sec-desc">Per-host monetization — all links of a host share same config automatically</div>
+        </div>
+        <button class="add-btn" onclick="openModal('hostmon')">➕ Configure Host</button>
+      </div>
+      <div class="mon-table">
+        <div class="mon-head">
+          <span>Host</span>
+          <span>Ads / Shortlinks / Popups</span>
+          <span>Mode</span>
+          <span>Clicks</span>
+          <span>Knight</span>
+          <span>Status</span>
+          <span>Actions</span>
+        </div>
+        <div id="hostMonList">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: PAGE ADS CONTROL ===== -->
+    <div class="tab-pane" id="tab-page-control">
+      <div class="sec-head">
+        <div>
+          <h2>📄 Page Ads Control</h2>
+          <div class="sec-desc">Control exactly which pages show ads, how many pages between ads, and ad placement positions</div>
+        </div>
+        <button class="save-btn" style="font-size:12px;padding:8px 18px" onclick="savePageAdsConfig()">💾 Save All</button>
       </div>
 
-      <!-- Form (hidden by default) -->
-      <div id="adForm" style="display:none;margin-bottom:16px">
-        <div class="fgrid">
-          <div><label class="field-label">Ad Name</label><input id="adName" placeholder="e.g. Adsterra Popup"></div>
-          <div><label class="field-label">Type</label>
-            <select id="adType">
-              <option value="redirect">Redirect</option>
-              <option value="script">Script</option>
-              <option value="popup">Popup</option>
-              <option value="banner">Banner</option>
+      <div class="page-ads-grid">
+
+        <!-- Homepage -->
+        <div class="page-ad-card">
+          <h3>🏠 Homepage</h3>
+          <div class="desc">Control ads shown on the homepage layout</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-home-enabled" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Position</span>
+            <select class="control-select" id="pc-home-position">
+              <option value="top">Top Banner</option>
+              <option value="middle">Middle</option>
+              <option value="bottom">Bottom</option>
+              <option value="sidebar">Sidebar</option>
             </select>
           </div>
-          <div><label class="field-label">Weight</label><input id="adWeight" type="number" value="1" min="1"></div>
-          <div><label class="field-label">Delay (ms)</label><input id="adDelay" type="number" value="1500" min="0"></div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-home-ad">
+              <option value="">None</option>
+            </select>
+          </div>
         </div>
-        <div style="margin-bottom:10px"><label class="field-label">Ad Script / Redirect URL</label><textarea id="adCode" placeholder="https://... or &lt;script&gt;...&lt;/script&gt;" style="min-height:90px"></textarea></div>
-        <div class="row-actions">
-          <button class="btn btn-y" id="saveAdBtn">💾 Save Ad</button>
-          <button class="btn btn-s" id="cancelAdBtn">Cancel</button>
+
+        <!-- Anime Detail -->
+        <div class="page-ad-card">
+          <h3>🎬 Anime Detail Page</h3>
+          <div class="desc">Ads shown on each anime's detail/info page</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-detail-enabled" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Position</span>
+            <select class="control-select" id="pc-detail-position">
+              <option value="top">Top Banner</option>
+              <option value="below-poster">Below Poster</option>
+              <option value="below-desc">Below Description</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-detail-ad">
+              <option value="">None</option>
+            </select>
+          </div>
         </div>
-        <hr>
-      </div>
 
-      <div id="adsLibraryList"><div class="empty-box">No ads saved yet.</div></div>
-    </div>
-
-    <!-- ===== SHORTLINKS LIBRARY ===== -->
-    <div class="card">
-      <div class="card-head">
-        <h3>🔗 Shortlinks Library</h3>
-        <button class="btn btn-y btn-sm" id="openShortForm">➕ New Shortlink</button>
-      </div>
-
-      <div id="shortForm" style="display:none;margin-bottom:16px">
-        <div class="fgrid g3">
-          <div><label class="field-label">Name</label><input id="shortName" placeholder="e.g. cuty.io"></div>
-          <div><label class="field-label">Base URL</label><input id="shortBase" placeholder="https://cuty.io/"></div>
-          <div><label class="field-label">API Key</label><input id="shortApi" placeholder="Optional"></div>
+        <!-- Episode List -->
+        <div class="page-ad-card">
+          <h3>📺 Episode List Page</h3>
+          <div class="desc">Ads shown between episode listings</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-eplist-enabled" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Show Ad After Every N Episodes</span>
+            <input class="control-input" type="number" id="pc-eplist-interval" value="10" min="1" max="100">
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-eplist-ad">
+              <option value="">None</option>
+            </select>
+          </div>
         </div>
-        <div class="row-actions">
-          <button class="btn btn-y" id="saveShortBtn">💾 Save</button>
-          <button class="btn btn-s" id="cancelShortBtn">Cancel</button>
+
+        <!-- Download Page -->
+        <div class="page-ad-card">
+          <h3>📥 Download Page</h3>
+          <div class="desc">Ads shown on the public download page</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-dl-enabled" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Position</span>
+            <select class="control-select" id="pc-dl-position">
+              <option value="top">Top</option>
+              <option value="between-hosts">Between Hosts</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-dl-ad">
+              <option value="">None</option>
+            </select>
+          </div>
         </div>
-        <hr>
-      </div>
 
-      <div id="shortLibraryList"><div class="empty-box">No shortlinks saved yet.</div></div>
-    </div>
-
-    <!-- ===== POPUP LIBRARY ===== -->
-    <div class="card">
-      <div class="card-head">
-        <h3>🪟 Popup Library</h3>
-        <button class="btn btn-y btn-sm" id="openPopupForm">➕ New Popup</button>
-      </div>
-
-      <div id="popupForm" style="display:none;margin-bottom:16px">
-        <div style="margin-bottom:10px"><label class="field-label">Popup Name</label><input id="popupName" placeholder="e.g. Adsterra Popup Script"></div>
-        <div style="margin-bottom:10px"><label class="field-label">Popup Script</label><textarea id="popupCode" placeholder="&lt;script type='text/javascript'&gt;...&lt;/script&gt;"></textarea></div>
-        <div class="row-actions">
-          <button class="btn btn-y" id="savePopupBtn">💾 Save</button>
-          <button class="btn btn-s" id="cancelPopupBtn">Cancel</button>
+        <!-- Knight Page -->
+        <div class="page-ad-card">
+          <h3>👑 Knight Download Page</h3>
+          <div class="desc">Ads shown on knight.html quality selection page</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-knight-enabled" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Position</span>
+            <select class="control-select" id="pc-knight-position">
+              <option value="top">Top Banner</option>
+              <option value="between-buttons">Between Quality Buttons</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-knight-ad">
+              <option value="">None</option>
+            </select>
+          </div>
         </div>
-        <hr>
+
+        <!-- Navigation Ads -->
+        <div class="page-ad-card">
+          <h3>🔄 Navigation / Browse Pages</h3>
+          <div class="desc">Ads shown on search results, category, and browse pages</div>
+          <div class="control-row">
+            <span class="control-label">Ads Enabled</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-nav-enabled"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Pages Between Ads</span>
+            <input class="control-input" type="number" id="pc-nav-interval" value="3" min="1" max="50">
+          </div>
+          <div class="control-row">
+            <span class="control-label">Ad Script</span>
+            <select class="control-select" id="pc-nav-ad">
+              <option value="">None</option>
+            </select>
+          </div>
+        </div>
+
       </div>
 
-      <div id="popupLibraryList"><div class="empty-box">No popups saved yet.</div></div>
+      <!-- GLOBAL FREQUENCY CONTROL -->
+      <div class="section-title">🎛️ Global Frequency Control</div>
+      <div class="page-ads-grid">
+        <div class="page-ad-card">
+          <h3>⏱️ Interstitial / Redirect Timing</h3>
+          <div class="desc">How long before redirect ad fires</div>
+          <div class="control-row">
+            <span class="control-label">Delay (seconds)</span>
+            <input class="control-input" type="number" id="pc-redirect-delay" value="5" min="0" max="30">
+          </div>
+          <div class="control-row">
+            <span class="control-label">Skip Button After (sec)</span>
+            <input class="control-input" type="number" id="pc-redirect-skip" value="5" min="0" max="30">
+          </div>
+        </div>
+        <div class="page-ad-card">
+          <h3>🔁 User Session Frequency</h3>
+          <div class="desc">Prevent showing same ad too frequently per user</div>
+          <div class="control-row">
+            <span class="control-label">Show same popup max N times per session</span>
+            <input class="control-input" type="number" id="pc-popup-max" value="2" min="1" max="99">
+          </div>
+          <div class="control-row">
+            <span class="control-label">Cooldown between popups (seconds)</span>
+            <input class="control-input" type="number" id="pc-popup-cooldown" value="30" min="0" max="600">
+          </div>
+        </div>
+        <div class="page-ad-card">
+          <h3>📱 Mobile / Desktop Control</h3>
+          <div class="desc">Show ads differently per device type</div>
+          <div class="control-row">
+            <span class="control-label">Ads on Mobile</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-mobile-ads" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Extra popup on mobile</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-mobile-extra"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="page-ad-card">
+          <h3>🌐 Go Engine Flow Control</h3>
+          <div class="desc">Control the /api/go monetization steps</div>
+          <div class="control-row">
+            <span class="control-label">Enable Popup Step</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-go-popup" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Enable Shortlink Step</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-go-sl" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Enable Ads Step</span>
+            <label class="toggle-switch"><input type="checkbox" id="pc-go-ads" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- ===== PAGE ADS CONTROL ===== -->
-    <div class="card">
-      <div class="card-head">
-        <h3>🌐 Page Ads Control</h3>
-        <span style="font-size:11px;color:#555">Assign ads to any page — on/off</span>
+    <!-- ===== TAB: POSTER TARGETING ===== -->
+    <div class="tab-pane" id="tab-poster-target">
+      <div class="sec-head">
+        <div>
+          <h2>🎯 Poster-Level Ad Targeting</h2>
+          <div class="sec-desc">Assign specific ads to individual anime posters/pages — overrides global config</div>
+        </div>
+        <button class="save-btn" style="font-size:12px;padding:8px 18px" onclick="savePosterTargets()">💾 Save Targeting</button>
       </div>
-      <div class="page-slots" id="pageAdsSlots">
-        <!-- Auto-generated for each page -->
-      </div>
-    </div>
 
-    <!-- ===== HOST MONETIZATION ===== -->
-    <div class="card full">
-      <div class="card-head">
-        <h3>⚡ Host Monetization</h3>
-        <button class="btn btn-y" id="openHostModal">➕ Create Host Config</button>
+      <div class="section-title">Filter by Anime</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <input class="form-input" id="posterSearch" placeholder="🔍 Search anime..." style="max-width:280px" oninput="filterPosterGrid()">
+        <select class="form-input" id="posterFilter" style="max-width:180px" onchange="filterPosterGrid()">
+          <option value="">All Anime</option>
+          <option value="targeted">Has Custom Ad</option>
+          <option value="none">No Custom Ad</option>
+        </select>
       </div>
-      <p style="font-size:12px;color:#555;margin-bottom:20px">Per-host monetization — all episode links of a host share the same ads/shortlinks/popups configuration.</p>
-      <div id="hostMonetizationList"><div class="empty-box">No host configurations yet.</div></div>
-    </div>
 
-    <!-- ===== ANALYTICS ===== -->
-    <div class="card full">
-      <div class="card-head"><h3>📊 Monetization Analytics</h3></div>
-      <div class="analytics-grid">
-        <div class="stat-box"><h2 id="statHosts">0</h2><p>Host Configs</p></div>
-        <div class="stat-box"><h2 id="statAds">0</h2><p>Ads Saved</p></div>
-        <div class="stat-box"><h2 id="statShorts">0</h2><p>Shortlinks</p></div>
-        <div class="stat-box"><h2 id="statPopups">0</h2><p>Popups</p></div>
-        <div class="stat-box"><h2 id="statClicks">0</h2><p>Total Clicks</p></div>
+      <div class="target-grid" id="posterTargetGrid">
+        <div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div>
       </div>
-    </div>
-
-    <!-- ===== PAGE ADS PERFORMANCE ===== -->
-    <div class="card full">
-      <div class="card-head">
-        <h3>📈 Page Ads Performance</h3>
-        <button class="btn btn-r btn-sm" onclick="clearAdsAnalytics()">🗑 Clear Analytics</button>
-      </div>
-      <div id="adsPerformanceTable"><div class="empty-box">Loading analytics...</div></div>
     </div>
 
   </section>
 </main>
-</div>
 
-<!-- ===== HOST MODAL ===== -->
-<div class="modal" id="hostModal">
+<!-- ========== TOAST ========== -->
+<div class="toast" id="toast"></div>
+
+<!-- ========== AD MODAL ========== -->
+<div class="modal" id="adModal">
   <div class="modal-box">
     <div class="modal-header">
-      <h3 id="hostModalTitle">Create Host Config</h3>
-      <div class="modal-close" id="closeHostModal">✕</div>
+      <h3 id="adModalTitle">New Ad</h3>
+      <button class="modal-close" id="closeAdModal">✕</button>
     </div>
     <div class="modal-body">
-
-      <div class="sec-box">
-        <h4>Host Information</h4>
-        <div class="fgrid">
-          <div><label class="field-label">Host Name</label><input id="hostName" placeholder="e.g. KnightWolf"></div>
-          <div><label class="field-label">Storage</label><input id="hostStorage" placeholder="e.g. Telegram, Mega, GDrive"></div>
-          <div><label class="field-label">Knight Host?</label>
-            <select id="hostKnight">
-              <option value="0">No — Direct Download</option>
-              <option value="1">Yes — Knight Page</option>
-            </select>
-          </div>
-          <div><label class="field-label">Rotation Mode</label>
-            <select id="hostMode">
-              <option value="random">Random</option>
-              <option value="sequence">Sequence (1→2→3→repeat)</option>
-              <option value="direct">Direct (always first)</option>
-            </select>
-          </div>
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Ad Name *</label>
+          <input class="form-input" id="af-name" placeholder="e.g. Adsterra Popup">
+        </div>
+        <div>
+          <label class="form-label">Type</label>
+          <select class="form-input" id="af-type">
+            <option value="popup">Popup</option>
+            <option value="redirect">Redirect</option>
+            <option value="script">Script</option>
+            <option value="banner">Banner</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Delay (ms)</label>
+          <input class="form-input" type="number" id="af-delay" placeholder="0" min="0">
+        </div>
+        <div>
+          <label class="form-label">Weight (rotation priority)</label>
+          <input class="form-input" type="number" id="af-weight" placeholder="1" min="1" max="100">
+        </div>
+        <div>
+          <label class="form-label">Active</label>
+          <select class="form-input" id="af-active">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+        <div class="form-full">
+          <label class="form-label">Code / URL *</label>
+          <textarea class="form-input" id="af-code" placeholder="Paste ad script, redirect URL, or HTML code..."></textarea>
         </div>
       </div>
-
-      <div class="sec-box">
-        <h4>📢 Assign Ads</h4>
-        <div class="sel-grid" id="hostAdsList"><div class="empty-box">No ads available.</div></div>
-      </div>
-
-      <div class="sec-box">
-        <h4>🔗 Assign Shortlinks</h4>
-        <div class="sel-grid" id="hostShortlinksList"><div class="empty-box">No shortlinks available.</div></div>
-      </div>
-
-      <div class="sec-box">
-        <h4>🪟 Assign Popups</h4>
-        <div class="sel-grid" id="hostPopupsList"><div class="empty-box">No popups available.</div></div>
-      </div>
-
     </div>
     <div class="modal-footer">
-      <button class="btn btn-s" id="cancelHostModal">Cancel</button>
-      <button class="btn btn-y" id="saveHostBtn">💾 Save Config</button>
+      <button class="cancel-btn" id="cancelAdModal">Cancel</button>
+      <button class="save-btn" id="saveAdBtn">💾 Save Ad</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast-wrap" id="toastWrap"></div>
-
-<script>
-/* ============================================================
-  ANIMEHUNT — ADS & MONETIZATION ENGINE
-  File: admin/ads.html
-  Token: ah_token
-============================================================ */
-
-const BASE = "https://animehunt-backend.animehunt715.workers.dev"
-const API  = BASE + "/api/admin"
-const TOKEN_KEY = "ah_token"
-
-function getToken(){ return localStorage.getItem(TOKEN_KEY) }
-if(!getToken()){ location.href="login.html" }
-
-function authHeaders(){
-  return { "Content-Type":"application/json", "Authorization":"Bearer "+getToken() }
-}
-
-/* ── State ── */
-let ADS = [], SHORTLINKS = [], POPUPS = [], HOSTS = []
-let editingAdId=null, editingShortId=null, editingPopupId=null, editingHostId=null
-
-/* ── Page slots config ── */
-const PAGE_SLOTS = [
-  { key:"home",    label:"🏠 Home",    desc:"Homepage banner area" },
-  { key:"details", label:"📄 Details", desc:"Anime detail page" },
-  { key:"watch",   label:"🎬 Watch",   desc:"Video player page" },
-  { key:"search",  label:"🔍 Search",  desc:"Search results page" },
-  { key:"knight",  label:"⚔️ Knight",  desc:"Knight download page" },
-  { key:"all",     label:"🌐 All Pages",desc:"Show on every page" }
-]
-
-/* ── DOM ── */
-const D = id => document.getElementById(id)
-const toastWrap = D("toastWrap")
-
-/* ── Toast ── */
-function toast(msg, type="ok"){
-  const t = document.createElement("div")
-  t.className = `toast ${type}`
-  t.innerHTML = `<span>${type==="ok"?"✅":"❌"}</span><span>${msg}</span>`
-  toastWrap.appendChild(t)
-  setTimeout(()=>t.remove(), 3000)
-}
-
-/* ── API call ── */
-async function api(url, method="GET", body=null){
-  try{
-    const res = await fetch(url,{
-      method,
-      headers: authHeaders(),
-      body: body ? JSON.stringify(body) : null
-    })
-    if(res.status===401){ location.href="login.html"; return null }
-    const json = await res.json().catch(()=>({}))
-    if(!res.ok || json.success===false){
-      toast(json?.message || json?.error || "API Error","err")
-      return null
-    }
-    return json
-  }catch(err){
-    toast(err.message||"Request failed","err")
-    return null
-  }
-}
-
-/* ── Update last updated time ── */
-function updateTime(){
-  const now = new Date()
-  D("lastUpd").textContent = "Updated "+now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
-}
-
-/* ============================================================
-  LOAD ALL
-============================================================ */
-async function reloadAll(){
-  await Promise.all([loadAds(), loadShortlinks(), loadPopups(), loadHosts()])
-  renderAnalytics()
-  renderPageAds()
-  updateTime()
-}
-
-async function loadAds(){
-  const r = await api(`${API}/ads-library`)
-  ADS = Array.isArray(r?.data) ? r.data : []
-  renderAdsList()
-}
-async function loadShortlinks(){
-  const r = await api(`${API}/shortlinks-library`)
-  SHORTLINKS = Array.isArray(r?.data) ? r.data : []
-  renderShortList()
-}
-async function loadPopups(){
-  const r = await api(`${API}/popup-library`)
-  POPUPS = Array.isArray(r?.data) ? r.data : []
-  renderPopupList()
-}
-async function loadHosts(){
-  const r = await api(`${API}/host-monetization`)
-  HOSTS = Array.isArray(r?.data) ? r.data : []
-  renderHostList()
-}
-
-/* ============================================================
-  ADS LIBRARY
-============================================================ */
-
-D("openAdForm").onclick = ()=>{
-  D("adForm").style.display="block"
-  D("openAdForm").style.display="none"
-}
-D("cancelAdBtn").onclick = resetAdForm
-
-function resetAdForm(){
-  editingAdId=null
-  D("adName").value=""
-  D("adType").value="redirect"
-  D("adWeight").value="1"
-  D("adDelay").value="1500"
-  D("adCode").value=""
-  D("saveAdBtn").textContent="💾 Save Ad"
-  D("adForm").style.display="none"
-  D("openAdForm").style.display="inline-flex"
-}
-
-D("saveAdBtn").onclick = async()=>{
-  const name = D("adName").value.trim()
-  if(!name){ toast("Ad Name is required","err"); return }
-  const payload = {
-    name, type: D("adType").value,
-    code: D("adCode").value.trim(),
-    weight: Number(D("adWeight").value)||1,
-    delay: Number(D("adDelay").value)||0,
-    active: 1
-  }
-  let r
-  if(editingAdId){
-    r = await api(`${API}/ads-library/${editingAdId}`,"PUT",payload)
-    if(r){ toast("Ad updated") }
-  } else {
-    r = await api(`${API}/ads-library`,"POST",payload)
-    if(r){ toast("Ad saved") }
-  }
-  if(r){ resetAdForm(); await loadAds(); renderAnalytics() }
-}
-
-function renderAdsList(){
-  const el = D("adsLibraryList")
-  if(!ADS.length){ el.innerHTML='<div class="empty-box">No ads saved yet.</div>'; return }
-  el.innerHTML = ADS.map(ad=>`
-    <div class="lib-item ${ad.active?'':'inactive'}">
-      <div class="lib-left">
-        <div class="lib-name">
-          <span>${ad.name}</span>
-          <span class="badge badge-blue">${ad.type||'redirect'}</span>
-          <span class="badge badge-gray">w:${ad.weight||1}</span>
+<!-- ========== SHORTLINK MODAL ========== -->
+<div class="modal" id="slModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="slModalTitle">New Shortlink</h3>
+      <button class="modal-close" id="closeSlModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Name *</label>
+          <input class="form-input" id="sf-name" placeholder="e.g. cuty.io">
         </div>
-        <div class="lib-meta">${(ad.code||'').slice(0,60)}${(ad.code||'').length>60?'...':''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <label class="toggle" title="${ad.active?'Active':'Inactive'}">
-          <input type="checkbox" ${ad.active?'checked':''} onchange="toggleAd('${ad.id}',this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-        <button class="btn btn-s btn-sm" onclick="editAd('${ad.id}')">✏️</button>
-        <button class="btn btn-r btn-sm" onclick="deleteAd('${ad.id}')">🗑</button>
-      </div>
-    </div>
-  `).join("")
-}
-
-async function toggleAd(id, active){
-  const ad = ADS.find(x=>x.id===id)
-  if(!ad) return
-  await api(`${API}/ads-library/${id}`,"PUT",{...ad, active: active?1:0})
-  await loadAds()
-}
-
-function editAd(id){
-  const ad = ADS.find(x=>x.id===id)
-  if(!ad) return
-  editingAdId = id
-  D("adName").value = ad.name||""
-  D("adType").value = ad.type||"redirect"
-  D("adWeight").value = ad.weight||1
-  D("adDelay").value = ad.delay||0
-  D("adCode").value = ad.code||""
-  D("saveAdBtn").textContent="💾 Update Ad"
-  D("adForm").style.display="block"
-  D("openAdForm").style.display="none"
-  D("adForm").scrollIntoView({behavior:"smooth"})
-}
-
-async function deleteAd(id){
-  if(!confirm("Delete this ad?")) return
-  const r = await api(`${API}/ads-library/${id}`,"DELETE")
-  if(r){ toast("Ad deleted","ok"); await loadAds(); renderAnalytics() }
-}
-
-/* ============================================================
-  SHORTLINKS LIBRARY
-============================================================ */
-
-D("openShortForm").onclick = ()=>{
-  D("shortForm").style.display="block"
-  D("openShortForm").style.display="none"
-}
-D("cancelShortBtn").onclick = resetShortForm
-
-function resetShortForm(){
-  editingShortId=null
-  D("shortName").value=""
-  D("shortBase").value=""
-  D("shortApi").value=""
-  D("saveShortBtn").textContent="💾 Save"
-  D("shortForm").style.display="none"
-  D("openShortForm").style.display="inline-flex"
-}
-
-D("saveShortBtn").onclick = async()=>{
-  const name = D("shortName").value.trim()
-  const base = D("shortBase").value.trim()
-  if(!name||!base){ toast("Name and Base URL required","err"); return }
-  const payload = { name, base_url: base, api_key: D("shortApi").value.trim(), active:1 }
-  let r
-  if(editingShortId){
-    r = await api(`${API}/shortlinks-library/${editingShortId}`,"PUT",payload)
-    if(r){ toast("Shortlink updated") }
-  } else {
-    r = await api(`${API}/shortlinks-library`,"POST",payload)
-    if(r){ toast("Shortlink saved") }
-  }
-  if(r){ resetShortForm(); await loadShortlinks(); renderAnalytics() }
-}
-
-function renderShortList(){
-  const el = D("shortLibraryList")
-  if(!SHORTLINKS.length){ el.innerHTML='<div class="empty-box">No shortlinks saved yet.</div>'; return }
-  el.innerHTML = SHORTLINKS.map(s=>`
-    <div class="lib-item ${s.active?'':'inactive'}">
-      <div class="lib-left">
-        <div class="lib-name"><span>${s.name}</span><span class="badge badge-green">Shortlink</span></div>
-        <div class="lib-meta">${s.base_url||''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <label class="toggle">
-          <input type="checkbox" ${s.active?'checked':''} onchange="toggleShort('${s.id}',this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-        <button class="btn btn-s btn-sm" onclick="editShort('${s.id}')">✏️</button>
-        <button class="btn btn-r btn-sm" onclick="deleteShort('${s.id}')">🗑</button>
-      </div>
-    </div>
-  `).join("")
-}
-
-async function toggleShort(id, active){
-  const s = SHORTLINKS.find(x=>x.id===id)
-  if(!s) return
-  await api(`${API}/shortlinks-library/${id}`,"PUT",{...s, active: active?1:0})
-  await loadShortlinks()
-}
-
-function editShort(id){
-  const s = SHORTLINKS.find(x=>x.id===id)
-  if(!s) return
-  editingShortId=id
-  D("shortName").value=s.name||""
-   D("shortBase").value=s.base_url||""
-  D("shortApi").value=s.api_key||""
-  D("saveShortBtn").textContent="💾 Update"
-  D("shortForm").style.display="block"
-  D("openShortForm").style.display="none"
-}
-
-async function deleteShort(id){
-  if(!confirm("Delete this shortlink?")) return
-  const r = await api(`${API}/shortlinks-library/${id}`,"DELETE")
-  if(r){ toast("Deleted","ok"); await loadShortlinks(); renderAnalytics() }
-}
-
-/* ============================================================
-  POPUP LIBRARY
-============================================================ */
-
-D("openPopupForm").onclick = ()=>{
-  D("popupForm").style.display="block"
-  D("openPopupForm").style.display="none"
-}
-D("cancelPopupBtn").onclick = resetPopupForm
-
-function resetPopupForm(){
-  editingPopupId=null
-  D("popupName").value=""
-  D("popupCode").value=""
-  D("savePopupBtn").textContent="💾 Save"
-  D("popupForm").style.display="none"
-  D("openPopupForm").style.display="inline-flex"
-}
-
-D("savePopupBtn").onclick = async()=>{
-  const name = D("popupName").value.trim()
-  if(!name){ toast("Popup Name required","err"); return }
-  const payload = { name, script: D("popupCode").value.trim(), active:1 }
-  let r
-  if(editingPopupId){
-    r = await api(`${API}/popup-library/${editingPopupId}`,"PUT",payload)
-    if(r){ toast("Popup updated") }
-  } else {
-    r = await api(`${API}/popup-library`,"POST",payload)
-    if(r){ toast("Popup saved") }
-  }
-  if(r){ resetPopupForm(); await loadPopups(); renderAnalytics() }
-}
-
-function renderPopupList(){
-  const el = D("popupLibraryList")
-  if(!POPUPS.length){ el.innerHTML='<div class="empty-box">No popups saved yet.</div>'; return }
-  el.innerHTML = POPUPS.map(p=>`
-    <div class="lib-item ${p.active?'':'inactive'}">
-      <div class="lib-left">
-        <div class="lib-name"><span>${p.name}</span><span class="badge badge-orange">Popup</span></div>
-        <div class="lib-meta">${(p.script||'').slice(0,50)}${(p.script||'').length>50?'...':''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <label class="toggle">
-          <input type="checkbox" ${p.active?'checked':''} onchange="togglePopup('${p.id}',this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-        <button class="btn btn-s btn-sm" onclick="editPopup('${p.id}')">✏️</button>
-        <button class="btn btn-r btn-sm" onclick="deletePopup('${p.id}')">🗑</button>
-      </div>
-    </div>
-  `).join("")
-}
-
-async function togglePopup(id, active){
-  const p = POPUPS.find(x=>x.id===id)
-  if(!p) return
-  await api(`${API}/popup-library/${id}`,"PUT",{...p, active: active?1:0})
-  await loadPopups()
-}
-
-function editPopup(id){
-  const p = POPUPS.find(x=>x.id===id)
-  if(!p) return
-  editingPopupId=id
-  D("popupName").value=p.name||""
-  D("popupCode").value=p.script||""
-  D("savePopupBtn").textContent="💾 Update"
-  D("popupForm").style.display="block"
-  D("openPopupForm").style.display="none"
-}
-
-async function deletePopup(id){
-  if(!confirm("Delete this popup?")) return
-  const r = await api(`${API}/popup-library/${id}`,"DELETE")
-  if(r){ toast("Deleted","ok"); await loadPopups(); renderAnalytics() }
-}
-
-/* ============================================================
-  PAGE ADS CONTROL
-============================================================ */
-
-let PAGE_ADS_STATE = {} // { page_key: { enabled, ad_id } }
-
-async function loadPageAdsState(){
-  const r = await api(`${API}/page-ads`)
-  if(r?.data){ r.data.forEach(x=>{ PAGE_ADS_STATE[x.page]=x }) }
-}
-
-function renderPageAds(){
-  const el = D("pageAdsSlots")
-  el.innerHTML = PAGE_SLOTS.map(slot=>{
-    const state = PAGE_ADS_STATE[slot.key]||{}
-    const enabled = state.enabled||false
-    const selectedAd = state.ad_id||""
-    const adsOpts = ADS.map(a=>`<option value="${a.id}" ${selectedAd===a.id?'selected':''}>${a.name}</option>`).join("")
-    return `
-      <div class="page-slot">
-        <div class="page-slot-head">
-          <div>
-            <div class="page-slot-name">${slot.label}</div>
-            <div style="font-size:10px;color:#555;margin-top:2px">${slot.desc}</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" ${enabled?'checked':''} onchange="togglePageAd('${slot.key}',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
+        <div class="form-full">
+          <label class="form-label">Base URL *</label>
+          <input class="form-input" id="sf-url" placeholder="https://cuty.io/api?api=KEY&url=">
         </div>
-        <div class="page-slot-select">
-          <select onchange="setPageAd('${slot.key}',this.value)" ${!enabled?'disabled':''}>
-            <option value="">— Select Ad —</option>
-            ${adsOpts}
+        <div class="form-full">
+          <label class="form-label">API Key</label>
+          <input class="form-input" id="sf-apikey" placeholder="your_api_key_here">
+        </div>
+        <div>
+          <label class="form-label">Active</label>
+          <select class="form-input" id="sf-active">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Weight</label>
+          <input class="form-input" type="number" id="sf-weight" placeholder="1" min="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelSlModal">Cancel</button>
+      <button class="save-btn" id="saveSlBtn">💾 Save Shortlink</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== POPUP MODAL ========== -->
+<div class="modal" id="popModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="popModalTitle">New Popup</h3>
+      <button class="modal-close" id="closePopModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Name *</label>
+          <input class="form-input" id="pf-name" placeholder="e.g. Adsterra Popup Script">
+        </div>
+        <div>
+          <label class="form-label">Active</label>
+          <select class="form-input" id="pf-active">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Trigger</label>
+          <select class="form-input" id="pf-trigger">
+            <option value="onload">On Page Load</option>
+            <option value="onclick">On First Click</option>
+            <option value="ondownload">On Download Click</option>
+          </select>
+        </div>
+        <div class="form-full">
+          <label class="form-label">Script / Code *</label>
+          <textarea class="form-input" id="pf-script" style="min-height:120px" placeholder="&lt;script&gt;...&lt;/script&gt;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelPopModal">Cancel</button>
+      <button class="save-btn" id="savePopBtn">💾 Save Popup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== HOST MON MODAL ========== -->
+<div class="modal" id="hostMonModal">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <h3 id="hmModalTitle">Configure Host Monetization</h3>
+      <button class="modal-close" id="closeHmModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="form-label">Host *</label>
+          <select class="form-input" id="hm-host">
+            <option value="">— Select Host —</option>
+          </select>
+        </div>
+        <div class="form-full">
+          <label class="form-label">Rotation Mode</label>
+          <select class="form-input" id="hm-mode">
+            <option value="random">🎲 Random — pick random item each time</option>
+            <option value="sequence">🔁 Sequence — rotate 1→2→3→repeat</option>
+            <option value="direct">⚡ Direct — always first item</option>
           </select>
         </div>
       </div>
-    `
-  }).join("")
+
+      <div class="section-title">📢 Ads (select multiple)</div>
+      <div class="multi-select-box" id="hm-ads-list">Loading...</div>
+
+      <div class="section-title">🔗 Shortlinks (select multiple)</div>
+      <div class="multi-select-box" id="hm-sl-list">Loading...</div>
+
+      <div class="section-title">💬 Popups (select multiple)</div>
+      <div class="multi-select-box" id="hm-pop-list">Loading...</div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="cancelHmModal">Cancel</button>
+      <button class="save-btn" id="saveHmBtn">💾 Save Config</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================
+   CONFIG
+========================================= */
+const API = (window.API_BASE || '') + '/api'
+function getToken(){ return localStorage.getItem('ah_token')||'' }
+function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+getToken()} }
+
+let adsData = [], slData = [], popData = [], hostsData = [], monData = []
+let animeData = []
+let posterTargets = {}
+let editIds = { ad:null, sl:null, pop:null, hm:null }
+
+/* =========================================
+   AUTH
+========================================= */
+function requireAuth(){
+  if(!getToken()){ window.location.href='login.html'; return false }
+  return true
+}
+async function checkAuth(){
+  try{
+    const r = await fetch(`${API}/auth/me`,{headers:authHeaders()})
+    if(r.status===401){ localStorage.removeItem('ah_token'); window.location.href='login.html'; return false }
+    const j = await r.json()
+    if(j.success) document.getElementById('adminName').textContent = j.data.name||''
+    return j.success
+  }catch{ return false }
+}
+document.getElementById('logoutBtn').onclick = ()=>{ localStorage.removeItem('ah_token'); window.location.href='login.html' }
+
+/* =========================================
+   TOAST
+========================================= */
+let toastTimer
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = `toast ${type}`; t.classList.add('show')
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'),3200)
 }
 
-async function togglePageAd(page, enabled){
-  const state = PAGE_ADS_STATE[page]||{}
-  PAGE_ADS_STATE[page] = {...state, page, enabled}
-  await api(`${API}/page-ads`,"POST",{ page, enabled: enabled?1:0, ad_id: state.ad_id||null })
-  renderPageAds()
-}
-
-async function setPageAd(page, adId){
-  const state = PAGE_ADS_STATE[page]||{}
-  PAGE_ADS_STATE[page] = {...state, page, ad_id: adId}
-  await api(`${API}/page-ads`,"POST",{ page, enabled: state.enabled?1:0, ad_id: adId||null })
-}
-
-/* ============================================================
-  HOST MONETIZATION
-============================================================ */
-
-function openModal(id){
-  D(id).classList.add("show")
-  document.body.style.overflow="hidden"
-}
-function closeModal(id){
-  D(id).classList.remove("show")
-  document.body.style.overflow=""
-}
-
-D("openHostModal").onclick = ()=>{
-  editingHostId=null
-  D("hostModalTitle").textContent="Create Host Config"
-  D("hostName").value=""
-  D("hostStorage").value=""
-  D("hostKnight").value="0"
-  D("hostMode").value="random"
-  renderSelList(D("hostAdsList"), ADS, [])
-  renderSelList(D("hostShortlinksList"), SHORTLINKS, [])
-  renderSelList(D("hostPopupsList"), POPUPS, [])
-  openModal("hostModal")
-}
-D("closeHostModal").onclick = ()=>closeModal("hostModal")
-D("cancelHostModal").onclick = ()=>closeModal("hostModal")
-D("hostModal").onclick = e=>{ if(e.target===D("hostModal")) closeModal("hostModal") }
-
-function renderSelList(container, items, selected=[]){
-  if(!items.length){ container.innerHTML='<div class="empty-box">None available.</div>'; return }
-  container.innerHTML = items.map(item=>`
-    <label class="sel-item">
-      <input type="checkbox" value="${item.id}" ${selected.includes(item.id)?'checked':''}>
-      <div><b>${item.name}</b><small>${item.type||item.base_url||''}</small></div>
-    </label>
-  `).join("")
-}
-
-function getChecked(container){
-  return [...container.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value)
-}
-
-D("saveHostBtn").onclick = async()=>{
-  const name = D("hostName").value.trim()
-  if(!name){ toast("Host Name required","err"); return }
-  const payload = {
-    host: name,
-    storage: D("hostStorage").value.trim(),
-    knight: Number(D("hostKnight").value),
-    mode: D("hostMode").value,
-    ads: getChecked(D("hostAdsList")),
-    shortlinks: getChecked(D("hostShortlinksList")),
-    popups: getChecked(D("hostPopupsList")),
-    active: 1
+/* =========================================
+   TABS
+========================================= */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'))
+    tab.classList.add('active')
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active')
   }
-  let r
-  if(editingHostId){
-    r = await api(`${API}/host-monetization/${editingHostId}`,"PUT",payload)
-    if(r){ toast("Host config updated") }
-  } else {
-    r = await api(`${API}/host-monetization`,"POST",payload)
-    if(r){ toast("Host config created") }
-  }
-  if(r){ closeModal("hostModal"); await loadHosts(); renderAnalytics() }
+})
+
+/* =========================================
+   ESCAPE
+========================================= */
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+/* =========================================
+   LOAD ALL DATA
+========================================= */
+async function loadAll(){
+  await Promise.all([loadAds(), loadShortlinks(), loadPopups(), loadHosts()])
+  loadHostMon()
+  loadStats()
+  loadAnimeForTargets()
+  populatePageAdSelects()
+  loadPageAdsConfig()
 }
 
-function renderHostList(){
-  const el = D("hostMonetizationList")
-  if(!HOSTS.length){ el.innerHTML='<div class="empty-box">No host configurations yet. Create one to get started.</div>'; return }
-  el.innerHTML = HOSTS.map(h=>{
-    const adNames = (h.ads||[]).map(id=>ADS.find(x=>x.id===id)?.name||id)
-    const shortNames = (h.shortlinks||[]).map(id=>SHORTLINKS.find(x=>x.id===id)?.name||id)
-    const popupNames = (h.popups||[]).map(id=>POPUPS.find(x=>x.id===id)?.name||id)
-    return `
-      <div class="host-card ${h.active?'':'inactive'}">
-        <div class="host-top">
-          <div>
-            <div class="host-name">${h.host||h.name||'Unnamed'}</div>
-            <div class="host-storage">Storage: ${h.storage||'—'}</div>
-          </div>
-          <div class="host-right">
-            <div class="host-tags">
-              <span class="badge ${h.knight?'badge-yellow':'badge-gray'}">${h.knight?'⚔️ Knight':'📁 Direct'}</span>
-              <span class="badge badge-blue">Mode: ${(h.mode||'random').toUpperCase()}</span>
-              <span class="badge badge-green">Clicks: ${h.clicks||0}</span>
-            </div>
-            <label class="toggle" title="Active/Inactive">
-              <input type="checkbox" ${h.active?'checked':''} onchange="toggleHost('${h.id}',this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+async function loadAds(){
+  try{
+    const r = await fetch(`${API}/ads-library`,{headers:authHeaders()})
+    const j = await r.json()
+    adsData = j.success ? (j.data||[]) : []
+    renderAds()
+  }catch{ adsData=[] }
+}
+async function loadShortlinks(){
+  try{
+    const r = await fetch(`${API}/shortlinks-library`,{headers:authHeaders()})
+    const j = await r.json()
+    slData = j.success ? (j.data||[]) : []
+    renderShortlinks()
+  }catch{ slData=[] }
+}
+async function loadPopups(){
+  try{
+    const r = await fetch(`${API}/popup-library`,{headers:authHeaders()})
+    const j = await r.json()
+    popData = j.success ? (j.data||[]) : []
+    renderPopups()
+  }catch{ popData=[] }
+}
+async function loadHosts(){
+  try{
+    const r = await fetch(`${API}/hosts`,{headers:authHeaders()})
+    const j = await r.json()
+    hostsData = j.success ? (j.data||[]) : []
+  }catch{ hostsData=[] }
+}
+async function loadHostMon(){
+  try{
+    const r = await fetch(`${API}/host-monetization`,{headers:authHeaders()})
+    const j = await r.json()
+    monData = j.success ? (j.data||[]) : []
+    renderHostMon()
+  }catch{ monData=[] }
+}
+
+/* =========================================
+   RENDER ADS
+========================================= */
+function renderAds(){
+  const el = document.getElementById('adsList')
+  if(!adsData.length){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">📢</div><div>No ads yet</div></div>'; return }
+  el.innerHTML = adsData.map(a => `
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">${esc(a.name)}</div>
+          <div class="card-sub">Weight: ${a.weight||1} · Delay: ${a.delay||0}ms</div>
         </div>
-        ${adNames.length ? `<div class="host-section"><h5>📢 Ads</h5><div class="tag-list">${adNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
-        ${shortNames.length ? `<div class="host-section"><h5>🔗 Shortlinks</h5><div class="tag-list">${shortNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
-        ${popupNames.length ? `<div class="host-section"><h5>🪟 Popups</h5><div class="tag-list">${popupNames.map(n=>`<div class="tag-item">${n}</div>`).join('')}</div></div>` : ''}
-        <div class="host-actions">
-          <button class="btn btn-s btn-sm" onclick="editHost('${h.id}')">✏️ Edit</button>
-          <button class="btn btn-r btn-sm" onclick="deleteHost('${h.id}')">🗑 Delete</button>
+        <div class="card-actions">
+          <button class="edit-btn" onclick="editItem('ad',${a.id})">✏️</button>
+          <button class="del-btn" onclick="deleteItem('ad',${a.id},'${esc(a.name)}')">🗑️</button>
         </div>
       </div>
-    `
-  }).join("")
+      <div class="card-tags" style="margin-top:8px">
+        <span class="badge badge-type-${a.type||'script'}">${a.type||'script'}</span>
+        <span class="badge ${a.active?'badge-active':'badge-inactive'}">${a.active?'Active':'Inactive'}</span>
+      </div>
+      <div class="card-body" style="font-family:monospace;margin-top:6px;overflow:hidden;max-height:40px;opacity:.5">${esc((a.code||'').substring(0,80))}${(a.code||'').length>80?'...':''}</div>
+    </div>`).join('')
 }
 
-async function toggleHost(id, active){
-  const h = HOSTS.find(x=>x.id===id)
-  if(!h) return
-  await api(`${API}/host-monetization/${id}`,"PUT",{...h, active: active?1:0})
-  await loadHosts()
+/* =========================================
+   RENDER SHORTLINKS
+========================================= */
+function renderShortlinks(){
+  const el = document.getElementById('shortlinksList')
+  if(!slData.length){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔗</div><div>No shortlinks yet</div></div>'; return }
+  el.innerHTML = slData.map(s => `
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">${esc(s.name)}</div>
+          <div class="card-sub">${esc(s.base_url||'').substring(0,40)}...</div>
+        </div>
+        <div class="card-actions">
+          <button class="edit-btn" onclick="editItem('sl',${s.id})">✏️</button>
+          <button class="del-btn" onclick="deleteItem('sl',${s.id},'${esc(s.name)}')">🗑️</button>
+        </div>
+      </div>
+      <div class="card-tags" style="margin-top:8px">
+        <span class="badge ${s.active?'badge-active':'badge-inactive'}">${s.active?'Active':'Inactive'}</span>
+        <span class="tag sl">Shortlink</span>
+      </div>
+    </div>`).join('')
 }
 
-function editHost(id){
-  const h = HOSTS.find(x=>x.id===id)
-  if(!h) return
-  editingHostId=id
-  D("hostModalTitle").textContent="Edit Host Config"
-  D("hostName").value=h.host||h.name||""
-  D("hostStorage").value=h.storage||""
-  D("hostKnight").value=h.knight?'1':'0'
-  D("hostMode").value=h.mode||"random"
-  renderSelList(D("hostAdsList"), ADS, h.ads||[])
-  renderSelList(D("hostShortlinksList"), SHORTLINKS, h.shortlinks||[])
-  renderSelList(D("hostPopupsList"), POPUPS, h.popups||[])
-  openModal("hostModal")
+/* =========================================
+   RENDER POPUPS
+========================================= */
+function renderPopups(){
+  const el = document.getElementById('popupsList')
+  if(!popData.length){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">💬</div><div>No popups yet</div></div>'; return }
+  el.innerHTML = popData.map(p => `
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">${esc(p.name)}</div>
+          <div class="card-sub">Trigger: ${esc(p.trigger||'onload')}</div>
+        </div>
+        <div class="card-actions">
+          <button class="edit-btn" onclick="editItem('pop',${p.id})">✏️</button>
+          <button class="del-btn" onclick="deleteItem('pop',${p.id},'${esc(p.name)}')">🗑️</button>
+        </div>
+      </div>
+      <div class="card-tags" style="margin-top:8px">
+        <span class="badge ${p.active?'badge-active':'badge-inactive'}">${p.active?'Active':'Inactive'}</span>
+        <span class="tag pop">Popup</span>
+      </div>
+    </div>`).join('')
 }
 
-async function deleteHost(id){
-  if(!confirm("Delete this host config?")) return
-  const r = await api(`${API}/host-monetization/${id}`,"DELETE")
-  if(r){ toast("Host config deleted","ok"); await loadHosts(); renderAnalytics() }
+/* =========================================
+   RENDER HOST MON TABLE
+========================================= */
+function renderHostMon(){
+  const el = document.getElementById('hostMonList')
+  if(!monData.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🌐</div><div>No host monetization configured yet</div></div>'; return
+  }
+  el.innerHTML = monData.map(m => {
+    const host = hostsData.find(h=>h.id==m.host_id)||{}
+    let adTags='', slTags='', popTags=''
+    try{
+      JSON.parse(m.ads||'[]').forEach(id=>{ const a=adsData.find(x=>x.id==id); adTags+=`<span class="tag ad">${esc(a?a.name:'?')}</span>` })
+      JSON.parse(m.shortlinks||'[]').forEach(id=>{ const s=slData.find(x=>x.id==id); slTags+=`<span class="tag sl">${esc(s?s.name:'?')}</span>` })
+      JSON.parse(m.popups||'[]').forEach(id=>{ const p=popData.find(x=>x.id==id); popTags+=`<span class="tag pop">${esc(p?p.name:'?')}</span>` })
+    }catch{}
+    return `<div class="mon-row">
+      <span style="font-weight:600">${esc(host.name||'Unknown')}</span>
+      <div class="mon-tags">${adTags||'—'}${slTags}${popTags}</div>
+      <span><span class="tag mode-${m.mode||'random'}">${m.mode||'random'}</span></span>
+      <span style="color:#777">${m.clicks||0}</span>
+      <span>${host.knight?'<span class="tag knight">👑</span>':'—'}</span>
+      <span><span class="badge ${m.active!==false?'badge-active':'badge-inactive'}">${m.active!==false?'On':'Off'}</span></span>
+      <span style="display:flex;gap:6px">
+        <button style="background:none;border:none;cursor:pointer;font-size:14px" onclick="editItem('hm',${m.id})" title="Edit">✏️</button>
+        <button style="background:none;border:none;cursor:pointer;font-size:14px" onclick="deleteItem('hm',${m.id},'${esc(host.name)}')" title="Delete">🗑️</button>
+      </span>
+    </div>`
+  }).join('')
 }
 
-/* ============================================================
-  ANALYTICS
-============================================================ */
-
-function renderAnalytics(){
-  D("statHosts").textContent   = HOSTS.length
-  D("statAds").textContent     = ADS.length
-  D("statShorts").textContent  = SHORTLINKS.length
-  D("statPopups").textContent  = POPUPS.length
-  D("statClicks").textContent  = HOSTS.reduce((a,h)=>a+Number(h.clicks||0),0).toLocaleString()
-  // Also load page ads performance
-  loadAdsPerformance()
+/* =========================================
+   OPEN MODAL ROUTER
+========================================= */
+function openModal(type){
+  if(type==='ad')        openAdModal(null)
+  if(type==='shortlink') openSlModal(null)
+  if(type==='popup')     openPopModal(null)
+  if(type==='hostmon')   openHmModal(null)
 }
-async function loadAdsPerformance(){
-  const el = D("adsPerformanceTable")
-  if(!el) return
-  const r = await api(`${API}/ads-analytics`)
-  if(!r?.data || !r.data.length){
-    el.innerHTML='<div class="empty-box">No page ad performance data yet.</div>'
+
+/* =========================================
+   AD MODAL
+========================================= */
+function openAdModal(id){
+  editIds.ad = id
+  const a = id ? adsData.find(x=>x.id==id) : null
+  document.getElementById('adModalTitle').textContent = id ? 'Edit Ad' : 'New Ad'
+  document.getElementById('af-name').value  = a?.name||''
+  document.getElementById('af-type').value  = a?.type||'popup'
+  document.getElementById('af-delay').value = a?.delay||0
+  document.getElementById('af-weight').value= a?.weight||1
+  document.getElementById('af-active').value= (a?.active??1).toString()
+  document.getElementById('af-code').value  = a?.code||''
+  document.getElementById('adModal').classList.add('open')
+}
+function editItem(type, id){
+  if(type==='ad')  openAdModal(id)
+  if(type==='sl')  openSlModal(id)
+  if(type==='pop') openPopModal(id)
+  if(type==='hm')  openHmModal(id)
+}
+async function deleteItem(type, id, name){
+  if(!confirm(`Delete "${name}"?`)) return
+  const endpointMap = { ad:'ads-library', sl:'shortlinks-library', pop:'popup-library', hm:'host-monetization' }
+  try{
+    const r = await fetch(`${API}/${endpointMap[type]}/${id}`,{method:'DELETE',headers:authHeaders()})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Deleted ✅')
+    loadAll()
+  }catch(e){ showToast(e.message,'error') }
+}
+document.getElementById('saveAdBtn').onclick = async ()=>{
+  const name = document.getElementById('af-name').value.trim()
+  const code = document.getElementById('af-code').value.trim()
+  if(!name||!code){ showToast('Name and code required','error'); return }
+  const payload = {
+    name, code,
+    type:   document.getElementById('af-type').value,
+    delay:  parseInt(document.getElementById('af-delay').value)||0,
+    weight: parseInt(document.getElementById('af-weight').value)||1,
+    active: parseInt(document.getElementById('af-active').value)
+  }
+  await saveItem('ad', 'ads-library', payload, 'adModal', 'saveAdBtn')
+}
+['closeAdModal','cancelAdModal'].forEach(id=>{ document.getElementById(id).onclick = ()=>document.getElementById('adModal').classList.remove('open') })
+
+/* =========================================
+   SHORTLINK MODAL
+========================================= */
+function openSlModal(id){
+  editIds.sl = id
+  const s = id ? slData.find(x=>x.id==id) : null
+  document.getElementById('slModalTitle').textContent = id ? 'Edit Shortlink' : 'New Shortlink'
+  document.getElementById('sf-name').value   = s?.name||''
+  document.getElementById('sf-url').value    = s?.base_url||''
+  document.getElementById('sf-apikey').value = s?.api_key||''
+  document.getElementById('sf-active').value = (s?.active??1).toString()
+  document.getElementById('sf-weight').value = s?.weight||1
+  document.getElementById('slModal').classList.add('open')
+}
+document.getElementById('saveSlBtn').onclick = async ()=>{
+  const name = document.getElementById('sf-name').value.trim()
+  const url  = document.getElementById('sf-url').value.trim()
+  if(!name||!url){ showToast('Name and URL required','error'); return }
+  const payload = {
+    name, base_url:url,
+    api_key: document.getElementById('sf-apikey').value.trim(),
+    active:  parseInt(document.getElementById('sf-active').value),
+    weight:  parseInt(document.getElementById('sf-weight').value)||1
+  }
+  await saveItem('sl','shortlinks-library',payload,'slModal','saveSlBtn')
+}
+['closeSlModal','cancelSlModal'].forEach(id=>{ document.getElementById(id).onclick = ()=>document.getElementById('slModal').classList.remove('open') })
+
+/* =========================================
+   POPUP MODAL
+========================================= */
+function openPopModal(id){
+  editIds.pop = id
+  const p = id ? popData.find(x=>x.id==id) : null
+  document.getElementById('popModalTitle').textContent = id ? 'Edit Popup' : 'New Popup'
+  document.getElementById('pf-name').value    = p?.name||''
+  document.getElementById('pf-active').value  = (p?.active??1).toString()
+  document.getElementById('pf-trigger').value = p?.trigger||'onload'
+  document.getElementById('pf-script').value  = p?.script||''
+  document.getElementById('popModal').classList.add('open')
+}
+document.getElementById('savePopBtn').onclick = async ()=>{
+  const name   = document.getElementById('pf-name').value.trim()
+  const script = document.getElementById('pf-script').value.trim()
+  if(!name||!script){ showToast('Name and script required','error'); return }
+  const payload = {
+    name, script,
+    active:  parseInt(document.getElementById('pf-active').value),
+    trigger: document.getElementById('pf-trigger').value
+  }
+  await saveItem('pop','popup-library',payload,'popModal','savePopBtn')
+}
+['closePopModal','cancelPopModal'].forEach(id=>{ document.getElementById(id).onclick = ()=>document.getElementById('popModal').classList.remove('open') })
+
+/* =========================================
+   HOST MON MODAL
+========================================= */
+function openHmModal(id){
+  editIds.hm = id
+  const m = id ? monData.find(x=>x.id==id) : null
+  document.getElementById('hmModalTitle').textContent = id ? 'Edit Host Monetization' : 'Configure Host Monetization'
+
+  // Host select
+  const sel = document.getElementById('hm-host')
+  sel.innerHTML = '<option value="">— Select Host —</option>'
+  hostsData.forEach(h => {
+    sel.innerHTML += `<option value="${h.id}" ${m&&m.host_id==h.id?'selected':''}>${esc(h.name)}</option>`
+  })
+  document.getElementById('hm-mode').value = m?.mode||'random'
+
+  // Multi selects
+  const selAds  = JSON.parse(m?.ads||'[]')
+  const selSl   = JSON.parse(m?.shortlinks||'[]')
+  const selPop  = JSON.parse(m?.popups||'[]')
+
+  buildMultiSelect('hm-ads-list', adsData, selAds, 'ad')
+  buildMultiSelect('hm-sl-list',  slData,  selSl,  'sl')
+  buildMultiSelect('hm-pop-list', popData, selPop, 'pop')
+
+  document.getElementById('hostMonModal').classList.add('open')
+}
+
+function buildMultiSelect(containerId, items, selected, type){
+  const el = document.getElementById(containerId)
+  if(!items.length){ el.innerHTML='<div style="color:#555;font-size:11px;padding:8px">No '+type+'s in library yet</div>'; return }
+  el.innerHTML = items.map(item=>`
+    <label class="ms-item ${selected.includes(item.id)?'checked':''}" data-id="${item.id}">
+      <input type="checkbox" value="${item.id}" ${selected.includes(item.id)?'checked':''}>
+      <span>${esc(item.name)}</span>
+      <span class="tag ${type}" style="margin-left:auto">${type}</span>
+    </label>`).join('')
+  el.querySelectorAll('.ms-item').forEach(lbl=>{
+    lbl.onclick = function(){
+      const cb = this.querySelector('input')
+      cb.checked = !cb.checked
+      this.classList.toggle('checked',cb.checked)
+    }
+  })
+}
+
+function getMultiSelectValues(containerId){
+  return [...document.querySelectorAll(`#${containerId} input:checked`)].map(i=>parseInt(i.value))
+}
+
+document.getElementById('saveHmBtn').onclick = async ()=>{
+  const hid = document.getElementById('hm-host').value
+  if(!hid){ showToast('Select a host','error'); return }
+  const payload = {
+    host_id:    parseInt(hid),
+    mode:       document.getElementById('hm-mode').value,
+    ads:        JSON.stringify(getMultiSelectValues('hm-ads-list')),
+    shortlinks: JSON.stringify(getMultiSelectValues('hm-sl-list')),
+    popups:     JSON.stringify(getMultiSelectValues('hm-pop-list'))
+  }
+  await saveItem('hm','host-monetization',payload,'hostMonModal','saveHmBtn')
+}
+['closeHmModal','cancelHmModal'].forEach(id=>{ document.getElementById(id).onclick=()=>document.getElementById('hostMonModal').classList.remove('open') })
+
+/* =========================================
+   GENERIC SAVE
+========================================= */
+async function saveItem(type, endpoint, payload, modalId, btnId){
+  const idMap = { ad: editIds.ad, sl: editIds.sl, pop: editIds.pop, hm: editIds.hm }
+  const editId = idMap[type]
+  const url    = editId ? `${API}/${endpoint}/${editId}` : `${API}/${endpoint}`
+  const method = editId ? 'PUT' : 'POST'
+  const btn = document.getElementById(btnId)
+  btn.disabled=true; btn.textContent='Saving...'
+  try{
+    const r = await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(payload)})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Saved ✅')
+    document.getElementById(modalId).classList.remove('open')
+    loadAll()
+  }catch(e){ showToast(e.message,'error') }
+  finally{ btn.disabled=false; btn.textContent='💾 Save' }
+}
+
+/* =========================================
+   PAGE ADS CONFIG
+========================================= */
+function populatePageAdSelects(){
+  const ids = ['pc-home-ad','pc-detail-ad','pc-eplist-ad','pc-dl-ad','pc-knight-ad','pc-nav-ad']
+  ids.forEach(id=>{
+    const el = document.getElementById(id)
+    if(!el) return
+    const val = el.value
+    el.innerHTML = '<option value="">None</option>'
+    adsData.forEach(a=>{
+      el.innerHTML += `<option value="${a.id}" ${val==a.id?'selected':''}>${esc(a.name)}</option>`
+    })
+  })
+}
+
+async function loadPageAdsConfig(){
+  try{
+    const r = await fetch(`${API}/page-ads-config`,{headers:authHeaders()})
+    const j = await r.json()
+    if(!j.success) return
+    const d = j.data||{}
+    ;[
+      ['pc-home-enabled','home_enabled',true],
+      ['pc-detail-enabled','detail_enabled',true],
+      ['pc-eplist-enabled','eplist_enabled',true],
+      ['pc-dl-enabled','dl_enabled',true],
+      ['pc-knight-enabled','knight_enabled',true],
+      ['pc-nav-enabled','nav_enabled',false],
+      ['pc-go-popup','go_popup',true],
+      ['pc-go-sl','go_sl',true],
+      ['pc-go-ads','go_ads',true],
+      ['pc-mobile-ads','mobile_ads',true],
+      ['pc-mobile-extra','mobile_extra',false]
+    ].forEach(([id,key,def])=>{
+      const el=document.getElementById(id)
+      if(el) el.checked = key in d ? !!d[key] : def
+    })
+    ;[
+      ['pc-home-position','home_position','top'],
+      ['pc-detail-position','detail_position','top'],
+      ['pc-dl-position','dl_position','top'],
+      ['pc-knight-position','knight_position','top'],
+      ['pc-home-ad','home_ad',''],
+      ['pc-detail-ad','detail_ad',''],
+      ['pc-eplist-ad','eplist_ad',''],
+      ['pc-dl-ad','dl_ad',''],
+      ['pc-knight-ad','knight_ad',''],
+      ['pc-nav-ad','nav_ad','']
+    ].forEach(([id,key,def])=>{
+      const el=document.getElementById(id)
+      if(el) el.value = d[key]??def
+    })
+    ;[
+      ['pc-eplist-interval','eplist_interval',10],
+      ['pc-nav-interval','nav_interval',3],
+      ['pc-redirect-delay','redirect_delay',5],
+      ['pc-redirect-skip','redirect_skip',5],
+      ['pc-popup-max','popup_max',2],
+      ['pc-popup-cooldown','popup_cooldown',30]
+    ].forEach(([id,key,def])=>{
+      const el=document.getElementById(id)
+      if(el) el.value = d[key]??def
+    })
+  }catch{}
+}
+
+async function savePageAdsConfig(){
+  const payload = {}
+  ;['pc-home-enabled','pc-detail-enabled','pc-eplist-enabled','pc-dl-enabled','pc-knight-enabled','pc-nav-enabled','pc-go-popup','pc-go-sl','pc-go-ads','pc-mobile-ads','pc-mobile-extra'].forEach(id=>{
+    const el = document.getElementById(id)
+    if(el) payload[id.replace('pc-','').replace(/-/g,'_')] = el.checked
+  })
+  ;['pc-home-position','pc-detail-position','pc-dl-position','pc-knight-position','pc-home-ad','pc-detail-ad','pc-eplist-ad','pc-dl-ad','pc-knight-ad','pc-nav-ad'].forEach(id=>{
+    const el=document.getElementById(id); if(el) payload[id.replace('pc-','').replace(/-/g,'_')]=el.value
+  })
+  ;['pc-eplist-interval','pc-nav-interval','pc-redirect-delay','pc-redirect-skip','pc-popup-max','pc-popup-cooldown'].forEach(id=>{
+    const el=document.getElementById(id); if(el) payload[id.replace('pc-','').replace(/-/g,'_')]=parseInt(el.value)||0
+  })
+  try{
+    const r = await fetch(`${API}/page-ads-config`,{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Page ads config saved ✅')
+  }catch(e){ showToast(e.message,'error') }
+}
+
+/* =========================================
+   POSTER TARGETING
+========================================= */
+async function loadAnimeForTargets(){
+  try{
+    const r = await fetch(`${API}/anime?limit=200`,{headers:authHeaders()})
+    const j = await r.json()
+    animeData = j.success ? (j.data.data||[]) : []
+    // Load existing targets
+    try{
+      const rt = await fetch(`${API}/poster-ad-targets`,{headers:authHeaders()})
+      const jt = await rt.json()
+      posterTargets = {}
+      if(jt.success && jt.data){
+        jt.data.forEach(t=>{ posterTargets[t.anime_id]=t.ad_id })
+      }
+    }catch{}
+    renderPosterTargets(animeData)
+  }catch{ animeData=[] }
+}
+
+function renderPosterTargets(list){
+  const grid = document.getElementById('posterTargetGrid')
+  if(!list.length){
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">🎯</div><div>No anime found</div></div>'
     return
   }
-  el.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead>
-        <tr style="border-bottom:1px solid #1a2035">
-          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Ad Name</th>
-          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Type</th>
-          <th style="text-align:left;padding:8px 12px;color:#ffcc00">Page</th>
-          <th style="text-align:right;padding:8px 12px;color:#ffcc00">Impressions</th>
-          <th style="text-align:right;padding:8px 12px;color:#ffcc00">Clicks</th>
-          <th style="text-align:right;padding:8px 12px;color:#ffcc00">CTR</th>
-          <th style="text-align:center;padding:8px 12px;color:#ffcc00">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${r.data.map(a=>`
-          <tr style="border-bottom:1px solid #1a203520">
-            <td style="padding:8px 12px;color:#fff;font-weight:600">${a.name||'—'}</td>
-            <td style="padding:8px 12px"><span class="badge badge-blue">${a.type||'—'}</span></td>
-            <td style="padding:8px 12px;color:#aaa">${a.page||'all'}</td>
-            <td style="padding:8px 12px;text-align:right;color:#ccc">${(a.impressions||0).toLocaleString()}</td>
-            <td style="padding:8px 12px;text-align:right;color:#ccc">${(a.clicks||0).toLocaleString()}</td>
-            <td style="padding:8px 12px;text-align:right;color:#ffcc00;font-weight:700">${a.ctr||'0%'}</td>
-            <td style="padding:8px 12px;text-align:center">
-              <span class="badge ${a.active?'badge-green':'badge-gray'}">${a.active?'Active':'Off'}</span>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `
+  grid.innerHTML = list.map(a=>{
+    const currentTarget = posterTargets[a.id]||''
+    const adOptions = adsData.map(ad=>`<option value="${ad.id}" ${currentTarget==ad.id?'selected':''}>${esc(ad.name)}</option>`).join('')
+    const poster = a.poster ? `<img class="target-poster" src="${esc(a.poster)}" onerror="this.style.display='none'">` : '<div class="target-poster"></div>'
+    return `<div class="target-item" data-id="${a.id}">
+      ${poster}
+      <div class="target-info">
+        <div class="ti-title" title="${esc(a.title)}">${esc(a.title)}</div>
+        <div class="ti-ad">${currentTarget?'Custom ad':'Default'}</div>
+        <select class="target-select" data-anime="${a.id}" onchange="posterTargetChanged(this)">
+          <option value="">Default (no override)</option>
+          ${adOptions}
+        </select>
+      </div>
+    </div>`
+  }).join('')
 }
 
-async function clearAdsAnalytics(){
-  if(!confirm("Clear all page ad analytics? This cannot be undone.")) return
-  const r = await api(`${API}/ads-analytics-clear`, "DELETE")
-  if(r){ toast("Analytics cleared"); loadAdsPerformance() }
+function posterTargetChanged(sel){
+  const animeId = sel.dataset.anime
+  posterTargets[animeId] = sel.value
+  const info = sel.closest('.target-item').querySelector('.ti-ad')
+  info.textContent = sel.value ? 'Custom ad' : 'Default'
 }
 
-/* ============================================================
-  KEYBOARD + REFRESH
-============================================================ */
-
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeModal("hostModal") } })
-D("refreshBtn").onclick = reloadAll
-
-/* ============================================================
-  INIT
-============================================================ */
-
-async function init(){
-  await loadPageAdsState()
-  await reloadAll()
+function filterPosterGrid(){
+  const q = document.getElementById('posterSearch').value.toLowerCase()
+  const f = document.getElementById('posterFilter').value
+  let filtered = animeData.filter(a => a.title.toLowerCase().includes(q))
+  if(f==='targeted') filtered = filtered.filter(a => posterTargets[a.id])
+  if(f==='none')     filtered = filtered.filter(a => !posterTargets[a.id])
+  renderPosterTargets(filtered)
 }
 
-init()
+async function savePosterTargets(){
+  const entries = Object.entries(posterTargets).filter(([k,v])=>v).map(([anime_id,ad_id])=>({anime_id,ad_id}))
+  try{
+    const r = await fetch(`${API}/poster-ad-targets`,{method:'POST',headers:authHeaders(),body:JSON.stringify({targets:entries})})
+    const j = await r.json()
+    if(!j.success) throw new Error(j.message)
+    showToast('Poster targets saved ✅')
+  }catch(e){ showToast(e.message,'error') }
+}
+
+/* =========================================
+   STATS
+========================================= */
+async function loadStats(){
+  try{
+    const r = await fetch(`${API}/ads/stats`,{headers:authHeaders()})
+    const j = await r.json()
+    const d = j.data||{}
+    document.getElementById('statImpressions').textContent = d.impressions??'—'
+    document.getElementById('statAdClicks').textContent    = d.ad_clicks??'—'
+    document.getElementById('statShortClicks').textContent = d.shortlink_clicks??'—'
+    document.getElementById('statPopups').textContent      = d.popup_opens??'—'
+  }catch{}
+}
+
+/* =========================================
+   INIT
+========================================= */
+if(requireAuth()){
+  checkAuth()
+  loadAll()
+}
 </script>
 </body>
 </html>
