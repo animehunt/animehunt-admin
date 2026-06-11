@@ -141,7 +141,8 @@ body{
 </div>
 
 <script>
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const AUTH_API = "https://animehunt-backend.animehunt715.workers.dev/api/auth"
 
 // ── Already logged in → redirect ──
 if (localStorage.getItem("ah_token")) {
@@ -188,7 +189,7 @@ async function doLogin() {
   btn.classList.add("loading")
 
   try {
-    const res  = await fetch(`${API}/login`, {
+    const res  = await fetch(`${AUTH_API}/login`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ username, password })
