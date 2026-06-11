@@ -6,42 +6,84 @@
 <title>Login – AnimeHunt CMS</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+
 body{
   background:#0b0f1a;color:#fff;
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background-image:radial-gradient(ellipse at 20% 50%,rgba(255,204,0,.05) 0%,transparent 60%),
-                   radial-gradient(ellipse at 80% 20%,rgba(255,204,0,.03) 0%,transparent 50%)
+  background-image:
+    radial-gradient(ellipse at 20% 50%,rgba(255,204,0,.06) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 20%,rgba(255,204,0,.03) 0%,transparent 50%)
 }
+
 .login-box{
-  width:100%;max-width:380px;
+  width:100%;max-width:390px;
   background:#0e1424;border:1px solid #1a2035;border-radius:16px;
-  padding:36px 32px;box-shadow:0 24px 60px rgba(0,0,0,.5)
+  padding:40px 32px;box-shadow:0 24px 60px rgba(0,0,0,.6);
+  animation:fadeUp .35s ease
 }
-.brand{text-align:center;margin-bottom:28px}
-.brand h1{font-size:26px;font-weight:800}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Brand ── */
+.brand{text-align:center;margin-bottom:32px}
+.brand h1{font-size:28px;font-weight:800;letter-spacing:-.5px}
 .brand h1 b{color:#ffcc00}
-.brand p{font-size:12px;color:#555;margin-top:6px}
-.form-group{margin-bottom:16px}
-.form-label{font-size:11px;color:#777;margin-bottom:6px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.brand p{font-size:12px;color:#555;margin-top:6px;letter-spacing:.3px}
+
+/* ── Form ── */
+.form-group{margin-bottom:18px}
+.form-label{
+  font-size:11px;color:#777;margin-bottom:7px;
+  display:block;font-weight:600;text-transform:uppercase;letter-spacing:.5px
+}
+
+.input-wrap{position:relative}
 .form-input{
   width:100%;background:#0b0f1a;border:1px solid #1a2035;color:#fff;
-  padding:11px 14px;border-radius:8px;font-size:13px;outline:none;transition:.2s
+  padding:11px 14px;border-radius:8px;font-size:13px;outline:none;
+  transition:border-color .2s,box-shadow .2s
 }
-.form-input:focus{border-color:#ffcc00}
-.form-input::placeholder{color:#333}
+.form-input:focus{border-color:#ffcc00;box-shadow:0 0 0 3px rgba(255,204,0,.08)}
+.form-input::placeholder{color:#2e3347}
+
+/* password toggle */
+.toggle-pw{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;padding:2px;
+  color:#444;transition:color .2s
+}
+.toggle-pw:hover{color:#ffcc00}
+.toggle-pw svg{display:block;width:16px;height:16px}
+
+/* ── Button ── */
 .login-btn{
   width:100%;background:#ffcc00;border:none;color:#000;
-  padding:12px;border-radius:8px;font-size:14px;font-weight:700;
-  cursor:pointer;margin-top:8px;transition:.2s
+  padding:13px;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;margin-top:6px;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px
 }
-.login-btn:hover{background:#ffd633;transform:translateY(-1px)}
+.login-btn:hover:not(:disabled){background:#ffd633;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,204,0,.2)}
 .login-btn:disabled{opacity:.5;cursor:default;transform:none}
-.error-msg{
-  background:#220d0d;border:1px solid #f44336;color:#f44336;
-  padding:10px 14px;border-radius:7px;font-size:12px;margin-top:12px;
-  display:none
+
+/* spinner */
+.spinner{
+  width:15px;height:15px;border:2px solid rgba(0,0,0,.3);
+  border-top-color:#000;border-radius:50%;
+  animation:spin .6s linear infinite;display:none
 }
-.error-msg.show{display:block}
+.login-btn.loading .spinner{display:block}
+.login-btn.loading .btn-text{opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Messages ── */
+.msg{
+  padding:10px 14px;border-radius:7px;font-size:12px;margin-top:14px;
+  display:none;align-items:center;gap:8px
+}
+.msg.show{display:flex}
+.msg.error{background:#1e0808;border:1px solid #f44336;color:#f77}
+.msg.success{background:#081a10;border:1px solid #4caf50;color:#6dda85}
+.msg svg{flex-shrink:0;width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -49,47 +91,101 @@ body{
 <div class="login-box">
   <div class="brand">
     <h1>Anime<b>Hunt</b></h1>
-    <p>Admin CMS — Sign in to continue</p>
+    <p>Admin CMS &mdash; Sign in to continue</p>
   </div>
 
   <div class="form-group">
     <label class="form-label">Username</label>
-    <input class="form-input" id="username" type="text" placeholder="Enter username" autocomplete="username">
+    <input class="form-input" id="username" type="text"
+           placeholder="Enter username" autocomplete="username">
   </div>
 
   <div class="form-group">
     <label class="form-label">Password</label>
-    <input class="form-input" id="password" type="password" placeholder="Enter password" autocomplete="current-password">
+    <div class="input-wrap">
+      <input class="form-input" id="password" type="password"
+             placeholder="Enter password" autocomplete="current-password">
+      <button class="toggle-pw" id="togglePw" type="button" title="Show/Hide password">
+        <!-- Eye icon -->
+        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
-  <button class="login-btn" id="loginBtn">Sign In</button>
+  <button class="login-btn" id="loginBtn">
+    <div class="spinner"></div>
+    <span class="btn-text">Sign In</span>
+  </button>
 
-  <div class="error-msg" id="errorMsg"></div>
+  <div class="msg error" id="errorMsg">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span id="errorText"></span>
+  </div>
+
+  <div class="msg success" id="successMsg">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span>Login successful! Redirecting…</span>
+  </div>
 </div>
 
 <script>
 const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 
-/* If already logged in, redirect */
+// ── Already logged in → redirect ──
 if (localStorage.getItem("ah_token")) {
   window.location.href = "dashboard.html"
 }
 
+// ── Password toggle ──
+const pwInput  = document.getElementById("password")
+const eyeIcon  = document.getElementById("eyeIcon")
+document.getElementById("togglePw").addEventListener("click", () => {
+  const show = pwInput.type === "password"
+  pwInput.type = show ? "text" : "password"
+  eyeIcon.innerHTML = show
+    ? `<path stroke-linecap="round" stroke-linejoin="round"
+         d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8
+            a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4
+            c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07
+            a3 3 0 1 1-4.24-4.24"/>
+       <line x1="1" y1="1" x2="23" y2="23" stroke-linecap="round"/>`
+    : `<path stroke-linecap="round" stroke-linejoin="round"
+         d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+       <circle cx="12" cy="12" r="3"/>`
+})
+
+// ── Login ──
 async function doLogin() {
   const username = document.getElementById("username").value.trim()
-  const password = document.getElementById("password").value.trim()
+  const password = pwInput.value.trim()
   const btn      = document.getElementById("loginBtn")
   const errEl    = document.getElementById("errorMsg")
+  const errText  = document.getElementById("errorText")
+  const sucEl    = document.getElementById("successMsg")
+
+  errEl.classList.remove("show")
+  sucEl.classList.remove("show")
 
   if (!username || !password) {
-    errEl.textContent = "Please enter username and password"
+    errText.textContent = "Username aur password dono enter karein"
     errEl.classList.add("show")
     return
   }
 
-  btn.disabled    = true
-  btn.textContent = "Signing in..."
-  errEl.classList.remove("show")
+  btn.disabled = true
+  btn.classList.add("loading")
 
   try {
     const res  = await fetch(`${API}/login`, {
@@ -97,30 +193,30 @@ async function doLogin() {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ username, password })
     })
-    const json = await res.json()
 
+    const json = await res.json()
     if (!json.success) throw new Error(json.message || "Invalid credentials")
 
+    // Save token
     localStorage.setItem("ah_token",    json.data.token)
     localStorage.setItem("ah_username", json.data.username)
 
-    window.location.href = "dashboard.html"
+    sucEl.classList.add("show")
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html"
+    }, 800)
 
   } catch (err) {
-    errEl.textContent = err.message
+    errText.textContent = err.message
     errEl.classList.add("show")
-  } finally {
-    btn.disabled    = false
-    btn.textContent = "Sign In"
+    btn.disabled = false
+    btn.classList.remove("loading")
   }
 }
 
-document.getElementById("loginBtn").onclick = doLogin
-
-/* Enter key support */
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") doLogin()
-})
+document.getElementById("loginBtn").addEventListener("click", doLogin)
+document.addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin() })
 </script>
 </body>
 </html>
