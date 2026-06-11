@@ -493,6 +493,19 @@ select.form-input option{background:#0b0f1a}
         </label>
       </div>
 
+      <div class="toggle-card" id="card-embed">
+        <span class="tc-icon">🖼</span>
+        <div class="tc-info">
+          <div class="tc-title">Embed Protection</div>
+          <div class="tc-desc">Prevents unauthorized embedding of your site content in iframes.</div>
+          <span class="tc-impact impact-med">MEDIUM</span>
+        </div>
+        <label class="sw" onclick="event.stopPropagation()">
+          <input type="checkbox" id="core_embed" onchange="toggleCard('embed','core_embed');markDirty()">
+          <span class="sw-sl"></span>
+        </label>
+      </div>
+
     </div>
 
     <!-- NETWORK PROTECTION -->
@@ -811,22 +824,23 @@ function authHeaders() {
 }
 
 function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
+  if (!getToken()) { window.location.href = "Login.html"; return false }
   return true
 }
 
 async function checkAuth() {
   try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const AUTH_ME = "https://animehunt-backend.animehunt715.workers.dev/api/auth/me"
+    const res  = await fetch(AUTH_ME, { headers: authHeaders() })
     const json = await res.json()
     if (!json.success) throw new Error()
     document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "login.html" }
+  } catch { window.location.href = "Login.html" }
 }
 
 document.getElementById("logoutBtn").onclick = () => {
   localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
+  window.location.href = "Login.html"
 }
 
 /* =========================================
@@ -888,6 +902,7 @@ function toggleCard(cardId, cbId) {
 function updateAllCards() {
   const pairs = [
     ["bot","core_bot"],["scraper","core_scraper"],["hotlink","core_hotlink"],
+    ["embed","core_embed"],
     ["xss","core_xss"],["csrf","core_csrf"],["sqli","core_sqli"],
     ["rateLimit","rate_limit"],["ddos","ddos_protect"],["tor","tor_block"],
     ["autoBan","ai_auto_ban"],["aiThreat","ai_threat_detect"],["aiAnomaly","ai_anomaly"],
@@ -960,6 +975,7 @@ async function loadSettings() {
     setCB("core_bot",          d.core?.bot)
     setCB("core_scraper",      d.core?.scraper)
     setCB("core_hotlink",      d.core?.hotlink)
+    setCB("core_embed",        d.core?.embed)
     setCB("core_xss",          d.core?.xss)
     setCB("core_csrf",         d.core?.csrf)
     setCB("core_sqli",         d.core?.sqli)
