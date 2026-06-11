@@ -582,7 +582,7 @@ select.form-input option{background:#0b0f1a}
    CONFIG
 ========================================= */
 const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
-const SYS_API = `${API}/system`
+const SYS_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
 
 /* =========================================
    AUTH
@@ -594,22 +594,23 @@ function authHeaders() {
 }
 
 function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
+  if (!getToken()) { window.location.href = "Login.html"; return false }
   return true
 }
 
 async function checkAuth() {
   try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
+    const AUTH_ME = "https://animehunt-backend.animehunt715.workers.dev/api/auth/me"
+    const res  = await fetch(AUTH_ME, { headers: authHeaders() })
     const json = await res.json()
     if (!json.success) throw new Error()
     document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "login.html" }
+  } catch { window.location.href = "Login.html" }
 }
 
 document.getElementById("logoutBtn").onclick = () => {
   localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
+  window.location.href = "Login.html"
 }
 
 /* =========================================
@@ -763,7 +764,7 @@ async function loadSettings() {
     const res  = await fetch(SYS_API, { headers: authHeaders() })
     const json = await res.json()
 
-    if (res.status === 401) { window.location.href = "login.html"; return }
+    if (res.status === 401) { window.location.href = "Login.html"; return }
     if (!json.success) throw new Error(json.message)
 
     const d = json.data
