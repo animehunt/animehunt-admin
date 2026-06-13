@@ -179,7 +179,7 @@
       if (data.success) {
         localStorage.setItem("ah_token",    data.data.token)
         localStorage.setItem("ah_username", data.data.username)
-        window.location.href = "index.html"
+        window.location.href = "dashboard.html"
       } else {
         err.textContent = data.message || "Invalid credentials"
         err.classList.add("show")
