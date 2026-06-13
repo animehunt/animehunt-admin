@@ -513,56 +513,6 @@ const GENRES = [
 ]
 
 /* =========================================
-   AUTH
-========================================= */
-function getToken() {
-  return localStorage.getItem("ah_token")
-}
-
-function authHeaders() {
-  const token = getToken()
-  return {
-    "Content-Type":  "application/json",
-    "Authorization": `Bearer ${token}`
-  }
-}
-
-function requireAuth() {
-  const token = getToken()
-  if (!token) {
-    window.location.href = "login.html"
-    return false
-  }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res = await fetch(`${API}/me`, { headers: authHeaders() })
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return false
-    }
-    if (!res.ok) throw new Error("Not authorized")
-    const json = await res.json()
-    if (json.success) {
-      document.getElementById("adminName").textContent = json.data?.username || ""
-    }
-    return true
-  } catch {
-    localStorage.removeItem("ah_token")
-    window.location.href = "login.html"
-    return false
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
-
-/* =========================================
    TOAST
 ========================================= */
 let toastTimer
@@ -606,7 +556,7 @@ function getSelectedGenres() {
 }
 
 function setSelectedGenres(values) {
-  const safeValues = Array.isArray(values) ? values : []   // ✅ FIX: guard non-array
+  const safeValues = Array.isArray(values) ? values : []
   document.querySelectorAll("#genresGrid label").forEach(lbl => {
     const v = lbl.dataset.genre
     const checked = safeValues.includes(v)
@@ -669,7 +619,6 @@ function resetForm() {
     cb.closest(".check-item").classList.remove("checked")
   })
   setSelectedGenres([])
-  // ✅ FIX: reset file inputs so same file can be re-uploaded
   document.getElementById("f-poster-file").value = ""
   document.getElementById("f-banner-file").value = ""
   editId = null
@@ -703,7 +652,6 @@ function populateForm(a) {
 
 /* Slug auto-generate */
 document.getElementById("f-title").addEventListener("input", function() {
-  // ✅ FIX: only auto-generate slug while ADDING (not editing) so we don't break links
   if (editId) return
   const slug = this.value.toLowerCase()
     .replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")
@@ -721,26 +669,26 @@ async function uploadFile(file, previewEl, urlInput) {
   const fd = new FormData()
   fd.append("file", file)
 
-  const oldVal = urlInput.value   // ✅ FIX: remember old value to restore on fail
+  const oldVal = urlInput.value
   urlInput.value = "Uploading..."
   previewEl.textContent = "Uploading..."
 
   try {
     const res  = await fetch(`${API}/upload`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${getToken()}` },
+      headers: { "Authorization": auth.getHeaders()["Authorization"] },
       body: fd
     })
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Upload server error (${res.status})`) }   // ✅ FIX: guard non-JSON upload error
+    catch { throw new Error(`Upload server error (${res.status})`) }
     if (!json.success) throw new Error(json.message || "Upload failed")
     urlInput.value        = json.data.url
     previewEl.textContent = json.data.url
     showToast("Image uploaded ✅")
   } catch (err) {
     showToast("Upload failed: " + err.message, "error")
-    urlInput.value        = oldVal || ""   // ✅ FIX: restore previous URL instead of wiping
+    urlInput.value        = oldVal || ""
     previewEl.textContent = oldVal || ""
   }
 }
@@ -778,7 +726,7 @@ document.getElementById("openAddBtn").onclick  = () => { resetForm(); openModal(
 document.getElementById("closeModal").onclick  = closeModal
 document.getElementById("cancelModal").onclick = closeModal
 document.getElementById("animeModal").addEventListener("click", (e) => {
-  if (e.target.id === "animeModal") closeModal()   // ✅ FIX: use id check — direct object comparison (e.target === element) can fail when element reference changes in some browsers
+  if (e.target.id === "animeModal") closeModal()
 })
 
 /* =========================================
@@ -800,30 +748,30 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res  = await fetch(url, {
       method,
-      headers: authHeaders(),
+      headers: auth.getHeaders(),
       body: JSON.stringify(form)
     })
 
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: if response is not JSON (e.g. CF error page), give readable error instead of cryptic SyntaxError
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message || "Save failed")
 
     showToast(editId ? "Anime updated ✅" : "Anime added ✅")
     closeModal()
-    loadAnime(editId ? currentPage : 1)   // ✅ FIX: stay on page when editing, reset to 1 when adding
+    loadAnime(editId ? currentPage : 1)
 
   } catch (err) {
     showToast(err.message, "error")
   } finally {
     btn.disabled    = false
-    btn.textContent = "💾 Save Anime"   // ✅ always restore button text
+    btn.textContent = "💾 Save Anime"
   }
 }
 
 /* =========================================
-   LOAD  (FIXED — home filter + abort old requests)
+   LOAD
 ========================================= */
 let loadController = null
 async function loadAnime(page = 1) {
@@ -832,15 +780,14 @@ async function loadAnime(page = 1) {
   const search = document.getElementById("searchInput").value.trim()
   const type   = document.getElementById("typeFilter").value
   const status = document.getElementById("statusFilter").value
-  const home   = document.getElementById("homeFilter").value   // ✅ FIX
+  const home   = document.getElementById("homeFilter").value
 
   let url = `${API}/anime?page=${page}&limit=${PAGE_SIZE}`
   if (search) url += `&search=${encodeURIComponent(search)}`
   if (type)   url += `&type=${type}`
   if (status) url += `&status=${status}`
-  if (home)   url += `&home=${home}`   // ✅ FIX
+  if (home)   url += `&home=${home}`
 
-  // ✅ FIX: cancel previous in-flight request (fast typing race condition)
   if (loadController) loadController.abort()
   loadController = new AbortController()
 
@@ -848,15 +795,11 @@ async function loadAnime(page = 1) {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res  = await fetch(url, { headers: authHeaders(), signal: loadController.signal })
-    if (res.status === 401) {                 // ✅ FIX: handle expired token
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res  = await fetch(url, { headers: auth.getHeaders(), signal: loadController.signal })
+
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON response
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message)
 
@@ -868,18 +811,18 @@ async function loadAnime(page = 1) {
     renderPagination()
 
   } catch (err) {
-    if (err.name === "AbortError") return   // ✅ FIX: ignore cancelled requests
+    if (err.name === "AbortError") return
     document.getElementById("animeList").innerHTML =
       `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
   }
 }
-window.loadAnime = loadAnime   // ✅ FIX: expose globally for inline pagination onclick
+window.loadAnime = loadAnime
 
 /* =========================================
-   STATS  (FIXED — use real backend totals)
+   STATS
 ========================================= */
 function updateStats(data) {
-  document.getElementById("statTotal").textContent    = data.totalAll        ?? data.total ?? 0   // ✅ FIX: use unfiltered totalAll so stat card shows real count even when filtered
+  document.getElementById("statTotal").textContent    = data.totalAll      ?? data.total ?? 0
   document.getElementById("statTrending").textContent = data.totalTrending ?? 0
   document.getElementById("statHome").textContent     = data.totalHome     ?? 0
   document.getElementById("statHidden").textContent   = data.totalHidden   ?? 0
@@ -888,7 +831,7 @@ function updateStats(data) {
 /* =========================================
    RENDER TABLE
 ========================================= */
-function escapeHtml(str) {                    // ✅ FIX: prevent XSS / broken HTML from titles
+function escapeHtml(str) {
   return String(str ?? "")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
@@ -915,7 +858,7 @@ function renderTable() {
     const safeTitle = escapeHtml(a.title)
     const poster = a.poster
       ? `<img src="${escapeHtml(a.poster)}" alt="${safeTitle}" loading="lazy"
-           onerror="this.style.display='none'">`   // ✅ FIX: hide broken images
+           onerror="this.style.display='none'">`
       : `<div style="width:36px;height:54px;background:#1a2035;border-radius:5px"></div>`
 
     const genresArr = Array.isArray(a.genres) ? a.genres : []
@@ -985,14 +928,13 @@ async function deleteAnime(id, title) {
   try {
     const res  = await fetch(`${API}/anime/${id}`, {
       method:  "DELETE",
-      headers: authHeaders()
+      headers: auth.getHeaders()
     })
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON response
+    catch { throw new Error(`Server error (${res.status})`) }
     if (!json.success) throw new Error(json.message)
     showToast("Deleted ✅")
-    // ✅ FIX: if last item on page deleted, go to previous page
     const goToPage = (animeData.length === 1 && currentPage > 1) ? currentPage - 1 : currentPage
     loadAnime(goToPage)
   } catch (err) {
@@ -1013,14 +955,19 @@ document.getElementById("statusFilter").addEventListener("change", () => loadAni
 document.getElementById("homeFilter").addEventListener("change",   () => loadAnime(1))
 
 /* =========================================
-   INIT
+   LOGOUT — delegates to central auth.js
 ========================================= */
-if (requireAuth()) {
+document.getElementById("logoutBtn").onclick = () => auth.logout()
+
+/* =========================================
+   INIT — delegates to central auth.js
+========================================= */
+auth.init((user) => {
+  document.getElementById("adminName").textContent = user.username
   buildGenresGrid()
   setupCheckLabels()
-  checkAuth().then(ok => { if (ok) loadAnime() })   // ✅ FIX: only load data after auth confirmed — prevents race condition where loadAnime fires before token is validated and gets 401
-}
+  loadAnime()
+})
 </script>
 </body>
 </html>
-
