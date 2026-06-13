@@ -478,6 +478,7 @@ select.form-input option{background:#0e1424}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG
@@ -486,33 +487,9 @@ const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const SIDE_API = `${API}/sidebar`
 
 /* =========================================
-   AUTH
+   LOGOUT — Central auth.js handles it
 ========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "Login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const AUTH_ME = "https://animehunt-backend.animehunt715.workers.dev/api/auth/me"
-    const res  = await fetch(AUTH_ME, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "Login.html" }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "Login.html"
-}
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
@@ -539,7 +516,7 @@ let dragSrcIdx = null
 ========================================= */
 async function loadStats() {
   try {
-    const res  = await fetch(`${SIDE_API}/stats`, { headers: authHeaders() })
+    const res  = await fetch(`${SIDE_API}/stats`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) return
     const d = json.data
@@ -558,10 +535,9 @@ async function loadItems() {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res  = await fetch(SIDE_API, { headers: authHeaders() })
+    const res  = await fetch(SIDE_API, { headers: Auth.headers() })
     const json = await res.json()
 
-    if (res.status === 401) { window.location.href = "Login.html"; return }
     if (!json.success) throw new Error(json.message)
 
     items = json.data || []
@@ -723,7 +699,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
   try {
     const order = items.map((item, i) => ({ id: item.id, priority: i + 1 }))
     const res   = await fetch(`${SIDE_API}/reorder`, {
-      method: "POST", headers: authHeaders(),
+      method: "POST", headers: Auth.headers(),
       body: JSON.stringify({ order })
     })
     const json = await res.json()
@@ -747,7 +723,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
 async function toggleItem(id, checkbox) {
   try {
     const res  = await fetch(`${SIDE_API}/${id}/toggle`, {
-      method: "PATCH", headers: authHeaders()
+      method: "PATCH", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -777,7 +753,7 @@ document.getElementById("autoBuildBtn").onclick = async () => {
 
   try {
     const res  = await fetch(`${SIDE_API}/default`, {
-      method: "POST", headers: authHeaders()
+      method: "POST", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -883,7 +859,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
   try {
     const res  = await fetch(SIDE_API, {
-      method: "POST", headers: authHeaders(),
+      method: "POST", headers: Auth.headers(),
       body: JSON.stringify(payload)
     })
     const json = await res.json()
@@ -920,7 +896,7 @@ async function deleteItem(id, title) {
 
   try {
     const res  = await fetch(`${SIDE_API}/${id}`, {
-      method: "DELETE", headers: authHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -934,10 +910,12 @@ async function deleteItem(id, title) {
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadItems()
-}
+/* =========================================
+   INIT — auth.js handles protect + username
+========================================= */
+Auth.protect()
+Auth.showUsername("adminName")
+loadItems()
 </script>
 </body>
 </html>
