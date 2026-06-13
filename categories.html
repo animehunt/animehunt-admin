@@ -276,7 +276,7 @@ select.form-input option{background:#0e1424}
           <div class="num" id="statTotal">—</div>
           <div class="lbl">Total Categories</div>
         </div>
-      </div>
+        </div>
       <div class="stat-card">
         <div class="stat-icon">✅</div>
         <div class="stat-info">
@@ -429,55 +429,17 @@ select.form-input option{background:#0e1424}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- =========================================
+     CENTRAL AUTH — delegated to auth.js
+========================================= -->
+<script src="auth.js"></script>
+
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const CAT_API = `${API}/categories`
-
-/* =========================================
-   AUTH
-========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return {
-    "Content-Type":  "application/json",
-    "Authorization": `Bearer ${getToken()}`
-  }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res = await fetch(`${API}/me`, { headers: authHeaders() })
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")   // ✅ FIX: clear stale token
-      window.location.href = "login.html"
-      return false
-    }
-    if (!res.ok) throw new Error("Not authorized")
-    const json = await res.json()
-    if (json.success) {
-      document.getElementById("adminName").textContent = json.data?.username || ""   // ✅ FIX: optional chaining prevents crash if data null
-    }
-    return true
-  } catch {
-    localStorage.removeItem("ah_token")
-    window.location.href = "login.html"
-    return false
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
 
 /* =========================================
    TOAST
@@ -512,7 +474,6 @@ function resetForm() {
 
   FLAGS.forEach(key => {
     const cb  = document.getElementById(`f-${key}`)
-    /* isActive default true */
     cb.checked = (key === "isActive")
     cb.closest(".check-item").classList.toggle("checked", cb.checked)
   })
@@ -549,7 +510,7 @@ function getFormData() {
     slug:       document.getElementById("f-slug").value.trim(),
     type:       document.getElementById("f-type").value,
     priority:   Number(document.getElementById("f-priority").value),
-    order:      orderVal >= 1 ? orderVal : null,   // ✅ FIX: was `|| 0` — sending 0 bypassed backend MAX()+1 auto-assign
+    order:      orderVal >= 1 ? orderVal : null,
     showHome:   document.getElementById("f-showHome").checked,
     isActive:   document.getElementById("f-isActive").checked,
     isFeatured: document.getElementById("f-isFeatured").checked,
@@ -562,7 +523,6 @@ function getFormData() {
 /* Auto slug */
 document.getElementById("f-name").addEventListener("input", function() {
   if (editId) return
-  // ✅ FIX: improved slug — was leaving double dashes on consecutive special chars (e.g. "Action!! Anime" → "action--anime")
   document.getElementById("f-slug").value = this.value.toLowerCase().trim()
     .replace(/[^a-z0-9\s-]+/g, "")
     .replace(/[\s-]+/g, "-")
@@ -593,8 +553,13 @@ document.getElementById("openAddBtn").onclick  = () => { resetForm(); openModal(
 document.getElementById("closeModal").onclick  = closeModal
 document.getElementById("cancelModal").onclick = closeModal
 document.getElementById("categoryModal").addEventListener("click", e => {
-  if (e.target.id === "categoryModal") closeModal()   // ✅ FIX: id string comparison is reliable
+  if (e.target.id === "categoryModal") closeModal()
 })
+
+/* =========================================
+   LOGOUT — delegates to central auth.js
+========================================= */
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    SAVE
@@ -603,7 +568,6 @@ document.getElementById("saveBtn").onclick = async () => {
   const form = getFormData()
   if (!form.name) { showToast("Name is required","error"); return }
 
-  // ✅ FIX: warn user if they have unsaved drag order — saving will refresh from server
   if (orderDirty && !confirm("You have unsaved order changes. Saving this category will reload the list and lose the drag order. Continue?")) return
 
   const btn = document.getElementById("saveBtn")
@@ -616,19 +580,19 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res = await fetch(url, {
       method,
-      headers: authHeaders(),
+      headers: Auth.headers(),
       body: JSON.stringify(form)
     })
 
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message || "Save failed")
 
     showToast(editId ? "Category updated ✅" : "Category added ✅")
     closeModal()
-    orderDirty = false   // ✅ FIX: reset dirty flag since we're reloading from server
+    orderDirty = false
     document.getElementById("saveOrderBtn").style.display = "none"
     loadCategories()
 
@@ -651,10 +615,9 @@ async function loadCategories() {
   let url = CAT_API
   const params = []
   if (search) params.push(`search=${encodeURIComponent(search)}`)
-  if (type)   params.push(`type=${encodeURIComponent(type)}`)   // ✅ FIX: encode type value
+  if (type)   params.push(`type=${encodeURIComponent(type)}`)
   if (params.length) url += "?" + params.join("&")
 
-  // ✅ FIX: abort previous in-flight request — debounced search + filter change = race condition
   if (loadController) loadController.abort()
   loadController = new AbortController()
 
@@ -662,18 +625,11 @@ async function loadCategories() {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res = await fetch(url, { headers: authHeaders(), signal: loadController.signal })
-
-    // ✅ FIX: handle expired token
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res = await fetch(url, { headers: Auth.headers(), signal: loadController.signal })
 
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON response
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message)
 
@@ -682,7 +638,7 @@ async function loadCategories() {
     renderTable()
 
   } catch (err) {
-    if (err.name === "AbortError") return   // ✅ FIX: ignore cancelled requests silently
+    if (err.name === "AbortError") return
     document.getElementById("categoryList").innerHTML =
       `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
   }
@@ -730,13 +686,13 @@ function renderTable() {
 
     const safeName = escapeHtml(cat.name)
     const safeSlug = escapeHtml(cat.slug)
-    const safeId   = escapeHtml(String(cat.id || "").slice(0, 8))   // ✅ FIX: guard null id before slice
+    const safeId   = escapeHtml(String(cat.id || "").slice(0, 8))
 
     const typeBadge = {
       row:  '<span class="badge badge-row">Row</span>',
       page: '<span class="badge badge-page">Page</span>',
       both: '<span class="badge badge-both">Both</span>'
-    }[cat.type] || escapeHtml(cat.type)   // ✅ FIX: escape unknown type values
+    }[cat.type] || escapeHtml(cat.type)
 
     const flags = [
       cat.show_home   && `<span class="flag on">🏠 Home</span>`,
@@ -770,7 +726,6 @@ function renderTable() {
     row.querySelector(".edit-btn").onclick   = () => editCategory(cat.id)
     row.querySelector(".del-btn").onclick    = () => deleteCategory(cat.id, cat.name)
 
-    /* Drag events */
     row.addEventListener("dragstart", onDragStart)
     row.addEventListener("dragover",  onDragOver)
     row.addEventListener("drop",      onDrop)
@@ -785,17 +740,11 @@ function renderTable() {
 ========================================= */
 async function editCategory(id) {
   try {
-    const res = await fetch(`${CAT_API}/${id}`, { headers: authHeaders() })
-
-    if (res.status === 401) {   // ✅ FIX: handle expired token
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res = await fetch(`${CAT_API}/${id}`, { headers: Auth.headers() })
 
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message)
 
@@ -817,11 +766,11 @@ async function deleteCategory(id, name) {
   try {
     const res = await fetch(`${CAT_API}/${id}`, {
       method:  "DELETE",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    catch { throw new Error(`Server error (${res.status})`) }
     if (!json.success) throw new Error(json.message)
     showToast("Deleted ✅")
     loadCategories()
@@ -833,26 +782,19 @@ async function deleteCategory(id, name) {
 /* =========================================
    TOGGLE ACTIVE
 ========================================= */
-async function toggleCategory(id, currentActive) {
+async function toggleCategory(id) {
   try {
     const res = await fetch(`${CAT_API}/${id}/toggle`, {
       method:  "PATCH",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
-
-    if (res.status === 401) {   // ✅ FIX: handle expired token
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
 
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message)
 
-    // ✅ FIX: update local data instead of full reload — full reload was losing unsaved drag order (orderDirty state)
     const cat = catData.find(c => c.id === id)
     if (cat) cat.active = json.data.active
 
@@ -888,18 +830,15 @@ function onDrop(e) {
   const targetIdx = Number(this.dataset.idx)
   if (dragSrcIdx === null || dragSrcIdx === targetIdx) return
 
-  // ✅ FIX: verify indices are still valid — stale idx after a concurrent render would corrupt order
   if (dragSrcIdx >= catData.length || targetIdx >= catData.length) {
     showToast("Drag failed — list changed. Please try again.", "error")
     dragSrcIdx = null
     return
   }
 
-  /* Reorder catData array */
   const moved = catData.splice(dragSrcIdx, 1)[0]
   catData.splice(targetIdx, 0, moved)
 
-  /* Update order values */
   catData.forEach((c, i) => { c.category_order = i + 1 })
 
   orderDirty = true
@@ -927,19 +866,13 @@ document.getElementById("saveOrderBtn").onclick = async () => {
 
     const res = await fetch(`${CAT_API}/reorder`, {
       method:  "POST",
-      headers: authHeaders(),
+      headers: Auth.headers(),
       body:    JSON.stringify({ order })
     })
 
-    if (res.status === 401) {   // ✅ FIX: handle expired token
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
-
     let json
     try { json = await res.json() }
-    catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
+    catch { throw new Error(`Server error (${res.status})`) }
 
     if (!json.success) throw new Error(json.message)
 
@@ -966,15 +899,14 @@ document.getElementById("searchInput").addEventListener("input", () => {
 document.getElementById("typeFilter").addEventListener("change", () => loadCategories())
 
 /* =========================================
-   INIT
+   INIT — delegates to central auth.js
 ========================================= */
-if (requireAuth()) {
-  checkAuth().then(ok => {
-    if (!ok) return   // ✅ FIX: stop all API calls if auth failed/redirected
-    loadCategories()  // ✅ FIX: only load after auth confirmed — was concurrent causing 401 on fresh load
-  })
-}
+Auth.init({
+  onSuccess: (user) => {
+    document.getElementById("adminName").textContent = user.username
+    loadCategories()
+  }
+})
 </script>
 </body>
 </html>
-
