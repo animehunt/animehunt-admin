@@ -527,40 +527,13 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
 const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const FOOT_API = `${API}/footer`
-
-/* =========================================
-   AUTH
-========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "login.html" }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
 
 /* =========================================
    TOAST
@@ -702,7 +675,8 @@ function updatePreview() {
 ========================================= */
 async function loadSettings() {
   try {
-    const res  = await fetch(FOOT_API, { headers: authHeaders() })
+    const res  = await AuthService.authFetch(FOOT_API)
+    if (!res) return
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
@@ -836,10 +810,11 @@ async function saveSettings() {
   btn.textContent = "Saving..."
 
   try {
-    const res  = await fetch(FOOT_API, {
-      method: "POST", headers: authHeaders(),
+    const res  = await AuthService.authFetch(FOOT_API, {
+      method: "POST",
       body: JSON.stringify(buildPayload())
     })
+    if (!res) return
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
@@ -862,7 +837,8 @@ document.getElementById("saveBtn").onclick = saveSettings
 document.getElementById("resetBtn").onclick = async () => {
   if (!confirm("Reset footer to defaults?")) return
   try {
-    const res  = await fetch(`${FOOT_API}/reset`, { method: "POST", headers: authHeaders() })
+    const res  = await AuthService.authFetch(`${FOOT_API}/reset`, { method: "POST" })
+    if (!res) return
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
     showToast("Reset to defaults ✅")
@@ -876,7 +852,8 @@ document.getElementById("resetBtn").onclick = async () => {
 document.getElementById("killBtn").onclick = async () => {
   if (!confirm("Disable footer on entire site?")) return
   try {
-    const res  = await fetch(`${FOOT_API}/kill`, { method: "POST", headers: authHeaders() })
+    const res  = await AuthService.authFetch(`${FOOT_API}/kill`, { method: "POST" })
+    if (!res) return
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
     showToast("Footer disabled ⛔", "info")
@@ -887,10 +864,9 @@ document.getElementById("killBtn").onclick = async () => {
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadSettings()
-}
+AuthService.init().then(ok => {
+  if (ok) loadSettings()
+})
 </script>
 </body>
 </html>
