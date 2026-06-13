@@ -493,6 +493,11 @@ select.form-input option{background:#0e1424}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- =========================================
+     CENTRAL AUTH — delegated to auth.js
+========================================= -->
+<script src="auth.js"></script>
+
 <script>
 /* =========================================
    CONFIG
@@ -500,39 +505,6 @@ select.form-input option{background:#0e1424}
 const API        = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const BANNER_API = `${API}/banners`
 const UPLOAD_API = `${API}/upload`
-
-/* =========================================
-   AUTH
-========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return {
-    "Content-Type":  "application/json",
-    "Authorization": `Bearer ${getToken()}`
-  }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch {
-    window.location.href = "login.html"
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
 
 /* =========================================
    TOAST
@@ -592,10 +564,10 @@ document.getElementById("f-image-file").addEventListener("change", async functio
   if (!file.type.startsWith("image/")) { showToast("Only images allowed","error"); return }
   if (file.size > 10 * 1024 * 1024)   { showToast("Max 10MB allowed","error"); return }
 
-  const urlInput    = document.getElementById("f-image")
-  const statusEl    = document.getElementById("uploadStatus")
+  const urlInput  = document.getElementById("f-image")
+  const statusEl  = document.getElementById("uploadStatus")
 
-  urlInput.value        = "Uploading..."
+  urlInput.value         = "Uploading..."
   statusEl.style.display = "block"
   statusEl.textContent   = "Uploading..."
 
@@ -605,7 +577,7 @@ document.getElementById("f-image-file").addEventListener("change", async functio
   try {
     const res  = await fetch(UPLOAD_API, {
       method:  "POST",
-      headers: { "Authorization": `Bearer ${getToken()}` },
+      headers: { "Authorization": `Bearer ${Auth.getToken()}` },
       body:    fd
     })
     const json = await res.json()
@@ -706,6 +678,11 @@ document.getElementById("bannerModal").addEventListener("click", e => {
 })
 
 /* =========================================
+   LOGOUT — delegates to central auth.js
+========================================= */
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
+
+/* =========================================
    SAVE
 ========================================= */
 document.getElementById("saveBtn").onclick = async () => {
@@ -724,7 +701,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res  = await fetch(url, {
       method,
-      headers: authHeaders(),
+      headers: Auth.headers(),
       body: JSON.stringify(form)
     })
     const json = await res.json()
@@ -759,7 +736,7 @@ async function loadBanners() {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res  = await fetch(url, { headers: authHeaders() })
+    const res  = await fetch(url, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
@@ -844,12 +821,11 @@ async function toggleBanner(id, checkbox) {
   try {
     const res  = await fetch(`${BANNER_API}/${id}/toggle`, {
       method:  "PATCH",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
-    /* Update local data */
     const b = bannerData.find(x => x.id === id)
     if (b) b.active = json.data.active
 
@@ -857,7 +833,6 @@ async function toggleBanner(id, checkbox) {
     updateStats()
 
   } catch (err) {
-    /* Revert toggle on error */
     checkbox.checked = !checkbox.checked
     showToast(err.message, "error")
   }
@@ -883,7 +858,7 @@ async function deleteBanner(id, title) {
   try {
     const res  = await fetch(`${BANNER_API}/${id}`, {
       method:  "DELETE",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -901,13 +876,15 @@ document.getElementById("pageFilter").addEventListener("change",     () => loadB
 document.getElementById("positionFilter").addEventListener("change", () => loadBanners())
 
 /* =========================================
-   INIT
+   INIT — delegates to central auth.js
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadBanners()
-  resetForm()
-}
+Auth.init({
+  onSuccess: (user) => {
+    document.getElementById("adminName").textContent = user.username
+    loadBanners()
+    resetForm()
+  }
+})
 </script>
 </body>
 </html>
