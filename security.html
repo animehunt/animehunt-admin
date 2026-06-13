@@ -804,6 +804,7 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG
@@ -815,33 +816,9 @@ let currentFW = 3
 let isDirty   = false
 
 /* =========================================
-   AUTH
+   LOGOUT — Central auth.js handles it
 ========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "Login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const AUTH_ME = "https://animehunt-backend.animehunt715.workers.dev/api/auth/me"
-    const res  = await fetch(AUTH_ME, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "Login.html" }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "Login.html"
-}
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
@@ -917,7 +894,7 @@ function updateAllCards() {
 ========================================= */
 async function loadScore() {
   try {
-    const res  = await fetch(`${SEC_API}/score`, { headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/score`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) return
 
@@ -946,7 +923,7 @@ async function loadScore() {
 ========================================= */
 async function loadStats() {
   try {
-    const res  = await fetch(`${SEC_API}/stats`, { headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/stats`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) return
     document.getElementById("statBanned").textContent  = json.data.bannedIPs
@@ -959,7 +936,7 @@ async function loadStats() {
 ========================================= */
 async function loadSettings() {
   try {
-    const res  = await fetch(SEC_API, { headers: authHeaders() })
+    const res  = await fetch(SEC_API, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
@@ -1086,7 +1063,7 @@ async function saveSettings() {
 
   try {
     const res  = await fetch(SEC_API, {
-      method: "POST", headers: authHeaders(),
+      method: "POST", headers: Auth.headers(),
       body: JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -1112,7 +1089,7 @@ document.getElementById("saveBtn").onclick = saveSettings
 document.getElementById("resetBtn").onclick = async () => {
   if (!confirm("Reset all security settings to defaults?")) return
   try {
-    const res  = await fetch(`${SEC_API}/reset`, { method: "POST", headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/reset`, { method: "POST", headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
     showToast("Reset to defaults ✅")
@@ -1125,7 +1102,7 @@ document.getElementById("resetBtn").onclick = async () => {
 ========================================= */
 async function enableAll() {
   try {
-    const res  = await fetch(`${SEC_API}/enable-all`, { method: "POST", headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/enable-all`, { method: "POST", headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
     showToast("All security features enabled ✅")
@@ -1144,7 +1121,7 @@ async function banIP() {
 
   try {
     const res  = await fetch(`${SEC_API}/ban`, {
-      method: "POST", headers: authHeaders(),
+      method: "POST", headers: Auth.headers(),
       body: JSON.stringify({ ip, reason: reason || "manual" })
     })
     const json = await res.json()
@@ -1164,7 +1141,7 @@ async function banIP() {
 ========================================= */
 async function loadBannedIPs() {
   try {
-    const res  = await fetch(`${SEC_API}/banned`, { headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/banned`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error()
 
@@ -1194,7 +1171,7 @@ async function loadBannedIPs() {
 async function unbanIP(ip) {
   try {
     const res  = await fetch(`${SEC_API}/ban/${encodeURIComponent(ip)}`, {
-      method: "DELETE", headers: authHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -1208,7 +1185,7 @@ async function clearAllBans() {
   if (!confirm("Unban ALL IPs?")) return
   try {
     const res  = await fetch(`${SEC_API}/banned/all`, {
-      method: "DELETE", headers: authHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -1223,7 +1200,7 @@ async function clearAllBans() {
 ========================================= */
 async function loadThreats() {
   try {
-    const res  = await fetch(`${SEC_API}/threats?limit=30`, { headers: authHeaders() })
+    const res  = await fetch(`${SEC_API}/threats?limit=30`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error()
 
@@ -1259,7 +1236,7 @@ async function clearThreats() {
   if (!confirm("Clear all threat logs?")) return
   try {
     const res  = await fetch(`${SEC_API}/threats`, {
-      method: "DELETE", headers: authHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -1272,13 +1249,15 @@ async function clearThreats() {
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadSettings()
-  loadStats()
-  loadBannedIPs()
-  loadThreats()
-}
+/* =========================================
+   INIT — auth.js handles protect + username
+========================================= */
+Auth.protect()
+Auth.showUsername("adminName")
+loadSettings()
+loadStats()
+loadBannedIPs()
+loadThreats()
 </script>
 </body>
 </html>
