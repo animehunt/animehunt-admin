@@ -525,6 +525,7 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG
@@ -533,37 +534,9 @@ const API        = "https://animehunt-backend.animehunt715.workers.dev/api/admin
 const SEARCH_API = `${API}/search`
 
 /* =========================================
-   AUTH
+   LOGOUT — Central auth.js handles it
 ========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return {
-    "Content-Type":  "application/json",
-    "Authorization": `Bearer ${getToken()}`
-  }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch {
-    window.location.href = "login.html"
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
@@ -634,7 +607,7 @@ function initToggle(key, val) {
 ========================================= */
 async function loadSettings() {
   try {
-    const res  = await fetch(SEARCH_API, { headers: authHeaders() })
+    const res  = await fetch(SEARCH_API, { headers: Auth.headers() })
     const json = await res.json()
 
     if (!json.success) throw new Error(json.message)
@@ -732,7 +705,7 @@ async function saveSettings() {
   try {
     const res  = await fetch(SEARCH_API, {
       method:  "POST",
-      headers: authHeaders(),
+      headers: Auth.headers(),
       body:    JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -763,7 +736,7 @@ document.getElementById("resetBtn").onclick = async () => {
   try {
     const res  = await fetch(`${SEARCH_API}/reset`, {
       method:  "POST",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -803,7 +776,7 @@ async function runTest(query) {
   try {
     const res  = await fetch(
       `${SEARCH_API}/test?q=${encodeURIComponent(query)}`,
-      { headers: authHeaders() }
+      { headers: Auth.headers() }
     )
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -841,7 +814,7 @@ async function runTest(query) {
 ========================================= */
 async function loadPopular() {
   try {
-    const res  = await fetch(`${SEARCH_API}/popular`, { headers: authHeaders() })
+    const res  = await fetch(`${SEARCH_API}/popular`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error()
 
@@ -874,7 +847,7 @@ document.getElementById("clearPopularBtn").onclick = async () => {
   try {
     const res  = await fetch(`${SEARCH_API}/popular`, {
       method:  "DELETE",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -898,11 +871,13 @@ window.addEventListener("beforeunload", (e) => {
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadSettings()
-  loadPopular()
-}
+/* =========================================
+   INIT — auth.js handles protect + username
+========================================= */
+Auth.protect()
+Auth.showUsername("adminName")
+loadSettings()
+loadPopular()
 </script>
 </body>
 </html>
