@@ -465,6 +465,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG
@@ -472,48 +473,6 @@ textarea.form-input{resize:vertical;min-height:70px}
 const API       = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const ANIME_API = `${API}/anime`
 const EP_API    = `${API}/episodes`
-
-/* =========================================
-   AUTH
-========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders(isForm = false) {
-  const h = { "Authorization": `Bearer ${getToken()}` }
-  if (!isForm) h["Content-Type"] = "application/json"
-  return h
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res = await fetch(`${API}/me`, { headers: authHeaders() })
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")   // ✅ FIX: clear stale token before redirect
-      window.location.href = "login.html"
-      return false
-    }
-    if (!res.ok) throw new Error("Not authorized")
-    const json = await res.json()
-    if (json.success) {
-      document.getElementById("adminName").textContent = json.data?.username || ""   // ✅ FIX: optional chaining prevents crash if data is null
-    }
-    return true
-  } catch {
-    localStorage.removeItem("ah_token")
-    window.location.href = "login.html"
-    return false
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
 
 /* =========================================
    TOAST
@@ -542,13 +501,8 @@ const PAGE_SIZE = 30
 ========================================= */
 async function loadAnimeList() {
   try {
-    const res = await fetch(`${ANIME_API}?limit=200`, { headers: authHeaders() })   // ✅ FIX: increased from 100 to 200 — sites with many anime were truncating the list
-
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res = await AuthService.authFetch(`${ANIME_API}?limit=200`)   // ✅ FIX: increased from 100 to 200 — sites with many anime were truncating the list
+    if (!res) return
 
     let json
     try { json = await res.json() }
@@ -717,11 +671,11 @@ document.getElementById("f-thumb-file").addEventListener("change", async functio
   preview.textContent = "Uploading..."
 
   try {
-    const res = await fetch(`${API}/upload`, {
+    const res = await AuthService.authFetch(`${API}/upload`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${getToken()}` },
       body: fd
     })
+    if (!res) return
     let json
     try { json = await res.json() }
     catch { throw new Error(`Upload server error (${res.status})`) }   // ✅ FIX: guard non-JSON
@@ -776,11 +730,11 @@ document.getElementById("saveBtn").onclick = async () => {
     const url    = editId ? `${EP_API}/${editId}` : EP_API
     const method = editId ? "PUT" : "POST"
 
-    const res = await fetch(url, {
+    const res = await AuthService.authFetch(url, {
       method,
-      headers: authHeaders(),
       body: JSON.stringify(form)
     })
+    if (!res) return
 
     let json
     try { json = await res.json() }
@@ -824,14 +778,8 @@ async function loadEpisodes(page = 1) {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res = await fetch(url, { headers: authHeaders(), signal: loadController.signal })
-
-    // ✅ FIX: handle 401 expired token
-    if (res.status === 401) {
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res = await AuthService.authFetch(url, { signal: loadController.signal })
+    if (!res) return
 
     let json
     try { json = await res.json() }
@@ -955,13 +903,8 @@ function renderPagination() {
 ========================================= */
 async function editEpisode(id) {
   try {
-    const res = await fetch(`${EP_API}/${id}`, { headers: authHeaders() })
-
-    if (res.status === 401) {   // ✅ FIX: handle expired token in edit fetch
-      localStorage.removeItem("ah_token")
-      window.location.href = "login.html"
-      return
-    }
+    const res = await AuthService.authFetch(`${EP_API}/${id}`)
+    if (!res) return
 
     let json
     try { json = await res.json() }
@@ -985,10 +928,10 @@ async function deleteEpisode(id, anime, season, ep) {
   if (!confirm(`Delete S${season}E${ep} of "${anime}"?\n\nThis cannot be undone.`)) return
 
   try {
-    const res = await fetch(`${EP_API}/${id}`, {
-      method:  "DELETE",
-      headers: authHeaders()
+    const res = await AuthService.authFetch(`${EP_API}/${id}`, {
+      method: "DELETE"
     })
+    if (!res) return
     let json
     try { json = await res.json() }
     catch { throw new Error(`Server error (${res.status})`) }   // ✅ FIX: guard non-JSON
@@ -1016,12 +959,10 @@ document.getElementById("seasonFilter").addEventListener("change", () => loadEpi
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth().then(ok => {
-    if (!ok) return   // ✅ FIX: stop if auth failed (was firing API calls after redirect)
-    loadAnimeList().then(() => loadEpisodes())   // ✅ FIX: load episodes only after anime list is ready (was concurrent — race condition)
-  })
-}
+AuthService.init().then(ok => {
+  if (!ok) return   // init() already redirected — nothing else to do
+  loadAnimeList().then(() => loadEpisodes())   // ✅ FIX: load episodes only after anime list is ready (was concurrent — race condition)
+})
 </script>
 </body>
 </html>
