@@ -517,32 +517,9 @@ const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
 const HOME_API = `${API}/homepage`
 
 /* =========================================
-   AUTH
+   LOGOUT — Central auth.js handles it
 ========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const res  = await fetch(`${API}/me`, { headers: authHeaders() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminName").textContent = json.data.username
-  } catch { window.location.href = "login.html" }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "login.html"
-}
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
@@ -626,7 +603,7 @@ document.querySelectorAll(".check-item input[type=checkbox]").forEach(cb => {
 ========================================= */
 async function loadStats() {
   try {
-    const res  = await fetch(`${HOME_API}/stats`, { headers: authHeaders() })
+    const res  = await fetch(`${HOME_API}/stats`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) return
     const d = json.data
@@ -644,10 +621,9 @@ async function loadRows() {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res  = await fetch(HOME_API, { headers: authHeaders() })
+    const res  = await fetch(HOME_API, { headers: Auth.headers() })
     const json = await res.json()
 
-    if (res.status === 401) { window.location.href = "login.html"; return }
     if (!json.success) throw new Error(json.message)
 
     rowData = json.data || []
@@ -771,7 +747,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
   try {
     const order = rowData.map((r, i) => ({ id: r.id, order: i + 1 }))
     const res   = await fetch(`${HOME_API}/reorder`, {
-      method: "POST", headers: authHeaders(),
+      method: "POST", headers: Auth.headers(),
       body: JSON.stringify({ order })
     })
     const json = await res.json()
@@ -795,7 +771,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
 async function toggleRow(id, checkbox) {
   try {
     const res  = await fetch(`${HOME_API}/${id}/toggle`, {
-      method: "PATCH", headers: authHeaders()
+      method: "PATCH", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -824,7 +800,7 @@ document.getElementById("autoBuildBtn").onclick = async () => {
 
   try {
     const res  = await fetch(`${HOME_API}/auto-build`, {
-      method: "POST", headers: authHeaders()
+      method: "POST", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -936,7 +912,7 @@ document.getElementById("saveBtn").onclick = async () => {
     const method = editId ? "PATCH" : "POST"
 
     const res  = await fetch(url, {
-      method, headers: authHeaders(), body: JSON.stringify(form)
+      method, headers: Auth.headers(), body: JSON.stringify(form)
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -958,7 +934,7 @@ document.getElementById("saveBtn").onclick = async () => {
 ========================================= */
 async function editRow(id) {
   try {
-    const res  = await fetch(`${HOME_API}/${id}`, { headers: authHeaders() })
+    const res  = await fetch(`${HOME_API}/${id}`, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
@@ -979,7 +955,7 @@ async function deleteRow(id, title) {
 
   try {
     const res  = await fetch(`${HOME_API}/${id}`, {
-      method: "DELETE", headers: authHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
@@ -993,11 +969,13 @@ async function deleteRow(id, title) {
 /* =========================================
    INIT
 ========================================= */
-if (requireAuth()) {
-  checkAuth()
-  loadRows()
-  resetForm()
-}
+/* =========================================
+   INIT — auth.js handles protect + username
+========================================= */
+Auth.protect()
+Auth.showUsername("adminName")
+loadRows()
+resetForm()
 </script>
 </body>
 </html>
