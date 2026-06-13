@@ -584,42 +584,9 @@ const DASH  = `${API}/dashboard`
 const REFRESH_INTERVAL = 30000  /* 30 seconds */
 
 /* =========================================
-   AUTH
+   LOGOUT — Central auth.js handles it
 ========================================= */
-function getToken() { return localStorage.getItem("ah_token") }
-
-function authHeaders() {
-  return {
-    "Content-Type":  "application/json",
-    "Authorization": `Bearer ${getToken()}`
-  }
-}
-
-function requireAuth() {
-  if (!getToken()) { window.location.href = "Login.html"; return false }
-  return true
-}
-
-async function checkAuth() {
-  try {
-    const AUTH_ME = "https://animehunt-backend.animehunt715.workers.dev/api/auth/me"
-    const res  = await fetch(AUTH_ME, { headers: authHeaders() })
-    if (!res.ok) throw new Error("Auth verify failed")
-
-    const json = await res.json()
-    if (!json.success) throw new Error()
-    document.getElementById("adminBadge").textContent = `👤 ${json.data.username}`
-    return true
-  } catch {
-    window.location.href = "Login.html"
-    return false
-  }
-}
-
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("ah_token")
-  window.location.href = "Login.html"
-}
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
@@ -668,12 +635,7 @@ function statusBadge(val) {
 ========================================= */
 async function loadDashboard() {
   try {
-    const res = await fetch(DASH, { headers: authHeaders() })
-
-    if (res.status === 401) {
-      window.location.href = "Login.html"
-      return
-    }
+    const res = await fetch(DASH, { headers: Auth.headers() })
 
     if (!res.ok) {
       const text = await res.text()
@@ -771,7 +733,7 @@ async function runSyncCheck() {
   try {
     const res  = await fetch(`${DASH}/sync-check`, {
       method:  "POST",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`)
@@ -811,7 +773,7 @@ async function runAIScan() {
   try {
     const res  = await fetch(`${DASH}/ai-scan`, {
       method:  "POST",
-      headers: authHeaders()
+      headers: Auth.headers()
     })
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`)
     const json = await res.json()
@@ -840,7 +802,7 @@ function confirmEmergencyStop() {
 
   fetch(`${API}/system/kill`, {
     method:  "POST",
-    headers: authHeaders()
+    headers: Auth.headers()
   }).catch(() => {})
 
   showToast("Emergency stop activated 🚨", "error")
@@ -944,14 +906,14 @@ function startProgressBar() {
 /* =========================================
    INIT
 ========================================= */
+/* =========================================
+   INIT — auth.js handles protect + username
+========================================= */
 async function init() {
-  if (requireAuth()) {
-    const isAuthed = await checkAuth()
-    if (isAuthed) {
-      await loadDashboard()
-      startAutoRefresh()
-    }
-  }
+  Auth.protect()
+  Auth.showUsername("adminBadge")
+  await loadDashboard()
+  startAutoRefresh()
 }
 
 // Start execution
