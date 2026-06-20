@@ -82,7 +82,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 }
 .panel-search:focus{border-color:#ffcc00}
 .anime-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
   padding:10px;overflow-y:auto;flex:1
 }
 .anime-card{
@@ -91,9 +91,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 }
 .anime-card:hover{border-color:#ffcc00;transform:translateY(-2px)}
 .anime-card.active{border-color:#ffcc00;background:#1a2035}
-.anime-card img{
-  width:100%;aspect-ratio:2/3;object-fit:cover;display:block
-}
+.anime-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
 .anime-card-info{padding:6px 8px}
 .anime-card-info .title{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .anime-card-info .type{font-size:9px;color:#777;margin-top:2px}
@@ -117,7 +115,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 .breadcrumb .sep{color:#333}
 .panel-content{flex:1;overflow-y:auto;padding:12px}
 
-/* ========== SEASON / STRUCTURE ========== */
+/* ========== SEASON STRUCTURE ========== */
 .structure-list{display:flex;flex-direction:column;gap:8px}
 .struct-item{
   background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;
@@ -131,11 +129,6 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 .struct-item .si-sub{font-size:11px;color:#555;margin-top:2px}
 .struct-item .si-right{display:flex;align-items:center;gap:8px}
 .struct-item .ep-count{font-size:11px;color:#777}
-.struct-btn-add{
-  background:#1a2035;border:none;color:#aaa;padding:5px 10px;
-  border-radius:5px;font-size:11px;cursor:pointer;transition:.15s
-}
-.struct-btn-add:hover{background:#ffcc00;color:#000}
 
 /* ========== EPISODE LIST ========== */
 .ep-list{display:flex;flex-direction:column;gap:6px}
@@ -155,29 +148,19 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 .ep-item .ep-meta{font-size:10px;color:#555;margin-top:2px}
 .ep-item .ep-right{display:flex;align-items:center;gap:6px}
 .host-dots{display:flex;gap:3px}
-.host-dot{
-  width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block
-}
+.host-dot{width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block}
 
 /* ========== HOST ENTRIES ========== */
 .host-entries{display:flex;flex-direction:column;gap:8px}
-.host-entry{
-  background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;padding:12px 14px
-}
-.host-entry-head{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px
-}
+.host-entry{background:#0b0f1a;border:1px solid #1a2035;border-radius:8px;padding:12px 14px}
+.host-entry-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .host-name{font-size:13px;font-weight:700}
 .host-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.badge{
-  display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600
-}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
 .badge-knight{background:#2a1a3a;color:#ce93d8}
 .badge-storage{background:#1a2a3a;color:#64b5f6}
 .badge-mega{background:#1a3a2a;color:#4caf50}
 .badge-direct{background:#2a2a1a;color:#ffcc00}
-.badge-yes{background:#2a2a1a;color:#ffcc00}
-.badge-no{background:#1a2035;color:#555}
 .host-actions{display:flex;gap:6px}
 .host-actions button{
   background:none;border:none;cursor:pointer;padding:5px;border-radius:5px;font-size:14px;transition:.15s
@@ -191,16 +174,17 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
   display:flex;align-items:center;gap:8px;background:#1a2035;
   padding:6px 10px;border-radius:6px;font-size:11px
 }
-.quality-label{
-  color:#ffcc00;font-weight:700;min-width:44px;font-size:10px
-}
-.quality-link{
-  color:#6b8cde;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px
-}
-.direct-link{
-  font-size:10px;color:#6b8cde;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;margin-top:4px
-}
+.quality-label{color:#ffcc00;font-weight:700;min-width:44px;font-size:10px}
+.quality-link{color:#6b8cde;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+.direct-link{font-size:10px;color:#6b8cde;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+
+/* Mon tags */
+.mon-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mon-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:#1a2035;color:#aaa;border:1px solid #2a3055}
+.mon-tag.ad{border-color:#3a1a3a;color:#ce93d8}
+.mon-tag.sl{border-color:#1a3a3a;color:#4dd0e1}
+.mon-tag.pop{border-color:#3a2a1a;color:#ffb74d}
+.mon-tag.rd{border-color:#2a2a3a;color:#9575cd}
 
 /* Add host btn */
 .add-host-btn{
@@ -233,7 +217,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
 /* ========== MODAL ========== */
 .modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  position:fixed;inset:0;background:rgba(0,0,0,.78);
   display:none;align-items:center;justify-content:center;z-index:9999;padding:16px
 }
 .modal.open{display:flex}
@@ -278,7 +262,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 }
 .cancel-btn:hover{border-color:#aaa;color:#fff}
 
-/* ========== HOST MODAL EXTRAS ========== */
+/* Host modal extras */
 .host-auto-info{
   background:#0e1424;border:1px solid #1a2035;border-radius:8px;
   padding:10px 14px;margin-bottom:12px;display:none
@@ -288,7 +272,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 .hai-row{display:flex;gap:12px;flex-wrap:wrap}
 .hai-item{font-size:11px;color:#aaa}
 .hai-item b{color:#ffcc00}
-.hai-divider{height:1px;background:#1a2035;margin:10px 0}
+.hai-divider{height:1px;background:#1a2035;margin:12px 0}
 
 /* Quality builder */
 .quality-builder{display:flex;flex-direction:column;gap:6px}
@@ -318,20 +302,9 @@ textarea.form-input{resize:vertical;min-height:70px}
 }
 .add-quality-btn:hover{border-color:#ffcc00;color:#ffcc00}
 
-/* Monetization preview */
-.mon-preview{
-  background:#0e1424;border:1px solid #1a2035;border-radius:8px;
-  padding:10px 14px
-}
+/* Mon preview */
+.mon-preview{background:#0e1424;border:1px solid #1a2035;border-radius:8px;padding:10px 14px}
 .mon-preview .mp-title{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;margin-bottom:6px}
-.mon-tags{display:flex;flex-wrap:wrap;gap:5px}
-.mon-tag{
-  font-size:10px;padding:2px 8px;border-radius:12px;
-  background:#1a2035;color:#aaa;border:1px solid #2a3055
-}
-.mon-tag.ad{border-color:#3a1a3a;color:#ce93d8}
-.mon-tag.sl{border-color:#1a3a3a;color:#4dd0e1}
-.mon-tag.pop{border-color:#3a2a1a;color:#ffb74d}
 
 /* ========== TOAST ========== */
 .toast{
@@ -361,9 +334,6 @@ textarea.form-input{resize:vertical;min-height:70px}
 .pagination button:hover{border-color:#ffcc00;color:#ffcc00}
 .pagination button.active{background:#ffcc00;color:#000;border-color:#ffcc00}
 .pagination button:disabled{opacity:.4;cursor:default}
-
-/* ZIP badge */
-.badge-zip{background:#2a1a1a;color:#ff7043}
 </style>
 </head>
 <body>
@@ -380,23 +350,16 @@ textarea.form-input{resize:vertical;min-height:70px}
     <a href="homepage.html">🏠 Homepage</a>
     <div class="menu-sep"></div>
     <a href="downloads.html" class="active">📥 Downloads</a>
+    <a href="hosts.html">🖥 Hosts</a>
     <a href="servers.html">🌐 Servers</a>
     <a href="player.html">🎞 Player</a>
-    <a href="search.html">🔍 Search</a>
+    <div class="menu-sep"></div>
+    <a href="ads.html">📢 Ads & Monetization</a>
     <div class="menu-sep"></div>
     <a href="seo.html">📈 SEO</a>
     <a href="analytics.html">📊 Analytics</a>
-    <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
-    <a href="deploy-backup.html">🚀 Deploy</a>
-    <div class="menu-sep"></div>
-    <a href="ads.html">📢 Ads</a>
-    <a href="ai-brain.html">🧠 AI Brain</a>
-    <div class="menu-sep"></div>
-    <a href="sidebar.html">📌 Sidebar</a>
-    <a href="footer.html">🦶 Footer</a>
-    <div class="menu-sep"></div>
     <a href="system-settings.html">⚙ System</a>
   </nav>
 </aside>
@@ -407,7 +370,7 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="title">📥 Download Management</div>
     <div class="hdr-right">
       <span id="adminName" style="font-size:12px;color:#555"></span>
-      <button class="add-btn" id="quickAddBtn">⚡ Quick Add Entry</button>
+      <button class="add-btn" id="quickAddBtn">⚡ Quick Add</button>
       <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
   </header>
@@ -456,18 +419,13 @@ textarea.form-input{resize:vertical;min-height:70px}
 
       <!-- RIGHT PANEL -->
       <div class="right-panel" id="rightPanel">
-        <!-- Breadcrumb -->
         <div class="breadcrumb" id="breadcrumb">
           <span>Select an anime →</span>
         </div>
-
-        <!-- Toolbar -->
         <div class="panel-toolbar" id="panelToolbar" style="display:none">
           <button class="back-btn" id="backBtn">← Back</button>
           <div class="right" id="toolbarRight"></div>
         </div>
-
-        <!-- Content -->
         <div class="panel-content" id="panelContent">
           <div class="empty-state">
             <div class="icon">📥</div>
@@ -483,7 +441,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 <!-- ========== TOAST ========== -->
 <div class="toast" id="toast"></div>
 
-<!-- ========== ADD HOST MODAL ========== -->
+<!-- ========== HOST MODAL ========== -->
 <div class="modal" id="hostModal">
   <div class="modal-box wide">
     <div class="modal-header">
@@ -497,34 +455,30 @@ textarea.form-input{resize:vertical;min-height:70px}
       </div>
 
       <div class="form-grid">
-        <!-- Host Select -->
         <div class="form-full">
           <label class="form-label">Host *</label>
           <select class="form-input" id="hf-host">
             <option value="">— Select Host —</option>
           </select>
         </div>
-        <!-- Storage (auto-filled) -->
         <div>
           <label class="form-label">Storage (auto)</label>
-          <input class="form-input" id="hf-storage" placeholder="Auto from host" readonly style="opacity:.6">
+          <input class="form-input" id="hf-storage" readonly style="opacity:.6">
         </div>
-        <!-- Knight (auto-filled) -->
         <div>
           <label class="form-label">Knight Mode (auto)</label>
-          <input class="form-input" id="hf-knight" placeholder="Auto from host" readonly style="opacity:.6">
+          <input class="form-input" id="hf-knight" readonly style="opacity:.6">
         </div>
       </div>
 
-      <!-- Monetization Preview -->
       <div class="section-title">Monetization (auto from host)</div>
       <div class="mon-preview" id="hf-monPreview">
-        <div class="mp-title">No monetization configured</div>
+        <div class="mp-title">Select a host first</div>
       </div>
 
       <div class="hai-divider"></div>
 
-      <!-- Direct Link (for non-knight) -->
+      <!-- Direct Link (non-knight) -->
       <div id="directLinkSection">
         <div class="form-grid">
           <div class="form-full">
@@ -534,7 +488,7 @@ textarea.form-input{resize:vertical;min-height:70px}
         </div>
       </div>
 
-      <!-- Quality Builder (for knight) -->
+      <!-- Quality Builder (knight) -->
       <div id="qualitySection" style="display:none">
         <div class="section-title">Quality Links (Knight Mode)</div>
         <div class="quality-builder" id="qualityBuilder"></div>
@@ -559,9 +513,7 @@ textarea.form-input{resize:vertical;min-height:70px}
       <div class="form-grid">
         <div class="form-full">
           <label class="form-label">Anime *</label>
-          <select class="form-input" id="qf-anime">
-            <option value="">— Select Anime —</option>
-          </select>
+          <select class="form-input" id="qf-anime"></select>
         </div>
         <div>
           <label class="form-label">Content Type</label>
@@ -569,6 +521,9 @@ textarea.form-input{resize:vertical;min-height:70px}
             <option value="episode">Episode</option>
             <option value="season_zip">Season ZIP</option>
             <option value="movie">Movie</option>
+            <option value="collection">Collection</option>
+            <option value="pack">Pack</option>
+            <option value="batch">Batch</option>
           </select>
         </div>
         <div>
@@ -583,17 +538,15 @@ textarea.form-input{resize:vertical;min-height:70px}
         </div>
         <div id="qf-epNumWrap">
           <label class="form-label">Episode Number</label>
-          <input class="form-input" id="qf-epNum" type="number" min="1" placeholder="e.g. 12">
+          <input class="form-input" id="qf-epNum" type="number" min="1" placeholder="e.g. 12" onchange="autoFillEpisodeTitle()">
         </div>
         <div id="qf-epTitleWrap">
-          <label class="form-label">Episode Title (optional)</label>
-          <input class="form-input" id="qf-epTitle" placeholder="auto from episodes DB">
+          <label class="form-label">Episode Title (auto from DB)</label>
+          <input class="form-input" id="qf-epTitle" placeholder="Auto-filled...">
         </div>
         <div class="form-full">
           <label class="form-label">Host *</label>
-          <select class="form-input" id="qf-host" onchange="quickHostChanged()">
-            <option value="">— Select Host —</option>
-          </select>
+          <select class="form-input" id="qf-host" onchange="quickHostChanged()"></select>
         </div>
         <div class="form-full" id="qf-linkWrap">
           <label class="form-label">Download Link *</label>
@@ -613,232 +566,197 @@ textarea.form-input{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<script src="auth.js"></script>
 <script>
 /* =========================================
    CONFIG & STATE
 ========================================= */
-const API = (window.API_BASE || '') + '/api'
+const API       = (window.API_BASE || 'https://animehunt-backend.animehunt715.workers.dev') + '/api'
+const ADMIN_API = (window.API_BASE || 'https://animehunt-backend.animehunt715.workers.dev') + '/api/admin'
 
-function getToken(){ return localStorage.getItem('ah_token') || '' }
-function authHeaders(){ return { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() } }
-
-// Navigation state
 let navState = {
-  view: 'anime',      // anime | seasons | episodes | hosts
-  animeId: null,
-  animeTitle: '',
-  animeType: '',
-  season: null,
-  contentType: null,
-  entryId: null,
-  episodeTitle: ''
+  view: 'anime',
+  animeId: null, animeTitle: '', animeType: '',
+  season: null, contentType: null, entryId: null, episodeTitle: ''
 }
-
 let animeList  = []
-let hostsDB    = []    // all hosts from DB
-let monDB      = {}    // monetization map: host_id -> config
-let adsDB      = []
-let shortlinksDB = []
-let popupsDB   = []
+let hostsDB    = []
+let monDB      = {}
+let adsDB      = [], shortlinksDB = [], popupsDB = [], redirectsDB = []
 
 /* =========================================
-   AUTH
+   LOGOUT
 ========================================= */
-function requireAuth(){
-  if(!getToken()){ window.location.href='login.html'; return false }
-  return true
-}
-async function checkAuth(){
-  try{
-    const r = await fetch(`${API}/auth/me`,{headers:authHeaders()})
-    if(r.status===401){ localStorage.removeItem('ah_token'); window.location.href='login.html'; return false }
-    const j = await r.json()
-    if(j.success) document.getElementById('adminName').textContent = j.data.name||''
-    return j.success
-  }catch{ return false }
-}
-document.getElementById('logoutBtn').onclick = ()=>{
-  localStorage.removeItem('ah_token')
-  window.location.href='login.html'
-}
+document.getElementById('logoutBtn').onclick = () => Auth.logout()
 
 /* =========================================
    TOAST
 ========================================= */
 let toastTimer
-function showToast(msg, type='success'){
+function showToast(msg, type = 'success') {
   const t = document.getElementById('toast')
   t.textContent = msg
   t.className = `toast ${type}`
   t.classList.add('show')
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200)
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200)
 }
 
 /* =========================================
-   LOAD HOSTS & MONETIZATION
+   ESCAPE
 ========================================= */
-async function loadHostsDB(){
-  try{
-    const r = await fetch(`${API}/hosts?active=1`,{headers:authHeaders()})
-    const j = await r.json()
-    hostsDB = j.success ? (j.data||[]) : []
-  }catch{ hostsDB = [] }
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
 }
 
-async function loadMonetizationDB(){
-  try{
-    const r = await fetch(`${API}/host-monetization`,{headers:authHeaders()})
+/* =========================================
+   LOAD REFERENCE DATA
+========================================= */
+async function loadHostsDB() {
+  try {
+    const r = await fetch(`${ADMIN_API}/hosts?active=1`, { headers: Auth.headers() })
     const j = await r.json()
-    const arr = j.success ? (j.data||[]) : []
+    hostsDB = j.success ? (j.data || []) : []
+  } catch { hostsDB = [] }
+}
+
+async function loadMonetizationDB() {
+  try {
+    const r = await fetch(`${ADMIN_API}/host-monetization`, { headers: Auth.headers() })
+    const j = await r.json()
+    const arr = j.success ? (j.data || []) : []
     monDB = {}
     arr.forEach(m => { monDB[m.host_id] = m })
-  }catch{ monDB = {} }
+  } catch { monDB = {} }
 }
 
-async function loadAdsDB(){
-  try{
-    const [ra,rs,rp] = await Promise.all([
-      fetch(`${API}/ads-library`,{headers:authHeaders()}),
-      fetch(`${API}/shortlinks-library`,{headers:authHeaders()}),
-      fetch(`${API}/popup-library`,{headers:authHeaders()})
+async function loadAdsDB() {
+  try {
+    const [ra, rs, rp, rr] = await Promise.all([
+      fetch(`${ADMIN_API}/ads-library`,        { headers: Auth.headers() }),
+      fetch(`${ADMIN_API}/shortlinks-library`, { headers: Auth.headers() }),
+      fetch(`${ADMIN_API}/popup-library`,      { headers: Auth.headers() }),
+      fetch(`${ADMIN_API}/redirect-library`,   { headers: Auth.headers() })
     ])
-    adsDB       = (await ra.json()).data || []
+    adsDB        = (await ra.json()).data || []
     shortlinksDB = (await rs.json()).data || []
-    popupsDB    = (await rp.json()).data || []
-  }catch{}
+    popupsDB     = (await rp.json()).data || []
+    redirectsDB  = (await rr.json()).data || []
+  } catch {}
 }
 
 /* =========================================
    LOAD ANIME GRID
 ========================================= */
-async function loadAnimeGrid(){
+async function loadAnimeGrid() {
   const grid = document.getElementById('animeGrid')
   grid.innerHTML = '<div style="grid-column:1/-1" class="loading-row"><div class="spinner"></div></div>'
-  try{
-    const r = await fetch(`${API}/anime?limit=200`,{headers:authHeaders()})
-    if(r.status===401){ localStorage.removeItem('ah_token'); window.location.href='login.html'; return }
+  try {
+    const r = await fetch(`${ADMIN_API}/anime?limit=500`, { headers: Auth.headers() })
     const j = await r.json()
-    animeList = j.success ? (j.data.data||[]) : []
+    animeList = j.success ? (j.data.data || []) : []
     document.getElementById('animeCount').textContent = animeList.length + ' anime'
     renderAnimeGrid(animeList)
     populateAnimeSelects()
-  }catch(e){
+  } catch {
     grid.innerHTML = '<div style="grid-column:1/-1;color:#f44336;text-align:center;padding:40px">Error loading anime</div>'
   }
 }
 
-function renderAnimeGrid(list){
+function renderAnimeGrid(list) {
   const grid = document.getElementById('animeGrid')
-  if(!list.length){
+  if (!list.length) {
     grid.innerHTML = '<div style="grid-column:1/-1" class="empty-state"><div class="icon">🎬</div><div>No anime found</div></div>'
     return
   }
   grid.innerHTML = ''
   list.forEach(a => {
     const card = document.createElement('div')
-    card.className = 'anime-card'
-    if(navState.animeId===a.id) card.classList.add('active')
+    card.className = 'anime-card' + (navState.animeId === a.id ? ' active' : '')
     const img = a.poster
       ? `<img src="${esc(a.poster)}" alt="${esc(a.title)}" loading="lazy" onerror="this.style.display='none'">`
       : `<div class="anime-card-placeholder">🎬</div>`
-    card.innerHTML = `${img}
-      <div class="anime-card-info">
-        <div class="title" title="${esc(a.title)}">${esc(a.title)}</div>
-        <div class="type">${esc((a.type||'ANIME').toUpperCase())}</div>
-      </div>`
-    card.onclick = ()=> selectAnime(a)
+    card.innerHTML = `${img}<div class="anime-card-info"><div class="title" title="${esc(a.title)}">${esc(a.title)}</div><div class="type">${esc((a.type || 'ANIME').toUpperCase())}</div></div>`
+    card.onclick = () => selectAnime(a)
     grid.appendChild(card)
   })
 }
 
-document.getElementById('animeSearch').addEventListener('input', function(){
+document.getElementById('animeSearch').addEventListener('input', function () {
   const q = this.value.toLowerCase()
   renderAnimeGrid(animeList.filter(a => a.title.toLowerCase().includes(q)))
 })
 
 /* =========================================
-   SELECT ANIME → SHOW SEASONS
+   ANIME → SEASONS
 ========================================= */
-async function selectAnime(a){
-  navState = { view:'seasons', animeId:a.id, animeTitle:a.title, animeType:a.type||'anime', season:null, contentType:null, entryId:null }
+async function selectAnime(a) {
+  navState = { view: 'seasons', animeId: a.id, animeTitle: a.title, animeType: a.type || 'anime', season: null, contentType: null, entryId: null }
   document.querySelectorAll('.anime-card').forEach(c => c.classList.remove('active'))
-  document.querySelectorAll('.anime-card').forEach(c => {
-    if(c.querySelector('.title')?.title===a.title) c.classList.add('active')
-  })
+  event?.currentTarget?.classList?.add('active')
   updateBreadcrumb()
   showSeasons(a)
 }
 
-async function showSeasons(a){
-  const content = document.getElementById('panelContent')
-  const toolbar = document.getElementById('panelToolbar')
-  const tbRight = document.getElementById('toolbarRight')
-  toolbar.style.display='flex'
+async function showSeasons(a) {
+  const content  = document.getElementById('panelContent')
+  const toolbar  = document.getElementById('panelToolbar')
+  const tbRight  = document.getElementById('toolbarRight')
+  toolbar.style.display = 'flex'
   tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openAddEntryFlow()">➕ Add Entry</button>`
-  document.getElementById('backBtn').onclick = ()=>{ navState.view='anime'; resetRightPanel() }
-
+  document.getElementById('backBtn').onclick = () => { navState.view = 'anime'; resetRightPanel() }
   content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
 
-  try{
-    const r = await fetch(`${API}/downloads/structure/${a.id}`,{headers:authHeaders()})
+  try {
+    const r = await fetch(`${ADMIN_API}/downloads/structure/${a.id}`, { headers: Auth.headers() })
     const j = await r.json()
-    const structure = j.success ? (j.data||{}) : {}
-    renderSeasonStructure(structure, a)
-  }catch{
-    // Fallback: show default structure
-    renderSeasonStructure({seasons:[1,2,3], type:a.type}, a)
+    renderSeasonStructure(j.success ? (j.data || {}) : {}, a)
+  } catch {
+    renderSeasonStructure({ seasons: [1, 2, 3], type: a.type }, a)
   }
 }
 
-function renderSeasonStructure(structure, a){
+function renderSeasonStructure(structure, a) {
   const content = document.getElementById('panelContent')
-  const type = (a.type||'anime').toLowerCase()
-  const seasons = structure.seasons || [1,2,3]
-
+  const type    = (a.type || 'anime').toLowerCase()
+  const seasons = structure.seasons || [1]
   let html = '<div class="structure-list">'
 
-  if(type==='movie'){
-    html += makeStructItem('🎬','Movies','Click to manage movie downloads','movie',null)
+  if (type === 'movie') {
+    html += makeStructItem('🎬', 'Movies', 'Click to manage movie downloads', 'movie', null)
   } else {
     seasons.forEach(s => {
-      html += makeStructItem('📺',`Season ${s}`,`Episodes for Season ${s}`,'episode',s)
-      html += makeStructItem('🗜️',`Season ${s} ZIP`,`Full season package`,'season_zip',s)
+      html += makeStructItem('📺', `Season ${s}`, `Episodes for Season ${s}`, 'episode', s)
+      html += makeStructItem('🗜️', `Season ${s} ZIP`, `Full season package`, 'season_zip', s)
     })
+    html += '</div><div class="section-title" style="margin-top:14px">Special Packages</div><div class="structure-list">'
+    html += makeStructItem('📦', 'Collections', 'Curated episode collections', 'collection', null)
+    html += makeStructItem('🎁', 'Packs', 'Multi-season download packs', 'pack', null)
+    html += makeStructItem('🗂️', 'Batch', 'Bulk episode batch downloads', 'batch', null)
   }
-  html += '</div>'
-
-  html += `<div class="section-title" style="margin-top:16px">Quick Add</div>
+  html += `</div><div class="section-title" style="margin-top:16px">Quick Add</div>
   <button class="add-host-btn" onclick="openAddEntryFlow()">➕ Add new download entry for ${esc(a.title)}</button>`
-
   content.innerHTML = html
 
-  // Attach clicks
   content.querySelectorAll('.struct-item[data-ct]').forEach(el => {
-    el.onclick = ()=> showEpisodes(el.dataset.ct, parseInt(el.dataset.s)||null)
+    el.onclick = () => showEpisodes(el.dataset.ct, parseInt(el.dataset.s) || null)
   })
 }
 
-function makeStructItem(icon, title, sub, ct, season){
-  return `<div class="struct-item" data-ct="${ct}" data-s="${season||0}">
+function makeStructItem(icon, title, sub, ct, season) {
+  return `<div class="struct-item" data-ct="${ct}" data-s="${season || 0}">
     <div class="si-left">
       <span class="si-icon">${icon}</span>
-      <div>
-        <div class="si-title">${title}</div>
-        <div class="si-sub">${sub}</div>
-      </div>
+      <div><div class="si-title">${title}</div><div class="si-sub">${sub}</div></div>
     </div>
-    <div class="si-right">
-      <span class="ep-count" id="epcount_${ct}_${season||0}">Loading...</span>
-      <span>›</span>
-    </div>
+    <div class="si-right"><span class="ep-count">›</span></div>
   </div>`
 }
 
 /* =========================================
-   SHOW EPISODES
+   EPISODES
 ========================================= */
-async function showEpisodes(contentType, season){
+async function showEpisodes(contentType, season) {
   navState.view = 'episodes'
   navState.contentType = contentType
   navState.season = season
@@ -847,60 +765,53 @@ async function showEpisodes(contentType, season){
   const content = document.getElementById('panelContent')
   const tbRight = document.getElementById('toolbarRight')
   tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openAddEntryFlow()">➕ Add Entry</button>`
-  document.getElementById('backBtn').onclick = ()=>{ navState.view='seasons'; showSeasons({id:navState.animeId,title:navState.animeTitle,type:navState.animeType}) }
-
+  document.getElementById('backBtn').onclick = () => { navState.view = 'seasons'; showSeasons({ id: navState.animeId, title: navState.animeTitle, type: navState.animeType }) }
   content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
 
-  try{
-    let url = `${API}/downloads/entries?anime_id=${navState.animeId}&content_type=${contentType}`
-    if(season) url += `&season=${season}`
-    const r = await fetch(url, {headers:authHeaders()})
+  try {
+    let url = `${ADMIN_API}/downloads/entries?anime_id=${navState.animeId}&content_type=${contentType}`
+    if (season) url += `&season=${season}`
+    const r = await fetch(url, { headers: Auth.headers() })
     const j = await r.json()
-    const entries = j.success ? (j.data||[]) : []
-    renderEpisodeList(entries)
-  }catch{
+    renderEpisodeList(j.success ? (j.data || []) : [])
+  } catch {
     renderEpisodeList([])
   }
 }
 
-function renderEpisodeList(entries){
+function renderEpisodeList(entries) {
   const content = document.getElementById('panelContent')
-  if(!entries.length){
+  if (!entries.length) {
     content.innerHTML = `<div class="empty-state"><div class="icon">📭</div><div>No entries yet</div></div>
     <button class="add-host-btn" onclick="openAddEntryFlow()">➕ Add first entry</button>`
     return
   }
   let html = '<div class="ep-list">'
   entries.forEach(e => {
-    const hostCount = e.host_count || 0
-    const dots = Array(Math.min(hostCount,5)).fill('<span class="host-dot"></span>').join('')
-    html += `<div class="ep-item ${hostCount?'has-hosts':''}" data-entry="${e.id}" data-title="${esc(e.episode_title||'')}">
+    const hc   = e.host_count || 0
+    const dots = Array(Math.min(hc, 5)).fill('<span class="host-dot"></span>').join('')
+    html += `<div class="ep-item ${hc ? 'has-hosts' : ''}" data-entry="${e.id}" data-title="${esc(e.episode_title || '')}">
       <div class="ep-left">
-        <span class="ep-num">EP ${e.episode||1}</span>
+        <span class="ep-num">EP ${e.episode || 1}</span>
         <div>
-          <div class="ep-title">${esc(e.episode_title||'Untitled')}</div>
-          <div class="ep-meta">Season ${e.season||'—'} · ${hostCount} host${hostCount!==1?'s':''}</div>
+          <div class="ep-title">${esc(e.episode_title || 'Untitled')}</div>
+          <div class="ep-meta">Season ${e.season || '—'} · ${hc} host${hc !== 1 ? 's' : ''}</div>
         </div>
       </div>
-      <div class="ep-right">
-        <div class="host-dots">${dots}</div>
-        <span style="color:#555;font-size:12px">›</span>
-      </div>
+      <div class="ep-right"><div class="host-dots">${dots}</div><span style="color:#555;font-size:12px">›</span></div>
     </div>`
   })
-  html += '</div>'
-  html += `<button class="add-host-btn" onclick="openAddEntryFlow()" style="margin-top:10px">➕ Add new entry</button>`
+  html += '</div><button class="add-host-btn" onclick="openAddEntryFlow()" style="margin-top:10px">➕ Add new entry</button>'
   content.innerHTML = html
-
   content.querySelectorAll('.ep-item').forEach(el => {
-    el.onclick = ()=> showHostEntries(el.dataset.entry, el.dataset.title)
+    el.onclick = () => showHostEntries(el.dataset.entry, el.dataset.title)
   })
 }
 
 /* =========================================
-   SHOW HOST ENTRIES
+   HOST ENTRIES
 ========================================= */
-async function showHostEntries(entryId, episodeTitle){
+async function showHostEntries(entryId, episodeTitle) {
   navState.view = 'hosts'
   navState.entryId = entryId
   navState.episodeTitle = episodeTitle
@@ -909,78 +820,72 @@ async function showHostEntries(entryId, episodeTitle){
   const content = document.getElementById('panelContent')
   const tbRight = document.getElementById('toolbarRight')
   tbRight.innerHTML = `<button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="openHostModal(null,'${entryId}')">➕ Add Host</button>`
-  document.getElementById('backBtn').onclick = ()=>{ navState.view='episodes'; showEpisodes(navState.contentType,navState.season) }
-
+  document.getElementById('backBtn').onclick = () => { navState.view = 'episodes'; showEpisodes(navState.contentType, navState.season) }
   content.innerHTML = '<div class="loading-row"><div class="spinner"></div></div>'
 
-  try{
-    const r = await fetch(`${API}/downloads/hosts/${entryId}`, {headers:authHeaders()})
+  try {
+    const r = await fetch(`${ADMIN_API}/downloads/hosts/${entryId}`, { headers: Auth.headers() })
     const j = await r.json()
-    const hosts = j.success ? (j.data||[]) : []
-    renderHostEntries(hosts, entryId)
-  }catch{
+    renderHostEntries(j.success ? (j.data || []) : [], entryId)
+  } catch {
     renderHostEntries([], entryId)
   }
 }
 
-function renderHostEntries(hosts, entryId){
+function renderHostEntries(hosts, entryId) {
   const content = document.getElementById('panelContent')
-  let html = `<div class="section-title">${esc(navState.episodeTitle||'Episode')}</div>`
+  let html = `<div class="section-title">${esc(navState.episodeTitle || 'Episode')}</div>`
 
-  if(!hosts.length){
+  if (!hosts.length) {
     html += `<div class="empty-state"><div class="icon">🌐</div><div>No hosts yet</div></div>`
   } else {
     html += '<div class="host-entries">'
     hosts.forEach(h => {
-      const mon = monDB[h.host_id]
+      const mon      = monDB[h.host_id]
       const isKnight = h.knight == 1 || h.knight === true
-      const storageLabel = h.storage||h.host_name||'Unknown'
 
-      // Build monetization tags
       let monHtml = ''
-      if(mon){
-        try{
-          const ads = JSON.parse(mon.ads||'[]')
-          const sl  = JSON.parse(mon.shortlinks||'[]')
-          const pop = JSON.parse(mon.popups||'[]')
-          if(ads.length||sl.length||pop.length){
-            monHtml = '<div class="mon-tags" style="margin-top:6px">'
-            ads.forEach(()=>{ monHtml += '<span class="mon-tag ad">AD</span>' })
-            sl.forEach(()=>{ monHtml += '<span class="mon-tag sl">SHORTLINK</span>' })
-            pop.forEach(()=>{ monHtml += '<span class="mon-tag pop">POPUP</span>' })
-            monHtml += `<span class="mon-tag" style="color:#555">${mon.mode||'random'}</span></div>`
+      if (mon) {
+        try {
+          const ads = JSON.parse(mon.ads || '[]')
+          const sl  = JSON.parse(mon.shortlinks || '[]')
+          const pop = JSON.parse(mon.popups || '[]')
+          const rd  = JSON.parse(mon.redirects || '[]')
+          if (ads.length || sl.length || pop.length || rd.length) {
+            monHtml = '<div class="mon-tags">'
+            ads.forEach(() => { monHtml += '<span class="mon-tag ad">AD</span>' })
+            sl.forEach(()  => { monHtml += '<span class="mon-tag sl">SHORTLINK</span>' })
+            pop.forEach(() => { monHtml += '<span class="mon-tag pop">POPUP</span>' })
+            rd.forEach(()  => { monHtml += '<span class="mon-tag rd">REDIRECT</span>' })
+            monHtml += `<span class="mon-tag">${mon.mode || 'random'}</span></div>`
           }
-        }catch{}
+        } catch {}
       }
 
-      // Quality links or direct link
       let linksHtml = ''
-      if(isKnight && h.qualities && h.qualities.length){
+      if (isKnight && h.qualities?.length) {
         linksHtml = '<div class="quality-list">'
         h.qualities.forEach(q => {
-          linksHtml += `<div class="quality-row">
-            <span class="quality-label">${esc(q.quality)}</span>
-            <span class="quality-link">${esc(q.link)}</span>
-          </div>`
+          linksHtml += `<div class="quality-row"><span class="quality-label">${esc(q.quality)}</span><span class="quality-link">${esc(q.link)}</span></div>`
         })
         linksHtml += '</div>'
-      } else if(h.direct_download){
+      } else if (h.direct_download) {
         linksHtml = `<div class="direct-link">🔗 ${esc(h.direct_download)}</div>`
       }
 
       html += `<div class="host-entry">
         <div class="host-entry-head">
           <div>
-            <div class="host-name">${esc(h.host_name||'Unknown Host')}</div>
+            <div class="host-name">${esc(h.host_name || 'Unknown Host')}</div>
             <div class="host-badges" style="margin-top:4px">
-              <span class="badge badge-storage">${esc(storageLabel)}</span>
+              <span class="badge badge-storage">${esc(h.storage || h.host_name || '—')}</span>
               ${isKnight ? '<span class="badge badge-knight">👑 Knight</span>' : '<span class="badge badge-direct">Direct</span>'}
             </div>
             ${monHtml}
           </div>
           <div class="host-actions">
-            <button class="edit-btn" title="Edit" onclick="openHostModal(${h.id},'${entryId}')">✏️</button>
-            <button class="del-btn" title="Delete" onclick="deleteHostEntry(${h.id},'${entryId}')">🗑️</button>
+            <button class="edit-btn" onclick="openHostModal(${h.id},'${entryId}')">✏️</button>
+            <button class="del-btn" onclick="deleteHostEntry(${h.id},'${entryId}')">🗑️</button>
           </div>
         </div>
         ${linksHtml}
@@ -993,321 +898,293 @@ function renderHostEntries(hosts, entryId){
 }
 
 /* =========================================
-   OPEN HOST MODAL
+   HOST MODAL
 ========================================= */
-let editHostId = null
-let currentEntryId = null
+let editHostId = null, currentEntryId = null
 
-function openHostModal(hostId, entryId){
+function openHostModal(hostId, entryId) {
   editHostId = hostId
   currentEntryId = entryId
   document.getElementById('hostModalTitle').textContent = hostId ? 'Edit Host Entry' : 'Add Host Entry'
 
-  // Populate host select
   const sel = document.getElementById('hf-host')
   sel.innerHTML = '<option value="">— Select Host —</option>'
   hostsDB.forEach(h => {
-    sel.innerHTML += `<option value="${h.id}" data-storage="${esc(h.storage||h.name)}" data-knight="${h.knight?1:0}">${esc(h.name)}</option>`
+    sel.innerHTML += `<option value="${h.id}" data-storage="${esc(h.storage || h.name)}" data-knight="${h.knight ? 1 : 0}">${esc(h.name)}</option>`
   })
-
-  // Reset
   document.getElementById('hf-storage').value = ''
-  document.getElementById('hf-knight').value = ''
-  document.getElementById('hf-link').value = ''
+  document.getElementById('hf-knight').value  = ''
+  document.getElementById('hf-link').value    = ''
   document.getElementById('qualityBuilder').innerHTML = ''
-  document.getElementById('directLinkSection').style.display='block'
-  document.getElementById('qualitySection').style.display='none'
+  document.getElementById('directLinkSection').style.display = 'block'
+  document.getElementById('qualitySection').style.display    = 'none'
   document.getElementById('hostAutoInfo').classList.remove('visible')
   document.getElementById('hf-monPreview').innerHTML = '<div class="mp-title" style="color:#555">Select a host first</div>'
-
   document.getElementById('hostModal').classList.add('open')
 }
 
-document.getElementById('hf-host').addEventListener('change', function(){
-  const opt = this.options[this.selectedIndex]
-  const storage = opt.dataset.storage||''
-  const knight  = opt.dataset.knight==='1'
+document.getElementById('hf-host').addEventListener('change', function () {
+  const opt     = this.options[this.selectedIndex]
+  const storage = opt.dataset.storage || ''
+  const knight  = opt.dataset.knight === '1'
 
   document.getElementById('hf-storage').value = storage
   document.getElementById('hf-knight').value  = knight ? 'YES — Knight UI' : 'NO — Direct'
 
-  // Toggle quality vs direct
-  if(knight){
-    document.getElementById('directLinkSection').style.display='none'
-    document.getElementById('qualitySection').style.display='block'
-    if(!document.getElementById('qualityBuilder').children.length) addQualityRow()
+  if (knight) {
+    document.getElementById('directLinkSection').style.display = 'none'
+    document.getElementById('qualitySection').style.display    = 'block'
+    if (!document.getElementById('qualityBuilder').children.length) addQualityRow()
   } else {
-    document.getElementById('directLinkSection').style.display='block'
-    document.getElementById('qualitySection').style.display='none'
+    document.getElementById('directLinkSection').style.display = 'block'
+    document.getElementById('qualitySection').style.display    = 'none'
   }
 
-  // Load monetization preview
-  const hid = parseInt(this.value)
-  const mon = monDB[hid]
+  const mon = monDB[parseInt(this.value)]
   buildMonPreview(document.getElementById('hf-monPreview'), mon)
 
-  // Show auto info
   const info = document.getElementById('hostAutoInfo')
   const row  = document.getElementById('hostAutoRow')
-  if(storage || knight){
+  if (storage || knight) {
     info.classList.add('visible')
     row.innerHTML = `
       <div class="hai-item">Storage: <b>${esc(storage)}</b></div>
-      <div class="hai-item">Knight: <b>${knight?'YES':'NO'}</b></div>
-      ${mon ? `<div class="hai-item">Mode: <b>${esc(mon.mode||'random')}</b></div>` : ''}
+      <div class="hai-item">Knight: <b>${knight ? 'YES' : 'NO'}</b></div>
+      ${mon ? `<div class="hai-item">Mode: <b>${esc(mon.mode || 'random')}</b></div>` : ''}
     `
   } else {
     info.classList.remove('visible')
   }
 })
 
-function buildMonPreview(el, mon){
-  if(!mon){ el.innerHTML = '<div class="mp-title" style="color:#555">No monetization configured for this host</div>'; return }
-  try{
-    const ads = JSON.parse(mon.ads||'[]')
-    const sl  = JSON.parse(mon.shortlinks||'[]')
-    const pop = JSON.parse(mon.popups||'[]')
-
-    let html = `<div class="mp-title">Mode: ${esc(mon.mode||'random')}</div><div class="mon-tags">`
-    ads.forEach(id => {
-      const a = adsDB.find(x=>x.id==id)
-      html += `<span class="mon-tag ad">📢 ${esc(a?a.name:'Ad')}</span>`
-    })
-    sl.forEach(id => {
-      const s = shortlinksDB.find(x=>x.id==id)
-      html += `<span class="mon-tag sl">🔗 ${esc(s?s.name:'Shortlink')}</span>`
-    })
-    pop.forEach(id => {
-      const p = popupsDB.find(x=>x.id==id)
-      html += `<span class="mon-tag pop">💬 ${esc(p?p.name:'Popup')}</span>`
-    })
+function buildMonPreview(el, mon) {
+  if (!mon) { el.innerHTML = '<div class="mp-title" style="color:#555">No monetization configured for this host</div>'; return }
+  try {
+    const ads = JSON.parse(mon.ads || '[]')
+    const sl  = JSON.parse(mon.shortlinks || '[]')
+    const pop = JSON.parse(mon.popups || '[]')
+    const rd  = JSON.parse(mon.redirects || '[]')
+    let html = `<div class="mp-title">Mode: ${esc(mon.mode || 'random')}</div><div class="mon-tags">`
+    ads.forEach(id => { const a = adsDB.find(x => x.id == id); html += `<span class="mon-tag ad">📢 ${esc(a ? a.name : 'Ad')}</span>` })
+    sl.forEach(id  => { const s = shortlinksDB.find(x => x.id == id); html += `<span class="mon-tag sl">🔗 ${esc(s ? s.name : 'Shortlink')}</span>` })
+    pop.forEach(id => { const p = popupsDB.find(x => x.id == id); html += `<span class="mon-tag pop">💬 ${esc(p ? p.name : 'Popup')}</span>` })
+    rd.forEach(id  => { const r = redirectsDB.find(x => x.id == id); html += `<span class="mon-tag rd">↩️ ${esc(r ? r.name : 'Redirect')}</span>` })
     html += '</div>'
     el.innerHTML = html
-  }catch{ el.innerHTML = '<div class="mp-title" style="color:#555">Config error</div>' }
+  } catch { el.innerHTML = '<div class="mp-title" style="color:#555">Config error</div>' }
 }
 
-/* Quality rows */
-function addQualityRow(quality='', link=''){
+function addQualityRow(quality = '', link = '') {
   const builder = document.getElementById('qualityBuilder')
   const row = document.createElement('div')
   row.className = 'quality-entry'
   row.innerHTML = `
     <select>
-      <option value="360p" ${quality==='360p'?'selected':''}>360p</option>
-      <option value="480p" ${quality==='480p'?'selected':''}>480p</option>
-      <option value="720p" ${quality==='720p'?'selected':''}>720p</option>
-      <option value="1080p" ${quality==='1080p'?'selected':''}>1080p</option>
-      <option value="4K" ${quality==='4K'?'selected':''}>4K</option>
+      <option value="360p" ${quality === '360p' ? 'selected' : ''}>360p</option>
+      <option value="480p" ${quality === '480p' ? 'selected' : ''}>480p</option>
+      <option value="720p" ${quality === '720p' ? 'selected' : ''}>720p</option>
+      <option value="1080p" ${quality === '1080p' ? 'selected' : ''}>1080p</option>
+      <option value="4K" ${quality === '4K' ? 'selected' : ''}>4K</option>
     </select>
     <input type="text" placeholder="https://..." value="${esc(link)}">
     <button class="rm-q" onclick="this.closest('.quality-entry').remove()">✕</button>
   `
   builder.appendChild(row)
 }
-document.getElementById('addQualityBtn').onclick = ()=> addQualityRow()
+document.getElementById('addQualityBtn').onclick = () => addQualityRow()
 
-/* Save host */
-document.getElementById('saveHostBtn').onclick = async ()=>{
+document.getElementById('saveHostBtn').onclick = async () => {
   const hid = document.getElementById('hf-host').value
-  if(!hid){ showToast('Select a host','error'); return }
+  if (!hid) { showToast('Select a host', 'error'); return }
   const isKnight = document.getElementById('hf-knight').value.includes('YES')
+  let payload = { entry_id: currentEntryId, host_id: hid }
 
-  let payload = {
-    entry_id: currentEntryId,
-    host_id:  hid
-  }
-
-  if(isKnight){
+  if (isKnight) {
     const rows = document.querySelectorAll('#qualityBuilder .quality-entry')
     const qualities = []
     rows.forEach(r => {
       const q = r.querySelector('select').value
       const l = r.querySelector('input').value.trim()
-      if(l) qualities.push({quality:q,link:l})
+      if (l) qualities.push({ quality: q, link: l })
     })
-    if(!qualities.length){ showToast('Add at least one quality link','error'); return }
+    if (!qualities.length) { showToast('Add at least one quality link', 'error'); return }
     payload.qualities = qualities
   } else {
     const link = document.getElementById('hf-link').value.trim()
-    if(!link){ showToast('Enter download link','error'); return }
+    if (!link) { showToast('Enter download link', 'error'); return }
     payload.direct_download = link
   }
 
   const btn = document.getElementById('saveHostBtn')
-  btn.disabled = true; btn.textContent='Saving...'
-
-  try{
-    const url    = editHostId ? `${API}/downloads/hosts/${editHostId}` : `${API}/downloads/hosts`
+  btn.disabled = true; btn.textContent = 'Saving...'
+  try {
+    const url    = editHostId ? `${ADMIN_API}/downloads/hosts/${editHostId}` : `${ADMIN_API}/downloads/hosts`
     const method = editHostId ? 'PUT' : 'POST'
-    const r = await fetch(url,{method,headers:authHeaders(),body:JSON.stringify(payload)})
+    const r = await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
     const j = await r.json()
-    if(!j.success) throw new Error(j.message)
+    if (!j.success) throw new Error(j.message)
     showToast('Host saved ✅')
     document.getElementById('hostModal').classList.remove('open')
     showHostEntries(currentEntryId, navState.episodeTitle)
     loadStats()
-  }catch(e){ showToast(e.message,'error') }
-  finally{ btn.disabled=false; btn.textContent='💾 Save Host' }
+  } catch (e) { showToast(e.message, 'error') }
+  finally { btn.disabled = false; btn.textContent = '💾 Save Host' }
 }
 
-async function deleteHostEntry(id, entryId){
-  if(!confirm('Delete this host entry?')) return
-  try{
-    const r = await fetch(`${API}/downloads/hosts/${id}`,{method:'DELETE',headers:authHeaders()})
+async function deleteHostEntry(id, entryId) {
+  if (!confirm('Delete this host entry?')) return
+  try {
+    const r = await fetch(`${ADMIN_API}/downloads/hosts/${id}`, { method: 'DELETE', headers: Auth.headers() })
     const j = await r.json()
-    if(!j.success) throw new Error(j.message)
+    if (!j.success) throw new Error(j.message)
     showToast('Deleted ✅')
     showHostEntries(entryId, navState.episodeTitle)
     loadStats()
-  }catch(e){ showToast(e.message,'error') }
+  } catch (e) { showToast(e.message, 'error') }
 }
 
-/* Modal close */
-['closeHostModal','cancelHostModal'].forEach(id=>{
-  document.getElementById(id).onclick = ()=> document.getElementById('hostModal').classList.remove('open')
+['closeHostModal', 'cancelHostModal'].forEach(id => {
+  document.getElementById(id).onclick = () => document.getElementById('hostModal').classList.remove('open')
 })
 
 /* =========================================
-   QUICK ADD FLOW
+   QUICK ADD
 ========================================= */
-function populateAnimeSelects(){
-  ['qf-anime'].forEach(id=>{
-    const el = document.getElementById(id)
-    el.innerHTML = '<option value="">— Select Anime —</option>'
-    animeList.forEach(a => {
-      el.innerHTML += `<option value="${a.id}">${esc(a.title)}</option>`
-    })
-  })
+function populateAnimeSelects() {
+  const el = document.getElementById('qf-anime')
+  el.innerHTML = '<option value="">— Select Anime —</option>'
+  animeList.forEach(a => { el.innerHTML += `<option value="${a.id}">${esc(a.title)}</option>` })
+
   const qfHost = document.getElementById('qf-host')
   qfHost.innerHTML = '<option value="">— Select Host —</option>'
   hostsDB.forEach(h => {
-    qfHost.innerHTML += `<option value="${h.id}" data-knight="${h.knight?1:0}">${esc(h.name)}</option>`
+    qfHost.innerHTML += `<option value="${h.id}" data-knight="${h.knight ? 1 : 0}">${esc(h.name)}</option>`
   })
 }
 
-function openAddEntryFlow(){
+function openAddEntryFlow() {
   document.getElementById('quickModal').classList.add('open')
 }
 
-function updateQuickForm(){
-  const type = document.getElementById('qf-type').value
-  const epNum  = document.getElementById('qf-epNumWrap')
-  const epTitle = document.getElementById('qf-epTitleWrap')
-  const season = document.getElementById('qf-season').closest
-  if(type==='movie'){
-    epNum.style.display='none'
-    epTitle.style.display='none'
-  } else {
-    epNum.style.display='block'
-    epTitle.style.display='block'
-  }
+function updateQuickForm() {
+  const type    = document.getElementById('qf-type').value
+  const isEp    = type === 'episode'
+  const isMovie = type === 'movie'
+  document.getElementById('qf-epNumWrap').style.display   = isEp ? 'block' : 'none'
+  document.getElementById('qf-epTitleWrap').style.display = (isEp || isMovie) ? 'block' : 'none'
+  if (!isEp) document.getElementById('qf-epTitle').value = ''
 }
 
-function quickHostChanged(){
+async function autoFillEpisodeTitle() {
+  const animeId = document.getElementById('qf-anime').value
+  const season  = document.getElementById('qf-season').value
+  const epNum   = document.getElementById('qf-epNum').value
+  if (!animeId || !epNum || document.getElementById('qf-type').value !== 'episode') return
+  try {
+    const r = await fetch(`${ADMIN_API}/episodes?anime_id=${animeId}&season=${season || 1}&episode=${epNum}`, { headers: Auth.headers() })
+    const j = await r.json()
+    if (j.success && j.data?.length && j.data[0].title) {
+      document.getElementById('qf-epTitle').value = j.data[0].title
+    }
+  } catch {}
+}
+
+function quickHostChanged() {
   const opt = document.getElementById('qf-host').options[document.getElementById('qf-host').selectedIndex]
-  const isKnight = opt.dataset&&opt.dataset.knight==='1'
-  document.getElementById('qf-linkWrap').style.display = isKnight?'none':'block'
-  document.getElementById('qf-qualityWrap').style.display = isKnight?'block':'none'
-  if(isKnight && !document.getElementById('qf-qualityBuilder').children.length) addQualityRowQF()
+  const isKnight = opt.dataset && opt.dataset.knight === '1'
+  document.getElementById('qf-linkWrap').style.display    = isKnight ? 'none' : 'block'
+  document.getElementById('qf-qualityWrap').style.display = isKnight ? 'block' : 'none'
+  if (isKnight && !document.getElementById('qf-qualityBuilder').children.length) addQualityRowQF()
 }
 
-function addQualityRowQF(q='',l=''){
+function addQualityRowQF(q = '', l = '') {
   const builder = document.getElementById('qf-qualityBuilder')
   const row = document.createElement('div')
   row.className = 'quality-entry'
   row.innerHTML = `
     <select>
-      <option value="480p" ${q==='480p'?'selected':''}>480p</option>
-      <option value="720p" ${q==='720p'?'selected':''}>720p</option>
-      <option value="1080p" ${q==='1080p'?'selected':''}>1080p</option>
+      <option value="480p" ${q === '480p' ? 'selected' : ''}>480p</option>
+      <option value="720p" ${q === '720p' ? 'selected' : ''}>720p</option>
+      <option value="1080p" ${q === '1080p' ? 'selected' : ''}>1080p</option>
     </select>
     <input type="text" placeholder="https://..." value="${esc(l)}">
     <button class="rm-q" onclick="this.closest('.quality-entry').remove()">✕</button>
   `
   builder.appendChild(row)
 }
-document.getElementById('qf-addQuality').onclick = ()=> addQualityRowQF()
+document.getElementById('qf-addQuality').onclick = () => addQualityRowQF()
 
-document.getElementById('saveQuickBtn').onclick = async ()=>{
+document.getElementById('saveQuickBtn').onclick = async () => {
   const animeId = document.getElementById('qf-anime').value
   const type    = document.getElementById('qf-type').value
   const season  = document.getElementById('qf-season').value
   const epNum   = document.getElementById('qf-epNum').value
   const epTitle = document.getElementById('qf-epTitle').value
   const hostId  = document.getElementById('qf-host').value
+  if (!animeId) { showToast('Select anime', 'error'); return }
+  if (!hostId)  { showToast('Select host', 'error'); return }
 
-  if(!animeId){ showToast('Select anime','error'); return }
-  if(!hostId){ showToast('Select host','error'); return }
-
-  const opt = document.getElementById('qf-host').options[document.getElementById('qf-host').selectedIndex]
-  const isKnight = opt.dataset&&opt.dataset.knight==='1'
+  const opt      = document.getElementById('qf-host').options[document.getElementById('qf-host').selectedIndex]
+  const isKnight = opt.dataset && opt.dataset.knight === '1'
 
   let payload = {
-    anime_id:      animeId,
-    content_type:  type,
-    season:        parseInt(season)||null,
-    episode:       parseInt(epNum)||null,
-    episode_title: epTitle||null,
-    host_id:       hostId
+    anime_id: animeId, content_type: type,
+    season: parseInt(season) || null,
+    episode: parseInt(epNum) || null,
+    episode_title: epTitle || null,
+    host_id: hostId
   }
 
-  if(isKnight){
+  if (isKnight) {
     const rows = document.querySelectorAll('#qf-qualityBuilder .quality-entry')
     const qualities = []
     rows.forEach(r => {
       const q = r.querySelector('select').value
       const l = r.querySelector('input').value.trim()
-      if(l) qualities.push({quality:q,link:l})
+      if (l) qualities.push({ quality: q, link: l })
     })
     payload.qualities = qualities
   } else {
     const link = document.getElementById('qf-link').value.trim()
-    if(!link){ showToast('Enter link','error'); return }
+    if (!link) { showToast('Enter link', 'error'); return }
     payload.direct_download = link
   }
 
   const btn = document.getElementById('saveQuickBtn')
-  btn.disabled=true; btn.textContent='Saving...'
-
-  try{
-    const r = await fetch(`${API}/downloads/quick-add`,{method:'POST',headers:authHeaders(),body:JSON.stringify(payload)})
+  btn.disabled = true; btn.textContent = 'Saving...'
+  try {
+    const r = await fetch(`${ADMIN_API}/downloads/quick-add`, { method: 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
     const j = await r.json()
-    if(!j.success) throw new Error(j.message)
+    if (!j.success) throw new Error(j.message)
     showToast('Entry added ✅')
     document.getElementById('quickModal').classList.remove('open')
     loadStats()
-    // If currently viewing same anime, refresh
-    if(navState.animeId==animeId && navState.view!=='anime'){
-      showSeasons({id:animeId,title:navState.animeTitle,type:navState.animeType})
+    if (navState.animeId == animeId && navState.view !== 'anime') {
+      showSeasons({ id: animeId, title: navState.animeTitle, type: navState.animeType })
     }
-  }catch(e){ showToast(e.message,'error') }
-  finally{ btn.disabled=false; btn.textContent='💾 Add Entry' }
+  } catch (e) { showToast(e.message, 'error') }
+  finally { btn.disabled = false; btn.textContent = '💾 Add Entry' }
 }
 
-['closeQuickModal','cancelQuickModal'].forEach(id=>{
-  document.getElementById(id).onclick = ()=> document.getElementById('quickModal').classList.remove('open')
+['closeQuickModal', 'cancelQuickModal'].forEach(id => {
+  document.getElementById(id).onclick = () => document.getElementById('quickModal').classList.remove('open')
 })
-
 document.getElementById('quickAddBtn').onclick = openAddEntryFlow
 
 /* =========================================
    BREADCRUMB
 ========================================= */
-function updateBreadcrumb(){
+function updateBreadcrumb() {
   const bc = document.getElementById('breadcrumb')
-  let html = `<b>${esc(navState.animeTitle||'—')}</b>`
-  if(navState.view==='seasons') html += '<span class="sep">›</span><span>Structure</span>'
-  if(navState.view==='episodes'){
-    html += `<span class="sep">›</span><span>Structure</span><span class="sep">›</span><b>Season ${navState.season||'—'} ${navState.contentType==='season_zip'?'ZIP':''}</b>`
-  }
-  if(navState.view==='hosts'){
-    html += `<span class="sep">›</span><span>Season ${navState.season||'—'}</span><span class="sep">›</span><b>${esc(navState.episodeTitle||'Episode')}</b><span class="sep">›</span><span>Hosts</span>`
-  }
+  let html = `<b>${esc(navState.animeTitle || '—')}</b>`
+  if (navState.view === 'seasons') html += '<span class="sep">›</span><span>Structure</span>'
+  if (navState.view === 'episodes') html += `<span class="sep">›</span><span>Structure</span><span class="sep">›</span><b>Season ${navState.season || '—'} ${navState.contentType === 'season_zip' ? 'ZIP' : ''}</b>`
+  if (navState.view === 'hosts') html += `<span class="sep">›</span><span>Season ${navState.season || '—'}</span><span class="sep">›</span><b>${esc(navState.episodeTitle || 'Episode')}</b><span class="sep">›</span><span>Hosts</span>`
   bc.innerHTML = html
 }
 
-function resetRightPanel(){
-  document.getElementById('panelToolbar').style.display='none'
+function resetRightPanel() {
+  document.getElementById('panelToolbar').style.display = 'none'
   document.getElementById('panelContent').innerHTML = '<div class="empty-state"><div class="icon">📥</div><div>Select an anime to manage downloads</div></div>'
   document.getElementById('breadcrumb').innerHTML = '<span>Select an anime →</span>'
 }
@@ -1315,36 +1192,30 @@ function resetRightPanel(){
 /* =========================================
    STATS
 ========================================= */
-async function loadStats(){
-  try{
-    const r = await fetch(`${API}/downloads/stats`,{headers:authHeaders()})
+async function loadStats() {
+  try {
+    const r = await fetch(`${ADMIN_API}/downloads/stats`, { headers: Auth.headers() })
     const j = await r.json()
     const d = j.data || {}
     document.getElementById('statEntries').textContent = d.total_entries ?? '—'
     document.getElementById('statHosts').textContent   = d.active_hosts  ?? hostsDB.length
     document.getElementById('statLinks').textContent   = d.total_links   ?? '—'
-    document.getElementById('statKnight').textContent  = d.knight_entries?? '—'
+    document.getElementById('statKnight').textContent  = d.knight_entries ?? '—'
     document.getElementById('statClicks').textContent  = d.total_clicks  ?? '—'
-  }catch{
+  } catch {
     document.getElementById('statHosts').textContent = hostsDB.length
   }
 }
 
 /* =========================================
-   ESCAPE
-========================================= */
-function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-
-/* =========================================
    INIT
 ========================================= */
-if(requireAuth()){
-  checkAuth()
-  Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(()=>{
-    loadAnimeGrid()
-    loadStats()
-  })
-}
+Auth.protect()
+Auth.showUsername('adminName')
+Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(() => {
+  loadAnimeGrid()
+  loadStats()
+})
 </script>
 </body>
 </html>
