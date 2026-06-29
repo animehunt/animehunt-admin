@@ -237,7 +237,7 @@ select.form-input option{background:#0b0f1a}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -254,6 +254,7 @@ select.form-input option{background:#0b0f1a}
     <a href="performance.html" class="active">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -698,11 +699,12 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API     = "/api/admin"  // Bug Fix #41: relative URL
 const PERF    = `${API}/performance`
 
 const ALL_TOGGLES = [
@@ -921,8 +923,8 @@ function buildPayload() {
     },
     image: {
       imgQuality:    val("imgQuality"),
-      imgWebP:       document.getElementById("imgWebP")?.value === "1",
-      imgResponsive: document.getElementById("imgResponsive")?.value === "1",
+      imgWebP:       document.getElementById("imgWebP")?.checked ?? false,  // Bug Fix #41: .value==="1" → .checked
+      imgResponsive: document.getElementById("imgResponsive")?.checked ?? false,  // Bug Fix #41: .value==="1" → .checked
       thumbWidth:    val("thumbWidth")
     },
     cdn: {
