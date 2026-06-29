@@ -226,7 +226,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -439,13 +439,13 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 <!-- =========================================
      CENTRAL AUTH — delegated to auth.js
 ========================================= -->
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API    = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API    = "/api/admin"  // Bug Fix #37: relative URL
 const DEPLOY = `${API}/deploy`
 const REFRESH_INTERVAL = 30000
 
@@ -657,24 +657,47 @@ document.getElementById("createBackupBtn").onclick = async () => {
    DOWNLOAD BACKUP — secure fetch, no token in URL
 ========================================= */
 async function downloadBackup(id) {
+  // Bug Fix #37: Streaming download — avoids loading full backup into RAM as Blob
+  const btn = document.querySelector(`[onclick="downloadBackup('${id}')"]`)
+  if (btn) { btn.disabled = true; btn.textContent = "⬇ Downloading..."; }
+
   try {
     const res = await fetch(`${DEPLOY}/backup/${id}/download`, {
       headers: Auth.headers()
     })
-    if (!res.ok) throw new Error("Download failed")
+    if (!res.ok) throw new Error("Download failed (" + res.status + ")")
 
-    const blob     = await res.blob()
-    const url      = URL.createObjectURL(blob)
-    const a        = document.createElement("a")
+    // Get filename from header
     const filename = res.headers.get("Content-Disposition")
       ?.match(/filename="?([^"]+)"?/)?.[1] || `backup-${id}.json`
 
+    // Stream chunks — don't load entire file into RAM at once
+    const reader = res.body.getReader()
+    const chunks = []
+    let totalBytes = 0
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      totalBytes += value.length
+      if (btn) btn.textContent = `⬇ ${Math.round(totalBytes / 1024)}KB...`
+    }
+
+    // Create Blob only after streaming is complete
+    const blob = new Blob(chunks, { type: "application/json" })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement("a")
     a.href     = url
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
+
+    showToast("Backup downloaded ✅")
   } catch (err) {
     showToast("Download failed: " + err.message, "error")
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "⬇"; }
   }
 }
 
@@ -876,13 +899,11 @@ function startProgress() {
 /* =========================================
    INIT — delegates to central auth.js
 ========================================= */
-Auth.init({
-  onSuccess: (user) => {
-    document.getElementById("adminName").textContent = user.username
-    loadData()
-    startAutoRefresh()
-  }
-})
+// Bug Fix: Auth.init({onSuccess}) → Auth.protect()
+Auth.protect();
+Auth.showUsername("adminName");
+loadData();
+startAutoRefresh();
 </script>
 </body>
 </html>
