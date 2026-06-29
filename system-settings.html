@@ -217,7 +217,7 @@ select.form-input option{background:#0b0f1a}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -234,6 +234,7 @@ select.form-input option{background:#0b0f1a}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -577,13 +578,13 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
-const SYS_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/system"
+const API     = "/api/admin"  // Bug Fix #38/#39: relative URL
+const SYS_API = "/api/admin/system"
 
 /* =========================================
    LOGOUT — Central auth.js handles it
@@ -901,13 +902,26 @@ async function recoverSystem() {
    CACHE CLEAR
 ========================================= */
 async function clearCache() {
+  // Bug Fix #38 + Section 6 Item 4: Confirmation before destructive cache clear
+  const confirmed = confirm(
+    "⚠️ Cache clear karne se kuch seconds ke liye site slow ho sakti hai.\n\nKya aap sure hain?"
+  );
+  if (!confirmed) return;
+
+  const btn = document.querySelector('[onclick="clearCache()"]');
+  if (btn) { btn.disabled = true; btn.textContent = "Clearing..."; }
+
   try {
     const res  = await fetch(`${SYS_API}/cache-clear`, { method: "POST", headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
     showToast("Cache cleared ✅")
     loadLogs()
-  } catch (err) { showToast(err.message, "error") }
+  } catch (err) {
+    showToast(err.message, "error")
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "🗑 Clear Cache"; }
+  }
 }
 
 /* =========================================
@@ -915,17 +929,25 @@ async function clearCache() {
 ========================================= */
 async function exportConfig() {
   try {
-    const res  = await fetch(SYS_API, { headers: Auth.headers() })
-    const json = await res.json()
-    if (!json.success) throw new Error()
-
-    const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: "application/json" })
+    // Bug Fix #39: Stream the export to avoid loading entire config into RAM
+    const res = await fetch(`${SYS_API}/export`, { headers: Auth.headers() })
+    if (!res.ok) throw new Error("Export failed (" + res.status + ")")
+    const reader = res.body.getReader()
+    const chunks = []
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+    }
+    const blob = new Blob(chunks, { type: "application/json" })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement("a")
     a.href     = url
-    a.download = "animehunt-system-config.json"
+    a.download = `config-export-${Date.now()}.json`
     a.click()
+    URL.revokeObjectURL(url)
     showToast("Config exported ✅")
+    return
   } catch { showToast("Export failed", "error") }
 }
 
