@@ -268,7 +268,7 @@ select.form-input option{background:#0e1424}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -285,6 +285,7 @@ select.form-input option{background:#0e1424}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -302,7 +303,7 @@ select.form-input option{background:#0e1424}
 
   <header class="cms-header">
     <div class="title">🏠 Homepage Builder</div>
-    <div class="hdr-right">
+    <div class="hdr-right"><button onclick="loadStats()" style="background:#1a2035;border:1px solid #1a2035;color:#aaa;padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer" title="Refresh stats">⟳ Refresh</button>
       <span id="adminName" style="font-size:12px;color:#555"></span>
       <button class="add-btn" id="openAddBtn">➕ Add Row</button>
       <button class="logout-btn" id="logoutBtn">Logout</button>
@@ -509,11 +510,12 @@ select.form-input option{background:#0e1424}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API     = "/api/admin"  // Bug Fix #31: relative URL
 const HOME_API = `${API}/homepage`
 
 /* =========================================
@@ -601,7 +603,10 @@ document.querySelectorAll(".check-item input[type=checkbox]").forEach(cb => {
 /* =========================================
    LOAD STATS
 ========================================= */
+let _statsLoading = false;
 async function loadStats() {
+  if (_statsLoading) return;
+  _statsLoading = true;
   try {
     const res  = await fetch(`${HOME_API}/stats`, { headers: Auth.headers() })
     const json = await res.json()
