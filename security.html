@@ -247,7 +247,7 @@ select.form-input option{background:#0b0f1a}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -264,6 +264,8 @@ select.form-input option{background:#0b0f1a}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html" class="active">🔐 Security</a>
+    <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -804,12 +806,12 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API     = "/api/admin"  // Bug Fix #40: relative URL
 const SEC_API = `${API}/security`
 
 let currentFW = 3
@@ -1198,9 +1200,18 @@ async function clearAllBans() {
 /* =========================================
    THREAT LOG
 ========================================= */
-async function loadThreats() {
+let _threatPage = 1;
+const _THREAT_LIMIT = 30;
+
+async function loadThreats(page) {
+  // Bug Fix #40: Pagination added — was hardcoded limit=30 with no paging
+  if (page !== undefined) _threatPage = page;
+
   try {
-    const res  = await fetch(`${SEC_API}/threats?limit=30`, { headers: Auth.headers() })
+    const res  = await fetch(
+      `${SEC_API}/threats?page=${_threatPage}&limit=${_THREAT_LIMIT}`,
+      { headers: Auth.headers() }
+    )
     const json = await res.json()
     if (!json.success) throw new Error()
 
@@ -1209,6 +1220,7 @@ async function loadThreats() {
 
     if (!list.length) {
       el.innerHTML = `<div class="no-threats">No threats logged</div>`
+      renderThreatPagination(json.pagination || null)
       return
     }
 
@@ -1245,6 +1257,31 @@ async function clearThreats() {
     loadStats()
   } catch (err) { showToast(err.message, "error") }
 }
+
+
+function renderThreatPagination(pagination) {
+  // Bug Fix #40: Threat pagination UI
+  let pager = document.getElementById("threatPagination")
+  if (!pager) {
+    pager = document.createElement("div")
+    pager.id = "threatPagination"
+    pager.style.cssText = "display:flex;gap:6px;padding:10px 14px;justify-content:flex-end"
+    const threatList = document.getElementById("threatList")
+    if (threatList && threatList.parentNode) {
+      threatList.parentNode.insertBefore(pager, threatList.nextSibling)
+    }
+  }
+  pager.innerHTML = ""
+  if (!pagination || pagination.pages <= 1) return
+  for (let i = 1; i <= Math.min(pagination.pages, 10); i++) {
+    const btn = document.createElement("button")
+    btn.textContent = i
+    btn.style.cssText = `background:${i===_threatPage?"#ffcc00":"#0e1424"};color:${i===_threatPage?"#000":"#ccc"};border:1px solid #1a2035;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px`
+    btn.onclick = () => loadThreats(i)
+    pager.appendChild(btn)
+  }
+}
+
 
 /* =========================================
    INIT
