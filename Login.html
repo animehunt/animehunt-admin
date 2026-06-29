@@ -141,64 +141,85 @@
 </div>
 
 <script>
-  const API = "https://animehunt-backend.animehunt715.workers.dev/api/auth/login"
+  // Bug Fix #30: Hardcoded URL → relative URL
+  // Bug Fix: localStorage → sessionStorage (XSS safer, clears on tab close)
+
+  // Already logged in? Redirect
+  if (sessionStorage.getItem('admin_access_token')) {
+    window.location.href = 'index.html';
+  }
 
   // Eye toggle
-  document.getElementById("eyeBtn").onclick = () => {
-    const pw = document.getElementById("password")
-    pw.type = pw.type === "password" ? "text" : "password"
-  }
+  document.getElementById('eyeBtn').onclick = () => {
+    const pw = document.getElementById('password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+  };
 
-  // Login
   async function doLogin() {
-    const username = document.getElementById("username").value.trim()
-    const password = document.getElementById("password").value
-    const btn      = document.getElementById("loginBtn")
-    const err      = document.getElementById("errMsg")
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('loginBtn');
+    const err      = document.getElementById('errMsg');
 
-    err.classList.remove("show")
+    err.classList.remove('show');
 
     if (!username || !password) {
-      err.textContent = "Please enter username and password"
-      err.classList.add("show")
-      return
+      err.textContent = 'Please enter username and password';
+      err.classList.add('show');
+      return;
     }
 
-    btn.disabled    = true
-    btn.textContent = "Signing in..."
+    btn.disabled    = true;
+    btn.textContent = 'Signing in...';
 
     try {
-      const res  = await fetch(API, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
+      // Bug Fix #30: Relative URL — no hardcoded workers.dev domain
+      const res = await fetch('/api/admin/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ username, password })
-      })
+      });
 
-      const data = await res.json()
+      let data;
+      try { data = await res.json(); }
+      catch { throw new Error(`Server error (${res.status})`); }
 
-      if (data.success) {
-        localStorage.setItem("ah_token",    data.data.token)
-        localStorage.setItem("ah_username", data.data.username)
-        window.location.href = "dashboard.html"
-      } else {
-        err.textContent = data.message || "Invalid credentials"
-        err.classList.add("show")
-        btn.disabled    = false
-        btn.textContent = "Sign In"
+      if (!res.ok) {
+        err.textContent = data.error || data.message || 'Invalid credentials';
+        err.classList.add('show');
+        return;
       }
 
-    } catch {
-      err.textContent = "Connection error. Try again."
-      err.classList.add("show")
-      btn.disabled    = false
-      btn.textContent = "Sign In"
+      // Bug Fix: sessionStorage instead of localStorage
+      // Handle both {accessToken} and {data:{token}} response shapes
+      const token        = data.accessToken || data.data?.token || data.token;
+      const refreshToken = data.refreshToken || data.data?.refreshToken;
+
+      if (!token) {
+        err.textContent = 'Login failed — no token received';
+        err.classList.add('show');
+        return;
+      }
+
+      sessionStorage.setItem('admin_access_token', token);
+      if (refreshToken) sessionStorage.setItem('admin_refresh_token', refreshToken);
+
+      // Bug Fix: dashboard.html → index.html (correct file name)
+      window.location.href = 'index.html';
+
+    } catch (e) {
+      err.textContent = 'Connection error. Try again.';
+      err.classList.add('show');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Sign In';
     }
   }
 
-  document.getElementById("loginBtn").onclick = doLogin
-  document.addEventListener("keydown", e => {
-    if (e.key === "Enter") doLogin()
-  })
+  document.getElementById('loginBtn').onclick = doLogin;
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
 </script>
 
 </body>
