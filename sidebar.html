@@ -267,7 +267,7 @@ select.form-input option{background:#0e1424}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -284,6 +284,7 @@ select.form-input option{background:#0e1424}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -478,12 +479,12 @@ select.form-input option{background:#0e1424}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API      = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API      = "/api/admin"  // Bug Fix #46: relative URL
 const SIDE_API = `${API}/sidebar`
 
 /* =========================================
@@ -670,6 +671,17 @@ function onDrop(e) {
   e.preventDefault()
   const targetIdx = Number(this.dataset.idx)
   if (dragSrcIdx === null || dragSrcIdx === targetIdx) return
+
+  // Bug Fix #46: Bounds check before reorder — prevents undefined corruption
+  if (
+    isNaN(dragSrcIdx) || isNaN(targetIdx) ||
+    dragSrcIdx < 0 || dragSrcIdx >= items.length ||
+    targetIdx  < 0 || targetIdx  >= items.length
+  ) {
+    console.warn("Sidebar drag-drop: invalid indices", dragSrcIdx, targetIdx, "len:", items.length)
+    dragSrcIdx = null
+    return
+  }
 
   const moved = items.splice(dragSrcIdx, 1)[0]
   items.splice(targetIdx, 0, moved)
