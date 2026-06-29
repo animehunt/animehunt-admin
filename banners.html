@@ -256,7 +256,7 @@ select.form-input option{background:#0e1424}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -273,6 +273,7 @@ select.form-input option{background:#0e1424}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -496,13 +497,13 @@ select.form-input option{background:#0e1424}
 <!-- =========================================
      CENTRAL AUTH — delegated to auth.js
 ========================================= -->
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API        = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API        = "/api/admin"  // Bug Fix duplicate #4: relative URL
 const BANNER_API = `${API}/banners`
 const UPLOAD_API = `${API}/upload`
 
@@ -577,7 +578,7 @@ document.getElementById("f-image-file").addEventListener("change", async functio
   try {
     const res  = await fetch(UPLOAD_API, {
       method:  "POST",
-      headers: { "Authorization": `Bearer ${Auth.getToken()}` },
+      headers: Auth.headers(),
       body:    fd
     })
     const json = await res.json()
@@ -878,13 +879,11 @@ document.getElementById("positionFilter").addEventListener("change", () => loadB
 /* =========================================
    INIT — delegates to central auth.js
 ========================================= */
-Auth.init({
-  onSuccess: (user) => {
-    document.getElementById("adminName").textContent = user.username
-    loadBanners()
-    resetForm()
-  }
-})
+// Bug Fix duplicate #4: Auth.init({onSuccess}) → Auth.protect()
+Auth.protect();
+Auth.showUsername("adminName");
+loadBanners();
+resetForm();
 </script>
 </body>
 </html>
