@@ -232,7 +232,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="index.html" class="active">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -249,6 +249,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -575,11 +576,12 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 
 <div class="toast" id="toast"></div>
 
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API   = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API   = "/api/admin"
 const DASH  = `${API}/dashboard`
 const REFRESH_INTERVAL = 30000  /* 30 seconds */
 
