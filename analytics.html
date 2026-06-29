@@ -413,7 +413,7 @@
     </div>
 
     <nav class="cms-menu">
-      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="index.html">🏠 Dashboard</a>
       <a href="anime.html">🎬 Anime</a>
       <a href="episodes.html">📺 Episodes</a>
       <a href="categories.html">🗂 Categories</a>
@@ -427,7 +427,7 @@
       <a href="analytics.html" class="active">📊 Analytics</a>
       <a href="performance.html">⚡ Performance</a>
       <a href="security.html">🔐 Security</a>
-      <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
+    <a href="deploy-backup.html">🚀 Deploy &amp; Backup</a>
       <a href="ads.html">📢 Ads</a>
       <a href="ai-brain.html">🧠 AI Brain</a>
       <a href="sidebar.html">📌 Sidebar</a>
@@ -563,13 +563,14 @@
   </main>
 </div>
 
+<script src="/js/auth.js"></script>
 <script>
 /* ============================================================
   ANIMEHUNT — ANALYTICS PAGE (Business Logic Only)
   Auth: fully delegated to central auth.js
 ============================================================ */
 
-const ADMIN_API = "https://animehunt-backend.animehunt715.workers.dev/api/admin/analytics"
+const ADMIN_API = "/api/admin/analytics"  // Bug Fix #42/#43: relative URL
 
 /* ── DOM refs ── */
 const rangeSelect    = document.getElementById("range")
@@ -587,6 +588,25 @@ function showLoading(on) {
 function showError(msg) {
   errorMsg.textContent = msg || "Failed to load analytics data."
   errorBanner.classList.add("show")
+}
+
+
+function showToast(msg, type = "success") {
+  // Wrapper so exportCSV and other new features can show toast notifications
+  const existing = document.getElementById("ahToast")
+  const el = existing || document.createElement("div")
+  if (!existing) {
+    el.id = "ahToast"
+    el.style.cssText = "position:fixed;bottom:20px;right:20px;z-index:9999;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:.3s;opacity:0;pointer-events:none"
+    document.body.appendChild(el)
+  }
+  el.textContent = msg
+  el.style.background = type === "error" ? "#2a0d0d" : "#0d2218"
+  el.style.color       = type === "error" ? "#f44336"  : "#4caf50"
+  el.style.border      = `1px solid ${type === "error" ? "#f44336" : "#4caf50"}`
+  el.style.opacity     = "1"
+  clearTimeout(el._t)
+  el._t = setTimeout(() => { el.style.opacity = "0" }, 3000)
 }
 
 function hideError() {
@@ -648,7 +668,7 @@ async function loadAnalytics(showSpinner = true) {
   let data = null
   try {
     const res = await fetch(`${ADMIN_API}?range=${range}`, {
-      headers: auth.getHeaders()
+      headers: Auth.headers()
     })
 
     if (!res.ok) throw new Error(`Server error: ${res.status}`)
@@ -712,13 +732,38 @@ refreshBtn.addEventListener("click",   () => loadAnalytics(true))
 setInterval(() => loadAnalytics(false), 2 * 60 * 1000)
 
 /* ── LOGOUT — delegates to central auth.js ── */
-document.getElementById("logoutBtn").onclick = () => auth.logout()
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
-/* ── INIT — delegates to central auth.js ── */
-auth.init((user) => {
-  document.getElementById("adminName").textContent = user.username
-  loadAnalytics(true)
-})
+/* ── INIT — Bug Fix #43: auth.init() → Auth.protect() + Auth.showUsername() ── */
+
+/* =========================================
+   EXPORT CSV — Missing Feature Fix #12
+========================================= */
+async function exportCSV() {
+  const btn = document.getElementById("exportCsvBtn")
+  if (btn) { btn.disabled = true; btn.textContent = "Exporting..."; }
+
+  try {
+    const res = await fetch("/api/admin/analytics/export", { headers: Auth.headers() })
+    if (!res.ok) throw new Error("Export failed (" + res.status + ")")
+
+    const blob = await res.blob()
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement("a")
+    a.href     = url
+    a.download = `analytics-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    alert("Export failed: " + err.message)
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "⬇ Export CSV"; }
+  }
+}
+
+Auth.protect();
+Auth.showUsername("adminName");
+loadAnalytics(true);
 </script>
 
 </body>
