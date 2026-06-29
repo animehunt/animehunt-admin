@@ -260,7 +260,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html" class="active">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -277,6 +277,7 @@ textarea.form-input{resize:vertical;min-height:70px}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -465,12 +466,12 @@ textarea.form-input{resize:vertical;min-height:70px}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API       = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API       = "/api/admin"  // Bug Fix #28: relative URL
 const ANIME_API = `${API}/anime`
 const EP_API    = `${API}/episodes`
 
@@ -501,7 +502,7 @@ const PAGE_SIZE = 30
 ========================================= */
 async function loadAnimeList() {
   try {
-    const res = await AuthService.authFetch(`${ANIME_API}?limit=200`)   // ✅ FIX: increased from 100 to 200 — sites with many anime were truncating the list
+    const res = await fetch(`${ANIME_API}?limit=200`, { headers: Auth.headers() })   // ✅ FIX: increased from 100 to 200 — sites with many anime were truncating the list
     if (!res) return
 
     let json
@@ -671,7 +672,7 @@ document.getElementById("f-thumb-file").addEventListener("change", async functio
   preview.textContent = "Uploading..."
 
   try {
-    const res = await AuthService.authFetch(`${API}/upload`, {
+    const res = await fetch(`${API}/upload`, { headers: Auth.headers(),
       method: "POST",
       body: fd
     })
@@ -730,7 +731,7 @@ document.getElementById("saveBtn").onclick = async () => {
     const url    = editId ? `${EP_API}/${editId}` : EP_API
     const method = editId ? "PUT" : "POST"
 
-    const res = await AuthService.authFetch(url, {
+    const res = await fetch(url, { headers: Auth.headers(),
       method,
       body: JSON.stringify(form)
     })
@@ -778,7 +779,7 @@ async function loadEpisodes(page = 1) {
     `<div class="loading-row"><div class="spinner"></div></div>`
 
   try {
-    const res = await AuthService.authFetch(url, { signal: loadController.signal })
+    const res = await fetch(url, { headers: Auth.headers(), signal: loadController.signal })
     if (!res) return
 
     let json
@@ -903,7 +904,7 @@ function renderPagination() {
 ========================================= */
 async function editEpisode(id) {
   try {
-    const res = await AuthService.authFetch(`${EP_API}/${id}`)
+    const res = await fetch(`${EP_API}/${id}`, { headers: Auth.headers() })
     if (!res) return
 
     let json
@@ -928,7 +929,7 @@ async function deleteEpisode(id, anime, season, ep) {
   if (!confirm(`Delete S${season}E${ep} of "${anime}"?\n\nThis cannot be undone.`)) return
 
   try {
-    const res = await AuthService.authFetch(`${EP_API}/${id}`, {
+    const res = await fetch(`${EP_API}/${id}`, { headers: Auth.headers(),
       method: "DELETE"
     })
     if (!res) return
@@ -959,11 +960,16 @@ document.getElementById("seasonFilter").addEventListener("change", () => loadEpi
 /* =========================================
    INIT
 ========================================= */
-AuthService.init().then(ok => {
-  if (!ok) return   // init() already redirected — nothing else to do
+// Bug Fix #28: AuthService → Auth
+Auth.protect();
+Auth.showUsername("adminName");
+document.getElementById("logoutBtn").onclick = () => Auth.logout();
+
+(async () => {
+
+  // auth handled by Auth.protect()   // init() already redirected — nothing else to do
   loadAnimeList().then(() => loadEpisodes())   // ✅ FIX: load episodes only after anime list is ready (was concurrent — race condition)
-})
+})();
 </script>
 </body>
 </html>
-
