@@ -205,7 +205,7 @@ select.form-input option{background:#0b0f1a}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -222,6 +222,7 @@ select.form-input option{background:#0b0f1a}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -612,12 +613,12 @@ select.form-input option{background:#0b0f1a}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="auth.js"></script>
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API     = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API     = "/api/admin"  // Bug Fix #35: relative URL
 const SEO_API = `${API}/seo`
 
 /* =========================================
@@ -707,15 +708,16 @@ function updatePreview(inputId, previewId, title="Naruto", season=1, ep=5, query
   if (!prev) return
 
   const result = tpl
-    .replace("{title}",    title    || "Naruto Shippuden")
-    .replace("{type}",     "anime")
-    .replace("{year}",     "2007")
-    .replace("{status}",   "ongoing")
-    .replace("{category}", title    || "Action")
-    .replace("{anime}",    title    || "Naruto")
-    .replace("{season}",   String(season || 1))
-    .replace("{ep}",       String(ep    || 5))
-    .replace("{query}",    query    || "naruto")
+    .replaceAll("{title}",    title    || "Naruto Shippuden")
+    .replaceAll("{type}",     "anime")
+    .replaceAll("{year}",     "2007")
+    .replaceAll("{status}",   "ongoing")
+    .replaceAll("{category}", title    || "Action")
+    .replaceAll("{anime}",    title    || "Naruto")
+    .replaceAll("{season}",   String(season || 1))
+    .replaceAll("{ep}",       String(ep    || 5))
+    .replaceAll("{query}",    query    || "naruto")
+    // Bug Fix #35: .replace() → .replaceAll() — replaces ALL occurrences in template
 
   prev.textContent = result || "—"
   prev.style.color = result.length > 65 ? "#ff9800" : "#4caf50"
@@ -964,14 +966,14 @@ async function autoGenerateSEO() {
 ========================================= */
 function openSitemap() {
   window.open(
-    "https://animehunt-backend.animehunt715.workers.dev/api/seo/sitemap",
+    "/api/seo/sitemap",
     "_blank"
   )
 }
 
 function openRobots() {
   window.open(
-    "https://animehunt-backend.animehunt715.workers.dev/api/seo/robots",
+    "/api/seo/robots",
     "_blank"
   )
 }
