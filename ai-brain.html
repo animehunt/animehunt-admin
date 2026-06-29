@@ -199,7 +199,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 <aside class="cms-sidebar">
   <div class="brand"><span>Anime</span><b>Hunt</b><small>Admin CMS</small></div>
   <nav class="cms-menu">
-    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="index.html">🏠 Dashboard</a>
     <a href="anime.html">🎬 Anime</a>
     <a href="episodes.html">📺 Episodes</a>
     <a href="categories.html">🗂 Categories</a>
@@ -216,6 +216,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html">🔐 Security</a>
+    <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
     <a href="ads.html">📢 Ads</a>
@@ -516,11 +517,12 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="/js/auth.js"></script>
 <script>
 /* =========================================
    CONFIG
 ========================================= */
-const API    = "https://animehunt-backend.animehunt715.workers.dev/api/admin"
+const API    = "/api/admin"  // Bug Fix #44/#45: relative URL
 const AI_API = `${API}/ai`
 
 /* =========================================
@@ -560,7 +562,7 @@ let lastUserAction = 0  /* debounce: skip auto-refresh within 5s of user action 
 ========================================= */
 async function loadAI() {
   try {
-    const res  = await fetch(AI_API, { headers: auth.getHeaders() })
+    const res  = await fetch(AI_API, { headers: Auth.headers() })
     const json = await res.json()
     if (!json.success) throw new Error(json.message || "Failed to load AI state")
 
@@ -639,7 +641,7 @@ async function saveSetting(checkbox) {
 
   try {
     const res  = await fetch(AI_API, {
-      method: "PATCH", headers: auth.getHeaders(),
+      method: "PATCH", headers: Auth.headers(),
       body: JSON.stringify({ engine, setting, value })
     })
     const json = await res.json()
@@ -677,7 +679,7 @@ document.getElementById("runBtn").onclick = async () => {
 
   try {
     const res  = await fetch(`${AI_API}/run`, {
-      method: "POST", headers: auth.getHeaders()
+      method: "POST", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message || "Run failed")
@@ -702,7 +704,7 @@ document.getElementById("pauseBtn").onclick = async () => {
   lastUserAction = Date.now()
   try {
     const res  = await fetch(`${AI_API}/pause`, {
-      method: "PATCH", headers: auth.getHeaders()
+      method: "PATCH", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message || "Toggle failed")
@@ -724,7 +726,7 @@ document.getElementById("resetBtn").onclick = async () => {
   lastUserAction = Date.now()
   try {
     const res  = await fetch(`${AI_API}/reset`, {
-      method: "POST", headers: auth.getHeaders()
+      method: "POST", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message || "Reset failed")
@@ -764,7 +766,7 @@ async function clearLogs() {
   lastUserAction = Date.now()
   try {
     const res  = await fetch(`${AI_API}/logs`, {
-      method: "DELETE", headers: auth.getHeaders()
+      method: "DELETE", headers: Auth.headers()
     })
     const json = await res.json()
     if (!json.success) throw new Error(json.message || "Clear failed")
@@ -787,15 +789,18 @@ setInterval(() => {
 /* =========================================
    LOGOUT BUTTON — delegates to central auth.js
 ========================================= */
-document.getElementById("logoutBtn").onclick = () => auth.logout()
+document.getElementById("logoutBtn").onclick = () => Auth.logout()
 
 /* =========================================
    INIT — delegates to central auth.js
 ========================================= */
-auth.init((user) => {
-  document.getElementById("adminName").textContent = user.username
-  loadAI()
-})
+// Bug Fix #45: auth.init() → Auth.protect() + Auth.showUsername()
+Auth.protect();
+Auth.showUsername("adminName");
+
+(async () => {
+  loadAI();
+})();
 </script>
 </body>
 </html>
