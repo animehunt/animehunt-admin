@@ -192,7 +192,7 @@
 
       // Bug Fix: sessionStorage instead of localStorage
       // Handle both {accessToken} and {data:{token}} response shapes
-      const token        = data.accessToken || data.data?.token || data.token;
+      const token        = data.accessToken || data.data?.accessToken || data.token;
       const refreshToken = data.refreshToken || data.data?.refreshToken;
 
       if (!token) {
