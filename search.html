@@ -141,6 +141,28 @@ select.form-input option{background:#0b0f1a}
 .test-item-sub{font-size:10px;color:#555;margin-top:2px}
 .test-empty{color:#555;font-size:12px;padding:12px 0}
 
+/* ========== INDEX MANAGEMENT ========== */
+.index-panel{
+  background:#0e1424;border:1px solid #1a2035;border-radius:10px;
+  padding:16px 18px;margin-bottom:20px
+}
+.index-title{font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:4px}
+.index-sub{font-size:11px;color:#555;margin-bottom:12px}
+.index-btn{
+  background:#0b0f1a;border:1px solid #1a2035;color:#ccc;
+  padding:10px 18px;border-radius:7px;font-size:12px;font-weight:600;
+  cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px
+}
+.index-btn:hover{border-color:#ffcc00;color:#ffcc00}
+.index-btn:disabled{opacity:.5;cursor:default;border-color:#1a2035;color:#ccc}
+.index-result{
+  margin-top:12px;padding:10px 14px;background:#0b0f1a;border-radius:7px;
+  border:1px solid #1a2035;font-size:12px;display:none
+}
+.index-result.show{display:block}
+.result-ok{color:#4caf50}
+.result-err{color:#f44336}
+
 /* ========== POPULAR SEARCHES ========== */
 .popular-panel{
   background:#0e1424;border:1px solid #1a2035;border-radius:10px;
@@ -499,6 +521,17 @@ select.form-input option{background:#0b0f1a}
       <div class="test-results" id="testResults"></div>
     </div>
 
+    <!-- INDEX MANAGEMENT -->
+    <div class="section-label">⚙️ Index Management</div>
+    <div class="index-panel">
+      <div class="index-title">🧩 Rebuild FTS5 Search Index</div>
+      <div class="index-sub">Re-syncs the full-text search index with your current anime database. Run this after bulk imports or if search results look stale.</div>
+      <button class="index-btn" id="rebuildIndexBtn" onclick="rebuildIndex()">
+        <span id="rebuildIndexIcon">🧩</span> Rebuild Index
+      </button>
+      <div class="index-result" id="indexResult"></div>
+    </div>
+
     <!-- POPULAR SEARCHES -->
     <div class="section-label">🔥 Popular Searches</div>
     <div class="popular-panel">
@@ -533,6 +566,19 @@ select.form-input option{background:#0b0f1a}
 ========================================= */
 const API        = "/api/admin"
 const SEARCH_API = `${API}/search`
+
+/* =========================================
+   HTML ESCAPE — prevents XSS
+========================================= */
+function escapeHTML(str) {
+  if (typeof str !== "string") return ""
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
 
 /* =========================================
    LOGOUT — Central auth.js handles it
@@ -769,6 +815,51 @@ document.getElementById("testBtn").onclick = () => {
   if (q) runTest(q)
 }
 
+/* =========================================
+   REBUILD SEARCH INDEX
+========================================= */
+async function rebuildIndex() {
+  const btn    = document.getElementById("rebuildIndexBtn")
+  const icon   = document.getElementById("rebuildIndexIcon")
+  const res_el = document.getElementById("indexResult")
+
+  btn.disabled = true
+  icon.innerHTML = `<span class="spinner"></span>`
+  res_el.className = "index-result show"
+  res_el.textContent = "Rebuilding index..."
+
+  let offset = 0
+  let totalIndexed = 0
+
+  try {
+    while (true) {
+      const res  = await fetch(`${SEARCH_API}/rebuild-index?offset=${offset}`, {
+        method:  "POST",
+        headers: Auth.headers()
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.message || "Rebuild failed")
+
+      totalIndexed += json.data.indexed || 0
+
+      if (json.data.done) {
+        res_el.innerHTML = `<span class="result-ok">✅ Index rebuilt — ${totalIndexed} anime indexed</span>`
+        showToast(`Search index rebuilt (${totalIndexed} anime) ✅`)
+        break
+      }
+
+      offset = json.data.nextOffset
+      res_el.textContent = `Indexing... ${totalIndexed} anime processed so far`
+    }
+  } catch (err) {
+    res_el.innerHTML = `<span class="result-err">❌ Error: ${escapeHTML(err.message)}</span>`
+    showToast(err.message, "error")
+  } finally {
+    btn.disabled = false
+    icon.textContent = "🧩"
+  }
+}
+
 async function runTest(query) {
   const resultsEl = document.getElementById("testResults")
   resultsEl.classList.add("show")
@@ -785,28 +876,33 @@ async function runTest(query) {
     const results = json.data.results || []
 
     if (!results.length) {
-      resultsEl.innerHTML = `<div class="test-empty">No results found for "${query}"</div>`
+      resultsEl.innerHTML = `<div class="test-empty">No results found for "${escapeHTML(query)}"</div>`
       return
     }
 
     resultsEl.innerHTML = results.map(a => {
+      const safeTitle  = escapeHTML(a.title || "")
+      const safePoster = escapeHTML(a.poster || "")
+      const safeType   = escapeHTML(a.type || "")
+      const safeStatus = escapeHTML(a.status || "")
+
       const poster = a.poster
-        ? `<img src="${a.poster}" alt="${a.title}" loading="lazy">`
+        ? `<img src="${safePoster}" alt="${safeTitle}" loading="lazy">`
         : `<div style="width:28px;height:40px;background:#1a2035;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px">🎬</div>`
 
       return `
         <div class="test-item">
           ${poster}
           <div class="test-item-info">
-            <div class="test-item-title">${a.title}</div>
-            <div class="test-item-sub">${a.type} · ${a.status} · ⭐ ${a.rating || "N/A"}</div>
+            <div class="test-item-title">${safeTitle}</div>
+            <div class="test-item-sub">${safeType} · ${safeStatus} · ⭐ ${a.rating || "N/A"}</div>
           </div>
         </div>
       `
     }).join("")
 
   } catch (err) {
-    resultsEl.innerHTML = `<div class="test-empty" style="color:#f44336">Error: ${err.message}</div>`
+    resultsEl.innerHTML = `<div class="test-empty" style="color:#f44336">Error: ${escapeHTML(err.message)}</div>`
   }
 }
 
@@ -831,7 +927,7 @@ async function loadPopular() {
 
     el.innerHTML = list.map(item => `
       <div class="popular-tag">
-        🔍 ${item.query}
+        🔍 ${escapeHTML(item.query || "")}
         <span class="count">${item.count}</span>
       </div>
     `).join("")
@@ -882,3 +978,4 @@ loadPopular()
 </script>
 </body>
 </html>
+
