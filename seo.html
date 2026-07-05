@@ -82,7 +82,7 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
   font-size:12px;font-weight:700;color:#ffcc00;margin-bottom:12px;
   display:flex;align-items:center;gap:8px
 }
-.auto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.auto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .auto-btn{
   background:#0b0f1a;border:1px solid #1a2035;color:#ccc;
   padding:12px 14px;border-radius:8px;font-size:11px;cursor:pointer;
@@ -306,6 +306,12 @@ select.form-input option{background:#0b0f1a}
           <span class="a-sub">Crawler rules</span>
         </button>
 
+        <button class="auto-btn" id="regenSitemapBtn" onclick="regenerateSitemapCache()">
+          <span class="a-icon">🔄</span>
+          <span class="a-label">Regenerate Sitemap</span>
+          <span class="a-sub">Clear sitemap + robots cache</span>
+        </button>
+
         <button class="auto-btn" onclick="loadStats()">
           <span class="a-icon">📊</span>
           <span class="a-label">Refresh Stats</span>
@@ -379,6 +385,11 @@ select.form-input option{background:#0b0f1a}
             <option value="0.5">0.5 — Normal</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">Custom robots.txt <span class="hint">leave blank to use auto-generated default</span></label>
+          <textarea class="form-input" id="customRobots" rows="5" placeholder="User-agent: *&#10;Allow: /"></textarea>
+        </div>
+        <button class="outline-btn" id="saveRobotsBtn" onclick="saveCustomRobots()" style="width:100%;margin-top:4px">💾 Save robots.txt</button>
       </div>
 
       <div class="card">
@@ -622,6 +633,19 @@ const API     = "/api/admin"  // Bug Fix #35: relative URL
 const SEO_API = `${API}/seo`
 
 /* =========================================
+   HTML ESCAPE — prevents XSS
+========================================= */
+function escapeHTML(str) {
+  if (typeof str !== "string") return ""
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+/* =========================================
    LOGOUT — Central auth.js handles it
 ========================================= */
 document.getElementById("logoutBtn").onclick = () => Auth.logout()
@@ -815,9 +839,54 @@ async function loadSEO() {
 
     refreshAllPreviews()
     clearDirty()
+    loadCustomRobots()
 
   } catch (err) {
     showToast("Load failed: " + err.message, "error")
+  }
+}
+
+/* =========================================
+   ROBOTS.TXT EDITOR
+========================================= */
+async function loadCustomRobots() {
+  try {
+    const res  = await fetch(`${SEO_API}/robots`, { headers: Auth.headers() })
+    const text = await res.text()
+    document.getElementById("customRobots").value = text || ""
+  } catch (err) {
+    console.error("loadCustomRobots:", err)
+  }
+}
+
+async function saveCustomRobots() {
+  const btn     = document.getElementById("saveRobotsBtn")
+  const content = document.getElementById("customRobots").value
+
+  if (!content.trim()) {
+    showToast("robots.txt content cannot be empty", "error")
+    return
+  }
+
+  btn.disabled    = true
+  btn.textContent = "Saving..."
+
+  try {
+    const res  = await fetch(`${SEO_API}/robots/update`, {
+      method:  "POST",
+      headers: Auth.headers(),
+      body:    JSON.stringify({ content })
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    showToast("robots.txt saved ✅")
+
+  } catch (err) {
+    showToast("Save failed: " + err.message, "error")
+  } finally {
+    btn.disabled    = false
+    btn.textContent = "💾 Save robots.txt"
   }
 }
 
@@ -936,24 +1005,34 @@ async function autoGenerateSEO() {
   res_el.className   = "auto-result show"
   res_el.innerHTML   = `<span class="spinner"></span> Generating SEO for all anime...`
 
-  try {
-    const res  = await fetch(`${SEO_API}/auto-generate`, {
-      method:  "POST",
-      headers: Auth.headers()
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.message)
+  let offset = 0
+  let totalProcessed = 0
 
-    const d = json.data
-    res_el.innerHTML = `
-      <span class="result-ok">✅ Generated: ${d.generated} anime</span> &nbsp;
-      <span style="color:#555">Total: ${d.total}</span>
-    `
-    showToast(`SEO generated for ${d.generated} anime ✅`)
-    loadStats()
+  try {
+    while (true) {
+      const res  = await fetch(`${SEO_API}/auto-generate?offset=${offset}`, {
+        method:  "POST",
+        headers: Auth.headers()
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.message)
+
+      const d = json.data
+      totalProcessed += d.processed || 0
+
+      if (d.done) {
+        res_el.innerHTML = `<span class="result-ok">✅ Generated: ${totalProcessed} anime</span>`
+        showToast(`SEO generated for ${totalProcessed} anime ✅`)
+        loadStats()
+        break
+      }
+
+      res_el.innerHTML = `<span class="spinner"></span> Generating... ${totalProcessed} anime processed so far`
+      offset = d.nextOffset
+    }
 
   } catch (err) {
-    res_el.innerHTML = `<span class="result-err">❌ Error: ${err.message}</span>`
+    res_el.innerHTML = `<span class="result-err">❌ Error: ${escapeHTML(err.message)}</span>`
     showToast(err.message, "error")
   } finally {
     btn.classList.remove("running")
@@ -966,16 +1045,43 @@ async function autoGenerateSEO() {
 ========================================= */
 function openSitemap() {
   window.open(
-    "/api/seo/sitemap",
+    `${SEO_API}/sitemap`,
     "_blank"
   )
 }
 
 function openRobots() {
   window.open(
-    "/api/seo/robots",
+    `${SEO_API}/robots`,
     "_blank"
   )
+}
+
+async function regenerateSitemapCache() {
+  const btn = document.getElementById("regenSitemapBtn")
+  const res_el = document.getElementById("autoResult")
+
+  btn.classList.add("running")
+  res_el.className = "auto-result show"
+  res_el.innerHTML = `<span class="spinner"></span> Clearing sitemap cache...`
+
+  try {
+    const res  = await fetch(`${SEO_API}/sitemap/regenerate`, {
+      method:  "POST",
+      headers: Auth.headers()
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+
+    res_el.innerHTML = `<span class="result-ok">✅ ${escapeHTML(json.data.message || "Cache cleared")}</span>`
+    showToast("Sitemap cache cleared ✅")
+
+  } catch (err) {
+    res_el.innerHTML = `<span class="result-err">❌ Error: ${escapeHTML(err.message)}</span>`
+    showToast(err.message, "error")
+  } finally {
+    btn.classList.remove("running")
+  }
 }
 
 /* =========================================
