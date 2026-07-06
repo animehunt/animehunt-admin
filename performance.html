@@ -923,8 +923,8 @@ function buildPayload() {
     },
     image: {
       imgQuality:    val("imgQuality"),
-      imgWebP:       document.getElementById("imgWebP")?.checked ?? false,  // Bug Fix #41: .value==="1" → .checked
-      imgResponsive: document.getElementById("imgResponsive")?.checked ?? false,  // Bug Fix #41: .value==="1" → .checked
+      imgWebP:       document.getElementById("imgWebP")?.value === "1",
+      imgResponsive: document.getElementById("imgResponsive")?.value === "1",
       thumbWidth:    val("thumbWidth")
     },
     cdn: {
@@ -1024,3 +1024,4 @@ loadSettings()
 </script>
 </body>
 </html>
+
