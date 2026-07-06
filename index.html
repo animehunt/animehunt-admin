@@ -603,6 +603,13 @@ function showToast(msg, type = "success") {
   toastTimer = setTimeout(() => { t.className = "toast" }, 3500)
 }
 
+/* FIX: escape anime/episode fields before innerHTML — these are
+   rendered from DB rows managed by other modules and shouldn't be
+   trusted verbatim in an admin page. */
+function escapeHtml(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
 /* =========================================
    ANIMATE NUMBER
 ========================================= */
@@ -802,6 +809,10 @@ function confirmEmergencyStop() {
   if (!confirm("⚠️ EMERGENCY STOP\n\nThis will stop all services.\nAre you absolutely sure?")) return
   if (!confirm("Last warning — proceed?")) return
 
+  // NOTE: /api/system/kill is served by routes/system.js, which is NOT
+  // part of this module's ZIP — this module only mounts it in index.js.
+  // If system.js isn't deployed alongside this module, this call 404s;
+  // the catch below swallows that so the button never crashes the page.
   fetch(`${API}/system/kill`, {
     method:  "POST",
     headers: Auth.headers()
@@ -825,7 +836,7 @@ function renderRecentAnime(list) {
   el.innerHTML = list.map(a => {
     const date = a.created_at ? new Date(a.created_at).toLocaleDateString() : "—"
     const poster = a.poster
-      ? `<img src="${a.poster}" alt="${a.title}" loading="lazy" style="width:34px;height:50px;object-fit:cover;border-radius:4px;background:#1a2035">`
+      ? `<img src="${escapeHtml(a.poster)}" alt="${escapeHtml(a.title)}" loading="lazy" style="width:34px;height:50px;object-fit:cover;border-radius:4px;background:#1a2035">`
       : `<div style="width:34px;height:50px;background:#1a2035;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px">🎬</div>`
 
     const statusClass = a.status ? a.status.toLowerCase() : 'unknown'
@@ -834,12 +845,12 @@ function renderRecentAnime(list) {
       <div class="recent-row" onclick="location.href='anime.html'" style="cursor:pointer">
         ${poster}
         <div class="r-title">
-          ${a.title}
-          <small>${a.slug || ""}</small>
+          ${escapeHtml(a.title)}
+          <small>${escapeHtml(a.slug || "")}</small>
         </div>
-        <span><span class="badge-type">${a.type || "—"}</span></span>
-        <span><span class="badge-${statusClass}">${a.status || "—"}</span></span>
-        <span style="color:#555;font-size:10px">${date}</span>
+        <span><span class="badge-type">${escapeHtml(a.type || "—")}</span></span>
+        <span><span class="badge-${escapeHtml(statusClass)}">${escapeHtml(a.status || "—")}</span></span>
+        <span style="color:#555;font-size:10px">${escapeHtml(date)}</span>
       </div>
     `
   }).join("")
@@ -864,12 +875,12 @@ function renderRecentEpisodes(list) {
         style="grid-template-columns:1fr 60px 60px 100px;cursor:pointer"
         onclick="location.href='episodes.html'">
         <div class="r-title">
-          ${e.anime_title || "Unknown"}
-          <small>${e.title || "—"}</small>
+          ${escapeHtml(e.anime_title || "Unknown")}
+          <small>${escapeHtml(e.title || "—")}</small>
         </div>
-        <span style="color:#2196f3;font-weight:600">S${e.season}</span>
-        <span style="color:#4caf50;font-weight:600">E${e.episode}</span>
-        <span style="color:#555;font-size:10px">${date}</span>
+        <span style="color:#2196f3;font-weight:600">S${escapeHtml(e.season)}</span>
+        <span style="color:#4caf50;font-weight:600">E${escapeHtml(e.episode)}</span>
+        <span style="color:#555;font-size:10px">${escapeHtml(date)}</span>
       </div>
     `
   }).join("")
