@@ -344,17 +344,20 @@ async function loadLogs(page = 1) {
     logs.forEach(log => {
       const row = document.createElement('div')
       row.className = 'row'
+      // FIX: backend audit_logs columns are admin/action/target/detail/ip/created_at
+      // (not admin_username/resource_type/resource_id/timestamp/description/ip_address).
+      // Legacy keys kept as fallback in case another writer ever uses them.
       row.innerHTML = `
         <div class="time-cell">${formatTime(log.created_at || log.timestamp)}</div>
-        <div class="admin-cell">${escapeHtml(log.admin_username || log.admin || 'System')}</div>
+        <div class="admin-cell">${escapeHtml(log.admin || log.admin_username || 'System')}</div>
         <div>${actionBadge(log.action)}</div>
         <div class="resource-cell">
-          ${escapeHtml(log.resource_type || log.resource || '-')}
+          ${escapeHtml(log.target || log.resource_type || log.resource || '-')}
           ${log.resource_id ? `<br><small style="color:#555">#${escapeHtml(String(log.resource_id))}</small>` : ''}
         </div>
-        <div class="details-cell" title="${escapeHtml(log.details || '')}">
-          ${escapeHtml((log.details || log.description || '—').substring(0, 120))}
-          ${(log.details || '').length > 120 ? '...' : ''}
+        <div class="details-cell" title="${escapeHtml(log.detail || log.details || '')}">
+          ${escapeHtml((log.detail || log.details || log.description || '—').substring(0, 120))}
+          ${(log.detail || log.details || '').length > 120 ? '...' : ''}
         </div>
         <div class="ip-cell"><code>${escapeHtml(log.ip || log.ip_address || '-')}</code></div>
       `
@@ -468,3 +471,4 @@ loadLogs(1)
 </script>
 </body>
 </html>
+
