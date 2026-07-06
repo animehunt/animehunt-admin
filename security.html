@@ -264,7 +264,6 @@ select.form-input option{background:#0b0f1a}
     <a href="performance.html">⚡ Performance</a>
     <div class="menu-sep"></div>
     <a href="security.html" class="active">🔐 Security</a>
-    <a href="security.html">🔐 Security</a>
     <a href="audit-logs.html">📋 Audit Logs</a>
     <a href="deploy-backup.html">🚀 Deploy</a>
     <div class="menu-sep"></div>
@@ -835,6 +834,23 @@ function showToast(msg, type = "success") {
 }
 
 /* =========================================
+   HTML ESCAPING — for data that ultimately came from a request
+   (banned_ips.reason, threat_logs.type/ip/path) before it's inserted
+   via innerHTML. Without this, an attacker who can trigger a threat
+   log entry (e.g. via POST /security/threats/log, which stores
+   body.type/path/ua/ip with no sanitization) could store a script
+   payload that executes in whichever admin next opens this page.
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+function escapeAttr(str) {
+  // Same escaping is sufficient inside a single-quoted onclick="..." attribute
+  // as long as single quotes are also escaped, since that's the delimiter used.
+  return escapeHtml(str).replace(/'/g, "&#39;")
+}
+
+/* =========================================
    DIRTY
 ========================================= */
 function markDirty() {
@@ -1065,7 +1081,11 @@ async function saveSettings() {
 
   try {
     const res  = await fetch(SEC_API, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST",
+      // FIX: Content-Type header was missing on this POST — Auth.headers()
+      // only supplies Authorization. Adding it explicitly here rather than
+      // relying on fetch's implicit behavior for a string body.
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -1123,7 +1143,8 @@ async function banIP() {
 
   try {
     const res  = await fetch(`${SEC_API}/ban`, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST",
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ ip, reason: reason || "manual" })
     })
     const json = await res.json()
@@ -1140,6 +1161,18 @@ async function banIP() {
 
 /* =========================================
    LOAD BANNED IPs
+   FIX: json.data is an object { banned, pagination } — this was
+        reading json.data directly as the array, so .map() below
+        threw and the list silently fell into the catch block on
+        every load ("Could not load", forever).
+   FIX: banned-IP fields (ip, reason) are now HTML-escaped before
+        being inserted via innerHTML. threat_logs/banned_ips rows
+        are partly populated from raw request data (POST
+        /security/threats/log takes body.type/path/ip with no
+        sanitization), so an attacker who can reach that endpoint
+        could otherwise store a script payload that runs in the
+        admin's browser — with the admin's own session token in
+        reach — the next time this page loads.
 ========================================= */
 async function loadBannedIPs() {
   try {
@@ -1147,7 +1180,7 @@ async function loadBannedIPs() {
     const json = await res.json()
     if (!json.success) throw new Error()
 
-    const list = json.data || []
+    const list = json.data?.banned || []
     const el   = document.getElementById("ipList")
 
     if (!list.length) {
@@ -1157,10 +1190,10 @@ async function loadBannedIPs() {
 
     el.innerHTML = list.map(b => `
       <div class="ip-item">
-        <span class="ip-addr">${b.ip}</span>
-        <span class="ip-reason">${b.reason || "manual"}</span>
-        <span class="ip-count">×${b.ban_count}</span>
-        <button class="unban-btn" onclick="unbanIP('${b.ip}')">✓ Unban</button>
+        <span class="ip-addr">${escapeHtml(b.ip)}</span>
+        <span class="ip-reason">${escapeHtml(b.reason || "manual")}</span>
+        <span class="ip-count">×${escapeHtml(b.ban_count)}</span>
+        <button class="unban-btn" onclick="unbanIP('${escapeAttr(b.ip)}')">✓ Unban</button>
       </div>
     `).join("")
 
@@ -1205,6 +1238,10 @@ const _THREAT_LIMIT = 30;
 
 async function loadThreats(page) {
   // Bug Fix #40: Pagination added — was hardcoded limit=30 with no paging
+  // FIX: json.data is { threats, pagination } — this was reading
+  //      json.data as the array and json.pagination (top-level, which
+  //      doesn't exist) instead of json.data.pagination. Both bugs
+  //      meant the threat list and its pager never rendered.
   if (page !== undefined) _threatPage = page;
 
   try {
@@ -1215,28 +1252,32 @@ async function loadThreats(page) {
     const json = await res.json()
     if (!json.success) throw new Error()
 
-    const list = json.data || []
+    const list = json.data?.threats || []
     const el   = document.getElementById("threatList")
 
     if (!list.length) {
       el.innerHTML = `<div class="no-threats">No threats logged</div>`
-      renderThreatPagination(json.pagination || null)
+      renderThreatPagination(json.data?.pagination || null)
       return
     }
 
+    // FIX: type/ip/path come from POST /security/threats/log, which
+    // stores request-supplied strings verbatim — escape before innerHTML.
     el.innerHTML = list.map(t => {
       const time = t.created_at
         ? new Date(t.created_at).toLocaleTimeString()
         : "—"
       return `
         <div class="threat-item">
-          <span class="threat-type">${t.type || "unknown"}</span>
-          <span class="threat-ip">${t.ip || "—"}</span>
-          <span class="threat-path">${t.path || "—"}</span>
-          <span class="threat-time">${time}</span>
+          <span class="threat-type">${escapeHtml(t.type || "unknown")}</span>
+          <span class="threat-ip">${escapeHtml(t.ip || "—")}</span>
+          <span class="threat-path">${escapeHtml(t.path || "—")}</span>
+          <span class="threat-time">${escapeHtml(time)}</span>
         </div>
       `
     }).join("")
+
+    renderThreatPagination(json.data?.pagination || null)
 
   } catch {
     document.getElementById("threatList").innerHTML =
