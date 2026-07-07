@@ -844,6 +844,15 @@ function setSpeed(val) {
 }
 
 /* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
+/* =========================================
    TAG SYSTEM (for subtitle langs & audio tracks)
 ========================================= */
 const tagData = {
@@ -856,7 +865,7 @@ function renderTags(key, containerId) {
   if (!el) return
   el.innerHTML = tagData[key].map((t,i) => `
     <div class="tag">
-      ${t}
+      ${escapeHtml(t)}
       <span class="rm" onclick="removeTag('${key}',${i},'${containerId}')">×</span>
     </div>
   `).join("")
