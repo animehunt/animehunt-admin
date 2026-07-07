@@ -702,10 +702,12 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res  = await fetch(url, {
       method,
-      headers: Auth.headers(),
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(form)
     })
-    const json = await res.json()
+    let json
+    try { json = await res.json() }
+    catch { throw new Error(`Server error (${res.status})`) }
     if (!json.success) throw new Error(json.message || "Save failed")
 
     showToast(editId ? "Banner updated ✅" : "Banner added ✅")
@@ -759,6 +761,15 @@ function updateStats() {
 }
 
 /* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
+/* =========================================
    RENDER
 ========================================= */
 function renderTable() {
@@ -779,22 +790,23 @@ function renderTable() {
     const row = document.createElement("div")
     row.className = "row"
 
+    const safeTitle = escapeHtml(b.title)
     const thumb = b.image
-      ? `<img class="banner-thumb" src="${b.image}" alt="${b.title}" loading="lazy">`
+      ? `<img class="banner-thumb" src="${escapeHtml(b.image)}" alt="${safeTitle}" loading="lazy">`
       : `<div class="banner-thumb-empty">🖼</div>`
 
     const pageBadgeClass = `badge-${b.page}` || "badge-home"
 
     row.innerHTML = `
       ${thumb}
-      <div class="title-cell" title="${b.title}">
-        ${b.title}
-        <small>${b.link ? '🔗 ' + b.link.slice(0,30) + '...' : 'No link'}</small>
+      <div class="title-cell" title="${safeTitle}">
+        ${safeTitle}
+        <small>${b.link ? '🔗 ' + escapeHtml(b.link.slice(0,30)) + '...' : 'No link'}</small>
       </div>
-      <span><span class="badge ${pageBadgeClass}">${b.page}</span></span>
-      <span style="font-size:11px;color:#777">${b.category || '—'}</span>
-      <span><span class="badge badge-hero">${b.position}</span></span>
-      <span style="color:#777">${b.order}</span>
+      <span><span class="badge ${pageBadgeClass}">${escapeHtml(b.page)}</span></span>
+      <span style="font-size:11px;color:#777">${escapeHtml(b.category) || '—'}</span>
+      <span><span class="badge badge-hero">${escapeHtml(b.position)}</span></span>
+      <span style="color:#777">${escapeHtml(String(b.order))}</span>
       <span>
         <label class="switch">
           <input type="checkbox" ${b.active ? "checked" : ""}
