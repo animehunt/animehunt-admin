@@ -81,16 +81,17 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
 .table-wrap{background:#0e1424;border:1px solid #1a2035;border-radius:10px;overflow:hidden}
 .table-head{
   display:grid;
-  grid-template-columns:56px 1fr 90px 90px 120px 80px 80px 100px;
+  grid-template-columns:34px 56px 1fr 90px 90px 120px 80px 80px 100px;
   padding:11px 14px;font-size:11px;color:#666;background:#0b0f1a;
   border-bottom:1px solid #1a2035;font-weight:600;text-transform:uppercase;letter-spacing:.5px
 }
 .table-body .row{
   display:grid;
-  grid-template-columns:56px 1fr 90px 90px 120px 80px 80px 100px;
+  grid-template-columns:34px 56px 1fr 90px 90px 120px 80px 80px 100px;
   padding:10px 14px;border-top:1px solid #1a2035;align-items:center;
   font-size:12px;transition:background .15s
 }
+.row-check{accent-color:#ffcc00;cursor:pointer}
 .table-body .row:hover{background:#111827}
 .row img{width:36px;height:54px;object-fit:cover;border-radius:5px}
 .row .title-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;padding-right:8px}
@@ -332,7 +333,7 @@ textarea.form-input{resize:vertical;min-height:75px}
 
 
     <!-- BULK ACTIONS BAR -->
-    <div id="bulkBar" style="display:none;background:#1a2035;border:1px solid #ffcc00;border-radius:8px;padding:10px 16px;margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div id="bulkBar" style="display:none;background:#1a2035;border:1px solid #ffcc00;border-radius:8px;padding:10px 16px;margin-bottom:10px;gap:8px;align-items:center;flex-wrap:wrap">
       <span id="selectedCount" style="font-size:12px;color:#aaa">0 selected</span>
       <button onclick="bulkUpdateStatus('ongoing')" style="background:#1a3a2a;border:1px solid #4caf50;color:#4caf50;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px">Set Ongoing</button>
       <button onclick="bulkUpdateStatus('completed')" style="background:#1a2a3a;border:1px solid #2196f3;color:#2196f3;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px">Set Completed</button>
@@ -342,7 +343,7 @@ textarea.form-input{resize:vertical;min-height:75px}
     <!-- TABLE -->
     <div class="table-wrap">
       <div class="table-head">
-        <span><input type="checkbox" id="selectAll" title="Select All" style="accent-color:#ffcc00"> All</span>
+        <span><input type="checkbox" id="selectAll" title="Select All" class="row-check"></span>
         <span>Poster</span>
         <span>Title</span>
         <span>Type</span>
@@ -760,7 +761,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res  = await fetch(url, {
       method,
-      headers: Auth.headers(),
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(form)
     })
 
@@ -877,6 +878,7 @@ function renderTable() {
     const genres = genresArr.slice(0,2).join(", ") + (genresArr.length > 2 ? "..." : "")
 
     row.innerHTML = `
+      <span><input type="checkbox" class="row-check anime-checkbox" value="${escapeHtml(a.id)}"></span>
       ${poster}
       <div class="title-cell" title="${safeTitle}">
         ${safeTitle}
@@ -895,10 +897,29 @@ function renderTable() {
 
     row.querySelector(".edit-btn").onclick = () => editAnime(a.id)
     row.querySelector(".del-btn").onclick  = () => deleteAnime(a.id, a.title)
+    row.querySelector(".anime-checkbox").addEventListener("change", updateBulkBar)
 
     list.appendChild(row)
   })
+
+  document.getElementById("selectAll").checked = false
+  updateBulkBar()
 }
+
+/* =========================================
+   BULK SELECT BAR
+========================================= */
+function updateBulkBar() {
+  const checked = document.querySelectorAll(".anime-checkbox:checked")
+  const bar     = document.getElementById("bulkBar")
+  document.getElementById("selectedCount").textContent = `${checked.length} selected`
+  bar.style.display = checked.length > 0 ? "flex" : "none"
+}
+
+document.getElementById("selectAll").addEventListener("change", function() {
+  document.querySelectorAll(".anime-checkbox").forEach(cb => { cb.checked = this.checked })
+  updateBulkBar()
+})
 
 /* =========================================
    PAGINATION
@@ -993,6 +1014,7 @@ async function bulkUpdateStatus(status) {
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
     showToast('Bulk status updated ✅');
+    document.getElementById("selectAll").checked = false;
     loadAnime(currentPage);
   } catch (err) { showToast(err.message, 'error'); }
 }
