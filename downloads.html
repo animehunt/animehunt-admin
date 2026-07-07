@@ -370,6 +370,8 @@ textarea.form-input{resize:vertical;min-height:70px}
     <div class="title">📥 Download Management</div>
     <div class="hdr-right">
       <span id="adminName" style="font-size:12px;color:#555"></span>
+      <input type="file" id="bulkCsvInput" accept=".csv" style="display:none">
+      <button class="add-btn" id="bulkCsvBtn" style="background:#1a2035;color:#ffcc00;border:1px solid #2a3055">📥 Import CSV</button>
       <button class="add-btn" id="quickAddBtn">⚡ Quick Add</button>
       <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
@@ -673,6 +675,7 @@ function renderAnimeGrid(list) {
   list.forEach(a => {
     const card = document.createElement('div')
     card.className = 'anime-card' + (navState.animeId === a.id ? ' active' : '')
+    card.dataset.id = a.id
     const img = a.poster
       ? `<img src="${esc(a.poster)}" alt="${esc(a.title)}" loading="lazy" onerror="this.style.display='none'">`
       : `<div class="anime-card-placeholder">🎬</div>`
@@ -692,8 +695,7 @@ document.getElementById('animeSearch').addEventListener('input', function () {
 ========================================= */
 async function selectAnime(a) {
   navState = { view: 'seasons', animeId: a.id, animeTitle: a.title, animeType: a.type || 'anime', season: null, contentType: null, entryId: null }
-  document.querySelectorAll('.anime-card').forEach(c => c.classList.remove('active'))
-  event?.currentTarget?.classList?.add('active')
+  document.querySelectorAll('.anime-card').forEach(c => c.classList.toggle('active', String(c.dataset.id) === String(a.id)))
   updateBreadcrumb()
   showSeasons(a)
 }
@@ -710,9 +712,10 @@ async function showSeasons(a) {
   try {
     const r = await fetch(`${ADMIN_API}/downloads/structure/${a.id}`, { headers: Auth.headers() })
     const j = await r.json()
-    renderSeasonStructure(j.success ? (j.data || {}) : {}, a)
+    if (!j.success) throw new Error(j.message || 'Failed to load structure')
+    renderSeasonStructure(j.data || {}, a)
   } catch {
-    renderSeasonStructure({ seasons: [1, 2, 3], type: a.type }, a)
+    content.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div>Error loading structure</div></div>`
   }
 }
 
@@ -833,6 +836,7 @@ async function showHostEntries(entryId, episodeTitle) {
 }
 
 function renderHostEntries(hosts, entryId) {
+  currentHostEntries = hosts || []
   const content = document.getElementById('panelContent')
   let html = `<div class="section-title">${esc(navState.episodeTitle || 'Episode')}</div>`
 
@@ -900,18 +904,22 @@ function renderHostEntries(hosts, entryId) {
 /* =========================================
    HOST MODAL
 ========================================= */
-let editHostId = null, currentEntryId = null
+let editHostId = null, currentEntryId = null, currentHostEntries = []
 
 function openHostModal(hostId, entryId) {
   editHostId = hostId
   currentEntryId = entryId
+  const existing = hostId ? currentHostEntries.find(h => h.id === hostId) : null
   document.getElementById('hostModalTitle').textContent = hostId ? 'Edit Host Entry' : 'Add Host Entry'
 
   const sel = document.getElementById('hf-host')
   sel.innerHTML = '<option value="">— Select Host —</option>'
   hostsDB.forEach(h => {
-    sel.innerHTML += `<option value="${h.id}" data-storage="${esc(h.storage || h.name)}" data-knight="${h.knight ? 1 : 0}">${esc(h.name)}</option>`
+    const selAttr = existing && existing.host_id === h.id ? 'selected' : ''
+    sel.innerHTML += `<option value="${h.id}" data-storage="${esc(h.storage || h.name)}" data-knight="${h.knight ? 1 : 0}" ${selAttr}>${esc(h.name)}</option>`
   })
+  sel.disabled = !!hostId
+
   document.getElementById('hf-storage').value = ''
   document.getElementById('hf-knight').value  = ''
   document.getElementById('hf-link').value    = ''
@@ -920,6 +928,32 @@ function openHostModal(hostId, entryId) {
   document.getElementById('qualitySection').style.display    = 'none'
   document.getElementById('hostAutoInfo').classList.remove('visible')
   document.getElementById('hf-monPreview').innerHTML = '<div class="mp-title" style="color:#555">Select a host first</div>'
+
+  if (existing) {
+    const isKnight = existing.knight == 1 || existing.knight === true
+    document.getElementById('hf-storage').value = existing.storage || ''
+    document.getElementById('hf-knight').value  = isKnight ? 'YES — Knight UI' : 'NO — Direct'
+    document.getElementById('hf-link').value    = existing.direct_download || ''
+
+    if (isKnight) {
+      document.getElementById('directLinkSection').style.display = 'none'
+      document.getElementById('qualitySection').style.display    = 'block'
+      if (existing.qualities?.length) existing.qualities.forEach(q => addQualityRow(q.quality, q.link))
+      else addQualityRow()
+    }
+
+    const mon = monDB[existing.host_id]
+    buildMonPreview(document.getElementById('hf-monPreview'), mon)
+    const info = document.getElementById('hostAutoInfo')
+    const row  = document.getElementById('hostAutoRow')
+    info.classList.add('visible')
+    row.innerHTML = `
+      <div class="hai-item">Storage: <b>${esc(existing.storage || '')}</b></div>
+      <div class="hai-item">Knight: <b>${isKnight ? 'YES' : 'NO'}</b></div>
+      ${mon ? `<div class="hai-item">Mode: <b>${esc(mon.mode || 'random')}</b></div>` : ''}
+    `
+  }
+
   document.getElementById('hostModal').classList.add('open')
 }
 
@@ -1250,6 +1284,13 @@ async function handleBulkCSVUpload(file) {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = "📥 Import CSV"; }
   }
+}
+
+document.getElementById('bulkCsvBtn').onclick = () => document.getElementById('bulkCsvInput').click()
+document.getElementById('bulkCsvInput').onchange = (e) => {
+  const file = e.target.files[0]
+  handleBulkCSVUpload(file)
+  e.target.value = ''
 }
 
 Auth.protect()
