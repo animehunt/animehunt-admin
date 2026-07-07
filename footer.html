@@ -572,6 +572,15 @@ document.addEventListener("keydown", e => {
 })
 
 /* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
+/* =========================================
    CUSTOM LINKS
 ========================================= */
 let customLinks = []
@@ -580,8 +589,8 @@ function renderCustomLinks() {
   const el = document.getElementById("customLinksList")
   el.innerHTML = customLinks.map((l, i) => `
     <div class="link-item">
-      <input value="${l.label}" placeholder="Label" onchange="customLinks[${i}].label=this.value;markDirty()">
-      <input value="${l.url}"   placeholder="URL"   onchange="customLinks[${i}].url=this.value;markDirty()">
+      <input value="${escapeHtml(l.label)}" placeholder="Label" onchange="customLinks[${i}].label=this.value;markDirty()">
+      <input value="${escapeHtml(l.url)}"   placeholder="URL"   onchange="customLinks[${i}].url=this.value;markDirty()">
       <button class="rm-link" onclick="removeCustomLink(${i})">×</button>
     </div>
   `).join("")
@@ -639,7 +648,7 @@ function updatePreview() {
   customLinks.forEach(l => links.push(l.label))
 
   linksEl.innerHTML = links.map(l =>
-    `<span class="preview-link">${l}</span>`
+    `<span class="preview-link">${escapeHtml(l)}</span>`
   ).join("")
 
   /* Copyright */
