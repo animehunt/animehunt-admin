@@ -553,6 +553,15 @@ async function loadItems() {
 }
 
 /* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
+/* =========================================
    RENDER TABLE
 ========================================= */
 function renderTable() {
@@ -589,15 +598,18 @@ function renderTable() {
       Mobile:  "badge-mobile"
     }[item.device] || "badge-all"
 
+    const safeTitle = escapeHtml(item.title)
+    const safeUrl   = escapeHtml(item.url)
+
     row.innerHTML = `
       <span class="drag-handle">⠿</span>
-      <span class="priority-num">${item.priority}</span>
-      <span class="icon-cell">${item.icon || "—"}</span>
-      <div class="title-cell">${item.title}${item.badge ? ` <span style="font-size:10px;color:#ffcc00">[${item.badge}]</span>` : ""}</div>
-      <div class="url-cell" title="${item.url}">${item.url}</div>
-      <span><span class="badge ${devClass}">${item.device}</span></span>
-      <span><span class="badge ${hlClass}">${item.highlight}</span></span>
-      <span style="font-size:11px;color:#777">${item.visibility}</span>
+      <span class="priority-num">${escapeHtml(String(item.priority))}</span>
+      <span class="icon-cell">${escapeHtml(item.icon) || "—"}</span>
+      <div class="title-cell">${safeTitle}${item.badge ? ` <span style="font-size:10px;color:#ffcc00">[${escapeHtml(item.badge)}]</span>` : ""}</div>
+      <div class="url-cell" title="${safeUrl}">${safeUrl}</div>
+      <span><span class="badge ${devClass}">${escapeHtml(item.device)}</span></span>
+      <span><span class="badge ${hlClass}">${escapeHtml(item.highlight)}</span></span>
+      <span style="font-size:11px;color:#777">${escapeHtml(item.visibility)}</span>
       <span>
         <label class="sw" onclick="event.stopPropagation()">
           <input type="checkbox" ${item.active ? "checked" : ""} onchange="toggleItem('${item.id}',this)">
@@ -638,14 +650,14 @@ function renderPreview() {
     let badge = ""
     if (i.highlight !== "None") {
       const cls = { HOT:"badge-hot-sm", NEW:"badge-new-sm", UPDATE:"badge-update-sm" }[i.highlight]
-      badge = `<span class="p-badge ${cls}">${i.highlight}</span>`
+      badge = `<span class="p-badge ${cls}">${escapeHtml(i.highlight)}</span>`
     } else if (i.badge) {
-      badge = `<span class="p-badge" style="background:#1a2035;color:#aaa">${i.badge}</span>`
+      badge = `<span class="p-badge" style="background:#1a2035;color:#aaa">${escapeHtml(i.badge)}</span>`
     }
     return `
       <div class="preview-item">
-        ${i.icon ? `<span>${i.icon}</span>` : ""}
-        <span>${i.title}</span>
+        ${i.icon ? `<span>${escapeHtml(i.icon)}</span>` : ""}
+        <span>${escapeHtml(i.title)}</span>
         ${badge}
       </div>
     `
@@ -711,7 +723,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
   try {
     const order = items.map((item, i) => ({ id: item.id, priority: i + 1 }))
     const res   = await fetch(`${SIDE_API}/reorder`, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ order })
     })
     const json = await res.json()
@@ -871,7 +883,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
   try {
     const res  = await fetch(SIDE_API, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
     const json = await res.json()
