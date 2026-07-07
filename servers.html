@@ -569,11 +569,12 @@ function showToast(msg, type = "success") {
 /* =========================================
    STATE
 ========================================= */
-let serverData = []
-let animeList  = []
-let editId     = null
+let serverData  = []
+let animeList   = []
+let editId      = null
 let currentPage = 1
 let totalPages  = 1
+let totalItems  = 0
 const PAGE_SIZE = 50
 
 /* =========================================
@@ -590,13 +591,20 @@ async function loadAnimeList() {
     const fSelect = document.getElementById("f-anime-select")
     fSelect.innerHTML = `<option value="">Select Anime...</option>`
     animeList.forEach(a => {
-      fSelect.innerHTML += `<option value="${a.id}" data-title="${a.title}">${a.title}</option>`
+      const opt = document.createElement("option")
+      opt.value = a.id
+      opt.dataset.title = a.title
+      opt.textContent = a.title
+      fSelect.appendChild(opt)
     })
 
     const aFilter = document.getElementById("animeFilter")
     aFilter.innerHTML = `<option value="">All Anime</option>`
     animeList.forEach(a => {
-      aFilter.innerHTML += `<option value="${a.id}">${a.title}</option>`
+      const opt = document.createElement("option")
+      opt.value = a.id
+      opt.textContent = a.title
+      aFilter.appendChild(opt)
     })
 
   } catch (err) {
@@ -815,12 +823,46 @@ async function loadServers(page = 1) {
     if (!json.success) throw new Error(json.message)
 
     serverData = json.data || []
+    totalItems = json.total ?? serverData.length
+    totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1
+
     renderTable()
+    renderPagination()
 
   } catch (err) {
     document.getElementById("serverList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
+}
+window.loadServers = loadServers
+
+/* =========================================
+   PAGINATION
+========================================= */
+function renderPagination() {
+  const el = document.getElementById("pagination")
+  if (totalPages <= 1) { el.innerHTML = ""; return }
+
+  let html = `<span class="page-info">Page ${currentPage} / ${totalPages}</span>`
+  html += `<button ${currentPage===1?"disabled":""} onclick="loadServers(${currentPage-1})">← Prev</button>`
+
+  const start = Math.max(1, currentPage - 2)
+  const end   = Math.min(totalPages, currentPage + 2)
+  for (let i = start; i <= end; i++) {
+    html += `<button class="${i===currentPage?"active":""}" onclick="loadServers(${i})">${i}</button>`
+  }
+
+  html += `<button ${currentPage===totalPages?"disabled":""} onclick="loadServers(${currentPage+1})">Next →</button>`
+  el.innerHTML = html
+}
+
+/* =========================================
+   XSS ESCAPE HELPER
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
 }
 
 /* =========================================
@@ -850,25 +892,27 @@ function renderTable() {
     else if (s.fail_count >= 5)           { dot = "dot-bad";  dotTitle = `Failed ${s.fail_count}x` }
     else if (s.fail_count > 0)            { dot = "dot-warn"; dotTitle = `Warn ${s.fail_count}x fails` }
 
-    const shortEmbed = s.embed.length > 40
-      ? s.embed.slice(0,40) + "..."
-      : s.embed
+    const embedStr   = s.embed || ""
+    const safeEmbed  = escapeHtml(embedStr)
+    const shortEmbed = embedStr.length > 40
+      ? escapeHtml(embedStr.slice(0,40)) + "..."
+      : safeEmbed
 
     row.innerHTML = `
       <div class="server-name">
-        ${s.name}
-        <small>${s.type}</small>
+        ${escapeHtml(s.name)}
+        <small>${escapeHtml(s.type)}</small>
       </div>
-      <div class="anime-cell" title="${s.anime}">${s.anime}</div>
-      <span style="color:#777">S${s.season}</span>
-      <span style="color:#777">E${s.episode}</span>
-      <span class="embed-cell" title="${s.embed}" onclick="copyEmbed('${s.embed.replace(/'/g,"\\'")}')">
+      <div class="anime-cell" title="${escapeHtml(s.anime)}">${escapeHtml(s.anime)}</div>
+      <span style="color:#777">S${escapeHtml(String(s.season))}</span>
+      <span style="color:#777">E${escapeHtml(String(s.episode))}</span>
+      <span class="embed-cell" title="${safeEmbed}">
         ${shortEmbed}
       </span>
-      <span style="color:#777">#${s.priority}</span>
+      <span style="color:#777">#${escapeHtml(String(s.priority))}</span>
       <span>
-        <span class="health-dot ${dot}" title="${dotTitle}"></span>
-        <span style="font-size:10px;color:#777">${dotTitle}</span>
+        <span class="health-dot ${dot}" title="${escapeHtml(dotTitle)}"></span>
+        <span style="font-size:10px;color:#777">${escapeHtml(dotTitle)}</span>
       </span>
       <span>
         <span class="badge ${s.active ? 'badge-active' : 'badge-inactive'}">
@@ -882,9 +926,10 @@ function renderTable() {
       </span>
     `
 
-    row.querySelector(".test-btn").onclick  = () => quickTestEmbed(s.embed, s.name)
-    row.querySelector(".edit-btn").onclick  = () => editServer(s.id)
-    row.querySelector(".del-btn").onclick   = () => deleteServer(s.id, s.name)
+    row.querySelector(".embed-cell").onclick = () => copyEmbed(embedStr)
+    row.querySelector(".test-btn").onclick   = () => quickTestEmbed(embedStr, s.name)
+    row.querySelector(".edit-btn").onclick   = () => editServer(s.id)
+    row.querySelector(".del-btn").onclick    = () => deleteServer(s.id, s.name)
 
     listEl.appendChild(row)
   })
@@ -899,14 +944,17 @@ function copyEmbed(url) {
 
 /* Quick test embed in new tab */
 function quickTestEmbed(embed, name) {
+  if (!embed) { showToast("No embed URL to test","error"); return }
   const win = window.open("", "_blank")
+  if (!win) { showToast("Popup blocked — allow popups to test embeds","error"); return }
   win.document.write(`
-    <html><head><title>Test: ${name}</title>
+    <html><head><title>Test: ${escapeHtml(name)}</title>
     <style>body{margin:0;background:#000}iframe{width:100vw;height:100vh;border:none}</style>
     </head><body>
-    <iframe src="${embed}" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    <iframe src="${escapeHtml(embed)}" allow="autoplay;fullscreen" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe>
     </body></html>
   `)
+  win.document.close()
 }
 
 /* =========================================
@@ -981,7 +1029,7 @@ document.getElementById("healthCheckBtn").onclick = async () => {
     loadStats()
 
   } catch (err) {
-    res_el.innerHTML = `<span class="health-fail">Error: ${err.message}</span>`
+    res_el.innerHTML = `<span class="health-fail">Error: ${escapeHtml(err.message)}</span>`
     showToast(err.message, "error")
   } finally {
     btn.classList.remove("running")
@@ -1005,18 +1053,16 @@ document.getElementById("deactivateFailedBtn").onclick = async () => {
     const json = await res.json()
     if (!json.success) throw new Error(json.message)
 
-    const failed = (json.data || []).filter(s => s.fail_count >= 5)
-    let count = 0
+    const failed = (json.data || []).filter(s => s.fail_count >= 5 && s.active).slice(0, 40)
 
-    for (const s of failed) {
-      await fetch(`${SERVER_API}/${s.id}/toggle`, {
+    await Promise.all(failed.map(s =>
+      fetch(`${SERVER_API}/${s.id}/toggle`, {
         method:  "PATCH",
         headers: Auth.headers()
-      })
-      count++
-    }
+      }).catch(() => {})
+    ))
 
-    showToast(`Deactivated ${count} failed servers ✅`)
+    showToast(`Deactivated ${failed.length} failed servers ✅`)
     loadServers()
     loadStats()
 
