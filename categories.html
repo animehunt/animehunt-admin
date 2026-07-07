@@ -581,7 +581,7 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res = await fetch(url, {
       method,
-      headers: Auth.headers(),
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(form)
     })
 
@@ -867,7 +867,7 @@ document.getElementById("saveOrderBtn").onclick = async () => {
 
     const res = await fetch(`${CAT_API}/reorder`, {
       method:  "POST",
-      headers: Auth.headers(),
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body:    JSON.stringify({ order })
     })
 
