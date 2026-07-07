@@ -1383,7 +1383,9 @@ function applyNavMonConfig() {
     const adEl   = document.getElementById(ids.ad)
     const freqEl = document.getElementById(ids.freq)
     const onEl   = document.getElementById(ids.on)
-    if (adEl)   adEl.value   = cfg.ad_id    || ''
+    let firstAd = ''
+    try { firstAd = JSON.parse(cfg.ads || '[]')[0] ?? '' } catch {}
+    if (adEl)   adEl.value   = firstAd
     if (freqEl) freqEl.value = cfg.frequency || 'every_click'
     if (onEl)   onEl.checked = cfg.enabled   == 1
   })
@@ -1397,9 +1399,10 @@ async function saveNavMon(navEvent) {
     load_more:  { ad: 'nm-more-ad', freq: 'nm-more-freq', on: 'nm-more-on' }
   }
   const ids = MAP[navEvent]; if (!ids) return
+  const adVal = document.getElementById(ids.ad).value
   const payload = {
     nav_event: navEvent,
-    ad_id:     document.getElementById(ids.ad).value   || null,
+    ads:       JSON.stringify(adVal ? [parseInt(adVal)] : []),
     frequency: document.getElementById(ids.freq).value || 'every_click',
     enabled:   document.getElementById(ids.on).checked ? 1 : 0
   }
