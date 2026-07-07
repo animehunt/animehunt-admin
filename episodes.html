@@ -798,7 +798,7 @@ async function loadEpisodes(page = 1) {
   } catch (err) {
     if (err.name === "AbortError") return   // ✅ FIX: ignore cancelled requests
     document.getElementById("episodeList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
 }
 window.loadEpisodes = loadEpisodes   // ✅ FIX: expose globally for inline pagination onclick
