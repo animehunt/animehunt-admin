@@ -573,6 +573,16 @@
 
 const ADMIN_API = "/api/admin/analytics"  // Bug Fix #42/#43: relative URL
 
+// MIGRATION: added — this file renders analytics dimension keys (search
+// terms, referrers, etc.) into innerHTML without escaping them. Those
+// values can originate from visitor input (e.g. a search query), so
+// they're treated the same way every other admin page already treats
+// dynamic data. Matches the standard implementation used elsewhere in
+// this admin panel (index.html, anime.html, etc.).
+function escapeHtml(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
 /* ── DOM refs ── */
 const rangeSelect    = document.getElementById("range")
 const refreshBtn     = document.getElementById("refreshBtn")
@@ -648,7 +658,7 @@ function fillList(ulEl, list, keyName, valName) {
       <div class="list-item">
         <div class="list-item-bg" style="transform:scaleX(${percent / 100})"></div>
         <span class="item-rank">#${idx + 1}</span>
-        <span class="item-name" title="${key}">${key}</span>
+        <span class="item-name" title="${escapeHtml(key)}">${escapeHtml(key)}</span>
         <b class="item-val">${val.toLocaleString()}</b>
       </div>
     `
@@ -769,3 +779,5 @@ loadAnalytics(true);
 
 </body>
 </html>
+
+
