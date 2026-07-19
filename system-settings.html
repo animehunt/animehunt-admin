@@ -300,7 +300,7 @@ select.form-input option{background:#0b0f1a}
       <div class="health-card">
         <div class="h-dot dot-gray" id="d1Dot"></div>
         <div class="h-info">
-          <div class="h-name">Cloudflare D1</div>
+          <div class="h-name">Turso (libSQL)</div>
           <div class="h-status" id="d1Status">Checking...</div>
         </div>
       </div>
@@ -586,6 +586,15 @@ select.form-input option{background:#0b0f1a}
 const API     = "/api/admin"  // Bug Fix #38/#39: relative URL
 const SYS_API = "/api/admin/system"
 
+// MIGRATION: added — system logs (l.action/l.detail below) can echo back
+// values tied to requests the server received, so they're treated as
+// potentially untrusted the same way every other admin page already
+// treats dynamic data. Matches the standard implementation used
+// elsewhere in this admin panel.
+function escapeHtml(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
 /* =========================================
    LOGOUT — Central auth.js handles it
 ========================================= */
@@ -709,8 +718,8 @@ async function loadLogs() {
       const time = l.created_at ? new Date(l.created_at).toLocaleTimeString() : "—"
       return `
         <div class="log-item">
-          <span class="log-action">${l.action || "?"}</span>
-          <span class="log-detail">${l.detail || "—"}</span>
+          <span class="log-action">${escapeHtml(l.action || "?")}</span>
+          <span class="log-detail">${escapeHtml(l.detail || "—")}</span>
           <span class="log-time">${time}</span>
         </div>
       `
@@ -997,4 +1006,3 @@ loadLogs()
 </script>
 </body>
 </html>
-
