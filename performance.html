@@ -707,6 +707,14 @@ select.form-input option{background:#0b0f1a}
 const API     = "/api/admin"  // Bug Fix #41: relative URL
 const PERF    = `${API}/performance`
 
+// MIGRATION: added for consistency with the rest of the admin panel — the
+// tips rendered below currently only ever come from the server's own
+// scoring logic (not free-text user input), so this is defense-in-depth
+// rather than a fix for a proven exploit path.
+function escapeHtml(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+}
+
 const ALL_TOGGLES = [
   "lazyLoad","smartPreload","adaptiveLoad","mobilePriority",
   "assetMinify","imgOptimize","jsOptimize","cssOptimize",
@@ -818,7 +826,7 @@ async function loadScore() {
     const tipsEl = document.getElementById("scoreTips")
     if (d.tips?.length) {
       tipsEl.innerHTML = d.tips.slice(0,4).map(t =>
-        `<span class="score-tip">⚠ ${t}</span>`
+        `<span class="score-tip">⚠ ${escapeHtml(t)}</span>`
       ).join("")
     } else {
       tipsEl.innerHTML = `<span style="font-size:11px;color:#4caf50">✅ All optimizations enabled!</span>`
@@ -1024,4 +1032,3 @@ loadSettings()
 </script>
 </body>
 </html>
-
