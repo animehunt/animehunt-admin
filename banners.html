@@ -749,7 +749,7 @@ async function loadBanners() {
 
   } catch (err) {
     document.getElementById("bannerList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
 }
 
@@ -899,5 +899,3 @@ resetForm();
 </script>
 </body>
 </html>
-
-
