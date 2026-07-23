@@ -838,8 +838,17 @@ async function saveSettings() {
   btn.textContent = "Saving..."
 
   try {
+    // ✅ FIX (audit ISSUE-042): explicit Content-Type override. Flagged
+    // with lower confidence than other fixes in this audit — /js/auth.js
+    // is loaded via external <script src> and wasn't included in the
+    // provided files, so whether Auth.headers() already sets this
+    // couldn't be directly verified. security.html's own fix comment
+    // elsewhere states Auth.headers() "only supplies Authorization",
+    // which is the basis for this fix — but that's inference from a
+    // sibling file, not a direct confirmation. Harmless either way: a
+    // no-op if Auth.headers() already includes it, a real fix if not.
     const res  = await fetch(SYS_API, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -973,8 +982,9 @@ function importConfig() {
     reader.onload = async (ev) => {
       try {
         const data = JSON.parse(ev.target.result)
+        // ✅ FIX (audit ISSUE-042): same reasoning as saveSettings() above.
         const res  = await fetch(SYS_API, {
-          method: "POST", headers: Auth.headers(),
+          method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
           body: JSON.stringify(data)
         })
         const json = await res.json()
@@ -1006,3 +1016,5 @@ loadLogs()
 </script>
 </body>
 </html>
+
+
