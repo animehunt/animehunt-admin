@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -451,6 +450,23 @@ const DEPLOY = `${API}/deploy`
 const REFRESH_INTERVAL = 30000
 
 /* =========================================
+   HTML ESCAPE — prevents XSS
+   ✅ FIX (audit ISSUE-041): this file was the only admin page in the
+   codebase with no escape helper at all. Backup/version names come from
+   the admin-editable "note" field on POST /deploy/backup (stored verbatim,
+   no sanitization anywhere in the write path either) and were rendered
+   straight into innerHTML — a backup named with a script payload would run
+   in the browser of any admin who later opened this page, with access to
+   that admin's sessionStorage token. Matches the escapeHtml implementation
+   used consistently across every other admin page in this codebase.
+========================================= */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")
+}
+
+/* =========================================
    TOAST
 ========================================= */
 let toastTimer
@@ -565,18 +581,27 @@ function renderBackups(list) {
   el.innerHTML = list.map(b => {
     const date = b.created_at ? new Date(b.created_at).toLocaleString() : "—"
     const size = b.size_kb ? `${b.size_kb} KB` : ""
+    const safeName = escapeHtml(b.name || "")
+    const safeId   = escapeHtml(b.id || "")
     /* Download uses Auth.headers() via fetch — token NOT exposed in URL */
+    /* ✅ FIX (audit ISSUE-041): b.name is escaped for innerHTML, and
+       restoreBackup now reads from data-* attributes instead of being
+       built into the onclick="..." string — that string-based approach
+       only escaped single quotes (for the JS-string context) and left the
+       HTML-attribute context unescaped, so a name containing a double
+       quote could break out of the onclick attribute itself. Reading from
+       dataset lets the browser handle attribute escaping automatically. */
     return `
       <div class="backup-item">
         <div class="backup-item-info">
-          <div class="backup-name" title="${b.name}">${b.name}</div>
+          <div class="backup-name" title="${safeName}">${safeName}</div>
           <div class="backup-meta">${date}</div>
         </div>
         ${size ? `<span class="backup-size">${size}</span>` : ""}
         <div class="backup-actions">
-          <button class="restore-btn"  onclick="restoreBackup('${b.id}','${b.name.replace(/'/g,"\\'")}')" title="Restore">↩ Restore</button>
-          <button class="download-btn" onclick="downloadBackup('${b.id}')" title="Download">⬇</button>
-          <button class="del-backup-btn" onclick="deleteBackup('${b.id}')" title="Delete">🗑</button>
+          <button class="restore-btn"  data-id="${safeId}" data-name="${safeName}" onclick="restoreBackup(this.dataset.id,this.dataset.name)" title="Restore">↩ Restore</button>
+          <button class="download-btn" data-id="${safeId}" onclick="downloadBackup(this.dataset.id)" title="Download">⬇</button>
+          <button class="del-backup-btn" data-id="${safeId}" onclick="deleteBackup(this.dataset.id)" title="Delete">🗑</button>
         </div>
       </div>
     `
@@ -598,9 +623,9 @@ function renderVersions(list) {
     const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : "—"
     return `
       <div class="version-item">
-        <span class="version-tag">${v.tag || "v?"}</span>
+        <span class="version-tag">${escapeHtml(v.tag || "v?")}</span>
         <div class="version-info">
-          <div class="version-name">${v.name}</div>
+          <div class="version-name">${escapeHtml(v.name || "")}</div>
           <div class="version-meta">${v.anime_count || 0} anime · ${v.ep_count || 0} eps · ${date}</div>
         </div>
       </div>
@@ -706,7 +731,14 @@ async function downloadBackup(id) {
    RESTORE BACKUP
 ========================================= */
 async function restoreBackup(id, name) {
-  if (!confirm(`Restore backup:\n"${name}"\n\nAll current data will be REPLACED.\nThis cannot be undone.`)) return
+  // name arrives HTML-escaped (it's read from a data-* attribute that was
+  // populated with escapeHtml() for safe DOM insertion) — decode it back
+  // for the confirm() dialog, which only ever displays plain text and
+  // can't execute HTML, so this is safe to reverse here.
+  const displayName = String(name ?? "")
+    .replace(/&amp;/g,"&").replace(/&lt;/g,"<")
+    .replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+  if (!confirm(`Restore backup:\n"${displayName}"\n\nAll current data will be REPLACED.\nThis cannot be undone.`)) return
   if (!confirm("Are you absolutely sure?")) return
 
   showToast("Restoring... please wait", "info")
@@ -908,5 +940,3 @@ startAutoRefresh();
 </script>
 </body>
 </html>
-
-
