@@ -927,8 +927,15 @@ async function loadScore() {
 
     const tips = document.getElementById("scoreTips")
     if (d.tips?.length) {
+      // ✅ FIX (audit ISSUE-039): tips currently come from a hardcoded
+      // array of check descriptions server-side (securityAdmin.js's
+      // /security/score route), never from user input — so this wasn't
+      // actively exploitable — but this file defined escapeHtml
+      // specifically for this risk class and should apply it
+      // consistently, as a guard against any future change that makes
+      // tips dynamic.
       tips.innerHTML = d.tips.slice(0,4).map(t =>
-        `<span class="score-tip">⚠ ${t}</span>`
+        `<span class="score-tip">⚠ ${escapeHtml(t)}</span>`
       ).join("")
     } else {
       tips.innerHTML = `<span style="font-size:11px;color:#4caf50">✅ All security features enabled!</span>`
@@ -1028,6 +1035,7 @@ function buildPayload() {
       bot:     cb("core_bot"),
       scraper: cb("core_scraper"),
       hotlink: cb("core_hotlink"),
+      embed:   cb("core_embed"),  // ✅ FIX (audit ISSUE-040): was missing — checkbox and setCB() read already existed (see loadSettings), but this field was never added to the save payload, so every save silently reset Core Embed Protection to disabled regardless of the checkbox's actual state
       xss:     cb("core_xss"),
       csrf:    cb("core_csrf"),
       sqli:    cb("core_sqli")
@@ -1339,5 +1347,3 @@ loadThreats()
 </script>
 </body>
 </html>
-
-
