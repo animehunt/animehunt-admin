@@ -641,7 +641,7 @@ async function loadCategories() {
   } catch (err) {
     if (err.name === "AbortError") return
     document.getElementById("categoryList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
 }
 
@@ -909,4 +909,3 @@ loadCategories();
 </script>
 </body>
 </html>
-
