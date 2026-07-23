@@ -489,6 +489,15 @@ textarea.form-input{resize:vertical;min-height:75px}
             <label class="check-item" id="lbl-isHidden">
               <input type="checkbox" id="f-isHidden"> 🙈 Hidden
             </label>
+            <!-- ✅ FIX (audit ISSUE-029): active is a real schema column read
+                 across 6+ public route files, but had no admin UI control
+                 anywhere — meaning it could never be set, and if it were
+                 ever set to 0 by any other means, there was no way to
+                 recover the row through this admin panel. Defaults checked
+                 (active=1), matching the schema default. -->
+            <label class="check-item" id="lbl-isActive">
+              <input type="checkbox" id="f-isActive" checked> ✅ Active
+            </label>
           </div>
         </div>
 
@@ -613,6 +622,7 @@ function getFormData() {
     isMostViewed: document.getElementById("f-isMostViewed").checked,
     isBanner:     document.getElementById("f-isBanner").checked,
     isHidden:     document.getElementById("f-isHidden").checked,
+    isActive:     document.getElementById("f-isActive").checked,  // ✅ FIX (audit ISSUE-029)
     description:  document.getElementById("f-description").value.trim()
   }
 }
@@ -631,6 +641,11 @@ function resetForm() {
     cb.checked = false
     cb.closest(".check-item").classList.remove("checked")
   })
+  // ✅ FIX (audit ISSUE-029): isActive resets to checked (true), not false
+  // like the other flags above — a newly-created anime should be active
+  // by default, matching the schema's own default value.
+  document.getElementById("f-isActive").checked = true
+  document.getElementById("f-isActive").closest(".check-item").classList.add("checked")
   setSelectedGenres([])
   document.getElementById("f-poster-file").value = ""
   document.getElementById("f-banner-file").value = ""
@@ -654,7 +669,7 @@ function populateForm(a) {
   document.getElementById("f-poster-preview").textContent = a.poster || ""
   document.getElementById("f-banner-preview").textContent = a.banner || ""
 
-  ;["isHome","isTrending","isMostViewed","isBanner","isHidden"].forEach(key => {
+  ;["isHome","isTrending","isMostViewed","isBanner","isHidden","isActive"].forEach(key => {
     const cb  = document.getElementById(`f-${key}`)
     cb.checked = !!a[key]
     cb.closest(".check-item").classList.toggle("checked", !!a[key])
@@ -826,7 +841,7 @@ async function loadAnime(page = 1) {
   } catch (err) {
     if (err.name === "AbortError") return
     document.getElementById("animeList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
 }
 window.loadAnime = loadAnime
@@ -1025,5 +1040,3 @@ loadAnime();
 </script>
 </body>
 </html>
-
-
