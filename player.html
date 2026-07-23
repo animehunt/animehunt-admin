@@ -789,6 +789,16 @@ select.form-input option{background:#0b0f1a}
 const API      = "/api/admin"  // Bug Fix #34: relative URL
 const PLAY_API = `${API}/player`
 
+// ✅ FIX (audit ISSUE-036): embedOnly/iframeLimit have no UI checkbox
+// anywhere on this page, but buildPayload() was hardcoding both to false
+// on every save — meaning saving player settings for any reason (even an
+// unrelated field like subtitle color) silently force-disabled these two
+// security settings every time, undoing any protection enabled through
+// other means (direct DB edit, a future admin UI update, an API call).
+// This preserves whatever was loaded instead of forcing false. A real UI
+// toggle for these should be added to the Security section eventually.
+let loadedSecurity = { embedOnly: false, iframeLimit: false }
+
 /* =========================================
    LOGOUT — Central auth.js handles it
 ========================================= */
@@ -942,6 +952,11 @@ async function loadSettings() {
 
     const d = json.data
 
+    // ✅ FIX (audit ISSUE-036): capture these before anything else, so
+    // buildPayload() can preserve them on save instead of force-disabling.
+    loadedSecurity.embedOnly   = !!d.security?.embedOnly
+    loadedSecurity.iframeLimit = !!d.security?.iframeLimit
+
     /* Server */
     document.getElementById("defaultServer").value = d.server?.default || "Server 1"
 
@@ -1080,12 +1095,12 @@ function buildPayload() {
       skipSec: Number(val("adsSkipSec")) || 5
     },
     security: {
-      embedOnly:    false,
+      embedOnly:    loadedSecurity.embedOnly,     // ✅ FIX (audit ISSUE-036): was hardcoded false
       cloudflare:   cb("secCloudflare"),
       sandbox:      cb("secSandbox"),
       referrer:     val("secReferrer"),
       hotlinkBlock: cb("secHotlinkBlock"),
-      iframeLimit:  false
+      iframeLimit:  loadedSecurity.iframeLimit    // ✅ FIX (audit ISSUE-036): was hardcoded false
     }
   }
 }
@@ -1214,6 +1229,3 @@ loadSettings()
 </script>
 </body>
 </html>
-
-
-
