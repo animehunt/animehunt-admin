@@ -548,7 +548,7 @@ async function loadItems() {
 
   } catch (err) {
     document.getElementById("itemList").innerHTML =
-      `<div class="loading-row" style="color:#f44336">Error: ${err.message}</div>`
+      `<div class="loading-row" style="color:#f44336">Error: ${escapeHtml(err.message)}</div>`
   }
 }
 
@@ -943,8 +943,3 @@ loadItems()
 </script>
 </body>
 </html>
-
-
-
-
-
