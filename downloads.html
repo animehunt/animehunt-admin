@@ -1274,7 +1274,7 @@ async function handleBulkCSVUpload(file) {
     try { data = await res.json(); }
     catch { throw new Error("Server error (" + res.status + ")"); }
 
-    if (!res.ok) throw new Error(data.error || "Upload failed");
+    if (!res.ok) throw new Error(data.message || data.error || "Upload failed");
 
     showToast(`Imported: ${data.inserted || 0} links (${data.errors || 0} errors) ✅`);
     // Reload the current anime grid to reflect new entries
@@ -1302,3 +1302,4 @@ Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(() => {
 </script>
 </body>
 </html>
+
