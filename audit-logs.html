@@ -329,9 +329,10 @@ async function loadLogs(page = 1) {
     try { data = await res.json() }
     catch { throw new Error(`Server error (${res.status})`) }
 
-    if (!res.ok) throw new Error(data.error || 'Failed to load logs')
+    if (!res.ok) throw new Error(data.message || data.error || 'Failed to load logs')
 
-    const logs = data.logs || data.data || []
+    const payload = data.data || {}
+    const logs = payload.logs || []
 
     tbody.innerHTML = ''
 
@@ -364,7 +365,7 @@ async function loadLogs(page = 1) {
       tbody.appendChild(row)
     })
 
-    renderPagination(data.pagination || null)
+    renderPagination(payload.pagination || null)
 
   } catch (err) {
     if (err.name === 'AbortError') return
