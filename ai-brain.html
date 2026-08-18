@@ -641,7 +641,9 @@ async function saveSetting(checkbox) {
 
   try {
     const res  = await fetch(AI_API, {
-      method: "PATCH", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "PATCH", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ engine, setting, value })
     })
     const json = await res.json()
@@ -804,5 +806,3 @@ Auth.showUsername("adminName");
 </script>
 </body>
 </html>
-
-
