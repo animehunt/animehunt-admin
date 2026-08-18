@@ -874,7 +874,9 @@ async function saveCustomRobots() {
   try {
     const res  = await fetch(`${SEO_API}/robots/update`, {
       method:  "POST",
-      headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body:    JSON.stringify({ content })
     })
     const json = await res.json()
@@ -954,7 +956,9 @@ async function saveSettings() {
   try {
     const res  = await fetch(SEO_API, {
       method:  "POST",
-      headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body:    JSON.stringify(payload)
     })
     const json = await res.json()
