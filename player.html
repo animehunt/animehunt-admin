@@ -1115,7 +1115,7 @@ async function saveSettings() {
 
   try {
     const res  = await fetch(PLAY_API, {
-      method: "POST", headers: Auth.headers(),
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -1182,7 +1182,7 @@ function importConfig() {
       try {
         const data = JSON.parse(ev.target.result)
         const res  = await fetch(PLAY_API, {
-          method: "POST", headers: Auth.headers(),
+          method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
           body: JSON.stringify(data)
         })
         const json = await res.json()
@@ -1229,3 +1229,4 @@ loadSettings()
 </script>
 </body>
 </html>
+
