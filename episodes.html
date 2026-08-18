@@ -731,7 +731,16 @@ document.getElementById("saveBtn").onclick = async () => {
     const url    = editId ? `${EP_API}/${editId}` : EP_API
     const method = editId ? "PUT" : "POST"
 
-    const res = await fetch(url, { headers: Auth.headers(),
+    // ✅ FIX (audit): Content-Type: application/json was missing here —
+    // fetch() defaults an unlabeled string body to text/plain, which
+    // Hono's c.req.json() happens to still parse (it just JSON.parses
+    // the raw body regardless of Content-Type), so this wasn't
+    // outright broken — but anime.html's equivalent save call DOES
+    // set this explicitly, and relying on a parser's leniency instead
+    // of sending the correct header is fragile against any future
+    // middleware/proxy that inspects Content-Type. Matches the
+    // explicit pattern used everywhere else in this codebase.
+    const res = await fetch(url, { headers: { ...Auth.headers(), "Content-Type": "application/json" },
       method,
       body: JSON.stringify(form)
     })
