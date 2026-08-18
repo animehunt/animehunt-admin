@@ -600,7 +600,7 @@ function renderBackups(list) {
         ${size ? `<span class="backup-size">${size}</span>` : ""}
         <div class="backup-actions">
           <button class="restore-btn"  data-id="${safeId}" data-name="${safeName}" onclick="restoreBackup(this.dataset.id,this.dataset.name)" title="Restore">↩ Restore</button>
-          <button class="download-btn" data-id="${safeId}" onclick="downloadBackup(this.dataset.id)" title="Download">⬇</button>
+          <button class="download-btn" data-id="${safeId}" onclick="downloadBackup(this.dataset.id, this)" title="Download">⬇</button>
           <button class="del-backup-btn" data-id="${safeId}" onclick="deleteBackup(this.dataset.id)" title="Delete">🗑</button>
         </div>
       </div>
@@ -661,7 +661,9 @@ document.getElementById("createBackupBtn").onclick = async () => {
 
   try {
     const res  = await fetch(`${DEPLOY}/backup`, {
-      method: "POST", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ note })
     })
     const json = await res.json()
@@ -682,9 +684,18 @@ document.getElementById("createBackupBtn").onclick = async () => {
 /* =========================================
    DOWNLOAD BACKUP — secure fetch, no token in URL
 ========================================= */
-async function downloadBackup(id) {
-  // Bug Fix #37: Streaming download — avoids loading full backup into RAM as Blob
-  const btn = document.querySelector(`[onclick="downloadBackup('${id}')"]`)
+async function downloadBackup(id, btn) {
+  // ✅ FIX (audit): this used to look up the button via
+  // document.querySelector(`[onclick="downloadBackup('${id}')"]`) — a
+  // selector written for an OLDER onclick pattern that embedded the id
+  // directly in the attribute string. ISSUE-041's fix (see renderBackups
+  // above) changed the rendered attribute to the literal text
+  // onclick="downloadBackup(this.dataset.id)" for every button, so this
+  // selector could never match any button — the progress UI (button
+  // disable, "Downloading...", KB counter) silently never ran, even
+  // though the download itself still worked via the id argument alone.
+  // Passing the button element directly (`this`) from the onclick
+  // removes the need to look it up at all.
   if (btn) { btn.disabled = true; btn.textContent = "⬇ Downloading..."; }
 
   try {
@@ -745,7 +756,9 @@ async function restoreBackup(id, name) {
 
   try {
     const res  = await fetch(`${DEPLOY}/restore`, {
-      method: "POST", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ id })
     })
     const json = await res.json()
@@ -785,7 +798,9 @@ async function deleteBackup(id) {
 document.getElementById("createVersionBtn").onclick = async () => {
   try {
     const res  = await fetch(`${DEPLOY}/version`, {
-      method: "POST", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({})
     })
     const json = await res.json()
@@ -804,7 +819,9 @@ document.getElementById("freezeBtn").onclick = async () => {
   if (!confirm("Freeze the site? Updates will be paused.")) return
   try {
     const res  = await fetch(`${DEPLOY}/state`, {
-      method: "PATCH", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "PATCH", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ type: "freeze", value: true })
     })
     const json = await res.json()
@@ -817,7 +834,9 @@ document.getElementById("freezeBtn").onclick = async () => {
 document.getElementById("unfreezeBtn").onclick = async () => {
   try {
     const res  = await fetch(`${DEPLOY}/state`, {
-      method: "PATCH", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "PATCH", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ type: "freeze", value: false })
     })
     const json = await res.json()
@@ -836,7 +855,9 @@ document.getElementById("emergencyShutdownBtn").onclick = async () => {
 
   try {
     const res  = await fetch(`${DEPLOY}/state`, {
-      method: "PATCH", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "PATCH", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ type: "emergency", value: true })
     })
     const json = await res.json()
@@ -849,7 +870,9 @@ document.getElementById("emergencyShutdownBtn").onclick = async () => {
 document.getElementById("emergencyRecoverBtn").onclick = async () => {
   try {
     const res  = await fetch(`${DEPLOY}/state`, {
-      method: "PATCH", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "PATCH", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ type: "emergency", value: false })
     })
     const json = await res.json()
@@ -870,7 +893,9 @@ async function createFullBackupAndDeploy() {
   try {
     /* Step 1: backup */
     const bRes  = await fetch(`${DEPLOY}/backup`, {
-      method: "POST", headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      method: "POST", headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify({ note: "Pre-deploy backup" })
     })
     const bJson = await bRes.json()
@@ -940,3 +965,5 @@ startAutoRefresh();
 </script>
 </body>
 </html>
+
+
