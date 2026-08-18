@@ -1196,14 +1196,27 @@ async function loadBannedIPs() {
       return
     }
 
-    el.innerHTML = list.map(b => `
+    el.innerHTML = list.map(b => {
+      // ✅ FIX (audit): expires_at was never rendered here even though
+      // banned_ips genuinely has this column and firewall.js's blockIP()
+      // sets it — every ban looked permanent in this list regardless of
+      // its actual duration, with no way for an admin to tell a 1-hour
+      // ban from a permanent one.
+      const expiryLabel = b.expires_at
+        ? (new Date(b.expires_at) > new Date()
+            ? `Expires ${new Date(b.expires_at).toLocaleString()}`
+            : `Expired ${new Date(b.expires_at).toLocaleString()}`)
+        : "No expiry (permanent)"
+
+      return `
       <div class="ip-item">
         <span class="ip-addr">${escapeHtml(b.ip)}</span>
         <span class="ip-reason">${escapeHtml(b.reason || "manual")}</span>
         <span class="ip-count">×${escapeHtml(b.ban_count)}</span>
+        <span class="ip-expiry" style="font-size:11px;color:#888">${escapeHtml(expiryLabel)}</span>
         <button class="unban-btn" onclick="unbanIP('${escapeAttr(b.ip)}')">✓ Unban</button>
       </div>
-    `).join("")
+    `}).join("")
 
   } catch {
     document.getElementById("ipList").innerHTML =
