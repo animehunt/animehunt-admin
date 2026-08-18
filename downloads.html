@@ -1054,7 +1054,7 @@ document.getElementById('saveHostBtn').onclick = async () => {
   try {
     const url    = editHostId ? `${ADMIN_API}/downloads/hosts/${editHostId}` : `${ADMIN_API}/downloads/hosts`
     const method = editHostId ? 'PUT' : 'POST'
-    const r = await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method, headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Host saved ✅')
@@ -1117,9 +1117,14 @@ async function autoFillEpisodeTitle() {
   try {
     const r = await fetch(`${ADMIN_API}/episodes?anime_id=${animeId}&season=${season || 1}&episode=${epNum}`, { headers: Auth.headers() })
     const j = await r.json()
-    // Bug Fix #47: Array.isArray check + length guard before [0] access
-    if (j.success && Array.isArray(j.data) && j.data.length > 0 && j.data[0]?.title) {
-      document.getElementById('qf-epTitle').value = j.data[0].title
+    // ✅ FIX (audit): GET /episodes is paginated — its response shape is
+    // { success, data: { data: [...], page, limit, total, ... } }, not
+    // { success, data: [...] } — so `Array.isArray(j.data)` here was
+    // always false (j.data is a plain object, never an array), meaning
+    // this auto-fill feature never actually ran even before the
+    // backend's own `episode` filter was added (see episodes.js).
+    if (j.success && Array.isArray(j.data?.data) && j.data.data.length > 0 && j.data.data[0]?.title) {
+      document.getElementById('qf-epTitle').value = j.data.data[0].title
     }
   } catch {}
 }
@@ -1188,7 +1193,7 @@ document.getElementById('saveQuickBtn').onclick = async () => {
   const btn = document.getElementById('saveQuickBtn')
   btn.disabled = true; btn.textContent = 'Saving...'
   try {
-    const r = await fetch(`${ADMIN_API}/downloads/quick-add`, { method: 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(`${ADMIN_API}/downloads/quick-add`, { method: 'POST', headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Entry added ✅')
@@ -1302,4 +1307,3 @@ Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(() => {
 </script>
 </body>
 </html>
-
