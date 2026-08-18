@@ -379,14 +379,24 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
         <div class="sync-card">
           <div class="sync-dot dot-gray" id="d1Dot"></div>
           <div class="sync-info">
-            <div class="db-name">Turso (libSQL)</div>
+            <!-- ✅ FIX (audit): this card's label was "Turso (libSQL)",
+                 identical in meaning to the "Turso" card right below it
+                 — but this one is bound to updateSyncUI("d1", ...),
+                 which the backend's own comment confirms checks the
+                 PRIMARY database (c.env.DB, the D1-compatible adapter),
+                 while the card below checks TURSO_REPLICA_URL, the
+                 actual replica. Two cards both saying "Turso" made it
+                 look like a duplicate or a copy-paste error, not two
+                 distinct databases — renamed to make the primary/
+                 replica distinction clear at a glance. -->
+            <div class="db-name">Primary DB</div>
             <div class="db-status" id="d1Status">Checking...</div>
           </div>
         </div>
         <div class="sync-card">
           <div class="sync-dot dot-gray" id="tursoDot"></div>
           <div class="sync-info">
-            <div class="db-name">Turso</div>
+            <div class="db-name">Turso (Replica)</div>
             <div class="db-status" id="tursoStatus">Checking...</div>
           </div>
         </div>
@@ -809,16 +819,31 @@ function confirmEmergencyStop() {
   if (!confirm("⚠️ EMERGENCY STOP\n\nThis will stop all services.\nAre you absolutely sure?")) return
   if (!confirm("Last warning — proceed?")) return
 
-  // NOTE: /api/system/kill is served by routes/system.js, which is NOT
-  // part of this module's ZIP — this module only mounts it in index.js.
-  // If system.js isn't deployed alongside this module, this call 404s;
-  // the catch below swallows that so the button never crashes the page.
-  fetch(`${API}/system/kill`, {
-    method:  "POST",
-    headers: Auth.headers()
-  }).catch(() => {})
+  // ✅ FIX (audit): this used to fire the request without awaiting it
+  // and immediately show a success toast regardless of outcome — a
+  // network failure (silently swallowed by the old .catch(() => {}))
+  // would tell the admin the site was down when it never actually
+  // received the kill signal. This is the one button on this page
+  // where that gap matters most: awaiting the real result and only
+  // showing success on an actual 200 means the admin can trust what
+  // the toast tells them.
+  emergencyStop()
+}
 
-  showToast("Emergency stop activated 🚨", "error")
+async function emergencyStop() {
+  showToast("Sending emergency stop...", "info")
+  try {
+    const res = await fetch(`${API}/system/kill`, {
+      method:  "POST",
+      headers: Auth.headers()
+    })
+    if (!res.ok) throw new Error(`HTTP Error ${res.status}`)
+    const json = await res.json()
+    if (!json.success) throw new Error(json.message)
+    showToast("Emergency stop activated 🚨", "error")
+  } catch (err) {
+    showToast("Emergency stop FAILED — services may still be running: " + err.message, "error")
+  }
 }
 
 /* =========================================
@@ -934,3 +959,5 @@ init()
 </script>
 </body>
 </html>
+
+
