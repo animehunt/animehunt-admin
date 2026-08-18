@@ -563,7 +563,14 @@ document.getElementById("f-image-file").addEventListener("change", async functio
   if (!file) return
 
   if (!file.type.startsWith("image/")) { showToast("Only images allowed","error"); return }
-  if (file.size > 10 * 1024 * 1024)   { showToast("Max 10MB allowed","error"); return }
+  // ✅ FIX (audit): this said 10MB, but the backend's actual limit
+  // (config.js's UPLOAD.MAX_IMAGE_SIZE, enforced in upload.js) is 5MB
+  // — matching anime.html and episodes.html's own upload checks. A
+  // 6-9MB file would pass this client-side check and then get
+  // rejected by the server with "File too large — max 5MB", which is
+  // a confusing experience: the upload looked like it started
+  // successfully before failing.
+  if (file.size > 5 * 1024 * 1024)    { showToast("Max 5MB allowed","error"); return }
 
   const urlInput  = document.getElementById("f-image")
   const statusEl  = document.getElementById("uploadStatus")
