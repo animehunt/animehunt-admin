@@ -780,7 +780,9 @@ document.getElementById("saveBtn").onclick = async () => {
 
     const res  = await fetch(url, {
       method,
-      headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing.
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body: JSON.stringify(form)
     })
     const json = await res.json()
@@ -1132,3 +1134,5 @@ resetForm()
 </script>
 </body>
 </html>
+
+
