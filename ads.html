@@ -848,7 +848,7 @@ async function saveAd() {
   const btn = document.getElementById('saveAdBtn'); btn.disabled = true; btn.textContent = 'Saving...'
   try {
     const url = editId.ad ? `${ADMIN_API}/ads-library/${editId.ad}` : `${ADMIN_API}/ads-library`
-    const r = await fetch(url, { method: editId.ad ? 'PUT' : 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method: editId.ad ? 'PUT' : 'POST', headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Ad saved ✅'); closeModal('adModal'); loadAds()
@@ -916,7 +916,7 @@ async function savePopup() {
   const btn = document.getElementById('savePopupBtn'); btn.disabled = true; btn.textContent = 'Saving...'
   try {
     const url = editId.popup ? `${ADMIN_API}/popup-library/${editId.popup}` : `${ADMIN_API}/popup-library`
-    const r = await fetch(url, { method: editId.popup ? 'PUT' : 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method: editId.popup ? 'PUT' : 'POST', headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Popup saved ✅'); closeModal('popupModal'); loadPopups()
@@ -974,7 +974,7 @@ async function saveShortlink() {
   const btn = document.getElementById('saveSlBtn'); btn.disabled = true; btn.textContent = 'Saving...'
   try {
     const endpoint = editId.shortlink ? `${ADMIN_API}/shortlinks-library/${editId.shortlink}` : `${ADMIN_API}/shortlinks-library`
-    const r = await fetch(endpoint, { method: editId.shortlink ? 'PUT' : 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(endpoint, { method: editId.shortlink ? 'PUT' : 'POST', headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Shortlink saved ✅'); closeModal('shortlinkModal'); loadShortlinks()
@@ -1031,7 +1031,7 @@ async function saveRedirect() {
   const btn = document.getElementById('saveRdBtn'); btn.disabled = true; btn.textContent = 'Saving...'
   try {
     const endpoint = editId.redirect ? `${ADMIN_API}/redirect-library/${editId.redirect}` : `${ADMIN_API}/redirect-library`
-    const r = await fetch(endpoint, { method: editId.redirect ? 'PUT' : 'POST', headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(endpoint, { method: editId.redirect ? 'PUT' : 'POST', headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Redirect saved ✅'); closeModal('redirectModal'); loadRedirects()
@@ -1172,7 +1172,7 @@ async function saveHostMon() {
     const existing = hostMonDB[hostId]
     const url      = existing ? `${ADMIN_API}/host-monetization/${existing.id}` : `${ADMIN_API}/host-monetization`
     const method   = existing ? 'PUT' : 'POST'
-    const r = await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method, headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast('Host monetization saved ✅'); closeModal('hostMonModal'); loadHostMon()
@@ -1301,7 +1301,7 @@ async function saveSlotConfig() {
   try {
     const url    = existing.id ? `${ADMIN_API}/page-monetization/${existing.id}` : `${ADMIN_API}/page-monetization`
     const method = existing.id ? 'PUT' : 'POST'
-    const r = await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method, headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast(`Slot configured ✅`); closeModal('slotModal'); loadPageMon()
@@ -1315,7 +1315,7 @@ async function saveFrequency(sel) {
   try {
     const url    = existing.id ? `${ADMIN_API}/page-monetization/${existing.id}` : `${ADMIN_API}/page-monetization`
     const method = existing.id ? 'PUT' : 'POST'
-    await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
+    await fetch(url, { method, headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     showToast('Frequency updated ✅'); loadPageMon()
   } catch (e) { showToast(e.message, 'error') }
 }
@@ -1410,7 +1410,7 @@ async function saveNavMon(navEvent) {
     const existing = navMonConfig[navEvent]
     const url      = existing ? `${ADMIN_API}/nav-monetization/${existing.id}` : `${ADMIN_API}/nav-monetization`
     const method   = existing ? 'PUT' : 'POST'
-    const r = await fetch(url, { method, headers: Auth.headers(), body: JSON.stringify(payload) })
+    const r = await fetch(url, { method, headers: { ...Auth.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const j = await r.json()
     if (!j.success) throw new Error(j.message)
     showToast(`${navEvent.replace('_',' ')} saved ✅`)
@@ -1427,3 +1427,4 @@ loadAll()
 </script>
 </body>
 </html>
+
