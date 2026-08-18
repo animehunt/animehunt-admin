@@ -752,7 +752,11 @@ async function saveSettings() {
   try {
     const res  = await fetch(SEARCH_API, {
       method:  "POST",
-      headers: Auth.headers(),
+      // ✅ FIX (audit, same bug class already fixed in security.html):
+      // Content-Type: application/json was missing — fetch() defaults
+      // an unlabeled string body to text/plain. Explicit header matches
+      // the pattern used consistently elsewhere in this codebase.
+      headers: { ...Auth.headers(), "Content-Type": "application/json" },
       body:    JSON.stringify(buildPayload())
     })
     const json = await res.json()
@@ -978,5 +982,3 @@ loadPopular()
 </script>
 </body>
 </html>
-
-
