@@ -147,7 +147,7 @@ input:checked + .slider:before{transform:translateX(16px);background:#4caf50}
   padding:14px 18px;background:#0e1424;border-bottom:1px solid #1a2035;flex-shrink:0
 }
 .modal-header h3{font-size:15px;font-weight:700}
-.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:4px}
+.modal-close{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;line-height:1;padding:4px}
 .modal-close:hover{color:#fff}
 .modal-body{padding:18px;overflow-y:auto;flex:1}
 .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -470,6 +470,23 @@ select.form-input option{background:#0e1424}
         </div>
       </div>
 
+      <!-- Trailer Options -->
+      <div class="section-title">Trailer Video (Optional)</div>
+      <div class="form-grid" style="margin-bottom: 8px;">
+        <div class="form-full">
+          <label class="form-label">Trailer URL (MP4 / M3U8)</label>
+          <input class="form-input" id="f-trailer-url" placeholder="https://.../trailer.mp4">
+        </div>
+      </div>
+      <div class="checks-row" style="margin-bottom: 16px;">
+        <label class="check-item" id="lbl-trailerAutoplay">
+          <input type="checkbox" id="f-trailerAutoplay"> ▶️ Autoplay
+        </label>
+        <label class="check-item checked" id="lbl-trailerMuted">
+          <input type="checkbox" id="f-trailerMuted" checked> 🔇 Muted
+        </label>
+      </div>
+
       <!-- Flags -->
       <div class="section-title">Settings</div>
       <div class="checks-row">
@@ -503,7 +520,7 @@ select.form-input option{background:#0e1424}
 /* =========================================
    CONFIG
 ========================================= */
-const API        = "/api/admin"  // Bug Fix duplicate #4: relative URL
+const API        = "/api/admin"
 const BANNER_API = `${API}/banners`
 const UPLOAD_API = `${API}/upload`
 
@@ -563,13 +580,6 @@ document.getElementById("f-image-file").addEventListener("change", async functio
   if (!file) return
 
   if (!file.type.startsWith("image/")) { showToast("Only images allowed","error"); return }
-  // ✅ FIX (audit): this said 10MB, but the backend's actual limit
-  // (config.js's UPLOAD.MAX_IMAGE_SIZE, enforced in upload.js) is 5MB
-  // — matching anime.html and episodes.html's own upload checks. A
-  // 6-9MB file would pass this client-side check and then get
-  // rejected by the server with "File too large — max 5MB", which is
-  // a confusing experience: the upload looked like it started
-  // successfully before failing.
   if (file.size > 5 * 1024 * 1024)    { showToast("Max 5MB allowed","error"); return }
 
   const urlInput  = document.getElementById("f-image")
@@ -617,11 +627,17 @@ function resetForm() {
   document.getElementById("f-title").value    = ""
   document.getElementById("f-image").value    = ""
   document.getElementById("f-link").value     = ""
+  document.getElementById("f-trailer-url").value = ""
 
   document.getElementById("f-active").checked  = true
   document.getElementById("f-rotate").checked  = false
   document.getElementById("lbl-active").classList.add("checked")
   document.getElementById("lbl-rotate").classList.remove("checked")
+
+  document.getElementById("f-trailerAutoplay").checked = false
+  document.getElementById("f-trailerMuted").checked = true
+  document.getElementById("lbl-trailerAutoplay").classList.remove("checked")
+  document.getElementById("lbl-trailerMuted").classList.add("checked")
 
   showPreview("")
   editId = null
@@ -635,11 +651,17 @@ function populateForm(b) {
   document.getElementById("f-title").value    = b.title    || ""
   document.getElementById("f-image").value    = b.image    || ""
   document.getElementById("f-link").value     = b.link     || ""
+  document.getElementById("f-trailer-url").value = b.trailer_url || ""
 
   document.getElementById("f-active").checked = !!b.active
-  document.getElementById("f-rotate").checked = !!b.rotate
+  document.getElementById("f-rotate").checked = !!(b.auto_rotate || b.rotate)
   document.getElementById("lbl-active").classList.toggle("checked", !!b.active)
-  document.getElementById("lbl-rotate").classList.toggle("checked", !!b.rotate)
+  document.getElementById("lbl-rotate").classList.toggle("checked", !!(b.auto_rotate || b.rotate))
+
+  document.getElementById("f-trailerAutoplay").checked = !!b.trailer_autoplay
+  document.getElementById("f-trailerMuted").checked = !!b.trailer_muted
+  document.getElementById("lbl-trailerAutoplay").classList.toggle("checked", !!b.trailer_autoplay)
+  document.getElementById("lbl-trailerMuted").classList.toggle("checked", !!b.trailer_muted)
 
   showPreview(b.image || "")
 }
@@ -654,7 +676,10 @@ function getFormData() {
     image:    document.getElementById("f-image").value.trim(),
     link:     document.getElementById("f-link").value.trim(),
     active:   document.getElementById("f-active").checked,
-    rotate:   document.getElementById("f-rotate").checked
+    auto_rotate: document.getElementById("f-rotate").checked,
+    trailer_url: document.getElementById("f-trailer-url").value.trim(),
+    trailer_autoplay: document.getElementById("f-trailerAutoplay").checked,
+    trailer_muted: document.getElementById("f-trailerMuted").checked
   }
 }
 
@@ -764,7 +789,7 @@ function updateStats() {
   document.getElementById("statTotal").textContent  = bannerData.length
   document.getElementById("statActive").textContent = bannerData.filter(b => b.active).length
   document.getElementById("statHome").textContent   = bannerData.filter(b => b.page === "home").length
-  document.getElementById("statRotate").textContent = bannerData.filter(b => b.rotate).length
+  document.getElementById("statRotate").textContent = bannerData.filter(b => b.auto_rotate || b.rotate).length
 }
 
 /* =========================================
@@ -808,12 +833,12 @@ function renderTable() {
       ${thumb}
       <div class="title-cell" title="${safeTitle}">
         ${safeTitle}
-        <small>${b.link ? '🔗 ' + escapeHtml(b.link.slice(0,30)) + '...' : 'No link'}</small>
+        <small>${b.link ? '🔗 ' + escapeHtml(b.link.slice(0,30)) + '...' : 'No link'} ${b.trailer_url ? ' | ▶️ Trailer' : ''}</small>
       </div>
       <span><span class="badge ${pageBadgeClass}">${escapeHtml(b.page)}</span></span>
       <span style="font-size:11px;color:#777">${escapeHtml(b.category) || '—'}</span>
       <span><span class="badge badge-hero">${escapeHtml(b.position)}</span></span>
-      <span style="color:#777">${escapeHtml(String(b.order))}</span>
+      <span style="color:#777">${escapeHtml(String(b.order ?? b.banner_order ?? 0))}</span>
       <span>
         <label class="switch">
           <input type="checkbox" ${b.active ? "checked" : ""}
@@ -896,9 +921,8 @@ document.getElementById("pageFilter").addEventListener("change",     () => loadB
 document.getElementById("positionFilter").addEventListener("change", () => loadBanners())
 
 /* =========================================
-   INIT — delegates to central auth.js
+   INIT
 ========================================= */
-// Bug Fix duplicate #4: Auth.init({onSuccess}) → Auth.protect()
 Auth.protect();
 Auth.showUsername("adminName");
 loadBanners();
