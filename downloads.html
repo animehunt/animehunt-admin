@@ -215,6 +215,21 @@ body{background:#0b0f1a;color:#fff;display:flex;min-height:100vh}
   border-bottom:1px solid #1a2035
 }
 
+/* ========== AUTOCOMPLETE STYLES ========== */
+.ac-wrap { position: relative; }
+.ac-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; background: #0b0f1a;
+  border: 1px solid #1a2035; border-radius: 7px; max-height: 200px;
+  overflow-y: auto; z-index: 1000; display: none; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.ac-item {
+  padding: 8px 12px; font-size: 12px; color: #ccc; cursor: pointer; border-bottom: 1px solid #1a2035;
+  display: flex; align-items: center; gap: 8px;
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover { background: #1a2035; color: #ffcc00; }
+.ac-item img { width: 24px; height: 36px; object-fit: cover; border-radius: 4px; background: #1a2035; }
+
 /* ========== MODAL ========== */
 .modal{
   position:fixed;inset:0;background:rgba(0,0,0,.78);
@@ -324,16 +339,6 @@ textarea.form-input{resize:vertical;min-height:70px}
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-row{text-align:center;padding:40px;color:#555}
-
-/* ========== PAGINATION ========== */
-.pagination{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:10px}
-.pagination button{
-  background:#0e1424;border:1px solid #1a2035;color:#ccc;
-  padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;transition:.15s
-}
-.pagination button:hover{border-color:#ffcc00;color:#ffcc00}
-.pagination button.active{background:#ffcc00;color:#000;border-color:#ffcc00}
-.pagination button:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
@@ -412,7 +417,7 @@ textarea.form-input{resize:vertical;min-height:70px}
           <span id="animeCount" style="font-size:11px;color:#555">Loading...</span>
         </div>
         <div style="padding:8px 10px 0;border-bottom:1px solid #1a2035">
-          <input class="panel-search" id="animeSearch" placeholder="🔍 Search anime...">
+          <input class="panel-search" id="animeSearch" placeholder="🔍 Search anime..." autocomplete="off">
         </div>
         <div class="anime-grid" id="animeGrid">
           <div style="grid-column:1/-1" class="loading-row"><div class="spinner"></div></div>
@@ -515,7 +520,11 @@ textarea.form-input{resize:vertical;min-height:70px}
       <div class="form-grid">
         <div class="form-full">
           <label class="form-label">Anime *</label>
-          <select class="form-input" id="qf-anime"></select>
+          <div class="ac-wrap">
+            <input type="text" class="form-input" id="qf-anime-search" placeholder="Type to search anime..." autocomplete="off">
+            <input type="hidden" id="qf-anime">
+            <div class="ac-dropdown" id="qf-anime-dropdown"></div>
+          </div>
         </div>
         <div>
           <label class="form-label">Content Type</label>
@@ -573,7 +582,7 @@ textarea.form-input{resize:vertical;min-height:70px}
 /* =========================================
    CONFIG & STATE
 ========================================= */
-const API       = ''  // Bug Fix #47: relative base
+const API       = ''  
 const ADMIN_API = '/api/admin'
 
 let navState = {
@@ -648,16 +657,28 @@ async function loadAdsDB() {
 }
 
 /* =========================================
-   LOAD ANIME GRID
+   LOAD ANIME GRID (Server-side Search)
 ========================================= */
-async function loadAnimeGrid() {
+let gridDebounce;
+document.getElementById('animeSearch').addEventListener('input', function () {
+  clearTimeout(gridDebounce);
+  const q = this.value.trim();
+  gridDebounce = setTimeout(() => {
+    loadAnimeGrid(q);
+  }, 500);
+});
+
+async function loadAnimeGrid(searchQuery = '') {
   const grid = document.getElementById('animeGrid')
   grid.innerHTML = '<div style="grid-column:1/-1" class="loading-row"><div class="spinner"></div></div>'
   try {
-    const r = await fetch(`${ADMIN_API}/anime?limit=500`, { headers: Auth.headers() })
+    let url = `${ADMIN_API}/anime?limit=50`;
+    if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+    
+    const r = await fetch(url, { headers: Auth.headers() })
     const j = await r.json()
     animeList = j.success ? (j.data.data || []) : []
-    document.getElementById('animeCount').textContent = animeList.length + ' anime'
+    document.getElementById('animeCount').textContent = (j.data.total || animeList.length) + ' anime'
     renderAnimeGrid(animeList)
     populateAnimeSelects()
   } catch {
@@ -684,11 +705,6 @@ function renderAnimeGrid(list) {
     grid.appendChild(card)
   })
 }
-
-document.getElementById('animeSearch').addEventListener('input', function () {
-  const q = this.value.toLowerCase()
-  renderAnimeGrid(animeList.filter(a => a.title.toLowerCase().includes(q)))
-})
 
 /* =========================================
    ANIME → SEASONS
@@ -1082,13 +1098,57 @@ async function deleteHostEntry(id, entryId) {
 })
 
 /* =========================================
-   QUICK ADD
+   QUICK ADD AUTOCOMPLETE LOGIC
 ========================================= */
-function populateAnimeSelects() {
-  const el = document.getElementById('qf-anime')
-  el.innerHTML = '<option value="">— Select Anime —</option>'
-  animeList.forEach(a => { el.innerHTML += `<option value="${a.id}">${esc(a.title)}</option>` })
+let acDebounce;
+const acSearch   = document.getElementById('qf-anime-search');
+const acDropdown = document.getElementById('qf-anime-dropdown');
+const acHidden   = document.getElementById('qf-anime');
 
+acSearch.addEventListener('input', function() {
+  clearTimeout(acDebounce);
+  const q = this.value.trim();
+  if (q.length < 2) {
+    acDropdown.style.display = 'none';
+    return;
+  }
+  acDebounce = setTimeout(async () => {
+    try {
+      const r = await fetch(`${ADMIN_API}/anime?search=${encodeURIComponent(q)}&limit=10`, { headers: Auth.headers() });
+      const j = await r.json();
+      if (j.success && j.data && j.data.data.length) {
+        acDropdown.innerHTML = j.data.data.map(a => `
+          <div class="ac-item" data-id="${a.id}" data-title="${esc(a.title)}">
+            <img src="${esc(a.poster)}" onerror="this.style.display='none'">
+            <span>${esc(a.title)}</span>
+          </div>
+        `).join('');
+        acDropdown.style.display = 'block';
+      } else {
+        acDropdown.innerHTML = '<div style="padding:8px 12px;color:#555;font-size:12px;">No results found</div>';
+        acDropdown.style.display = 'block';
+      }
+    } catch (err) {}
+  }, 400);
+});
+
+acDropdown.addEventListener('click', function(e) {
+  const item = e.target.closest('.ac-item');
+  if (item) {
+    acHidden.value = item.dataset.id;
+    acSearch.value = item.dataset.title;
+    acDropdown.style.display = 'none';
+    autoFillEpisodeTitle(); 
+  }
+});
+
+document.addEventListener('click', e => {
+  if (!acSearch.contains(e.target) && !acDropdown.contains(e.target)) {
+    acDropdown.style.display = 'none';
+  }
+});
+
+function populateAnimeSelects() {
   const qfHost = document.getElementById('qf-host')
   qfHost.innerHTML = '<option value="">— Select Host —</option>'
   hostsDB.forEach(h => {
@@ -1098,6 +1158,13 @@ function populateAnimeSelects() {
 
 function openAddEntryFlow() {
   document.getElementById('quickModal').classList.add('open')
+  if (navState.animeId) {
+    document.getElementById('qf-anime').value = navState.animeId;
+    document.getElementById('qf-anime-search').value = navState.animeTitle;
+  } else {
+    document.getElementById('qf-anime').value = '';
+    document.getElementById('qf-anime-search').value = '';
+  }
 }
 
 function updateQuickForm() {
@@ -1117,12 +1184,6 @@ async function autoFillEpisodeTitle() {
   try {
     const r = await fetch(`${ADMIN_API}/episodes?anime_id=${animeId}&season=${season || 1}&episode=${epNum}`, { headers: Auth.headers() })
     const j = await r.json()
-    // ✅ FIX (audit): GET /episodes is paginated — its response shape is
-    // { success, data: { data: [...], page, limit, total, ... } }, not
-    // { success, data: [...] } — so `Array.isArray(j.data)` here was
-    // always false (j.data is a plain object, never an array), meaning
-    // this auto-fill feature never actually ran even before the
-    // backend's own `episode` filter was added (see episodes.js).
     if (j.success && Array.isArray(j.data?.data) && j.data.data.length > 0 && j.data.data[0]?.title) {
       document.getElementById('qf-epTitle').value = j.data.data[0].title
     }
@@ -1248,12 +1309,7 @@ async function loadStats() {
 }
 
 /* =========================================
-   INIT
-========================================= */
-
-/* =========================================
-   BULK CSV UPLOAD — Missing Feature #10/#14
-   Import download links via CSV
+   BULK CSV UPLOAD
 ========================================= */
 async function handleBulkCSVUpload(file) {
   if (!file) return;
@@ -1271,7 +1327,7 @@ async function handleBulkCSVUpload(file) {
   try {
     const res = await fetch(`${ADMIN_API}/bulk-upload/download-links`, {
       method: "POST",
-      headers: Auth.headers(),  // No Content-Type — FormData sets boundary
+      headers: Auth.headers(),
       body: formData
     });
 
@@ -1282,7 +1338,6 @@ async function handleBulkCSVUpload(file) {
     if (!res.ok) throw new Error(data.message || data.error || "Upload failed");
 
     showToast(`Imported: ${data.inserted || 0} links (${data.errors || 0} errors) ✅`);
-    // Reload the current anime grid to reflect new entries
     loadAnimeGrid();
   } catch (err) {
     showToast("CSV upload failed: " + err.message, "error");
@@ -1298,6 +1353,9 @@ document.getElementById('bulkCsvInput').onchange = (e) => {
   e.target.value = ''
 }
 
+/* =========================================
+   INIT
+========================================= */
 Auth.protect()
 Auth.showUsername('adminName')
 Promise.all([loadHostsDB(), loadMonetizationDB(), loadAdsDB()]).then(() => {
